@@ -1,0 +1,11 @@
+63f7b34db8d8cdea90c76aacccf841ec
+::res://::1765502911
+Camera3D.cs::CSharpScript::5306762016452856891::1765502479::0::1::::<><><>0<>0<><>::
+camera_3d.gd::GDScript::3454241889599487331::1765502409::0::1::::<>Camera3D<><>0<>0<><>::
+curved_ray_postprocess.gdshader::Shader::3282317646427007636::1765502083::0::1::::<><><>0<>0<><>::
+icon.webp::CompressedTexture2D::7652332113619774721::1765152170::1765341495::1::::<><><>0<>0<>a07731b734edb7cd369d6df2a233f967<>res://.godot/imported/icon.webp-e94f9a68b0f625a567a797079e4d325f.ctex::
+living_room.glb::PackedScene::3324210106345305406::1765152170::1765341496::1::::<><><>0<>0<>7c92cbbbf349eddb00888c5576dc873c<>res://.godot/imported/living_room.glb-e9e76bdaf4212fbe5bd6be0e778b81a5.scn::
+options.gd::GDScript::1131381816150715636::1765152170::0::1::::<>Control<><>0<>0<><>::
+README.md::TextFile::-1::1765152170::0::1::::<><><>0<>0<><>::
+test.tscn::PackedScene::1804899979016569558::1765502796::0::1::::<><><>0<>0<><>::uid://cmss07txb211i::::res://world_environment.gd<>uid://bnmjiwr2ptb5w::::res://living_room.glb<>uid://qebxtmehy4vg::::res://options.gd
+world_environment.gd::GDScript::5653405552479017196::1765501908::0::1::::<>WorldEnvironment<><>0<>0<><>::
