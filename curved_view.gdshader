@@ -1,19 +1,33 @@
-shader_type spatial;
-render_mode unshaded;
+shader_type canvas_item;
 
-uniform float beta : hint_range(-2.0, 2.0);
-uniform float gamma : hint_range(0.0, 8.0);
+uniform sampler2D SCREEN_TEXTURE : hint_screen_texture, filter_linear_mipmap;
+
+// These will be driven from your sliders via C#/GDScript
+uniform float beta  : hint_range(-2.0, 2.0) = 0.0;
+uniform float gamma : hint_range(0.0, 8.0)  = 2.0;
+
+void fragment() {
+    // Base UV for current pixel
+    vec2 uv = SCREEN_UV;
+
+    // Direction from screen center
+    vec2 d = uv - vec2(0.5);
+
+    float r = length(d);
+    // Curvature factor: r^gamma * beta
+    float k = pow(r, gamma) * beta;
+
+    // Warp strength – bump this to make it obvious
+    float warp_scale = 0.4; // 0.4 = BIG effect
+
+    vec2 warped_uv = uv + normalize(d) * k * warp_scale;
+
+    // Optional: clamp to avoid sampling outside the screen
+    warped_uv = clamp(warped_uv, vec2(0.0), vec2(1.0));
+
+    COLOR = texture(SCREEN_TEXTURE, warped_uv);
+}
 
 void vertex() {
     // pass through
-}
-
-void fragment() {
-    vec3 ray = normalize(VIEW);
-    float r = length(ray);
-    float k = pow(r, gamma) * beta;
-    ray = normalize(ray + ray * k);
-
-    // sample the scene texture
-    COLOR = texture(SCREEN_TEXTURE, SCREEN_UV + ray.xy * 0.01);
 }

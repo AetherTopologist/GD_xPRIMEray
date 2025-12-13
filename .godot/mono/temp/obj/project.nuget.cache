@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "dgSpecHash": "1KlcMNUs+wA=",
+  "success": true,
+  "projectFilePath": "C:\\godot\\godot-demo-projects\\3d\\physical_light_camera_units\\Physical Light and Camera Units.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\wmbro\\.nuget\\packages\\godot.sourcegenerators\\4.5.1\\godot.sourcegenerators.4.5.1.nupkg.sha512",
+    "C:\\Users\\wmbro\\.nuget\\packages\\godotsharp\\4.5.1\\godotsharp.4.5.1.nupkg.sha512",
+    "C:\\Users\\wmbro\\.nuget\\packages\\godotsharpeditor\\4.5.1\\godotsharpeditor.4.5.1.nupkg.sha512",
+    "C:\\Users\\wmbro\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.22\\microsoft.netcore.app.ref.8.0.22.nupkg.sha512",
+    "C:\\Users\\wmbro\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.22\\microsoft.windowsdesktop.app.ref.8.0.22.nupkg.sha512",
+    "C:\\Users\\wmbro\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.22\\microsoft.aspnetcore.app.ref.8.0.22.nupkg.sha512"
+  ],
+  "logs": []
+}

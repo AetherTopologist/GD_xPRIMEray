@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://cmss07txb211i" path="res://world_environment.gd" id="1_6uqi0"]
 [ext_resource type="PackedScene" uid="uid://bnmjiwr2ptb5w" path="res://living_room.glb" id="1_oncn7"]
 [ext_resource type="Script" uid="uid://qebxtmehy4vg" path="res://options.gd" id="2_hjhvo"]
-[ext_resource type="Script" uid="uid://chuvuh6fkc2ux" path="res://Camera3D.cs" id="2_ppyta"]
+[ext_resource type="Script" uid="uid://chuvuh6fkc2ux" path="res://CurvedCamera.cs" id="2_ppyta"]
 
 [sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_6cd1w"]
 use_debanding = false
@@ -439,6 +439,56 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
 text = "1.0"
 
+[node name="CurvatureBeta" type="HBoxContainer" parent="Options/Camera"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Options/Camera/CurvatureBeta"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+text = "Curvature Beta"
+
+[node name="HSlider" type="HSlider" parent="Options/Camera/CurvatureBeta"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 10.0
+step = 0.1
+value = 1.0
+
+[node name="Value" type="Label" parent="Options/Camera/CurvatureBeta"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+text = "0.0"
+
+[node name="CurvatureGamma" type="HBoxContainer" parent="Options/Camera"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Options/Camera/CurvatureGamma"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+text = "Curvature Gamma"
+
+[node name="HSlider" type="HSlider" parent="Options/Camera/CurvatureGamma"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 10.0
+step = 0.1
+value = 1.0
+
+[node name="Value" type="Label" parent="Options/Camera/CurvatureGamma"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+text = "2.0"
+
 [connection signal="value_changed" from="Options/Light/TimeOfDay/HSlider" to="Options" method="_on_time_of_day_value_changed"]
 [connection signal="value_changed" from="Options/Light/SunIntensity/HSlider" to="Options" method="_on_sun_intensity_value_changed"]
 [connection signal="value_changed" from="Options/Light/Lightbulb1Intensity/HSlider" to="Options" method="_on_lightbulb1_intensity_value_changed"]
@@ -452,3 +502,5 @@ text = "1.0"
 [connection signal="value_changed" from="Options/Camera/ShutterSpeed/HSlider" to="Options" method="_on_shutter_speed_value_changed"]
 [connection signal="value_changed" from="Options/Camera/Sensitivity/HSlider" to="Options" method="_on_sensitivity_value_changed"]
 [connection signal="value_changed" from="Options/Camera/AutoexposureSpeed/HSlider" to="Options" method="_on_autoexposure_speed_value_changed"]
+[connection signal="value_changed" from="Options/Camera/CurvatureBeta/HSlider" to="Options" method="_on_curvature_beta_value_changed"]
+[connection signal="value_changed" from="Options/Camera/CurvatureGamma/HSlider" to="Options" method="_on_curvature_gamma_value_changed"]

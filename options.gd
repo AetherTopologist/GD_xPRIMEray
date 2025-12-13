@@ -7,6 +7,18 @@ extends Control
 @export var world_environment: WorldEnvironment
 
 
+func _ready() -> void:
+	var cam := get_viewport().get_camera_3d()
+	if cam:
+		$Camera/CurvatureBeta/HSlider.value = cam.Beta
+		$Camera/CurvatureGamma/HSlider.value = cam.Gamma
+		# Sync sliders with C# CurvedCamera exports
+		($Camera/CurvatureBeta/HSlider as HSlider).set_value_no_signal(cam.Beta)
+		($Camera/CurvatureGamma/HSlider as HSlider).set_value_no_signal(cam.Gamma)
+		$Camera/CurvatureBeta/Value.text = "%.2f" % cam.Beta
+		$Camera/CurvatureGamma/Value.text = "%.1f" % cam.Gamma
+
+
 ## Returns color from a given temperature in kelvins (6500K is nearly white).
 ## Valid range is [1000; 15000].
 ## As explained in the Filament documentation:
@@ -111,6 +123,20 @@ func _on_sensitivity_value_changed(value: float) -> void:
 func _on_autoexposure_speed_value_changed(value: float) -> void:
 	get_viewport().get_camera_3d().attributes.auto_exposure_speed = value
 	$Camera/AutoexposureSpeed/Value.text = "%.1f" % value
+
+
+func _on_curvature_beta_value_changed(value: float) -> void:
+	var cam := get_viewport().get_camera_3d()
+	if cam:
+		cam.Beta = value
+	$Camera/CurvatureBeta/Value.text = "%.2f" % value
+
+
+func _on_curvature_gamma_value_changed(value: float) -> void:
+	var cam := get_viewport().get_camera_3d()
+	if cam:
+		cam.Gamma = value
+	$Camera/CurvatureGamma/Value.text = "%.1f" % value
 
 
 func _on_sdfgi_button_toggled(button_pressed: bool) -> void:
