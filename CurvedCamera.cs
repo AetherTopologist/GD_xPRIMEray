@@ -7,8 +7,7 @@ public partial class CurvedCamera : Camera3D
 
 	public override void _Process(double delta)
 	{
-		// Example per-frame debug:
-		// GD.Print(GetCurvedRay(new Vector2(0, 0)));
+		//GD.Print($"Beta={Beta}, Gamma={Gamma}");
 	}
 
 	public Vector3 GetCurvedRay(Vector2 ndc)
@@ -18,4 +17,5 @@ public partial class CurvedCamera : Camera3D
 		float k = Mathf.Pow(r, Gamma) * Beta;
 		return (ray + ray.Normalized() * k).Normalized();
 	}
+
 }

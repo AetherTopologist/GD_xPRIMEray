@@ -27,7 +27,3 @@ void fragment() {
 
     COLOR = texture(SCREEN_TEXTURE, warped_uv);
 }
-
-void vertex() {
-    // pass through
-}

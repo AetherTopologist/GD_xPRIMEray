@@ -5,7 +5,7 @@ extends Control
 @export var lightbulb_1: OmniLight3D
 @export var lightbulb_2: OmniLight3D
 @export var world_environment: WorldEnvironment
-
+@export var curved_overlay: ColorRect
 
 func _ready() -> void:
 	var cam := get_viewport().get_camera_3d()
@@ -17,6 +17,8 @@ func _ready() -> void:
 		($Camera/CurvatureGamma/HSlider as HSlider).set_value_no_signal(cam.Gamma)
 		$Camera/CurvatureBeta/Value.text = "%.2f" % cam.Beta
 		$Camera/CurvatureGamma/Value.text = "%.1f" % cam.Gamma
+	_update_curvature_shader()
+
 
 
 ## Returns color from a given temperature in kelvins (6500K is nearly white).
@@ -130,6 +132,7 @@ func _on_curvature_beta_value_changed(value: float) -> void:
 	if cam:
 		cam.Beta = value
 	$Camera/CurvatureBeta/Value.text = "%.2f" % value
+	_update_curvature_shader()
 
 
 func _on_curvature_gamma_value_changed(value: float) -> void:
@@ -137,7 +140,18 @@ func _on_curvature_gamma_value_changed(value: float) -> void:
 	if cam:
 		cam.Gamma = value
 	$Camera/CurvatureGamma/Value.text = "%.1f" % value
+	_update_curvature_shader()
 
 
 func _on_sdfgi_button_toggled(button_pressed: bool) -> void:
 	world_environment.environment.sdfgi_enabled = button_pressed
+
+func _update_curvature_shader() -> void:
+	if not curved_overlay:
+		return
+	var mat := curved_overlay.material
+	if mat is ShaderMaterial:
+		var cam := get_viewport().get_camera_3d()
+		if cam:
+			mat.set_shader_parameter("beta", cam.Beta)
+			mat.set_shader_parameter("gamma", cam.Gamma)

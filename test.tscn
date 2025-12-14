@@ -1,9 +1,10 @@
-[gd_scene load_steps=10 format=3 uid="uid://0yko6oxwl0n7"]
+[gd_scene load_steps=12 format=3 uid="uid://0yko6oxwl0n7"]
 
 [ext_resource type="Script" uid="uid://cmss07txb211i" path="res://world_environment.gd" id="1_6uqi0"]
 [ext_resource type="PackedScene" uid="uid://bnmjiwr2ptb5w" path="res://living_room.glb" id="1_oncn7"]
 [ext_resource type="Script" uid="uid://qebxtmehy4vg" path="res://options.gd" id="2_hjhvo"]
 [ext_resource type="Script" uid="uid://chuvuh6fkc2ux" path="res://CurvedCamera.cs" id="2_ppyta"]
+[ext_resource type="Shader" uid="uid://gu1m7wtw117i" path="res://curved_view.gdshader" id="4_ykrsh"]
 
 [sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_6cd1w"]
 use_debanding = false
@@ -29,6 +30,11 @@ auto_exposure_speed = 1.0
 auto_exposure_enabled = true
 auto_exposure_speed = 1.0
 frustum_focal_length = 25.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_g14j6"]
+shader = ExtResource("4_ykrsh")
+shader_parameter/beta = 0.0
+shader_parameter/gamma = 2.0
 
 [node name="Node3D" type="Node3D"]
 
@@ -70,7 +76,17 @@ light_temperature = 5000.0
 light_size = 0.1
 shadow_enabled = true
 
-[node name="Options" type="Control" parent="." node_paths=PackedStringArray("sun", "lightbulb_1", "lightbulb_2", "world_environment")]
+[node name="CurvedLayer" type="CanvasLayer" parent="."]
+
+[node name="CurvedOverlay" type="ColorRect" parent="CurvedLayer"]
+material = SubResource("ShaderMaterial_g14j6")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Options" type="Control" parent="." node_paths=PackedStringArray("sun", "lightbulb_1", "lightbulb_2", "world_environment", "curved_overlay")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -82,6 +98,7 @@ sun = NodePath("../DirectionalLight3D")
 lightbulb_1 = NodePath("../Lightbulb1")
 lightbulb_2 = NodePath("../Lightbulb2")
 world_environment = NodePath("../WorldEnvironment")
+curved_overlay = NodePath("../CurvedLayer/CurvedOverlay")
 
 [node name="Light" type="VBoxContainer" parent="Options"]
 layout_mode = 0

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\godot\\godot-demo-projects\\3d\\physical_light_camera_units\\Physical Light and Camera Units.csproj": {}
+    "C:\\godot\\godot_xPRIMEray\\Physical Light and Camera Units.csproj": {}
   },
   "projects": {
-    "C:\\godot\\godot-demo-projects\\3d\\physical_light_camera_units\\Physical Light and Camera Units.csproj": {
+    "C:\\godot\\godot_xPRIMEray\\Physical Light and Camera Units.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\godot\\godot-demo-projects\\3d\\physical_light_camera_units\\Physical Light and Camera Units.csproj",
+        "projectUniqueName": "C:\\godot\\godot_xPRIMEray\\Physical Light and Camera Units.csproj",
         "projectName": "Physical Light and Camera Units",
-        "projectPath": "C:\\godot\\godot-demo-projects\\3d\\physical_light_camera_units\\Physical Light and Camera Units.csproj",
+        "projectPath": "C:\\godot\\godot_xPRIMEray\\Physical Light and Camera Units.csproj",
         "packagesPath": "C:\\Users\\wmbro\\.nuget\\packages\\",
-        "outputPath": "C:\\godot\\godot-demo-projects\\3d\\physical_light_camera_units\\.godot\\mono\\temp\\obj\\",
+        "outputPath": "C:\\godot\\godot_xPRIMEray\\.godot\\mono\\temp\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
