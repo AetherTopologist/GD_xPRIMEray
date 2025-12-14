@@ -1,5 +1,6 @@
 using Godot;
 
+[GlobalClass]
 public partial class CurvedCamera : Camera3D
 {
 	[Export] public float Beta = 0.0f;

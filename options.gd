@@ -40,17 +40,16 @@ func _set_cam_gamma(gamma: float) -> void:
 	if cam:
 		cam.set("Gamma", gamma)
 
+
 func _ready() -> void:
 	if curved_overlay:
 		curved_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-var bg: Vector2 = _get_cam_beta_gamma()
-($Camera/CurvatureBeta/HSlider as HSlider).set_value_no_signal(bg.x)
-($Camera/CurvatureGamma/HSlider as HSlider).set_value_no_signal(bg.y)
-$Camera/CurvatureBeta/Value.text = "%.2f" % bg.x
-$Camera/CurvatureGamma/Value.text = "%.1f" % bg.y
-
-
+	var bg: Vector2 = _get_cam_beta_gamma()
+	($Camera/CurvatureBeta/HSlider as HSlider).set_value_no_signal(bg.x)
+	($Camera/CurvatureGamma/HSlider as HSlider).set_value_no_signal(bg.y)
+	$Camera/CurvatureBeta/Value.text = "%.2f" % bg.x
+	$Camera/CurvatureGamma/Value.text = "%.1f" % bg.y
 	_update_curvature_shader()
 
 
@@ -177,16 +176,19 @@ func _on_sdfgi_button_toggled(button_pressed: bool) -> void:
 
 
 func _update_curvature_shader() -> void:
-	if not curved_overlay:
+	if curved_overlay == null:
 		return
-	#curved_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	curved_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
 	var mat := curved_overlay.material
 	if mat is ShaderMaterial:
-		var shader_mat := mat as ShaderMaterial
+		var shader_mat: ShaderMaterial = mat
 		var bg: Vector2 = _get_cam_beta_gamma()
+
 		shader_mat.set_shader_parameter("beta", bg.x)
 		shader_mat.set_shader_parameter("gamma", bg.y)
 
-		if shader_mat.shader and shader_mat.shader.has_param("warp_scale"):
-			var warp := shader_mat.get_shader_parameter("warp_scale")
-			shader_mat.set_shader_parameter("warp_scale", warp if warp != null else 0.4)
+		var w = shader_mat.get_shader_parameter("warp_scale")
+		var warp: float = float(w) if typeof(w) == TYPE_FLOAT or typeof(w) == TYPE_INT else 0.4
+		shader_mat.set_shader_parameter("warp_scale", warp)
