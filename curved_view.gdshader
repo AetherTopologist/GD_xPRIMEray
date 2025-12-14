@@ -2,9 +2,9 @@ shader_type canvas_item;
 
 uniform sampler2D SCREEN_TEXTURE : hint_screen_texture, filter_linear_mipmap;
 
-// These will be driven from your sliders via C#/GDScript
 uniform float beta  : hint_range(-2.0, 2.0) = 0.0;
 uniform float gamma : hint_range(0.0, 8.0)  = 2.0;
+uniform float warp_scale : hint_range(0.0, 1.0) = 0.4;
 
 void fragment() {
     // Base UV for current pixel
@@ -17,8 +17,6 @@ void fragment() {
     // Curvature factor: r^gamma * beta
     float k = pow(r, gamma) * beta;
 
-    // Warp strength – bump this to make it obvious
-    float warp_scale = 0.4; // 0.4 = BIG effect
 
     vec2 warped_uv = uv + normalize(d) * k * warp_scale;
 

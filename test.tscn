@@ -35,6 +35,7 @@ frustum_focal_length = 25.0
 shader = ExtResource("4_ykrsh")
 shader_parameter/beta = 0.0
 shader_parameter/gamma = 2.0
+shader_parameter/warp_scale = 0.4
 
 [node name="Node3D" type="Node3D"]
 
