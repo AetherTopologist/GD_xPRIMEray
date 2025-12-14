@@ -129,16 +129,29 @@ func _on_autoexposure_speed_value_changed(value: float) -> void:
 
 func _on_curvature_beta_value_changed(value: float) -> void:
 	var cam := get_viewport().get_camera_3d()
-	if cam:
+	#var cam := get_viewport().get_camera_3d() as CurvedCamera
+	print("BETA slider fired:", value, " cam=", cam)
+	#if cam:
+	if cam and cam.has_method("GetCurvedRay"):
 		cam.Beta = value
+		print("has GetCurvedRay? ", cam.has_method("GetCurvedRay"))
+	else:
+		push_warning("Viewport camera is not CurvedCamera!")
 	$Camera/CurvatureBeta/Value.text = "%.2f" % value
 	_update_curvature_shader()
 
 
+
 func _on_curvature_gamma_value_changed(value: float) -> void:
 	var cam := get_viewport().get_camera_3d()
-	if cam:
+	#var cam := get_viewport().get_camera_3d() as CurvedCamera
+	print("GAMMA slider fired:", value, " cam=", cam)
+	#if cam:
+	if cam and cam.has_method("GetCurvedRay"):
 		cam.Gamma = value
+		print("has GetCurvedRay? ", cam.has_method("GetCurvedRay"))
+	else:
+		push_warning("Camera isn't CurvedCamera or script not attached.")
 	$Camera/CurvatureGamma/Value.text = "%.1f" % value
 	_update_curvature_shader()
 
