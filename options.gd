@@ -6,19 +6,52 @@ extends Control
 @export var world_environment: WorldEnvironment
 @export var curved_overlay: ColorRect
 
+func _get_cam() -> Camera3D:
+	return get_viewport().get_camera_3d() as Camera3D
+
+
+func _get_cam_beta_gamma() -> Vector2:
+	var cam: Camera3D = _get_cam()
+	if cam == null:
+		return Vector2(0.0, 2.0)
+
+	var beta := 0.0
+	var gamma := 2.0
+
+	var b = cam.get("Beta")
+	if typeof(b) == TYPE_FLOAT or typeof(b) == TYPE_INT:
+		beta = float(b)
+
+	var g = cam.get("Gamma")
+	if typeof(g) == TYPE_FLOAT or typeof(g) == TYPE_INT:
+		gamma = float(g)
+
+	return Vector2(beta, gamma)
+
+
+func _set_cam_beta(beta: float) -> void:
+	var cam: Camera3D = _get_cam()
+	if cam:
+		cam.set("Beta", beta)
+
+
+func _set_cam_gamma(gamma: float) -> void:
+	var cam: Camera3D = _get_cam()
+	if cam:
+		cam.set("Gamma", gamma)
+
 func _ready() -> void:
-    if curved_overlay:
-        curved_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if curved_overlay:
+		curved_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-    var cam := get_viewport().get_camera_3d() as CurvedCamera
-    if cam:
-        ($Camera/CurvatureBeta/HSlider as HSlider).set_value_no_signal(cam.Beta)
-        ($Camera/CurvatureGamma/HSlider as HSlider).set_value_no_signal(cam.Gamma)
-        $Camera/CurvatureBeta/Value.text = "%.2f" % cam.Beta
-        $Camera/CurvatureGamma/Value.text = "%.1f" % cam.Gamma
+var bg: Vector2 = _get_cam_beta_gamma()
+($Camera/CurvatureBeta/HSlider as HSlider).set_value_no_signal(bg.x)
+($Camera/CurvatureGamma/HSlider as HSlider).set_value_no_signal(bg.y)
+$Camera/CurvatureBeta/Value.text = "%.2f" % bg.x
+$Camera/CurvatureGamma/Value.text = "%.1f" % bg.y
 
-    _update_curvature_shader()
 
+	_update_curvature_shader()
 
 
 ## Returns color from a given temperature in kelvins (6500K is nearly white).
@@ -29,45 +62,45 @@ func _ready() -> void:
 ## This is the same function as used internally by the engine when setting a
 ## Light3D's `light_temperature`, but converted to GDScript.
 func get_color_from_temperature(p_temperature: float) -> Color:
-    var t2 := p_temperature * p_temperature
-    var u := (
-            (0.860117757 + 1.54118254e-4 * p_temperature + 1.28641212e-7 * t2) /
-            (1.0 + 8.42420235e-4 * p_temperature + 7.08145163e-7 * t2)
-    )
-    var v := (
-            (0.317398726 + 4.22806245e-5 * p_temperature + 4.20481691e-8 * t2) /
-            (1.0 - 2.89741816e-5 * p_temperature + 1.61456053e-7 * t2)
-    )
+	var t2 := p_temperature * p_temperature
+	var u := (
+			(0.860117757 + 1.54118254e-4 * p_temperature + 1.28641212e-7 * t2) /
+			(1.0 + 8.42420235e-4 * p_temperature + 7.08145163e-7 * t2)
+	)
+	var v := (
+			(0.317398726 + 4.22806245e-5 * p_temperature + 4.20481691e-8 * t2) /
+			(1.0 - 2.89741816e-5 * p_temperature + 1.61456053e-7 * t2)
+	)
 
-    # Convert to xyY space.
-    var d := 1.0 / (2.0 * u - 8.0 * v + 4.0)
-    var x := 3.0 * u * d
-    var y := 2.0 * v * d
+	# Convert to xyY space.
+	var d := 1.0 / (2.0 * u - 8.0 * v + 4.0)
+	var x := 3.0 * u * d
+	var y := 2.0 * v * d
 
-    # Convert to XYZ space.
-    var a := 1.0 / maxf(y, 1e-5)
-    var xyz := Vector3(x * a, 1.0, (1.0 - x - y) * a)
+	# Convert to XYZ space.
+	var a := 1.0 / maxf(y, 1e-5)
+	var xyz := Vector3(x * a, 1.0, (1.0 - x - y) * a)
 
-    # Convert from XYZ to sRGB(linear).
-    var linear := Vector3(
-            3.2404542 * xyz.x - 1.5371385 * xyz.y - 0.4985314 * xyz.z,
-            -0.9692660 * xyz.x + 1.8760108 * xyz.y + 0.0415560 * xyz.z,
-            0.0556434 * xyz.x - 0.2040259 * xyz.y + 1.0572252 * xyz.z
-    )
-    linear /= maxf(1e-5, linear[linear.max_axis_index()])
-    # Normalize, clamp, and convert to sRGB.
-    return Color(linear.x, linear.y, linear.z).clamp().linear_to_srgb()
+	# Convert from XYZ to sRGB(linear).
+	var linear := Vector3(
+			3.2404542 * xyz.x - 1.5371385 * xyz.y - 0.4985314 * xyz.z,
+			-0.9692660 * xyz.x + 1.8760108 * xyz.y + 0.0415560 * xyz.z,
+			0.0556434 * xyz.x - 0.2040259 * xyz.y + 1.0572252 * xyz.z
+	)
+	linear /= maxf(1e-5, linear[linear.max_axis_index()])
+	# Normalize, clamp, and convert to sRGB.
+	return Color(linear.x, linear.y, linear.z).clamp().linear_to_srgb()
 
 
 func _on_time_of_day_value_changed(value: float) -> void:
-    var offset := TAU * 0.25
-    sun.rotation.x = remap(value, 0, 1440, 0 + offset, TAU + offset)
+	var offset := TAU * 0.25
+	sun.rotation.x = remap(value, 0, 1440, 0 + offset, TAU + offset)
 
-    # Improve and prevent light leaks by hiding the sun if it's below the horizon.
-    const EPSILON = 0.0001
-    sun.visible = sun.rotation.x > TAU * 0.5 + EPSILON and sun.rotation.x < TAU - EPSILON
+	# Improve and prevent light leaks by hiding the sun if it's below the horizon.
+	const EPSILON = 0.0001
+	sun.visible = sun.rotation.x > TAU * 0.5 + EPSILON and sun.rotation.x < TAU - EPSILON
 
-    $Light/TimeOfDay/Value.text = "%02d:%02d" % [value / 60, fmod(value, 60)]
+	$Light/TimeOfDay/Value.text = "%02d:%02d" % [value / 60, fmod(value, 60)]
 
 
 func _on_sun_intensity_value_changed(value: float) -> void:
@@ -128,36 +161,32 @@ func _on_autoexposure_speed_value_changed(value: float) -> void:
 
 
 func _on_curvature_beta_value_changed(value: float) -> void:
-    var cam := get_viewport().get_camera_3d() as CurvedCamera
-    if cam:
-        cam.Beta = value
-    $Camera/CurvatureBeta/Value.text = "%.2f" % value
-    _update_curvature_shader()
-
+	_set_cam_beta(value)
+	$Camera/CurvatureBeta/Value.text = "%.2f" % value
+	_update_curvature_shader()
 
 
 func _on_curvature_gamma_value_changed(value: float) -> void:
-    var cam := get_viewport().get_camera_3d() as CurvedCamera
-    if cam:
-        cam.Gamma = value
-    $Camera/CurvatureGamma/Value.text = "%.1f" % value
-    _update_curvature_shader()
+	_set_cam_gamma(value)
+	$Camera/CurvatureGamma/Value.text = "%.1f" % value
+	_update_curvature_shader()
 
 
 func _on_sdfgi_button_toggled(button_pressed: bool) -> void:
-    world_environment.environment.sdfgi_enabled = button_pressed
+	world_environment.environment.sdfgi_enabled = button_pressed
+
 
 func _update_curvature_shader() -> void:
-    if not curved_overlay:
-        return
-    curved_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
-    var mat := curved_overlay.material
-    if mat is ShaderMaterial:
-        var shader_mat := mat as ShaderMaterial
-        var cam := get_viewport().get_camera_3d() as CurvedCamera
-        if cam:
-            shader_mat.set_shader_parameter("beta", cam.Beta)
-            shader_mat.set_shader_parameter("gamma", cam.Gamma)
-        if shader_mat.shader and shader_mat.shader.has_param("warp_scale"):
-            var warp := shader_mat.get_shader_parameter("warp_scale")
-            shader_mat.set_shader_parameter("warp_scale", warp if warp != null else 0.4)
+	if not curved_overlay:
+		return
+	#curved_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var mat := curved_overlay.material
+	if mat is ShaderMaterial:
+		var shader_mat := mat as ShaderMaterial
+		var bg: Vector2 = _get_cam_beta_gamma()
+		shader_mat.set_shader_parameter("beta", bg.x)
+		shader_mat.set_shader_parameter("gamma", bg.y)
+
+		if shader_mat.shader and shader_mat.shader.has_param("warp_scale"):
+			var warp := shader_mat.get_shader_parameter("warp_scale")
+			shader_mat.set_shader_parameter("warp_scale", warp if warp != null else 0.4)

@@ -1,5 +1,4 @@
 res://test.tscn
-res://curved_ray_postprocess.gdshader
 res://curved_view.gdshader
-res://CurvedCamera.cs
+res://curved_ray_postprocess.gdshader
 res://options.gd
