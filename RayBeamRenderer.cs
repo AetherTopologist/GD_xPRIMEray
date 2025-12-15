@@ -17,6 +17,10 @@ public partial class RayBeamRenderer : Node3D
 	[Export] public Vector3 FieldCenter = Vector3.Zero;
 	[Export] public bool FieldCenterIsCamera = true;
 	[Export] public float FieldStrength = 1.0f; // extra multiplier
+	[Export] public bool ColorByField = true;
+	[Export] public float FieldColorGain = 0.15f;   // higher = gets “hot” faster
+	[Export] public Color HotColor = new Color(0.2f, 1.0f, 1.0f, 1.0f); // cyan-ish glow
+
 
 	private MultiMeshInstance3D _mmi;
 	private MultiMesh _mm;
@@ -78,12 +82,11 @@ public partial class RayBeamRenderer : Node3D
 		float beta = ReadFloat(cam, "Beta", 0f);
 		float gamma = ReadFloat(cam, "Gamma", 2f);
 
-		// (Optional) only rebuild when Beta/Gamma changes
-		if (Mathf.IsEqualApprox(beta, _lastBeta) && Mathf.IsEqualApprox(gamma, _lastGamma))
-		{
-			// Comment this out if you want constant animation later.
+		// If you have field sources, rebuild every frame (they might be moving)
+		var hasSources = GetTree().GetNodesInGroup("field_sources").Count > 0;
+
+		if (!hasSources && Mathf.IsEqualApprox(beta, _lastBeta) && Mathf.IsEqualApprox(gamma, _lastGamma))
 			return;
-		}
 
 		Rebuild();
 	}
@@ -123,7 +126,7 @@ public partial class RayBeamRenderer : Node3D
 			return;
 		}
 		//GD.Print($"emitters={emitters.Count}");
-		GD.Print($"RayBeamRenderer: emitters={emitters.Count}");
+		//GD.Print($"RayBeamRenderer: emitters={emitters.Count}");
 
 		// Total instances = sum over emitters of (rays * steps)
 		int total = 0;
@@ -195,29 +198,23 @@ public partial class RayBeamRenderer : Node3D
 				Vector3 p = origin;
 				Vector3 v = dir;
 
+				//////////////////
 				for (int s = 0; s <= StepsPerRay; s++)
 				{
-					SetBillboardInstance(idx++, p, camRight, camUp, camForward, baseC, e.Intensity);
-
+					Vector3 a = Vector3.Zero;
 					Vector3 next;
 
 					if (UseIntegratedField)
 					{
-						Vector3 a;
-
 						if (hasSources)
-						{
 							a = ComputeAccelerationAtPoint(p, fieldSources, beta, gamma);
-						}
 						else
 						{
-							// fallback to your single-center mode if no sources exist
 							Vector3 rvec = p - center;
 							float rr = Mathf.Max(0.001f, rvec.Length());
 							a = (-rvec / rr) * (beta * Mathf.Pow(rr, gamma) * BendScale * FieldStrength);
 						}
 
-						// Safety clamp so sliders don't yeet rays into hyperspace
 						float aLen = a.Length();
 						if (aLen > 50.0f)
 							a = a / aLen * 50.0f;
@@ -232,6 +229,26 @@ public partial class RayBeamRenderer : Node3D
 						next = origin + dir * t + bendDir * bend;
 					}
 
+					// --- Fade with distance (step-based) ---
+					float step01 = (StepsPerRay <= 0) ? 0f : (float)s / (float)StepsPerRay;
+					float fade = 1.0f - step01;
+					fade *= fade;
+					float alpha = Alpha * e.Intensity * fade;
+
+					// --- Color by field magnitude ---
+					Color c = baseC;
+					if (ColorByField)
+					{
+						float heat = Mathf.Clamp(a.Length() * FieldColorGain, 0f, 1f);
+						c = c.Lerp(HotColor, heat);
+					}
+
+					// Stamp current point
+					SetBillboardInstance(idx++, p, camRight, camUp, camForward, c, alpha);
+
+					if (idx >= _mm.InstanceCount)
+						return;
+
 					if ((next - origin).Length() > maxDist)
 						break;
 
@@ -242,10 +259,11 @@ public partial class RayBeamRenderer : Node3D
 						if (hit.Count > 0)
 						{
 							Vector3 hp = (Vector3)hit["position"];
-							SetBillboardInstance(idx++, hp, camRight, camUp, camForward, baseC, e.Intensity);
+							SetBillboardInstance(idx++, hp, camRight, camUp, camForward, c, alpha);
 							break;
 						}
 					}
+
 					p = next;
 				}
 			}
@@ -256,26 +274,22 @@ public partial class RayBeamRenderer : Node3D
 			_mm.InstanceCount = idx;
 	}
 
-	private void SetBillboardInstance(int index, Vector3 pos, Vector3 camRight, Vector3 camUp, Vector3 camForward, Color baseColor, float intensity)
+	private void SetBillboardInstance(int index, Vector3 pos,
+		Vector3 camRight, Vector3 camUp, Vector3 camForward,
+		Color c, float alpha)
 	{
 		if (index < 0 || index >= _mm.InstanceCount) return;
-		// Billboard basis facing camera:
-		// X=camRight, Y=camUp, Z=camForward
-		//var basis = new Basis(camRight, camUp, camForward);
-		float s = QuadSize; // or QuadSize * (0.75f + 0.25f * intensity)
-		//var basis = new Basis(camRight * s, camUp * s, camForward);
-		var basis = new Basis(camRight * s, camUp * s, camForward * s);
 
-
+		float s = QuadSize;
+		var basis = new Basis(camRight * s, camUp * s, camForward);
 		var xform = new Transform3D(basis, pos);
 
 		_mm.SetInstanceTransform(index, xform);
 
-		// Color with intensity & alpha
-		float a = Mathf.Clamp(Alpha * intensity, 0.0f, 1.0f);
-		Color c = new Color(baseColor.R, baseColor.G, baseColor.B, a);
+		c.A = Mathf.Clamp(alpha, 0.0f, 1.0f);
 		_mm.SetInstanceColor(index, c);
 	}
+
 	private Vector3 ComputeAccelerationAtPoint(
 		Vector3 p,
 		Godot.Collections.Array<Node> sources,
