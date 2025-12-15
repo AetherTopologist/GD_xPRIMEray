@@ -1,10 +1,14 @@
-[gd_scene load_steps=12 format=3 uid="uid://0yko6oxwl0n7"]
+[gd_scene load_steps=16 format=3 uid="uid://0yko6oxwl0n7"]
 
 [ext_resource type="Script" uid="uid://cmss07txb211i" path="res://world_environment.gd" id="1_6uqi0"]
 [ext_resource type="PackedScene" uid="uid://bnmjiwr2ptb5w" path="res://living_room.glb" id="1_oncn7"]
 [ext_resource type="Script" uid="uid://qebxtmehy4vg" path="res://options.gd" id="2_hjhvo"]
 [ext_resource type="Script" uid="uid://chuvuh6fkc2ux" path="res://CurvedCamera.cs" id="2_ppyta"]
+[ext_resource type="Script" uid="uid://26voemlp0vg4" path="res://RayViz.cs" id="3_rayviz"]
+[ext_resource type="Script" uid="uid://dg2asfleehqsw" path="res://RayBeamRenderer.cs" id="4_raybeam"]
 [ext_resource type="Shader" uid="uid://gu1m7wtw117i" path="res://curved_view.gdshader" id="4_ykrsh"]
+[ext_resource type="Script" uid="uid://713wqufxods5" path="res://RayEmitter3D.cs" id="5_emitter"]
+[ext_resource type="Script" uid="uid://bmaii4ehf2n5k" path="res://FieldSource3D.cs" id="8_xersf"]
 
 [sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_6cd1w"]
 use_debanding = false
@@ -58,6 +62,8 @@ directional_shadow_max_distance = 15.0
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(-0.824458, 0.0252143, -0.565361, 0, 0.999007, 0.0445544, 0.565923, 0.0367332, -0.82364, -2.93199, 2.20651, -1.8947)
 attributes = SubResource("CameraAttributesPhysical_drxnu")
+h_offset = 0.355
+v_offset = -0.01
 current = true
 script = ExtResource("2_ppyta")
 
@@ -87,6 +93,30 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+
+[node name="RayViz" type="MeshInstance3D" parent="."]
+script = ExtResource("3_rayviz")
+
+[node name="RayBeamRenderer" type="Node3D" parent="."]
+script = ExtResource("4_raybeam")
+BendScale = 0.085
+FieldCenter = Vector3(0, 1.5, 0)
+FieldCenterIsCamera = false
+
+[node name="Emitter1" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+script = ExtResource("5_emitter")
+Rays = 48
+SpreadDegrees = 60.0
+
+[node name="FieldSource3D" type="Node3D" parent="."]
+script = ExtResource("8_xersf")
+
+[node name="FieldA" type="Node3D" parent="."]
+script = ExtResource("8_xersf")
+
+[node name="FieldB" type="Node3D" parent="."]
+script = ExtResource("8_xersf")
 
 [node name="Options" type="Control" parent="." node_paths=PackedStringArray("sun", "lightbulb_1", "lightbulb_2", "world_environment", "curved_overlay")]
 layout_mode = 3
@@ -472,6 +502,7 @@ text = "Curvature Beta"
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
+min_value = -10.0
 max_value = 10.0
 step = 0.1
 value = 1.0
@@ -498,7 +529,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
 max_value = 10.0
-step = 0.1
+step = 0.01
 value = 1.0
 
 [node name="Value" type="Label" parent="Options/Camera/CurvatureGamma"]
