@@ -20,6 +20,21 @@ public partial class RayBeamRenderer : Node3D
 	[Export] public bool ColorByField = true;
 	[Export] public float FieldColorGain = 0.15f;   // higher = gets “hot” faster
 	[Export] public Color HotColor = new Color(0.2f, 1.0f, 1.0f, 1.0f); // cyan-ish glow
+	[Export] public int RenderEveryNSteps = 1;     // 1 = every step, 2 = every other, etc.
+	[Export] public float MinStepLength = 0.05f;
+	[Export] public float MaxStepLength = 0.5f;
+	[Export] public float StepAdaptGain = 0.05f;  // how strongly acceleration shrinks step
+
+	// --- Collision robustness (INSIGHT-ish thick segment) ---
+	[Export] public int CollisionEveryNSteps = 1;     // 1 = every step, 2 = every other, etc.
+	[Export] public float CollisionRadius = 0.03f;    // thickness of beam for hit testing
+	[Export] public bool UseSphereSweepCollision = true; // switch between IntersectRay vs IntersectShape
+
+	[Export] public bool UseInsightPlaneFilter = true;
+	[Export] public NodePath InsightPlaneNode; // drag your table body here
+
+	[Export] public float CollisionRaySubdivideThreshold = 0.25f; // meters per sub-ray
+	[Export] public int MaxCollisionSubsteps = 16;
 
 
 	private MultiMeshInstance3D _mmi;
@@ -103,6 +118,8 @@ public partial class RayBeamRenderer : Node3D
 	{
 		var cam = GetCamera();
 		if (cam == null) return;
+
+		RefreshInsightPlane();
 
 		Vector3 center = FieldCenterIsCamera ? cam.GlobalPosition : FieldCenter;
 
@@ -198,29 +215,46 @@ public partial class RayBeamRenderer : Node3D
 				Vector3 p = origin;
 				Vector3 v = dir;
 
+				float traveled = 0.0f;
+
 				//////////////////
 				for (int s = 0; s <= StepsPerRay; s++)
 				{
 					Vector3 a = Vector3.Zero;
-					Vector3 next;
+					Vector3 next = p;
+
 
 					if (UseIntegratedField)
 					{
 						if (hasSources)
+						{
 							a = ComputeAccelerationAtPoint(p, fieldSources, beta, gamma);
+						}
 						else
 						{
+							// ✅ real fallback (needs 'center' in scope)
 							Vector3 rvec = p - center;
 							float rr = Mathf.Max(0.001f, rvec.Length());
 							a = (-rvec / rr) * (beta * Mathf.Pow(rr, gamma) * BendScale * FieldStrength);
 						}
 
 						float aLen = a.Length();
-						if (aLen > 50.0f)
-							a = a / aLen * 50.0f;
+						if (aLen > 50.0f) a = a / aLen * 50.0f;
 
-						v = (v + a * StepLength).Normalized();
-						next = p + v * StepLength;
+						// --- Adaptive step size (based on field strength) ---
+						float step = StepLength;
+						if (UseIntegratedField)
+						{
+							float aMag = a.Length();
+							step = Mathf.Clamp(StepLength / (1.0f + aMag * StepAdaptGain), MinStepLength, MaxStepLength);
+						}
+
+						// Integrate using adaptive step
+						v = (v + a * step).Normalized();
+						next = p + v * step;
+
+						traveled += (next - p).Length();
+						if (traveled > maxDist) break;
 					}
 					else
 					{
@@ -229,13 +263,11 @@ public partial class RayBeamRenderer : Node3D
 						next = origin + dir * t + bendDir * bend;
 					}
 
-					// --- Fade with distance (step-based) ---
-					float step01 = (StepsPerRay <= 0) ? 0f : (float)s / (float)StepsPerRay;
+					float step01 = (StepsPerRay <= 0) ? 0f : (float)s / StepsPerRay;
 					float fade = 1.0f - step01;
 					fade *= fade;
 					float alpha = Alpha * e.Intensity * fade;
 
-					// --- Color by field magnitude ---
 					Color c = baseC;
 					if (ColorByField)
 					{
@@ -243,25 +275,61 @@ public partial class RayBeamRenderer : Node3D
 						c = c.Lerp(HotColor, heat);
 					}
 
-					// Stamp current point
-					SetBillboardInstance(idx++, p, camRight, camUp, camForward, c, alpha);
-
-					if (idx >= _mm.InstanceCount)
-						return;
-
-					if ((next - origin).Length() > maxDist)
-						break;
+					//if ((next - origin).Length() > maxDist) break;
 
 					if (StopOnHit && s > 0)
 					{
-						var q = PhysicsRayQueryParameters3D.Create(p, next, CollisionMask);
-						var hit = space.IntersectRay(q);
-						if (hit.Count > 0)
+						int ce = Mathf.Max(1, CollisionEveryNSteps);
+						if ((s % ce) == 0)
 						{
-							Vector3 hp = (Vector3)hit["position"];
-							SetBillboardInstance(idx++, hp, camRight, camUp, camForward, c, alpha);
-							break;
+							Vector3 segA = p;
+							Vector3 segB = next;
+							float segLen = (segB - segA).Length();
+
+							// INSIGHT-style plane prefilter (optional)
+							if (UseInsightPlaneFilter && _hasInsightPlane)
+							{
+								if (!SegmentCrossesPlane(segA, segB, _insightPlane, CollisionRadius))
+									goto NoHit;
+							}
+
+							bool didHit = false;
+							Vector3 hp = Vector3.Zero;
+
+							if (segLen > 1e-6f)
+							{
+								if (UseSphereSweepCollision)
+								{
+									didHit = SweepSegmentHit(space, segA, segB, CollisionMask, CollisionRadius, out hp);
+								}
+								else
+								{
+									int sub = 1;
+									if (segLen > CollisionRaySubdivideThreshold)
+										sub = Mathf.CeilToInt(segLen / CollisionRaySubdivideThreshold);
+									sub = Mathf.Clamp(sub, 1, MaxCollisionSubsteps);
+
+									didHit = SubdividedRayHit(space, segA, segB, CollisionMask, sub, out hp);
+								}
+							}
+
+							if (didHit)
+							{
+								if (idx < _mm.InstanceCount)
+									SetBillboardInstance(idx++, hp, camRight, camUp, camForward, c, alpha);
+								break;
+							}
+
+						NoHit:;
 						}
+					}
+
+					// 3) then stamp (if desired)
+					int every = Mathf.Max(1, RenderEveryNSteps);
+					if ((s % every) == 0)
+					{
+						if (idx >= _mm.InstanceCount) break;
+						SetBillboardInstance(idx++, next, camRight, camUp, camForward, c, alpha);
 					}
 
 					p = next;
@@ -281,6 +349,7 @@ public partial class RayBeamRenderer : Node3D
 		if (index < 0 || index >= _mm.InstanceCount) return;
 
 		float s = QuadSize;
+		//var basis = new Basis(camRight * s, camUp * s, camForward * s);
 		var basis = new Basis(camRight * s, camUp * s, camForward);
 		var xform = new Transform3D(basis, pos);
 
@@ -293,32 +362,79 @@ public partial class RayBeamRenderer : Node3D
 	private Vector3 ComputeAccelerationAtPoint(
 		Vector3 p,
 		Godot.Collections.Array<Node> sources,
-		float beta,
-		float gamma)
+		float globalBeta,
+		float globalGamma)
 	{
 		Vector3 aSum = Vector3.Zero;
 
 		foreach (var n in sources)
 		{
-			if (n is not FieldSource3D fs)
-				continue;
+			if (n is not FieldSource3D fs) continue;
+			if (!fs.Enabled) continue;
 
 			Vector3 center = fs.GlobalPosition;
 			Vector3 rvec = p - center;
 
-			float r = rvec.Length();
-			float soft = Mathf.Max(0.0001f, fs.Softening);
-			r = Mathf.Sqrt(r * r + soft * soft); // softened radius
+			float rRaw = rvec.Length();
+			float soft = Mathf.Max(0.00001f, fs.Softening);
 
-			if (fs.MaxRadius > 0.0f && r > fs.MaxRadius)
-				continue;
+			// Softened radius (prevents blowups)
+			float r = Mathf.Sqrt(rRaw * rRaw + soft * soft);
 
-			// Unit direction toward center (attract) or away (repel)
+			// Zone limits
+			if (fs.MinRadius > 0.0f && r < fs.MinRadius) continue;
+			if (fs.MaxRadius > 0.0f && r > fs.MaxRadius) continue;
+
+			// Direction (attract vs repel)
 			Vector3 dir = (-rvec / r);
 			if (!fs.Attract) dir = -dir;
 
-			// Your global field law: beta * r^gamma (kept intentionally consistent with your current system)
-			float mag = beta * Mathf.Pow(r, gamma) * BendScale * FieldStrength * fs.Strength;
+			// Choose per-source gamma / beta scaling
+			float gamma = fs.OverrideGamma ? fs.Gamma : globalGamma;
+			float betaScale = fs.OverrideBetaScale ? fs.BetaScale : 1.0f;
+
+			// Base amplitude (keeps your global controls still relevant)
+			float amp = globalBeta * betaScale * BendScale * FieldStrength * fs.Strength;
+
+			float mag = 0.0f;
+
+			switch (fs.Profile)
+			{
+				case FieldSource3D.ProfileType.Power:
+					// r^gamma
+					mag = amp * Mathf.Pow(r, gamma);
+					break;
+
+				case FieldSource3D.ProfileType.InversePower:
+					// 1 / r^gamma
+					mag = amp / Mathf.Pow(r, Mathf.Max(0.0001f, gamma));
+					break;
+
+				case FieldSource3D.ProfileType.Gaussian:
+					{
+						float sigma = Mathf.Max(0.0001f, fs.Sigma);
+						float x = r / sigma;
+						mag = amp * Mathf.Exp(-x * x);
+					}
+					break;
+
+				case FieldSource3D.ProfileType.Shell:
+					{
+						// Shell band: strong between InnerRadius..OuterRadius, smooth edges.
+						float inner = Mathf.Max(0.0f, fs.InnerRadius);
+						float outer = Mathf.Max(inner + 0.0001f, fs.OuterRadius);
+						float edge = Mathf.Max(0.0001f, fs.EdgeSoftness);
+
+						// Smooth step weights at inner/outer edges
+						float wIn = SmoothStep(inner - edge, inner + edge, r);
+						float wOut = 1.0f - SmoothStep(outer - edge, outer + edge, r);
+						float w = Mathf.Clamp(wIn * wOut, 0.0f, 1.0f);
+
+						// Within band, apply power law (or feel free to make this constant instead)
+						mag = amp * w * Mathf.Pow(r, gamma);
+					}
+					break;
+			}
 
 			aSum += dir * mag;
 		}
@@ -326,29 +442,17 @@ public partial class RayBeamRenderer : Node3D
 		return aSum;
 	}
 
-	// Random direction around local -Z axis (forward) within cone angle
-	// Godot's forward is -Z; we’ll treat cone around -Z.
-	private static Vector3 RandomInCone(Random rng, float coneAngleRad)
+	private static float SmoothStep(float a, float b, float x)
 	{
-		// Sample on cone cap with cosine-weight-ish distribution
-		double u = rng.NextDouble();
-		double v = rng.NextDouble();
-
-		float cosTheta = Mathf.Lerp(1.0f, Mathf.Cos(coneAngleRad), (float)u);
-		float sinTheta = Mathf.Sqrt(Mathf.Max(0f, 1f - cosTheta * cosTheta));
-		//float phi = (float)(TAU * v);
-		float phi = Mathf.Tau * (float)v;
-
-
-		float x = sinTheta * Mathf.Cos(phi);
-		float y = sinTheta * Mathf.Sin(phi);
-		float z = -cosTheta; // around -Z
-
-		return new Vector3(x, y, z).Normalized();
+		float t = Mathf.Clamp((x - a) / (b - a), 0.0f, 1.0f);
+		return t * t * (3.0f - 2.0f * t);
 	}
 
+	// Reads a float/int property from a Node (used for camera Beta/Gamma)
 	private static float ReadFloat(Node obj, StringName prop, float fallback)
 	{
+		if (obj == null) return fallback;
+
 		Variant v = obj.Get(prop);
 		return v.VariantType switch
 		{
@@ -357,4 +461,138 @@ public partial class RayBeamRenderer : Node3D
 			_ => fallback
 		};
 	}
+
+	// Random direction around local -Z axis (forward) within cone angle
+	// Godot's forward is -Z; we’ll treat cone around -Z.
+	private static Vector3 RandomInCone(Random rng, float coneAngleRad)
+	{
+		double u = rng.NextDouble();
+		double v = rng.NextDouble();
+
+		float cosTheta = Mathf.Lerp(1.0f, Mathf.Cos(coneAngleRad), (float)u);
+		float sinTheta = Mathf.Sqrt(Mathf.Max(0f, 1f - cosTheta * cosTheta));
+		float phi = Mathf.Tau * (float)v;
+
+		float x = sinTheta * Mathf.Cos(phi);
+		float y = sinTheta * Mathf.Sin(phi);
+		float z = -cosTheta;
+
+		return new Vector3(x, y, z).Normalized();
+	}
+	private static bool SegmentCrossesPlane(Vector3 p, Vector3 q, Plane plane, float eps = 0.001f)
+	{
+		float dp = plane.DistanceTo(p);
+		float dq = plane.DistanceTo(q);
+
+		// if either end is close, treat as crossing-ish
+		if (Mathf.Abs(dp) <= eps || Mathf.Abs(dq) <= eps) return true;
+
+		// sign change => segment crosses infinite plane
+		return (dp > 0f) != (dq > 0f);
+	}
+
+	private Plane _insightPlane;
+	private bool _hasInsightPlane = false;
+
+	private void RefreshInsightPlane()
+	{
+		_hasInsightPlane = false;
+		if (InsightPlaneNode == null || InsightPlaneNode.IsEmpty) return;
+
+		var n = GetNodeOrNull<Node3D>(InsightPlaneNode);
+		if (n == null) return;
+
+		// Use node's +Y as plane normal (good for flat “table top” if table is upright)
+		Vector3 normal = n.GlobalTransform.Basis.Y.Normalized();
+		Vector3 point  = n.GlobalPosition;
+
+		_insightPlane = new Plane(normal, point);
+		_hasInsightPlane = true;
+	}
+
+	private static bool SweepSegmentHit(
+		PhysicsDirectSpaceState3D space,
+		Vector3 a,
+		Vector3 b,
+		uint mask,
+		float radius,
+		out Vector3 hitPos)
+	{
+		hitPos = Vector3.Zero;
+
+		Vector3 motion = b - a;
+		float len = motion.Length();
+		if (len <= 1e-6f) return false;
+
+		var sphere = new SphereShape3D
+		{
+			Radius = Mathf.Max(0.0005f, radius)
+		};
+
+		var q = new PhysicsShapeQueryParameters3D
+		{
+			Shape = sphere,
+			Transform = new Transform3D(Basis.Identity, a),
+			Motion = motion,                  // ✅ motion goes HERE
+			Margin = 0.0f,
+			CollisionMask = mask,
+			CollideWithBodies = true,
+			CollideWithAreas = true
+		};
+
+		float[] res = space.CastMotion(q);
+
+		// res[1] < 1.0 → collision occurred before full motion
+		if (res.Length >= 2 && res[1] < 1.0f)
+		{
+			float t = res[1];
+			hitPos = a + motion * t;
+			return true;
+		}
+
+		return false;
+	}
+
+
+	private static bool SubdividedRayHit(
+		PhysicsDirectSpaceState3D space,
+		Vector3 a,
+		Vector3 b,
+		uint mask,
+		int maxSubsteps,
+		out Vector3 hitPos)
+	{
+		hitPos = Vector3.Zero;
+
+		Vector3 d = b - a;
+		float len = d.Length();
+		if (len <= 1e-6f) return false;
+
+		int steps = Mathf.Clamp(maxSubsteps, 1, 64);
+		Vector3 prev = a;
+
+		for (int i = 1; i <= steps; i++)
+		{
+			float t = (float)i / steps;
+			Vector3 cur = a + d * t;
+
+			var rq = PhysicsRayQueryParameters3D.Create(prev, cur, mask);
+			rq.CollideWithBodies = true;
+			rq.CollideWithAreas = true;
+			rq.HitFromInside = true;
+
+			var hit = space.IntersectRay(rq);
+			if (hit.Count > 0)
+			{
+				hitPos = (Vector3)hit["position"];
+				return true;
+			}
+
+			prev = cur;
+		}
+
+		return false;
+	}
+
+
 }

@@ -1,10 +1,10 @@
 [gd_scene load_steps=16 format=3 uid="uid://0yko6oxwl0n7"]
 
 [ext_resource type="Script" uid="uid://cmss07txb211i" path="res://world_environment.gd" id="1_6uqi0"]
-[ext_resource type="PackedScene" uid="uid://bnmjiwr2ptb5w" path="res://living_room.glb" id="1_oncn7"]
 [ext_resource type="Script" uid="uid://qebxtmehy4vg" path="res://options.gd" id="2_hjhvo"]
 [ext_resource type="Script" uid="uid://chuvuh6fkc2ux" path="res://CurvedCamera.cs" id="2_ppyta"]
 [ext_resource type="Script" uid="uid://26voemlp0vg4" path="res://RayViz.cs" id="3_rayviz"]
+[ext_resource type="PackedScene" uid="uid://bnmjiwr2ptb5w" path="res://living_room.glb" id="3_xersf"]
 [ext_resource type="Script" uid="uid://dg2asfleehqsw" path="res://RayBeamRenderer.cs" id="4_raybeam"]
 [ext_resource type="Shader" uid="uid://gu1m7wtw117i" path="res://curved_view.gdshader" id="4_ykrsh"]
 [ext_resource type="Script" uid="uid://713wqufxods5" path="res://RayEmitter3D.cs" id="5_emitter"]
@@ -67,7 +67,7 @@ v_offset = -0.01
 current = true
 script = ExtResource("2_ppyta")
 
-[node name="LivingRoom" parent="." instance=ExtResource("1_oncn7")]
+[node name="living_room" parent="." instance=ExtResource("3_xersf")]
 
 [node name="Lightbulb1" type="OmniLight3D" parent="."]
 transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 2, 3.19673, 0)
@@ -86,6 +86,7 @@ shadow_enabled = true
 [node name="CurvedLayer" type="CanvasLayer" parent="."]
 
 [node name="CurvedOverlay" type="ColorRect" parent="CurvedLayer"]
+visible = false
 material = SubResource("ShaderMaterial_g14j6")
 anchors_preset = 15
 anchor_right = 1.0
@@ -99,24 +100,38 @@ script = ExtResource("3_rayviz")
 
 [node name="RayBeamRenderer" type="Node3D" parent="."]
 script = ExtResource("4_raybeam")
-BendScale = 0.085
+StepsPerRay = 128
+BendScale = 1.0
+StopOnHit = true
 FieldCenter = Vector3(0, 1.5, 0)
 FieldCenterIsCamera = false
+MinStepLength = 0.02
+StepAdaptGain = 5.28
 
 [node name="Emitter1" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
 script = ExtResource("5_emitter")
-Rays = 48
+Rays = 136
 SpreadDegrees = 60.0
+FanYawDegrees = 360.0
 
 [node name="FieldSource3D" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 script = ExtResource("8_xersf")
+Strength = 0.005
+Softening = 2.115
 
 [node name="FieldA" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -0.5)
 script = ExtResource("8_xersf")
+Enabled = false
+Strength = 0.795
+Softening = 0.625
+Profile = 1
 
 [node name="FieldB" type="Node3D" parent="."]
 script = ExtResource("8_xersf")
+Enabled = false
 
 [node name="Options" type="Control" parent="." node_paths=PackedStringArray("sun", "lightbulb_1", "lightbulb_2", "world_environment", "curved_overlay")]
 layout_mode = 3
