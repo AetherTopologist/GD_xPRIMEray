@@ -1,11 +1,3 @@
-// ✅ Plug-n-play RayBeamRenderer.cs patch
-// What this does:
-// 1) Terminates the *draw trail* at first hit (even if you keep simulating)
-// 2) Prevents double-stamping (no more overbright/saturation from stamping prePos twice)
-// 3) Keeps your existing StopOnHit behavior intact
-//
-// Drop-in replace your script with this full file, or copy the marked blocks into yours.
-
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -32,7 +24,6 @@ public partial class RayBeamRenderer : Node3D
 	[Export] public float MinStepLength = 0.05f;
 	[Export] public float MaxStepLength = 0.5f;
 	[Export] public float StepAdaptGain = 0.05f;      // how strongly acceleration shrinks step
-
 	// --- Collision robustness (INSIGHT-ish thick segment) ---
 	[Export] public int CollisionEveryNSteps = 1;     // 1 = every step, 2 = every other, etc.
 	[Export] public float CollisionRadius = 0.03f;    // thickness of beam for hit testing
@@ -41,10 +32,8 @@ public partial class RayBeamRenderer : Node3D
 	[Export] public NodePath InsightPlaneNode;        // drag your table body here
 	[Export] public float CollisionRaySubdivideThreshold = 0.25f; // meters per sub-ray
 	[Export] public int MaxCollisionSubsteps = 16;
-
 	// If true and StopOnHit=true, only render rays that actually hit something.
 	[Export] public bool RequireHitToRender = false;
-
 	// --- Debug ---
 	[Export] public bool DebugRender = false;
 	[Export] public int DebugEveryNRays = 25;           // print 1 line per N rays
@@ -52,12 +41,7 @@ public partial class RayBeamRenderer : Node3D
 	[Export] public int DebugMaxRejectPrints = 10;      // cap reject spam
 	[Export] public bool CheckCollisionsEvenIfNotStopping = false;
 
-	// ✅ NEW: terminate *draw* trail at first hit (independent from StopOnHit simulation)
-	[Export] public bool TerminateTrailOnHit = true;
 
-	// ✅ NEW: draw a hit marker billboard
-	[Export] public bool DrawHitMarker = true;
-	[Export] public Color HitMarkerColor = new Color(1, 0, 0, 1);
 
 	private MultiMeshInstance3D _mmi;
 	private MultiMesh _mm;
@@ -68,8 +52,7 @@ public partial class RayBeamRenderer : Node3D
 
 	private bool _rebuildInProgress = false;
 	private bool _rebuildQueued = false;
-
-	// --- Change detection cache ---
+	// --- Change detection cache (for smarter updates) ---
 	private Vector3 _lastCamPos = new Vector3(float.NaN, float.NaN, float.NaN);
 	private float _lastCamFocal = float.NaN;
 	private int _lastFieldSourceCount = -1;
@@ -78,6 +61,8 @@ public partial class RayBeamRenderer : Node3D
 	private bool _hasInsightPlane = false;
 
 	private int _dbgRejectPrints = 0;
+
+
 
 	public override async void _Ready()
 	{
@@ -116,13 +101,19 @@ public partial class RayBeamRenderer : Node3D
 
 	public override void _Process(double delta)
 	{
+		// If you uncheck UpdateEveryFrame in the inspector, nothing auto-updates.
 		if (!UpdateEveryFrame) return;
 
 		var cam = GetCamera();
 		if (cam == null) return;
 
-		float beta = ReadFloat(cam, "Beta", 0f);
+		// Curvature controls on the camera
+		float beta  = ReadFloat(cam, "Beta", 0f);
 		float gamma = ReadFloat(cam, "Gamma", 2f);
+
+		// You can point this at whatever property you’re actually animating:
+		// - "FocalLength" if you’ve added it in a camera script
+		// - or use cam.Fov instead and store that here.
 		float focal = ReadFloat(cam, "FocalLength", 0f);
 
 		var fieldSources = GetTree().GetNodesInGroup("field_sources");
@@ -130,21 +121,26 @@ public partial class RayBeamRenderer : Node3D
 
 		bool changed = false;
 
+		// 1) Beta / Gamma changed?
 		if (!Mathf.IsEqualApprox(beta, _lastBeta) || !Mathf.IsEqualApprox(gamma, _lastGamma))
 			changed = true;
 
+		// 2) Camera position changed?
 		if (!IsFinite(_lastCamPos) || cam.GlobalPosition.DistanceTo(_lastCamPos) > 0.001f)
 			changed = true;
 
+		// 3) Focal length (or FOV proxy) changed?
 		if (float.IsNaN(_lastCamFocal) || !Mathf.IsEqualApprox(focal, _lastCamFocal))
 			changed = true;
 
+		// 4) field_sources topology changed (added/removed/moved group members)?
 		if (fieldCount != _lastFieldSourceCount)
 			changed = true;
 
 		if (!changed)
 			return;
 
+		// Update caches now that we know something changed
 		_lastCamPos = cam.GlobalPosition;
 		_lastCamFocal = focal;
 		_lastFieldSourceCount = fieldCount;
@@ -153,6 +149,7 @@ public partial class RayBeamRenderer : Node3D
 
 		RequestRebuild();
 	}
+
 
 	private void RequestRebuild()
 	{
@@ -170,7 +167,10 @@ public partial class RayBeamRenderer : Node3D
 	private async void DoRebuildDeferred()
 	{
 		_rebuildQueued = false;
+
+		// ✅ Make sure physics state is current before using DirectSpaceState collision queries
 		await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
+
 		Rebuild();
 	}
 
@@ -185,8 +185,6 @@ public partial class RayBeamRenderer : Node3D
 	private void Rebuild()
 	{
 		GD.Print("Rebuild ENTER");
-		GD.Print($"Rebuild on node: {GetPath()}  TerminateTrailOnHit={TerminateTrailOnHit} StopOnHit={StopOnHit} RequireHitToRender={RequireHitToRender}");
-		GD.Print($"READY node: {GetPath()}  Script={GetScript()}  TerminateTrailOnHit={TerminateTrailOnHit}");
 
 		if (_rebuildInProgress) return;
 		_rebuildInProgress = true;
@@ -210,6 +208,7 @@ public partial class RayBeamRenderer : Node3D
 			GD.Print("RayBeamRenderer: field sources in group = ", fieldSources.Count);
 			bool hasSources = fieldSources.Count > 0;
 
+			// Gather emitters
 			var emitters = GetTree().GetNodesInGroup("ray_emitters");
 			int emitterCount = emitters.Count;
 			if (emitterCount == 0)
@@ -219,9 +218,8 @@ public partial class RayBeamRenderer : Node3D
 			}
 			GD.Print("RayBeamRenderer: emitters in group = ", emitters.Count);
 
+			// Total instances = sum over emitters of (rays * steps)
 			int total = 0;
-			int capacity = total;
-			_mm.InstanceCount = capacity;
 			var emitterList = new List<RayEmitter3D>(emitterCount);
 
 			foreach (var node in emitters)
@@ -234,15 +232,15 @@ public partial class RayBeamRenderer : Node3D
 			}
 
 			_mm.InstanceCount = total;
-			_mm.VisibleInstanceCount = total; // default: show all until we decide otherwise
 			GD.Print($"RayBeamRenderer: total instances target = {total}");
 
+			// Camera basis for billboarding
 			Vector3 camRight = cam.GlobalTransform.Basis.X.Normalized();
 			Vector3 camUp = cam.GlobalTransform.Basis.Y.Normalized();
 			Vector3 camForward = (-cam.GlobalTransform.Basis.Z).Normalized();
 
 			int idx = 0;
-			var rng = new Random(12345);
+			var rng = new Random(12345); // deterministic for now
 
 			PhysicsDirectSpaceState3D space = GetWorld3D().DirectSpaceState;
 
@@ -251,6 +249,7 @@ public partial class RayBeamRenderer : Node3D
 			minStep = Mathf.Max(0.0001f, minStep);
 
 			int hitCount = 0;
+
 			bool capacityExhausted = false;
 
 			foreach (var e in emitterList)
@@ -261,7 +260,7 @@ public partial class RayBeamRenderer : Node3D
 				float maxDist = e.MaxDistance;
 
 				int rays = Math.Max(1, e.Rays);
-				int rayOrdinal = 0;
+				int rayOrdinal = 0; // counts rays for debug sampling
 				float spreadRad = Mathf.DegToRad(e.SpreadDegrees);
 
 				Vector3 origin = e.GlobalTransform.Origin;
@@ -271,24 +270,34 @@ public partial class RayBeamRenderer : Node3D
 					bool rayHit = false;
 					rayOrdinal++;
 
+					// Reset reject spam cap per rebuild (optional, keeps logs readable)
 					if (rayOrdinal == 1) _dbgRejectPrints = 0;
 
+					//////////////////
+					/// 
 					bool debugThisRay = DebugRender && (rayOrdinal % Mathf.Max(1, DebugEveryNRays) == 0);
 
+					int renderedThisRay = 0;
+
+					// ✅ Declare hit-state BEFORE any debug prints that use it
 					bool hadHit = false;
 					Vector3 hitPos = Vector3.Zero;
+					int cutoffSampleCount = int.MaxValue; // how many samples to render for this ray
+					bool stampedHitMarker = false;        // just in case you want to guard duplicates
 
-					// ✅ NEW: how many samples we will render for this ray
-					int trailStopCount = int.MaxValue;
-
+					// Collect samples for this ray
 					var samplePositions = new List<Vector3>();
 					var sampleColors = new List<Color>();
 
-					//int cutoffSampleCount = int.MaxValue; // render samples up to this count
-
-					if (debugThisRay)
+					if (debugThisRay) {
+						//GD.Print($"[DBG] Ray {rayOrdinal} entering render: willRender={(!RequireHitToRender || hadHit)}");
 						GD.Print($"[DBG] Ray#{rayOrdinal} start RequireHitToRender={RequireHitToRender} StopOnHit={StopOnHit}");
+					}
 
+					/////////////////////
+					/// 
+
+					// Random direction in a cone around emitter -Z (forward in local space)
 					Vector3 localDir;
 					if (e.UseFan)
 					{
@@ -309,6 +318,7 @@ public partial class RayBeamRenderer : Node3D
 
 					Vector3 dir = (e.GlobalTransform.Basis * localDir).Normalized();
 
+					// Bend direction: perpendicular within camera plane, based on direction relative to screen center.
 					float dx = dir.Dot(camRight);
 					float dy = dir.Dot(camUp);
 					Vector2 d2 = new Vector2(dx, -dy);
@@ -317,6 +327,7 @@ public partial class RayBeamRenderer : Node3D
 
 					Vector3 p = origin;
 					Vector3 v = dir;
+
 					float traveled = 0.0f;
 
 					int every = Mathf.Max(1, RenderEveryNSteps);
@@ -379,15 +390,13 @@ public partial class RayBeamRenderer : Node3D
 						}
 						c.A = Mathf.Clamp(alpha, 0.0f, 1.0f);
 
-						// ✅ Store samples until the frozen stop count (TerminateTrailOnHit)
-						// Always allow samples BEFORE a hit is detected; after a hit, stop collecting.
+						///////////////////////
+						/// 
+						// ✅ Store sample first (so even early hit rays still render a trail)
 						if ((s % every) == 0)
 						{
-							if (!TerminateTrailOnHit || samplePositions.Count < trailStopCount)
-							{
-								samplePositions.Add(p);
-								sampleColors.Add(c);
-							}
+							samplePositions.Add(p);
+							sampleColors.Add(c);
 						}
 
 						// --- Collision check (only if StopOnHit OR forced collision debug) ---
@@ -430,32 +439,39 @@ public partial class RayBeamRenderer : Node3D
 								hitCount++;
 								GD.Print("Beam hit at ", hp);
 
-								// ✅ Freeze drawable trail here (count is already how many samples were stored)
-								if (TerminateTrailOnHit) {
-									trailStopCount = samplePositions.Count;
-									GD.Print("trailStopCount:", trailStopCount);
+								// Optional: stamp last sample
+								if (samplePositions.Count > 0 && idx < _mm.InstanceCount)
+								{
+									var prePos = samplePositions[samplePositions.Count - 1];
+									var preCol = sampleColors[sampleColors.Count - 1];
+									SetBillboardInstance(idx++, prePos, camRight, camUp, camForward, preCol);
+									renderedThisRay++;
+								}
+
+								// Stamp hit marker
+								if (idx < _mm.InstanceCount)
+								{
+									var hitColor = new Color(1, 0, 0, 1);
+									SetBillboardInstance(idx++, hp, camRight, camUp, camForward, hitColor);
+									renderedThisRay++;
 								}
 
 								if (StopOnHit)
-									GD.Print("StopOnHit true = break removed... ", trailStopCount);
-									//break;
+									break;
 							}
 
 						SkipCollision:;
 						}
 
 						p = next;
+						///////////////////////
+						/// 
 					}
 
 					// Render this ray if we either don't require hits OR we got a hit
 					if (!RequireHitToRender || hadHit)
 					{
-						//int renderCount = Mathf.Min(samplePositions.Count, cutoffSampleCount);
-						int renderCount = Mathf.Min(samplePositions.Count, trailStopCount);
-						GD.Print($"Ray#{rayOrdinal} hadHit={hadHit} rayHit={rayHit} samples={samplePositions.Count} trailStopCount={trailStopCount} renderCount={renderCount}");
-
-
-						for (int i = 0; i < renderCount; i++)
+						for (int i = 0; i < samplePositions.Count; i++)
 						{
 							if (idx >= _mm.InstanceCount)
 							{
@@ -466,16 +482,7 @@ public partial class RayBeamRenderer : Node3D
 							if (idx == 0)
 								GD.Print("RayBeamRenderer: first instance placed at ", samplePositions[i]);
 
-							//SetBillboardInstance(idx++, samplePositions[i], camRight, camUp, camForward, sampleColors[i]);
-							SetBillboardInstance(idx++, capacity, samplePositions[i], camRight, camUp, camForward, sampleColors[i]);
-						}
-
-						// ✅ Stamp the hit marker AFTER the trail (optional, but you want it)
-						if (hadHit && idx < _mm.InstanceCount)
-						{
-							var hitColor = new Color(1, 0, 0, 1);
-							//SetBillboardInstance(idx++, hitPos, camRight, camUp, camForward, hitColor);
-							SetBillboardInstance(idx++, capacity, hitPos, camRight, camUp, camForward, hitColor);
+							SetBillboardInstance(idx++, samplePositions[i], camRight, camUp, camForward, sampleColors[i]);
 						}
 					}
 				}
@@ -483,16 +490,12 @@ public partial class RayBeamRenderer : Node3D
 
 			if (DebugRender)
 			{
-				//GD.Print($"[DBG] Rebuild summary: totalTarget={total} idxWritten={idx} instanceCount(beforeTrim)={_mm.InstanceCount} hits={hitCount}");
-				GD.Print($"[DBG] Rebuild summary: totalTarget={total} idxWritten={idx} InstanceCount={_mm.InstanceCount} VisibleCount={_mm.VisibleInstanceCount} hits={hitCount}");
+				GD.Print($"[DBG] Rebuild summary: totalTarget={total} idxWritten={idx} instanceCount(beforeTrim)={_mm.InstanceCount} hits={hitCount}");
 			}
 
 			// ✅ Always trim to what we actually wrote (prevents stale transforms/colors)
-			//_mm.InstanceCount = idx;
-			//_mm.VisibleInstanceCount = idx; 
-			_mm.VisibleInstanceCount = Mathf.Max(0, idx); // ✅ show only the instances we wrote
-
-
+			_mm.InstanceCount = idx;
+				
 		}
 		finally
 		{
@@ -502,9 +505,14 @@ public partial class RayBeamRenderer : Node3D
 		GD.Print("Rebuild EXIT");
 	}
 
-	//private void SetBillboardInstance(int index, Vector3 pos, Vector3 camRight, Vector3 camUp, Vector3 camForward, Color c)
-	private void SetBillboardInstance(int index, int capacity, Vector3 pos, Vector3 camRight, Vector3 camUp, Vector3 camForward, Color c)
-		{
+	private void SetBillboardInstance(
+		int index,
+		Vector3 pos,
+		Vector3 camRight,
+		Vector3 camUp,
+		Vector3 camForward,
+		Color c)
+	{
 		if (_mm == null) return;
 
 		if (index < 0 || index >= _mm.InstanceCount)
@@ -550,8 +558,12 @@ public partial class RayBeamRenderer : Node3D
 		_mm.SetInstanceColor(index, c);
 	}
 
-	private Vector3 ComputeAccelerationAtPoint(Vector3 p, Godot.Collections.Array<Node> sources, float globalBeta, float globalGamma)
-	{
+	private Vector3 ComputeAccelerationAtPoint(
+				Vector3 p,
+				Godot.Collections.Array<Node> sources,
+				float globalBeta,
+				float globalGamma) {
+
 		Vector3 aSum = Vector3.Zero;
 
 		foreach (var n in sources)
@@ -564,6 +576,7 @@ public partial class RayBeamRenderer : Node3D
 
 			float rRaw = rvec.Length();
 			float soft = Mathf.Max(0.00001f, fs.Softening);
+
 			float r = Mathf.Sqrt(rRaw * rRaw + soft * soft);
 
 			if (fs.MinRadius > 0.0f && r < fs.MinRadius) continue;
@@ -576,6 +589,7 @@ public partial class RayBeamRenderer : Node3D
 			float betaScale = fs.OverrideBetaScale ? fs.BetaScale : 1.0f;
 
 			float amp = globalBeta * betaScale * BendScale * FieldStrength * fs.Strength;
+
 			float mag = 0.0f;
 
 			switch (fs.Profile)
@@ -657,10 +671,12 @@ public partial class RayBeamRenderer : Node3D
 		float dp = plane.DistanceTo(p);
 		float dq = plane.DistanceTo(q);
 
+		// treat small band around plane as "slab"
 		float slab = eps * 10.0f;
 		if (Mathf.Abs(dp) <= slab || Mathf.Abs(dq) <= slab)
 			return true;
 
+		// sign change => segment crosses infinite plane
 		return (dp > 0f) != (dq > 0f);
 	}
 
@@ -679,7 +695,13 @@ public partial class RayBeamRenderer : Node3D
 		_hasInsightPlane = true;
 	}
 
-	private static bool SweepSegmentHit(PhysicsDirectSpaceState3D space, Vector3 a, Vector3 b, uint mask, float radius, out Vector3 hitPos)
+	private static bool SweepSegmentHit(
+						PhysicsDirectSpaceState3D space,
+						Vector3 a,
+						Vector3 b,
+						uint mask,
+						float radius,
+						out Vector3 hitPos)
 	{
 		hitPos = Vector3.Zero;
 
@@ -715,8 +737,13 @@ public partial class RayBeamRenderer : Node3D
 		return false;
 	}
 
-	private static bool SubdividedRayHit(PhysicsDirectSpaceState3D space, Vector3 a, Vector3 b, uint mask, int maxSubsteps, out Vector3 hitPos)
-	{
+	private static bool SubdividedRayHit(
+					PhysicsDirectSpaceState3D space,
+					Vector3 a,
+					Vector3 b,
+					uint mask,
+					int maxSubsteps,
+					out Vector3 hitPos) {
 		hitPos = Vector3.Zero;
 
 		Vector3 d = b - a;
@@ -734,7 +761,7 @@ public partial class RayBeamRenderer : Node3D
 			var rq = PhysicsRayQueryParameters3D.Create(prev, cur, mask);
 			rq.CollideWithBodies = true;
 			rq.CollideWithAreas = true;
-			rq.HitFromInside = false;	// formerly true
+			rq.HitFromInside = true;
 
 			var hit = space.IntersectRay(rq);
 			if (hit.Count > 0)
@@ -756,8 +783,11 @@ public partial class RayBeamRenderer : Node3D
 		return v / len;
 	}
 
-	private static bool IsFinite(Vector3 v)
-	{
-		return float.IsFinite(v.X) && float.IsFinite(v.Y) && float.IsFinite(v.Z);
-	}
+private static bool IsFinite(Vector3 v)
+{
+	return float.IsFinite(v.X) && float.IsFinite(v.Y) && float.IsFinite(v.Z);
+}
+
+
+
 }

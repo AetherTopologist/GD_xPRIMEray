@@ -61,17 +61,16 @@ directional_shadow_fade_start = 1.0
 directional_shadow_max_distance = 15.0
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(-0.9901037, 0.006252667, -0.14019874, -2.1082276e-09, 0.999007, 0.044554334, 0.1403381, 0.04411341, -0.9891205, -0.78539324, 2.1810393, -1.8947)
+transform = Transform3D(-0.9901037, 0.006252667, -0.14019874, -2.1082276e-09, 0.999007, 0.044554334, 0.1403381, 0.04411341, -0.9891205, 0.7, 2.436, -1.895)
 attributes = SubResource("CameraAttributesPhysical_drxnu")
-h_offset = 0.355
-v_offset = -0.01
 current = true
 script = ExtResource("2_ppyta")
 
 [node name="living_room" parent="." instance=ExtResource("3_xersf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.025899887, -0.00739336, 0.021672606)
 
 [node name="TestPhysicsRoom" parent="." instance=ExtResource("4_00tp4")]
-transform = Transform3D(5, 0, 0, 0, 0.2, 0, 0, 0, 5, -1.3982083, 1.993417, -0.11076069)
+transform = Transform3D(5, 0, 0, 0, 0.2, 0, 0, 0, 5, 0.8464689, 1.7868664, -0.131)
 
 [node name="Lightbulb1" type="OmniLight3D" parent="."]
 transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 2, 3.19673, 0)
@@ -104,10 +103,11 @@ script = ExtResource("3_rayviz")
 
 [node name="RayBeamRenderer" type="Node3D" parent="."]
 script = ExtResource("4_raybeam")
-StepsPerRay = 30
+StepsPerRay = 50
 StepLength = 0.1
 BendScale = 1.0
 Alpha = 0.565
+StopOnHit = true
 FieldCenter = Vector3(0, 1.5, 0)
 FieldCenterIsCamera = false
 MinStepLength = 0.001
@@ -117,6 +117,7 @@ CollisionRadius = 0.05
 UseSphereSweepCollision = true
 UseInsightPlaneFilter = true
 CollisionRaySubdivideThreshold = 0.05
+RequireHitToRender = true
 DebugRender = true
 DebugSetBillboardRejects = true
 CheckCollisionsEvenIfNotStopping = true
@@ -124,13 +125,13 @@ CheckCollisionsEvenIfNotStopping = true
 [node name="Emitter1" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
 script = ExtResource("5_emitter")
-Rays = 10
+Rays = 17
 SpreadDegrees = 59.975
 MaxDistance = 50.0
 FanYawDegrees = 360.0
 
 [node name="FieldSource3D" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.34824347, 1.7382352, 0.43196726)
 script = ExtResource("8_xersf")
 Strength = 0.005
 Softening = 2.115
@@ -400,15 +401,15 @@ text = "Focal Length"
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
-min_value = 10.0
-value = 13.0
+min_value = 2.0
+value = 10.0
 
 [node name="Value" type="Label" parent="Options/Camera/FocalLength"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
-text = "25 mm"
+text = "10 mm"
 
 [node name="Aperture" type="HBoxContainer" parent="Options/Camera"]
 layout_mode = 2
