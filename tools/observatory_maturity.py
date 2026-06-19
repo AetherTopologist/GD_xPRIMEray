@@ -18,7 +18,7 @@ MATURITY_LADDER = [
     {
         "stage": "Proposed",
         "score": 0,
-        "meaning": "Named concept or intended observatory primitive; design exists but repeatable artifact evidence is not yet established.",
+        "meaning": "A concept, expected panel, or fixture slot has been named, but repeatable artifact evidence is not established yet.",
         "minimum_evidence": "Concept document, prompt, or architecture note.",
     },
     {
@@ -71,15 +71,15 @@ CURATED_ASSIGNMENTS = [
         "kind": "Artifact",
         "stage": "Observed",
         "source_path": "reports/query_storyboard_v1.png",
-        "basis": "A real storyboard artifact exists, but it has not yet been promoted into a stable catalog or canonical visitor-facing contract.",
+        "basis": "A storyboard artifact exists, but it has not yet been promoted into a stable catalog or canonical visitor-facing contract.",
     },
     {
-        "id": "concept:cost_basin",
+        "id": "artifact:cost_basin",
         "name": "Cost Basin",
-        "kind": "Vocabulary Term",
-        "stage": "Proposed",
-        "source_path": "reports/cost_basin_v1.md",
-        "basis": "Concept architecture is documented; no dedicated Cost Basin artifact generation or validation gate exists yet.",
+        "kind": "Artifact",
+        "stage": "Observed",
+        "source_path": "reports/cost_basin_artifact_v1.md",
+        "basis": "Generated artifact exists from real full-coverage run data using final_step_count, terrain map, ladder, storyboard, and observation-only explanation.",
     },
     {
         "id": "artifact:hermetic_storyboard_v2",
@@ -119,6 +119,11 @@ def stage_for_catalog_record(record: dict[str, Any]) -> tuple[str, str]:
     source_path = str(record.get("source_path") or "")
     run_id = str(record.get("run_id") or "")
 
+    if artifact_type == "cost_basin":
+        return (
+            "Observed",
+            "Generated artifact exists from real full-coverage run data using final_step_count, terrain map, ladder, storyboard, and observation-only explanation.",
+        )
     if artifact_type == "hermetic_storyboard_v2":
         return (
             "Canonical",
@@ -205,7 +210,7 @@ def build_payload(catalog_path: Path) -> dict[str, Any]:
             "curated_sources": [
                 "docs/observer_storyboard/observer_storyboard_v1.md",
                 "reports/query_storyboard_v1.png",
-                "reports/cost_basin_v1.md",
+                "reports/cost_basin_artifact_v1.md",
                 "Docs/assets/observatory/hermetic_storyboard_v2.png",
             ],
         },
@@ -230,6 +235,8 @@ def write_markdown(payload: dict[str, Any], path: Path) -> None:
         lines.append(f"| {rung['score']} | **{rung['stage']}** | {rung['meaning']} | {rung['minimum_evidence']} |")
 
     lines += [
+        "",
+        "**Canonical does not mean physically true.** It means the artifact can anchor Observatory interpretation within its declared scene contract.",
         "",
         "## Anchor Assignments",
         "",
@@ -259,9 +266,14 @@ def write_markdown(payload: dict[str, Any], path: Path) -> None:
 
     lines += [
         "",
+        "Artifacts without a recorded score are unlabeled, not Proposed.",
+        "Proposed means a concept, expected panel, or fixture slot has been named but repeatable artifact evidence is not established yet.",
+        "",
+        "For the full trust-vocabulary crosswalk, see the Observatory Trust Model.",
+        "",
         "## Reading Rule",
         "",
-        "A higher score means the artifact has stronger evidence, clearer caveats, and more stable interpretation. It does not mean the artifact proves physical correctness. Canonical means it can anchor Observatory interpretation within its declared scene contract.",
+        "A higher score means the artifact has stronger evidence, clearer caveats, and more stable interpretation. Canonical means it can anchor Observatory interpretation within its declared scene contract.",
         "",
     ]
     path.write_text("\n".join(lines), encoding="utf-8")

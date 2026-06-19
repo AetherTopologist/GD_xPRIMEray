@@ -28,6 +28,7 @@ FIXTURE_LABELS = {
     "cathedral_probe": "Corner Probe Reference",
     "oracle_closure": "Oracle Closure",
     "renderer": "Renderer",
+    "renderer_hermetic_curved_room": "Renderer / Hermetic Curved Room",
     "observer_storyboard_framework": "Observer Storyboard Framework",
     "observatory_reference": "Observatory Reference",
     "unknown": "Unknown Fixture",
@@ -47,6 +48,8 @@ ARTIFACT_LABELS = {
     "observatory_story_reference": "Observatory Story Reference",
     "observer_storyboard": "Observer Storyboard",
     "renderer_storyboard_v1": "Renderer Storyboard v1",
+    "cost_basin": "Cost Basin Artifact",
+    "query_observatory": "Query Observatory",
 }
 
 STORYBOARDS = {
@@ -83,6 +86,10 @@ TERMS = {
     "full_frame_coverage": "Full-Frame Coverage",
     "traversal_cost": "Traversal Cost",
     "renderer_cost": "Renderer Cost",
+    "cost_basin": "Cost Basin",
+    "cost_basin_delta": "Cost Basin Delta",
+    "final_step_count": "final_step_count",
+    "computational_effort_accumulation": "Computational Effort Accumulation",
     "artifact_catalog": "Artifact Catalog",
 }
 
@@ -110,6 +117,9 @@ TERM_ALIASES = {
     "observer disagreement": "observer_disagreement",
     "coherence basin": "coherence_basin",
     "budget stress": "budget_stress",
+    "cost basin": "cost_basin",
+    "final_step_count": "final_step_count",
+    "computational effort": "computational_effort_accumulation",
     "beauty capture": "beauty_capture",
     "full-frame coverage": "full_frame_coverage",
     "full frame coverage": "full_frame_coverage",
@@ -216,6 +226,12 @@ def add_base_nodes(graph: Graph) -> None:
         graph.add_node(f"term:{key}", "Vocabulary Term", label)
     for key, label in CITATION_TYPES.items():
         graph.add_node(f"citation:{key}", "Citation Type", label)
+    graph.add_node(
+        "artifact:query_observatory",
+        "Artifact",
+        ARTIFACT_LABELS["query_observatory"],
+        source_paths=["reports/query_storyboard_v1.png"],
+    )
 
 
 def add_doc_citation_nodes(graph: Graph) -> None:
@@ -336,6 +352,9 @@ def add_storyboard_relationships(graph: Graph) -> None:
     graph.add_edge("artifact:renderer_storyboard_v1", "USES", "storyboard:renderer_storyboard_v1")
     graph.add_edge("artifact:observatory_story_reference", "USES", "storyboard:observatory_story")
     graph.add_edge("artifact:curvature_signature_ladder", "USES", "term:curvature_signature")
+    graph.add_edge("artifact:cost_basin", "DERIVED_FROM", "artifact:query_observatory")
+    graph.add_edge("artifact:cost_basin", "USES", "term:cost_basin")
+    graph.add_edge("artifact:cost_basin", "USES", "term:final_step_count")
 
 
 def add_vocabulary_relationships(graph: Graph) -> None:
@@ -350,6 +369,10 @@ def add_vocabulary_relationships(graph: Graph) -> None:
         ("term:oracle", "USES", "term:reference_integration"),
         ("term:reference_integration", "REFERENCES", "citation:reference_integration"),
         ("term:budget_stress", "EXPLAINS", "term:traversal_cost"),
+        ("term:cost_basin", "USES", "term:final_step_count"),
+        ("term:cost_basin", "EXPLAINS", "term:computational_effort_accumulation"),
+        ("term:sensitivity_signature", "EXPLAINS", "term:cost_basin_delta"),
+        ("term:cost_basin_delta", "EXPLAINS", "term:cost_basin"),
         ("term:closure_basin", "USES", "term:hermetic_closure"),
         ("term:coherence_basin", "EXPLAINS", "term:observer_disagreement"),
         ("term:curvature_benchmark", "USES", "term:curvature_signature"),

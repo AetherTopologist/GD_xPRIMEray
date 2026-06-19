@@ -21,8 +21,8 @@ The Observatory now tracks not only what exists, but how strongly each artifact 
 |---|---:|---:|---|---|
 | **Hermetic Storyboard** | Canonical | 5 | `Docs/assets/observatory/hermetic_storyboard_v2.png` | Promoted Gallery anchor for the sealed-room fixture with closure, coverage, curvature signature, verdict, and explicit scene-contract caveats. |
 | **Observer Storyboard Demo** | Characterized | 4 | `reports/observer_storyboard_demo.png` | Renderer-agnostic nine-panel framework has a schema, rendering tool, demo artifact, and explicit PASS/FAIL/PARTIAL/MISSING vocabulary. |
+| **Cost Basin** | Observed | 2 | `reports/cost_basin_artifact_v1.md` | Generated artifact exists from real full-coverage run data using final_step_count, terrain map, ladder, storyboard, and observation-only explanation. |
 | **Query Observatory** | Observed | 2 | `reports/query_storyboard_v1.png` | A storyboard artifact exists, but it has not yet been promoted into a stable catalog or canonical visitor-facing contract. |
-| **Cost Basin** | Proposed | 0 | `reports/cost_basin_v1.md` | Concept architecture is documented; no dedicated Cost Basin artifact generation or validation gate exists yet. |
 
 ## Catalog Artifact Scores
 
@@ -44,6 +44,10 @@ The Observatory now tracks not only what exists, but how strongly each artifact 
 | `hermetic_curved_room` | `curvature_signature_ladder` | `20260607T152708Z` | Observed | 2 | MISSING | PASS | MISSING | `output/curvature_fps_benchmark/20260607T152708Z/curvature_signature_ladder.png` |
 | `hermetic_curved_room` | `curvature_signature_ladder` | `published` | Observed | 2 | MISSING | PASS | MISSING | `reports/curvature_signature_ladder.png` |
 | `hermetic_curved_room` | `curvature_signature_ladder` | `published` | Observed | 2 | MISSING | PASS | MISSING | `reports/weekend_fps_curvature_sweep_assets/curvature_signature_ladder.png` |
+| `renderer / hermetic_curved_room` | `cost_basin` | `published` | Observed | 2 | PASS | PASS | OBSERVED | `reports/cost_basin_artifact_v1.md` |
+| `renderer / hermetic_curved_room` | `cost_basin` | `published` | Observed | 2 | PASS | PASS | OBSERVED | `reports/cost_basin_ladder.png` |
+| `renderer / hermetic_curved_room` | `cost_basin` | `published` | Observed | 2 | PASS | PASS | OBSERVED | `reports/cost_basin_storyboard.png` |
+| `renderer / hermetic_curved_room` | `cost_basin` | `published` | Observed | 2 | PASS | PASS | OBSERVED | `reports/cost_basin_terrain.png` |
 
 Artifacts without a recorded score are unlabeled, not Proposed.
 Proposed means a concept, expected panel, or fixture slot has been named but repeatable artifact evidence is not established yet.

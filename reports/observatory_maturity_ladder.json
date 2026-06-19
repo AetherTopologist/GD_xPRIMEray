@@ -169,6 +169,15 @@
       "verdict": "PARTIAL"
     },
     {
+      "basis": "Generated artifact exists from real full-coverage run data using final_step_count, terrain map, ladder, storyboard, and observation-only explanation.",
+      "id": "artifact:cost_basin",
+      "kind": "Artifact",
+      "name": "Cost Basin",
+      "score": 2,
+      "source_path": "reports/cost_basin_artifact_v1.md",
+      "stage": "Observed"
+    },
+    {
       "basis": "A storyboard artifact exists, but it has not yet been promoted into a stable catalog or canonical visitor-facing contract.",
       "id": "artifact:query_observatory",
       "kind": "Artifact",
@@ -268,22 +277,73 @@
       "verdict": "MISSING"
     },
     {
-      "basis": "Concept architecture is documented; no dedicated Cost Basin artifact generation or validation gate exists yet.",
-      "id": "concept:cost_basin",
-      "kind": "Vocabulary Term",
-      "name": "Cost Basin",
-      "score": 0,
-      "source_path": "reports/cost_basin_v1.md",
-      "stage": "Proposed"
+      "artifact_type": "cost_basin",
+      "basis": "Generated artifact exists from real full-coverage run data using final_step_count, terrain map, ladder, storyboard, and observation-only explanation.",
+      "closure": "PASS",
+      "coverage": "PASS",
+      "fixture": "renderer / hermetic_curved_room",
+      "id": "catalog:renderer / hermetic_curved_room:cost_basin:published:016",
+      "kind": "Artifact",
+      "name": "renderer / hermetic_curved_room / cost_basin / published",
+      "run_id": "published",
+      "score": 2,
+      "source_path": "reports/cost_basin_artifact_v1.md",
+      "stage": "Observed",
+      "verdict": "OBSERVED"
+    },
+    {
+      "artifact_type": "cost_basin",
+      "basis": "Generated artifact exists from real full-coverage run data using final_step_count, terrain map, ladder, storyboard, and observation-only explanation.",
+      "closure": "PASS",
+      "coverage": "PASS",
+      "fixture": "renderer / hermetic_curved_room",
+      "id": "catalog:renderer / hermetic_curved_room:cost_basin:published:017",
+      "kind": "Artifact",
+      "name": "renderer / hermetic_curved_room / cost_basin / published",
+      "run_id": "published",
+      "score": 2,
+      "source_path": "reports/cost_basin_ladder.png",
+      "stage": "Observed",
+      "verdict": "OBSERVED"
+    },
+    {
+      "artifact_type": "cost_basin",
+      "basis": "Generated artifact exists from real full-coverage run data using final_step_count, terrain map, ladder, storyboard, and observation-only explanation.",
+      "closure": "PASS",
+      "coverage": "PASS",
+      "fixture": "renderer / hermetic_curved_room",
+      "id": "catalog:renderer / hermetic_curved_room:cost_basin:published:018",
+      "kind": "Artifact",
+      "name": "renderer / hermetic_curved_room / cost_basin / published",
+      "run_id": "published",
+      "score": 2,
+      "source_path": "reports/cost_basin_storyboard.png",
+      "stage": "Observed",
+      "verdict": "OBSERVED"
+    },
+    {
+      "artifact_type": "cost_basin",
+      "basis": "Generated artifact exists from real full-coverage run data using final_step_count, terrain map, ladder, storyboard, and observation-only explanation.",
+      "closure": "PASS",
+      "coverage": "PASS",
+      "fixture": "renderer / hermetic_curved_room",
+      "id": "catalog:renderer / hermetic_curved_room:cost_basin:published:019",
+      "kind": "Artifact",
+      "name": "renderer / hermetic_curved_room / cost_basin / published",
+      "run_id": "published",
+      "score": 2,
+      "source_path": "reports/cost_basin_terrain.png",
+      "stage": "Observed",
+      "verdict": "OBSERVED"
     }
   ],
-  "generated_at": "2026-06-08T05:28:50Z",
+  "generated_at": "2026-06-19T02:58:36Z",
   "generated_from": {
     "catalog": "reports/observatory_catalog.json",
     "curated_sources": [
       "docs/observer_storyboard/observer_storyboard_v1.md",
       "reports/query_storyboard_v1.png",
-      "reports/cost_basin_v1.md",
+      "reports/cost_basin_artifact_v1.md",
       "Docs/assets/observatory/hermetic_storyboard_v2.png"
     ]
   },

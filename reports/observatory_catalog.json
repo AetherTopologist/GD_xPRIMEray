@@ -174,5 +174,49 @@
     "source_path": "reports/renderer_storyboard_v1.png",
     "timestamp": "2026-06-08T00:40:22Z",
     "verdict": "PASS"
+  },
+  {
+    "artifact_type": "cost_basin",
+    "category": "Research",
+    "closure": "PASS",
+    "coverage": "PASS",
+    "fixture": "renderer / hermetic_curved_room",
+    "run_id": "published",
+    "source_path": "reports/cost_basin_artifact_v1.md",
+    "timestamp": "2026-06-17T03:44:51Z",
+    "verdict": "OBSERVED"
+  },
+  {
+    "artifact_type": "cost_basin",
+    "category": "Research",
+    "closure": "PASS",
+    "coverage": "PASS",
+    "fixture": "renderer / hermetic_curved_room",
+    "run_id": "published",
+    "source_path": "reports/cost_basin_ladder.png",
+    "timestamp": "2026-06-17T03:44:51Z",
+    "verdict": "OBSERVED"
+  },
+  {
+    "artifact_type": "cost_basin",
+    "category": "Research",
+    "closure": "PASS",
+    "coverage": "PASS",
+    "fixture": "renderer / hermetic_curved_room",
+    "run_id": "published",
+    "source_path": "reports/cost_basin_storyboard.png",
+    "timestamp": "2026-06-17T03:44:51Z",
+    "verdict": "OBSERVED"
+  },
+  {
+    "artifact_type": "cost_basin",
+    "category": "Research",
+    "closure": "PASS",
+    "coverage": "PASS",
+    "fixture": "renderer / hermetic_curved_room",
+    "run_id": "published",
+    "source_path": "reports/cost_basin_terrain.png",
+    "timestamp": "2026-06-17T03:44:51Z",
+    "verdict": "OBSERVED"
   }
 ]

@@ -8,6 +8,37 @@
   ],
   "edges": [
     {
+      "source": "artifact:cost_basin",
+      "target": "artifact:query_observatory",
+      "type": "DERIVED_FROM"
+    },
+    {
+      "metadata": {
+        "source_path": "reports/observatory_catalog.json"
+      },
+      "source": "artifact:cost_basin",
+      "target": "citation:artifact_catalog",
+      "type": "DERIVED_FROM"
+    },
+    {
+      "metadata": {
+        "source_path": "reports/cost_basin_terrain.png"
+      },
+      "source": "artifact:cost_basin",
+      "target": "citation:source_path",
+      "type": "REFERENCES"
+    },
+    {
+      "source": "artifact:cost_basin",
+      "target": "term:cost_basin",
+      "type": "USES"
+    },
+    {
+      "source": "artifact:cost_basin",
+      "target": "term:final_step_count",
+      "type": "USES"
+    },
+    {
       "metadata": {
         "source_path": "reports/observatory_catalog.json"
       },
@@ -143,6 +174,16 @@
       "type": "USES"
     },
     {
+      "source": "docs_page:observatory_maturity_ladder",
+      "target": "citation:docs_page",
+      "type": "USES"
+    },
+    {
+      "source": "docs_page:observatory_trust_model",
+      "target": "citation:docs_page",
+      "type": "USES"
+    },
+    {
       "source": "docs_page:research_fixtures",
       "target": "citation:docs_page",
       "type": "USES"
@@ -215,6 +256,18 @@
       },
       "source": "fixture:renderer",
       "target": "artifact:renderer_storyboard_v1",
+      "type": "GENERATES"
+    },
+    {
+      "metadata": {
+        "closure": "PASS",
+        "coverage": "PASS",
+        "run_id": "published",
+        "source_path": "reports/cost_basin_terrain.png",
+        "verdict": "OBSERVED"
+      },
+      "source": "fixture:renderer_hermetic_curved_room",
+      "target": "artifact:cost_basin",
       "type": "GENERATES"
     },
     {
@@ -454,6 +507,29 @@
     },
     {
       "metadata": {
+        "source_path": "Docs/Observatory_Gallery/observatory_maturity_ladder.md"
+      },
+      "source": "term:cost_basin",
+      "target": "docs_page:observatory_maturity_ladder",
+      "type": "DERIVED_FROM"
+    },
+    {
+      "source": "term:cost_basin",
+      "target": "term:computational_effort_accumulation",
+      "type": "EXPLAINS"
+    },
+    {
+      "source": "term:cost_basin",
+      "target": "term:final_step_count",
+      "type": "USES"
+    },
+    {
+      "source": "term:cost_basin_delta",
+      "target": "term:cost_basin",
+      "type": "EXPLAINS"
+    },
+    {
+      "metadata": {
         "source_path": "Docs/Observatory_Gallery/canonical_fixtures.md"
       },
       "source": "term:coverage",
@@ -482,6 +558,22 @@
       },
       "source": "term:coverage",
       "target": "docs_page:observatory_gallery_index",
+      "type": "DERIVED_FROM"
+    },
+    {
+      "metadata": {
+        "source_path": "Docs/Observatory_Gallery/observatory_maturity_ladder.md"
+      },
+      "source": "term:coverage",
+      "target": "docs_page:observatory_maturity_ladder",
+      "type": "DERIVED_FROM"
+    },
+    {
+      "metadata": {
+        "source_path": "Docs/Observatory_Gallery/observatory_trust_model.md"
+      },
+      "source": "term:coverage",
+      "target": "docs_page:observatory_trust_model",
       "type": "DERIVED_FROM"
     },
     {
@@ -582,6 +674,14 @@
       },
       "source": "term:curvature_signature",
       "target": "docs_page:observatory_gallery_index",
+      "type": "DERIVED_FROM"
+    },
+    {
+      "metadata": {
+        "source_path": "Docs/Observatory_Gallery/observatory_maturity_ladder.md"
+      },
+      "source": "term:curvature_signature",
+      "target": "docs_page:observatory_maturity_ladder",
       "type": "DERIVED_FROM"
     },
     {
@@ -787,11 +887,32 @@
     },
     {
       "metadata": {
+        "source_path": "Docs/Observatory_Gallery/observatory_maturity_ladder.md"
+      },
+      "source": "term:scene_contract",
+      "target": "docs_page:observatory_maturity_ladder",
+      "type": "DERIVED_FROM"
+    },
+    {
+      "metadata": {
+        "source_path": "Docs/Observatory_Gallery/observatory_trust_model.md"
+      },
+      "source": "term:scene_contract",
+      "target": "docs_page:observatory_trust_model",
+      "type": "DERIVED_FROM"
+    },
+    {
+      "metadata": {
         "source_path": "Docs/Observatory_Gallery/what_the_observatory_measures.md"
       },
       "source": "term:scene_contract",
       "target": "docs_page:what_the_observatory_measures",
       "type": "DERIVED_FROM"
+    },
+    {
+      "source": "term:sensitivity_signature",
+      "target": "term:cost_basin_delta",
+      "type": "EXPLAINS"
     },
     {
       "source": "term:sensitivity_signature",
@@ -850,6 +971,22 @@
     },
     {
       "metadata": {
+        "source_path": "Docs/Observatory_Gallery/observatory_maturity_ladder.md"
+      },
+      "source": "term:verdict",
+      "target": "docs_page:observatory_maturity_ladder",
+      "type": "DERIVED_FROM"
+    },
+    {
+      "metadata": {
+        "source_path": "Docs/Observatory_Gallery/observatory_trust_model.md"
+      },
+      "source": "term:verdict",
+      "target": "docs_page:observatory_trust_model",
+      "type": "DERIVED_FROM"
+    },
+    {
+      "metadata": {
         "source_path": "docs/observer_storyboard/observer_storyboard_v1.schema.json"
       },
       "source": "term:verdict",
@@ -865,7 +1002,7 @@
       "type": "DERIVED_FROM"
     }
   ],
-  "generated_at": "2026-06-08T04:37:00Z",
+  "generated_at": "2026-06-19T02:58:36Z",
   "generated_from": {
     "catalog": "reports/observatory_catalog.json",
     "gallery": "Docs/Observatory_Gallery",
@@ -879,6 +1016,33 @@
     "Vocabulary Term"
   ],
   "nodes": [
+    {
+      "id": "artifact:cost_basin",
+      "label": "Cost Basin Artifact",
+      "metadata": {
+        "run_ids": [
+          "published"
+        ],
+        "source_paths": [
+          "reports/cost_basin_artifact_v1.md",
+          "reports/cost_basin_ladder.png",
+          "reports/cost_basin_storyboard.png",
+          "reports/cost_basin_terrain.png"
+        ],
+        "status_summary": {
+          "closure": [
+            "PASS"
+          ],
+          "coverage": [
+            "PASS"
+          ],
+          "verdict": [
+            "OBSERVED"
+          ]
+        }
+      },
+      "type": "Artifact"
+    },
     {
       "id": "artifact:curvature_signature_ladder",
       "label": "Curvature Signature Ladder",
@@ -996,6 +1160,16 @@
             "PARTIAL"
           ]
         }
+      },
+      "type": "Artifact"
+    },
+    {
+      "id": "artifact:query_observatory",
+      "label": "Query Observatory",
+      "metadata": {
+        "source_paths": [
+          "reports/query_storyboard_v1.png"
+        ]
       },
       "type": "Artifact"
     },
@@ -1118,6 +1292,24 @@
       "type": "Citation Type"
     },
     {
+      "id": "docs_page:observatory_maturity_ladder",
+      "label": "Observatory Maturity Ladder",
+      "metadata": {
+        "citation_kind": "docs_page",
+        "source_path": "Docs/Observatory_Gallery/observatory_maturity_ladder.md"
+      },
+      "type": "Citation Type"
+    },
+    {
+      "id": "docs_page:observatory_trust_model",
+      "label": "Observatory Trust Model",
+      "metadata": {
+        "citation_kind": "docs_page",
+        "source_path": "Docs/Observatory_Gallery/observatory_trust_model.md"
+      },
+      "type": "Citation Type"
+    },
+    {
       "id": "docs_page:research_fixtures",
       "label": "Research Fixtures",
       "metadata": {
@@ -1194,6 +1386,14 @@
     {
       "id": "fixture:renderer",
       "label": "Renderer",
+      "metadata": {
+        "category": "Research"
+      },
+      "type": "Fixture"
+    },
+    {
+      "id": "fixture:renderer_hermetic_curved_room",
+      "label": "Renderer / Hermetic Curved Room",
       "metadata": {
         "category": "Research"
       },
@@ -1278,6 +1478,21 @@
       "type": "Vocabulary Term"
     },
     {
+      "id": "term:computational_effort_accumulation",
+      "label": "Computational Effort Accumulation",
+      "type": "Vocabulary Term"
+    },
+    {
+      "id": "term:cost_basin",
+      "label": "Cost Basin",
+      "type": "Vocabulary Term"
+    },
+    {
+      "id": "term:cost_basin_delta",
+      "label": "Cost Basin Delta",
+      "type": "Vocabulary Term"
+    },
+    {
       "id": "term:coverage",
       "label": "Coverage",
       "type": "Vocabulary Term"
@@ -1295,6 +1510,11 @@
     {
       "id": "term:disagreements",
       "label": "Disagreements",
+      "type": "Vocabulary Term"
+    },
+    {
+      "id": "term:final_step_count",
+      "label": "final_step_count",
       "type": "Vocabulary Term"
     },
     {
