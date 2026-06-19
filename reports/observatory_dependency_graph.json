@@ -1,0 +1,392 @@
+{
+  "schema_version": "1.0",
+  "generated": "2026-06-16",
+  "role": "Observatory Architect",
+  "constraint": "No new concepts created. No renderer changes. Ontology minimization is the primary goal.",
+
+  "concepts": [
+    {
+      "id": "coverage_basin",
+      "name": "Coverage Basin",
+      "category": "FOUNDATIONAL",
+      "freeze_status": "experimental",
+      "concept_maturity": 0,
+      "concept_maturity_label": "Proposed",
+      "artifact_maturity": 2,
+      "artifact_maturity_label": "Observed",
+      "description": "Which pixels in the declared film domain were evaluated at all. Foundational — no other concept is its prerequisite.",
+      "observer_language_v1_panel": "Panel 7 — Evidence Coverage",
+      "unique_role": true
+    },
+    {
+      "id": "closure_basin",
+      "name": "Closure Basin",
+      "category": "DERIVED",
+      "freeze_status": "freeze",
+      "concept_maturity": 4,
+      "concept_maturity_label": "Characterized",
+      "artifact_maturity": 4,
+      "artifact_maturity_label": "Characterized",
+      "description": "Which evaluated pixels converged to a terminal classification within the declared step budget. The Observatory's central diagnostic concept.",
+      "observer_language_v1_panel": "Panel 5 — Closure Basin",
+      "unique_role": true
+    },
+    {
+      "id": "ownership_basin",
+      "name": "Ownership Basin",
+      "category": "DERIVED",
+      "freeze_status": "experimental",
+      "concept_maturity": 0,
+      "concept_maturity_label": "Proposed",
+      "artifact_maturity": 2,
+      "artifact_maturity_label": "Observed",
+      "description": "Which receiver zone claimed each ray after terminal classification. Defined only within the Closure Basin interior.",
+      "observer_language_v1_panel": "Panel 4 — Domain ownership (xPRIMEray); Panel 3 — Perspectives (generalized)",
+      "unique_role": true
+    },
+    {
+      "id": "cost_basin",
+      "name": "Cost Basin",
+      "category": "DERIVED",
+      "freeze_status": "experimental",
+      "concept_maturity": 0,
+      "concept_maturity_label": "Proposed",
+      "artifact_maturity": 2,
+      "artifact_maturity_label": "Observed",
+      "description": "How many traversal steps were required at each pixel to reach terminal classification. Defined only within the Closure Basin interior.",
+      "observer_language_v1_panel": "Panel 6 — Traversal steps; Panel 7 — Budget stress",
+      "unique_role": true
+    },
+    {
+      "id": "disagreement_basin",
+      "name": "Disagreement Basin",
+      "category": "DERIVED",
+      "freeze_status": "experimental",
+      "concept_maturity": 0,
+      "concept_maturity_label": "Proposed",
+      "artifact_maturity": 2,
+      "artifact_maturity_label": "Observed",
+      "description": "Where two Ownership Basins assign different terminal classifications to the same pixel. Requires two named perspectives.",
+      "observer_language_v1_panel": "Panel 4 — Disagreements",
+      "unique_role": true
+    },
+    {
+      "id": "sensitivity_basin",
+      "name": "Sensitivity Basin",
+      "category": "DERIVED",
+      "freeze_status": "experimental",
+      "concept_maturity": 0,
+      "concept_maturity_label": "Proposed",
+      "artifact_maturity": 4,
+      "artifact_maturity_label": "Characterized",
+      "artifact_maturity_note": "Curvature Signature instance is Characterized/4; generalized form is Proposed/0",
+      "description": "Where the observation space responds measurably to a named parameter change. Signed delta of two Cost Basins.",
+      "observer_language_v1_panel": "Panel 8 — Sensitivity Signature; xPRIMEray instance: Curvature Signature",
+      "unique_role": true
+    },
+    {
+      "id": "risk_nodes",
+      "name": "Risk Nodes",
+      "category": "DERIVED",
+      "freeze_status": "experimental",
+      "concept_maturity": 0,
+      "concept_maturity_label": "Proposed",
+      "artifact_maturity": 2,
+      "artifact_maturity_label": "Observed",
+      "description": "Complement of Closure Basin within Coverage Basin interior. A derived set, not a basin. No sub-derivations.",
+      "observer_language_v1_panel": null,
+      "unique_role": true,
+      "note": "NOT a seventh basin. Risk Nodes are a derived set expressed as Coverage_Basin_interior ∖ Closure_Basin_interior."
+    },
+    {
+      "id": "coherence_basin",
+      "name": "Coherence Basin",
+      "category": "CROSS-CUTTING",
+      "freeze_status": "experimental",
+      "concept_maturity": 0,
+      "concept_maturity_label": "Proposed",
+      "artifact_maturity": 0,
+      "artifact_maturity_label": "Proposed",
+      "description": "Topological stability criterion. Precision-invariant. Cannot be derived from a single run — requires a refinement sequence. Qualifies all six computational basins but is not contained by any.",
+      "observer_language_v1_panel": null,
+      "unique_role": true
+    },
+    {
+      "id": "trust_model",
+      "name": "Trust Model",
+      "category": "CROSS-CUTTING",
+      "freeze_status": "freeze",
+      "concept_maturity": 5,
+      "concept_maturity_label": "Canonical",
+      "artifact_maturity": 5,
+      "artifact_maturity_label": "Canonical",
+      "description": "Shared vocabulary for evidence strength. The 0–5 stage axis applies to all concepts and artifacts. Self-applicable. Crosswalk tables map Showcase Status, Citation Tiers, Xeno/Zeno Atlas Tiers, Archive Status, and Artifact Status onto the axis.",
+      "observer_language_v1_panel": null,
+      "unique_role": true
+    },
+    {
+      "id": "adversarial_reviews",
+      "name": "Adversarial Reviews",
+      "category": "CROSS-CUTTING",
+      "freeze_status": "experimental",
+      "concept_maturity": 0,
+      "concept_maturity_label": "Proposed",
+      "artifact_maturity": 2,
+      "artifact_maturity_label": "Observed",
+      "description": "QA process that evaluates whether Observatory language makes unwarranted physical-truth claims. Applied to all Observatory-facing documents. Not produced by any basin; not required to compute any basin.",
+      "observer_language_v1_panel": null,
+      "unique_role": true
+    },
+    {
+      "id": "observer_storyboard",
+      "name": "Observer Storyboard",
+      "category": "PRESENTATION",
+      "freeze_status": "freeze",
+      "concept_maturity": 4,
+      "concept_maturity_label": "Characterized",
+      "artifact_maturity": 4,
+      "artifact_maturity_label": "Characterized",
+      "description": "Generalized 9-panel evidence framework. Schema-backed, renderer-agnostic. Panel 9 is Verdict (PASS/FAIL/PARTIAL/MISSING). Panels populated from basin outputs and Trust Model stages.",
+      "observer_language_v1_panel": "Framework for Panels 1–9",
+      "unique_role": true
+    },
+    {
+      "id": "observatory_storyboard",
+      "name": "Observatory Storyboard",
+      "category": "PRESENTATION",
+      "freeze_status": "experimental",
+      "concept_maturity": 4,
+      "concept_maturity_label": "Characterized",
+      "artifact_maturity": 4,
+      "artifact_maturity_label": "Characterized",
+      "description": "xPRIMEray-specific 9-panel contact sheet. An instance of Observer Storyboard. Panel names are xPRIMEray-specific labels over the Observer Storyboard framework. Does not define independent framework capabilities.",
+      "observer_language_v1_panel": "xPRIMEray instance of Observer Storyboard panels",
+      "unique_role": false,
+      "unique_role_note": "An instance of Observer Storyboard, not a distinct concept."
+    },
+    {
+      "id": "maturity_ladder",
+      "name": "Maturity Ladder",
+      "category": "PRESENTATION",
+      "freeze_status": "experimental",
+      "concept_maturity": 5,
+      "concept_maturity_label": "Canonical",
+      "artifact_maturity": 5,
+      "artifact_maturity_label": "Canonical",
+      "description": "Thin presentation view of the Trust Model 0–5 scale. Unique content: Current Anchors table (per-artifact score assignments). Any scale changes must originate in the Trust Model.",
+      "observer_language_v1_panel": null,
+      "unique_role": false,
+      "unique_role_note": "Trust Model already defines and owns the 0–5 scale. Maturity Ladder's only unique content is the Current Anchors table."
+    },
+    {
+      "id": "basin_atlas",
+      "name": "Basin Atlas",
+      "category": "PRESENTATION",
+      "freeze_status": "experimental",
+      "concept_maturity": 2,
+      "concept_maturity_label": "Observed",
+      "artifact_maturity": 2,
+      "artifact_maturity_label": "Observed",
+      "description": "Compact reference card generated from reports/observatory_catalog.json. Relationship logic superseded by Basin Taxonomy v1. Retained as a generated artifact, not as the ontology source.",
+      "observer_language_v1_panel": null,
+      "unique_role": false,
+      "unique_role_note": "Basin Taxonomy v1 supersedes its relationship logic. Basin Atlas is a generated view, not a source of truth."
+    },
+    {
+      "id": "query_observatory",
+      "name": "Query Observatory",
+      "category": "PRESENTATION",
+      "freeze_status": "experimental",
+      "concept_maturity": 2,
+      "concept_maturity_label": "Observed",
+      "artifact_maturity": 2,
+      "artifact_maturity_label": "Observed",
+      "description": "A single storyboard artifact instance produced from one run. Not a concept. No dedicated pipeline, catalog, or generation gate. Does not have architectural authority.",
+      "observer_language_v1_panel": null,
+      "unique_role": false,
+      "unique_role_note": "An artifact instance, not a concept. Instance of Observatory Storyboard."
+    }
+  ],
+
+  "edges": [
+    {
+      "from": "coverage_basin",
+      "to": "closure_basin",
+      "type": "contains",
+      "description": "Closure is defined only within the Coverage Basin interior"
+    },
+    {
+      "from": "closure_basin",
+      "to": "ownership_basin",
+      "type": "contains_domain_of",
+      "description": "Ownership is undefined outside the Closure Basin interior"
+    },
+    {
+      "from": "closure_basin",
+      "to": "cost_basin",
+      "type": "contains_domain_of",
+      "description": "Cost is undefined outside the Closure Basin interior"
+    },
+    {
+      "from": "ownership_basin",
+      "to": "disagreement_basin",
+      "type": "two_instances_symmetric_diff",
+      "description": "Requires two Ownership Basins over the same Coverage interior; output is their symmetric difference"
+    },
+    {
+      "from": "cost_basin",
+      "to": "sensitivity_basin",
+      "type": "two_instances_signed_delta",
+      "description": "Requires two Cost Basins; pixel must be in both Closure Basins; output is signed arithmetic difference"
+    },
+    {
+      "from": "coverage_basin",
+      "to": "risk_nodes",
+      "type": "complement_minus",
+      "complement_basin": "closure_basin",
+      "description": "Risk Nodes = Coverage_Basin_interior ∖ Closure_Basin_interior"
+    },
+    {
+      "from": "coherence_basin",
+      "to": "coverage_basin",
+      "type": "qualifies",
+      "description": "Topological stability criterion applied to Coverage Basin results"
+    },
+    {
+      "from": "coherence_basin",
+      "to": "closure_basin",
+      "type": "qualifies",
+      "description": "Topological stability criterion applied to Closure Basin results"
+    },
+    {
+      "from": "coherence_basin",
+      "to": "ownership_basin",
+      "type": "qualifies",
+      "description": "Topological stability criterion applied to Ownership Basin results"
+    },
+    {
+      "from": "coherence_basin",
+      "to": "cost_basin",
+      "type": "qualifies",
+      "description": "Topological stability criterion applied to Cost Basin results"
+    },
+    {
+      "from": "coherence_basin",
+      "to": "disagreement_basin",
+      "type": "qualifies",
+      "description": "Topological stability criterion applied to Disagreement Basin results"
+    },
+    {
+      "from": "coherence_basin",
+      "to": "sensitivity_basin",
+      "type": "qualifies",
+      "description": "Topological stability criterion applied to Sensitivity Basin results"
+    },
+    {
+      "from": "trust_model",
+      "to": "maturity_ladder",
+      "type": "rendered_as",
+      "description": "Maturity Ladder is a thin presentation view of the Trust Model 0–5 scale"
+    },
+    {
+      "from": "observer_storyboard",
+      "to": "observatory_storyboard",
+      "type": "instantiated_as",
+      "description": "Observatory Storyboard is the xPRIMEray-specific instance of Observer Storyboard"
+    },
+    {
+      "from": "observatory_storyboard",
+      "to": "query_observatory",
+      "type": "artifact_instance",
+      "description": "Query Observatory is one run artifact of Observatory Storyboard; not a concept"
+    },
+    {
+      "from": "basin_taxonomy_v1",
+      "to": "basin_atlas",
+      "type": "supersedes",
+      "description": "Basin Taxonomy v1 absorbs and supersedes Basin Atlas relationship logic; Basin Atlas is retained as generated reference"
+    },
+    {
+      "from": "adversarial_reviews",
+      "to": "observer_storyboard",
+      "type": "qa_process_on",
+      "description": "Adversarial Reviews evaluate whether Observer Storyboard language makes unwarranted physical-truth claims"
+    }
+  ],
+
+  "circular_dependency_check": {
+    "result": "NONE",
+    "notes": [
+      "Computation chain is strictly directional: Coverage → Closure → {Ownership, Cost} → {Disagreement, Sensitivity}",
+      "No concept in the chain requires a concept downstream of it",
+      "Redundancy exists between Trust Model and Maturity Ladder (both define 0–5 scale) but this is redundancy, not circularity",
+      "Trust Model self-reference (Trust Model has its own maturity score) is self-reference, not circularity"
+    ]
+  },
+
+  "minimum_concept_set": {
+    "size": 6,
+    "concepts": [
+      "coverage_basin",
+      "closure_basin",
+      "ownership_basin",
+      "cost_basin",
+      "trust_model",
+      "observer_storyboard"
+    ],
+    "rationale": "From these six, all other named concepts are either derived, presentation instances, a superseded reference, or a QA process. Disagreement and Sensitivity Basins are excluded because they require two instances of their parents — they are comparative, not foundational. Coherence Basin is excluded because it requires a refinement sequence — it qualifies the minimum set but is not a prerequisite for defining it."
+  },
+
+  "concepts_without_unique_roles": [
+    {
+      "id": "maturity_ladder",
+      "role_held_by": "trust_model",
+      "recommendation": "Retain as presentation view; do not extend independently. Scale changes must originate in Trust Model."
+    },
+    {
+      "id": "basin_atlas",
+      "role_held_by": "basin_taxonomy_v1",
+      "recommendation": "Retain as generated artifact; update generator to pull from Basin Taxonomy v1 rather than defining relationships directly."
+    },
+    {
+      "id": "observatory_storyboard",
+      "role_held_by": "observer_storyboard",
+      "recommendation": "Retain as instance definition; do not define new framework capabilities in it."
+    },
+    {
+      "id": "query_observatory",
+      "role_held_by": "observatory_storyboard",
+      "recommendation": "Retain as example artifact; do not promote to Maturity Ladder anchor unless a stable catalog or generation gate is established."
+    }
+  ],
+
+  "freeze_recommendations": [
+    {
+      "id": "closure_basin",
+      "reason": "Characterized/4. Schema defined, artifacts generated per run, panel in Observer Storyboard v1, documented caveats. Observatory's central diagnostic concept. Renaming or redefining would invalidate all existing documentation."
+    },
+    {
+      "id": "trust_model",
+      "reason": "The 0–5 stage vocabulary is referenced by all crosswalk tables, all gallery pages, and all artifact scores. Self-consistent with no known conflicts. Any change propagates to every downstream artifact label."
+    },
+    {
+      "id": "observer_storyboard",
+      "reason": "Schema-backed, renderer-agnostic, instantiated. Panel names locked in Observer Language v1. Adding panels would invalidate existing nine-panel artifacts."
+    }
+  ],
+
+  "experimental_recommendations": [
+    "coverage_basin",
+    "ownership_basin",
+    "cost_basin",
+    "disagreement_basin",
+    "sensitivity_basin",
+    "risk_nodes",
+    "coherence_basin",
+    "adversarial_reviews",
+    "observatory_storyboard",
+    "maturity_ladder",
+    "basin_atlas",
+    "query_observatory"
+  ]
+}
