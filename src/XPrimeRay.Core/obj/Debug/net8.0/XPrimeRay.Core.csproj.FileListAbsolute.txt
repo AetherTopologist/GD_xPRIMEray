@@ -1,0 +1,12 @@
+/home/bb/code/godot_xPRIMEray/src/XPrimeRay.Core/bin/Debug/net8.0/XPrimeRay.Core.deps.json
+/home/bb/code/godot_xPRIMEray/src/XPrimeRay.Core/bin/Debug/net8.0/XPrimeRay.Core.dll
+/home/bb/code/godot_xPRIMEray/src/XPrimeRay.Core/bin/Debug/net8.0/XPrimeRay.Core.pdb
+/home/bb/code/godot_xPRIMEray/src/XPrimeRay.Core/obj/Debug/net8.0/XPrimeRay.Core.GeneratedMSBuildEditorConfig.editorconfig
+/home/bb/code/godot_xPRIMEray/src/XPrimeRay.Core/obj/Debug/net8.0/XPrimeRay.Core.AssemblyInfoInputs.cache
+/home/bb/code/godot_xPRIMEray/src/XPrimeRay.Core/obj/Debug/net8.0/XPrimeRay.Core.AssemblyInfo.cs
+/home/bb/code/godot_xPRIMEray/src/XPrimeRay.Core/obj/Debug/net8.0/XPrimeRay.Core.csproj.CoreCompileInputs.cache
+/home/bb/code/godot_xPRIMEray/src/XPrimeRay.Core/obj/Debug/net8.0/XPrimeRay.Core.sourcelink.json
+/home/bb/code/godot_xPRIMEray/src/XPrimeRay.Core/obj/Debug/net8.0/XPrimeRay.Core.dll
+/home/bb/code/godot_xPRIMEray/src/XPrimeRay.Core/obj/Debug/net8.0/refint/XPrimeRay.Core.dll
+/home/bb/code/godot_xPRIMEray/src/XPrimeRay.Core/obj/Debug/net8.0/XPrimeRay.Core.pdb
+/home/bb/code/godot_xPRIMEray/src/XPrimeRay.Core/obj/Debug/net8.0/ref/XPrimeRay.Core.dll

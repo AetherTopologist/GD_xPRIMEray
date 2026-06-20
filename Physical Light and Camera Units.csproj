@@ -5,4 +5,8 @@
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <RootNamespace>PhysicalLightandCameraUnits</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="src/XPrimeRay.Core/**/*.cs" />
+    <Compile Remove="src/XPrimeRay.Testbench.Cli/**/*.cs" />
+  </ItemGroup>
 </Project>

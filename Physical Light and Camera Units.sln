@@ -2,11 +2,17 @@
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Physical Light and Camera Units", "Physical Light and Camera Units.csproj", "{8C3F0A22-1E86-43F9-AA07-3AB91E4A2929}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{80A1D4DB-B7B8-4AEC-8D5E-C7186D0FC571}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XPrimeRay.Core", "src\XPrimeRay.Core\XPrimeRay.Core.csproj", "{5CCBD102-8E05-4515-881D-F276651F99CE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XPrimeRay.Testbench.Cli", "src\XPrimeRay.Testbench.Cli\XPrimeRay.Testbench.Cli.csproj", "{5D354FA4-1E12-4120-A7D1-7BECF716AF99}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-	Debug|Any CPU = Debug|Any CPU
-	ExportDebug|Any CPU = ExportDebug|Any CPU
-	ExportRelease|Any CPU = ExportRelease|Any CPU
+		Debug|Any CPU = Debug|Any CPU
+		ExportDebug|Any CPU = ExportDebug|Any CPU
+		ExportRelease|Any CPU = ExportRelease|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{8C3F0A22-1E86-43F9-AA07-3AB91E4A2929}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -15,5 +21,21 @@ Global
 		{8C3F0A22-1E86-43F9-AA07-3AB91E4A2929}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
 		{8C3F0A22-1E86-43F9-AA07-3AB91E4A2929}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
 		{8C3F0A22-1E86-43F9-AA07-3AB91E4A2929}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
+		{5CCBD102-8E05-4515-881D-F276651F99CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CCBD102-8E05-4515-881D-F276651F99CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CCBD102-8E05-4515-881D-F276651F99CE}.ExportDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CCBD102-8E05-4515-881D-F276651F99CE}.ExportDebug|Any CPU.Build.0 = Debug|Any CPU
+		{5CCBD102-8E05-4515-881D-F276651F99CE}.ExportRelease|Any CPU.ActiveCfg = Release|Any CPU
+		{5CCBD102-8E05-4515-881D-F276651F99CE}.ExportRelease|Any CPU.Build.0 = Release|Any CPU
+		{5D354FA4-1E12-4120-A7D1-7BECF716AF99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D354FA4-1E12-4120-A7D1-7BECF716AF99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D354FA4-1E12-4120-A7D1-7BECF716AF99}.ExportDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D354FA4-1E12-4120-A7D1-7BECF716AF99}.ExportDebug|Any CPU.Build.0 = Debug|Any CPU
+		{5D354FA4-1E12-4120-A7D1-7BECF716AF99}.ExportRelease|Any CPU.ActiveCfg = Release|Any CPU
+		{5D354FA4-1E12-4120-A7D1-7BECF716AF99}.ExportRelease|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5CCBD102-8E05-4515-881D-F276651F99CE} = {80A1D4DB-B7B8-4AEC-8D5E-C7186D0FC571}
+		{5D354FA4-1E12-4120-A7D1-7BECF716AF99} = {80A1D4DB-B7B8-4AEC-8D5E-C7186D0FC571}
 	EndGlobalSection
 EndGlobal
