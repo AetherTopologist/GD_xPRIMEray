@@ -38,7 +38,7 @@ static int Run(string[] args)
 
 static void PrintHelp()
 {
-    Console.WriteLine("xPRIMEray-Core Testbench v0.1");
+    Console.WriteLine("xPRIMEray-Core Testbench v0.2");
     Console.WriteLine();
     Console.WriteLine("Usage:");
     Console.WriteLine("  dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture <fixture.json>");
@@ -46,11 +46,19 @@ static void PrintHelp()
 
 static void PrintSummary(TransportResult result, ValidationReport report)
 {
-    Console.WriteLine("xPRIMEray-Core Testbench v0.1");
+    Console.WriteLine("xPRIMEray-Core Testbench v0.2");
     Console.WriteLine($"Fixture: {result.FixtureName}");
     Console.WriteLine($"Mode: {result.Mode}");
     Console.WriteLine($"Resolution: {result.Width}x{result.Height}");
     Console.WriteLine($"Rays: {result.Rays}");
+    if (result.Mode == "radial_grin_smoke")
+    {
+        Console.WriteLine($"Steps/Ray: {result.StepsPerRay}");
+        Console.WriteLine($"Field Samples: {result.FieldSampleCount}");
+        Console.WriteLine($"Mean Bend: {result.MeanBendMagnitude:G9}");
+        Console.WriteLine($"Max Bend: {result.MaxBendMagnitude:G9}");
+    }
+
     Console.WriteLine($"Hits: {result.Hits}");
     Console.WriteLine($"Misses: {result.Misses}");
     Console.WriteLine($"Validation: {report.Verdict}");
@@ -59,5 +67,5 @@ static void PrintSummary(TransportResult result, ValidationReport report)
         Console.WriteLine($"Reason: {report.Reason}");
     }
 
-    Console.WriteLine($"Note: {TransportRunner.ArtifactRunnerNote}");
+    Console.WriteLine($"Note: {result.Note}");
 }

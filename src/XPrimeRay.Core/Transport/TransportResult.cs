@@ -12,8 +12,14 @@ public sealed record TransportResult
     public int Hits { get; init; }
     public int Misses { get; init; }
     public int MaxStepsPerRay { get; init; }
+    public int StepsPerRay { get; init; }
+    public int FieldSampleCount { get; init; }
+    public float MeanBendMagnitude { get; init; }
+    public float MaxBendMagnitude { get; init; }
+    public bool HasInvalidValues { get; init; }
+    public string Note { get; init; } = "";
 
-    public static TransportResult FromFixture(FixtureDefinition fixture)
+    public static TransportResult FromArtifactFixture(FixtureDefinition fixture, string note)
     {
         var rays = checked(fixture.RayGrid.Width * fixture.RayGrid.Height);
         return new TransportResult
@@ -26,6 +32,8 @@ public sealed record TransportResult
             Hits = 0,
             Misses = rays,
             MaxStepsPerRay = fixture.Transport.MaxStepsPerRay,
+            StepsPerRay = fixture.Transport.MaxStepsPerRay,
+            Note = note,
         };
     }
 }

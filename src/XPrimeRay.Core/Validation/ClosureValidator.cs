@@ -30,10 +30,27 @@ public static class ClosureValidator
             return Fail("Hermetic closure was required but misses were observed.");
         }
 
+        if (result.FieldSampleCount < fixture.Validation.MinFieldSamples)
+        {
+            return Fail($"Field sample count {result.FieldSampleCount} is below minFieldSamples {fixture.Validation.MinFieldSamples}.");
+        }
+
+        if (result.MeanBendMagnitude < fixture.Validation.MinMeanBend)
+        {
+            return Fail($"Mean bend {result.MeanBendMagnitude:G9} is below minMeanBend {fixture.Validation.MinMeanBend:G9}.");
+        }
+
+        if (result.HasInvalidValues
+            || !float.IsFinite(result.MeanBendMagnitude)
+            || !float.IsFinite(result.MaxBendMagnitude))
+        {
+            return Fail("Transport result contained NaN or infinity values.");
+        }
+
         return new ValidationReport
         {
             Passed = true,
-            Reason = "v0.1 artifact validation passed.",
+            Reason = "Artifact validation passed.",
         };
     }
 
