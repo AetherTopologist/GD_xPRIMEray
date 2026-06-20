@@ -124,6 +124,11 @@ def stage_for_catalog_record(record: dict[str, Any]) -> tuple[str, str]:
             "Observed",
             "Generated artifact exists from real full-coverage run data using final_step_count, terrain map, ladder, storyboard, and observation-only explanation.",
         )
+    if artifact_type == "query_observatory":
+        return (
+            "Observed",
+            "Query Observatory storyboard exists as a presentation artifact with run-scoped aggregate attribution; it is not an architectural concept or per-pixel query map.",
+        )
     if artifact_type == "hermetic_storyboard_v2":
         return (
             "Canonical",

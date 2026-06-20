@@ -17,6 +17,7 @@ TARGETS = {
     "observatory_story_reference.png": "observatory_story_reference",
     "curvature_signature_ladder.png": "curvature_signature_ladder",
     "renderer_storyboard_v1.png": "renderer_storyboard_v1",
+    "query_storyboard_v1.png": "query_observatory",
     "cost_basin_terrain.png": "cost_basin",
     "cost_basin_storyboard.png": "cost_basin",
     "cost_basin_ladder.png": "cost_basin",
@@ -74,6 +75,8 @@ def fixture_for(path: Path, artifact_type: str, summary: dict[str, Any]) -> str:
         return "hermetic_curved_room"
     if artifact_type == "renderer_storyboard_v1":
         return "renderer"
+    if artifact_type == "query_observatory":
+        return "query_observatory"
     if artifact_type == "cost_basin":
         return "renderer / hermetic_curved_room"
     if artifact_type == "observer_storyboard":
@@ -86,7 +89,7 @@ def fixture_for(path: Path, artifact_type: str, summary: dict[str, Any]) -> str:
 def category_for(path: Path, artifact_type: str, fixture: str, summary: dict[str, Any]) -> str:
     if fixture == "hermetic_curved_room" or artifact_type in {"hermetic_storyboard_v2", "curvature_signature_ladder"}:
         return "Canonical"
-    if fixture == "renderer" or artifact_type in {"renderer_storyboard_v1", "observer_storyboard", "observatory_story_reference", "cost_basin"}:
+    if fixture == "renderer" or artifact_type in {"renderer_storyboard_v1", "observer_storyboard", "observatory_story_reference", "query_observatory", "cost_basin"}:
         return "Research"
     if summary.get("study") == "curvature_fps_benchmark":
         return "Canonical"
@@ -119,6 +122,8 @@ def coverage_for(artifact_type: str, summary: dict[str, Any]) -> str:
         return status_from_bool(full)
     if artifact_type in {"hermetic_storyboard_v2", "renderer_storyboard_v1", "cost_basin"}:
         return "PASS"
+    if artifact_type == "query_observatory":
+        return "MISSING"
     if artifact_type == "observer_storyboard":
         return "PARTIAL"
     return "MISSING"
@@ -133,13 +138,15 @@ def closure_for(artifact_type: str, summary: dict[str, Any]) -> str:
         return "PASS"
     if artifact_type == "cost_basin":
         return "PASS"
+    if artifact_type == "query_observatory":
+        return "MISSING"
     if artifact_type == "observer_storyboard":
         return "PARTIAL"
     return "MISSING"
 
 
 def verdict_for(coverage: str, closure: str, artifact_type: str) -> str:
-    if artifact_type == "cost_basin":
+    if artifact_type in {"cost_basin", "query_observatory"}:
         return "OBSERVED"
     if coverage == "PASS" and closure == "PASS":
         return "PASS"

@@ -126,6 +126,22 @@
       "metadata": {
         "source_path": "reports/observatory_catalog.json"
       },
+      "source": "artifact:query_observatory",
+      "target": "citation:artifact_catalog",
+      "type": "DERIVED_FROM"
+    },
+    {
+      "metadata": {
+        "source_path": "reports/query_storyboard_v1.png"
+      },
+      "source": "artifact:query_observatory",
+      "target": "citation:source_path",
+      "type": "REFERENCES"
+    },
+    {
+      "metadata": {
+        "source_path": "reports/observatory_catalog.json"
+      },
       "source": "artifact:renderer_storyboard_v1",
       "target": "citation:artifact_catalog",
       "type": "DERIVED_FROM"
@@ -141,6 +157,11 @@
     {
       "source": "artifact:renderer_storyboard_v1",
       "target": "storyboard:renderer_storyboard_v1",
+      "type": "USES"
+    },
+    {
+      "source": "docs_page:basin_atlas",
+      "target": "citation:docs_page",
       "type": "USES"
     },
     {
@@ -218,6 +239,18 @@
       "type": "GENERATES"
     },
     {
+      "metadata": {
+        "closure": "PASS",
+        "coverage": "PASS",
+        "run_id": "20260607T221311Z",
+        "source_path": "output/curvature_fps_benchmark/20260607T221311Z/cells/curvature_000/row/query_storyboard_v1.png",
+        "verdict": "OBSERVED"
+      },
+      "source": "fixture:hermetic_curved_room",
+      "target": "artifact:query_observatory",
+      "type": "GENERATES"
+    },
+    {
       "source": "fixture:hermetic_curved_room",
       "target": "term:curvature_signature",
       "type": "GENERATES"
@@ -244,6 +277,18 @@
       },
       "source": "fixture:observer_storyboard_framework",
       "target": "artifact:observer_storyboard",
+      "type": "GENERATES"
+    },
+    {
+      "metadata": {
+        "closure": "MISSING",
+        "coverage": "MISSING",
+        "run_id": "published",
+        "source_path": "reports/query_storyboard_v1.png",
+        "verdict": "OBSERVED"
+      },
+      "source": "fixture:query_observatory",
+      "target": "artifact:query_observatory",
       "type": "GENERATES"
     },
     {
@@ -507,6 +552,14 @@
     },
     {
       "metadata": {
+        "source_path": "Docs/Observatory_Gallery/basin_atlas.md"
+      },
+      "source": "term:cost_basin",
+      "target": "docs_page:basin_atlas",
+      "type": "DERIVED_FROM"
+    },
+    {
+      "metadata": {
         "source_path": "Docs/Observatory_Gallery/observatory_maturity_ladder.md"
       },
       "source": "term:cost_basin",
@@ -527,6 +580,14 @@
       "source": "term:cost_basin_delta",
       "target": "term:cost_basin",
       "type": "EXPLAINS"
+    },
+    {
+      "metadata": {
+        "source_path": "Docs/Observatory_Gallery/basin_atlas.md"
+      },
+      "source": "term:coverage",
+      "target": "docs_page:basin_atlas",
+      "type": "DERIVED_FROM"
     },
     {
       "metadata": {
@@ -768,6 +829,14 @@
     },
     {
       "metadata": {
+        "source_path": "Docs/Observatory_Gallery/basin_atlas.md"
+      },
+      "source": "term:oracle",
+      "target": "docs_page:basin_atlas",
+      "type": "DERIVED_FROM"
+    },
+    {
+      "metadata": {
         "source_path": "Docs/Observatory_Gallery/canonical_fixtures.md"
       },
       "source": "term:oracle",
@@ -1002,7 +1071,7 @@
       "type": "DERIVED_FROM"
     }
   ],
-  "generated_at": "2026-06-19T02:58:36Z",
+  "generated_at": "2026-06-19T21:29:03Z",
   "generated_from": {
     "catalog": "reports/observatory_catalog.json",
     "gallery": "Docs/Observatory_Gallery",
@@ -1167,9 +1236,27 @@
       "id": "artifact:query_observatory",
       "label": "Query Observatory",
       "metadata": {
+        "run_ids": [
+          "20260607T221311Z",
+          "published"
+        ],
         "source_paths": [
+          "output/curvature_fps_benchmark/20260607T221311Z/cells/curvature_000/row/query_storyboard_v1.png",
           "reports/query_storyboard_v1.png"
-        ]
+        ],
+        "status_summary": {
+          "closure": [
+            "MISSING",
+            "PASS"
+          ],
+          "coverage": [
+            "MISSING",
+            "PASS"
+          ],
+          "verdict": [
+            "OBSERVED"
+          ]
+        }
       },
       "type": "Artifact"
     },
@@ -1235,6 +1322,15 @@
     {
       "id": "citation:storyboard_spec",
       "label": "Storyboard Specification",
+      "type": "Citation Type"
+    },
+    {
+      "id": "docs_page:basin_atlas",
+      "label": "Basin Atlas",
+      "metadata": {
+        "citation_kind": "docs_page",
+        "source_path": "Docs/Observatory_Gallery/basin_atlas.md"
+      },
       "type": "Citation Type"
     },
     {
@@ -1380,6 +1476,14 @@
       "label": "Oracle Closure",
       "metadata": {
         "category": "Canonical"
+      },
+      "type": "Fixture"
+    },
+    {
+      "id": "fixture:query_observatory",
+      "label": "Query Observatory",
+      "metadata": {
+        "category": "Research"
       },
       "type": "Fixture"
     },

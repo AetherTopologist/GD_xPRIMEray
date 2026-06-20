@@ -1,0 +1,240 @@
+[gd_scene load_steps=15 format=3]
+
+; Fixture: GRIN wormhole transport demo
+; Purpose: Morris-Thorne-inspired optical transport demo.
+; Negative-amp FieldSource3D (throat) + positive-amp orb ring compose
+; an effective n(r) saddle profile. Rays from the source region bend through
+; the throat and teleport via WormholePortal to the destination room.
+; Controller: WormholeTransportDemoController
+; Orb ring instantiated at runtime; only ThroatFieldSource3D is pre-placed.
+
+[ext_resource type="Script" path="res://Fixtures/WormholeTransportDemoController.cs" id="1_ctrl"]
+[ext_resource type="Script" path="res://Wormhole/WormholePortal.cs" id="2_portal"]
+[ext_resource type="Script" path="res://BoundaryLayerVolume.cs" id="3_boundary"]
+[ext_resource type="Script" path="res://FieldSource3D.cs" id="4_field"]
+[ext_resource type="Script" path="res://RayBeamRenderer.cs" id="5_rbr"]
+[ext_resource type="Script" path="res://Fixtures/WormholeTransportHUD.cs" id="6_hud"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_portal"]
+radius = 1.35
+height = 2.7
+radial_segments = 48
+rings = 24
+
+[sub_resource type="SphereMesh" id="SphereMesh_source_marker"]
+radius = 0.4
+height = 0.8
+
+[sub_resource type="BoxMesh" id="BoxMesh_back_wall"]
+size = Vector3(80, 80, 0.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_back_wall"]
+size = Vector3(80, 80, 0.2)
+
+[sub_resource type="StandardMaterial3D" id="Mat_portal_a"]
+albedo_color = Color(0.24, 0.9, 0.84, 0.28)
+transparency = 1
+emission_enabled = true
+emission = Color(0.06, 0.28, 0.24, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_portal_b"]
+albedo_color = Color(0.98, 0.62, 0.3, 0.28)
+transparency = 1
+emission_enabled = true
+emission = Color(0.28, 0.11, 0.05, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_source_region"]
+albedo_color = Color(0.62, 0.36, 0.12, 1)
+emission_enabled = true
+emission = Color(0.08, 0.04, 0.01, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_dest_region"]
+albedo_color = Color(0.12, 0.28, 0.56, 1)
+emission_enabled = true
+emission = Color(0.01, 0.04, 0.10, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_source_marker"]
+albedo_color = Color(1.0, 0.85, 0.5, 1)
+emission_enabled = true
+emission = Color(0.6, 0.35, 0.08, 1)
+
+; ============================================================
+; Root: WormholeTransportDemoController
+; ============================================================
+[node name="FixtureWormholeTransportDemo" type="Node3D"]
+script = ExtResource("1_ctrl")
+
+; Camera for standard Godot viewport (GrinFilmCamera is in test harness)
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.97237, 0.23345, 0, -0.23345, 0.97237, 0, 2.0, 5.5)
+current = true
+fov = 62.0
+near = 0.01
+far = 120.0
+
+; RayBeamRenderer — controller configures it at runtime
+[node name="RayBeamRenderer" type="Node3D" parent="."]
+visible = false
+script = ExtResource("5_rbr")
+CameraPath = NodePath("../Camera3D")
+StepsPerRay = 400
+StepLength = 0.05
+MinStepLength = 0.005
+MaxStepLength = 0.15
+UseIntegratedField = true
+BendScale = 1.0
+FieldStrength = 1.0
+StopOnHit = true
+TerminateTrailOnHit = true
+RequireHitToRender = false
+UpdateEveryFrame = false
+
+; Throat field: negative-amp divergent core (controller overrides params at runtime)
+[node name="ThroatFieldSource3D" type="Node3D" parent="."]
+script = ExtResource("4_field")
+Enabled = true
+ROuter = 3.0
+Amp = -0.8
+CanonicalGamma = 1.5
+CanonicalOverrideBetaScale = true
+CanonicalBetaScale = 1.0
+CanonicalEnableInnerRadius = true
+RInner = 0.22
+DebugVizEnabled = false
+
+; Orb ring group — controller populates with FieldSource3D children at runtime
+[node name="OrbGroup" type="Node3D" parent="."]
+
+; ============================================================
+; Source region (camera side, z < 0)
+; ============================================================
+[node name="SourceRegion" type="Node3D" parent="."]
+
+[node name="BackWall" type="StaticBody3D" parent="SourceRegion" groups=["fixture_background", "fixture_geometry", "raytrace_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -22)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="SourceRegion/BackWall"]
+material_override = SubResource("Mat_source_region")
+mesh = SubResource("BoxMesh_back_wall")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SourceRegion/BackWall"]
+shape = SubResource("BoxShape3D_back_wall")
+
+; Source cluster marker: glowing orb at z=-10 representing the "aircraft / source"
+[node name="SourceMarker" type="MeshInstance3D" parent="SourceRegion" groups=["fixture_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -10)
+material_override = SubResource("Mat_source_marker")
+mesh = SubResource("SphereMesh_source_marker")
+
+; ============================================================
+; PortalA — wormhole throat mouth (source side, z=0)
+; ============================================================
+[node name="PortalA" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+script = ExtResource("2_portal")
+LinkedPortalPath = NodePath("../PortalB")
+WormholeId = "wt_source_mouth"
+LinkedWormholeId = "wt_dest_mouth"
+ParentRegionId = "wt_source"
+ChildRegionId = "wt_dest"
+ThroatRadius = 1.35
+EnablePhaseLockedRemap = true
+EnableThroatDiagnostics = false
+Radius = 1.35
+ExitOffset = 0.45
+ZoneMinZ = -2.5
+ZoneMaxZ = 2.5
+
+[node name="PortalShellVisual" type="MeshInstance3D" parent="PortalA"]
+material_override = SubResource("Mat_portal_a")
+mesh = SubResource("SphereMesh_portal")
+
+[node name="BoundaryShell" type="Node3D" parent="PortalA"]
+script = ExtResource("3_boundary")
+ExecutionMode = 1
+Behavior = 1
+Radius = 1.35
+LinkedBoundaryPath = NodePath("../../PortalB/BoundaryShell")
+SceneTransformExitOffset = 0.45
+
+[node name="FieldSource3D" type="Node3D" parent="PortalA"]
+script = ExtResource("4_field")
+Enabled = false
+ROuter = 2.0
+Strength = 0.0
+
+; ============================================================
+; PortalB — wormhole throat mouth (destination side, offset world)
+; At (20, 0, 0) offset so RoomB geometry doesn't overlap RoomA
+; ============================================================
+[node name="PortalB" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 0)
+script = ExtResource("2_portal")
+LinkedPortalPath = NodePath("../PortalA")
+WormholeId = "wt_dest_mouth"
+LinkedWormholeId = "wt_source_mouth"
+ParentRegionId = "wt_dest"
+ChildRegionId = "wt_source"
+ThroatRadius = 1.35
+EnablePhaseLockedRemap = true
+EnableThroatDiagnostics = false
+Radius = 1.35
+ExitOffset = 0.45
+ZoneMinZ = -2.5
+ZoneMaxZ = 2.5
+
+[node name="PortalShellVisual" type="MeshInstance3D" parent="PortalB"]
+material_override = SubResource("Mat_portal_b")
+mesh = SubResource("SphereMesh_portal")
+
+[node name="BoundaryShell" type="Node3D" parent="PortalB"]
+script = ExtResource("3_boundary")
+ExecutionMode = 1
+Behavior = 1
+Radius = 1.35
+LinkedBoundaryPath = NodePath("../../PortalA/BoundaryShell")
+SceneTransformExitOffset = 0.45
+
+[node name="FieldSource3D" type="Node3D" parent="PortalB"]
+script = ExtResource("4_field")
+Enabled = false
+ROuter = 2.0
+Strength = 0.0
+
+; ============================================================
+; Destination region (RoomB, offset at x=20)
+; ============================================================
+[node name="DestinationRegion" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 0)
+
+[node name="BackWall" type="StaticBody3D" parent="DestinationRegion" groups=["fixture_background", "fixture_geometry", "raytrace_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -15)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="DestinationRegion/BackWall"]
+material_override = SubResource("Mat_dest_region")
+mesh = SubResource("BoxMesh_back_wall")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="DestinationRegion/BackWall"]
+shape = SubResource("BoxShape3D_back_wall")
+
+; Arrival marker: cool-blue sphere at the destination
+[node name="DestinationMarker" type="MeshInstance3D" parent="DestinationRegion" groups=["fixture_geometry"]]
+material_override = SubResource("Mat_dest_region")
+mesh = SubResource("SphereMesh_source_marker")
+
+; ============================================================
+; Ambient lighting
+; ============================================================
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.25, 0.433013, 0, 0.866025, 0.5, -0.5, -0.433013, 0.75, 0, 8, 0)
+light_energy = 0.6
+shadow_enabled = true
+
+; ============================================================
+; HUD — researcher quotes, cycles automatically
+; ============================================================
+[node name="WormholeTransportHUD" type="CanvasLayer" parent="."]
+script = ExtResource("6_hud")
+SecondsPerQuote = 5.0
+FadeDuration = 0.8
+AutoCycle = true

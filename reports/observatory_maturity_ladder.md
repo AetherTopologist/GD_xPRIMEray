@@ -44,6 +44,8 @@ The Observatory now tracks not only what exists, but how strongly each artifact 
 | `hermetic_curved_room` | `curvature_signature_ladder` | `20260607T152708Z` | Observed | 2 | MISSING | PASS | MISSING | `output/curvature_fps_benchmark/20260607T152708Z/curvature_signature_ladder.png` |
 | `hermetic_curved_room` | `curvature_signature_ladder` | `published` | Observed | 2 | MISSING | PASS | MISSING | `reports/curvature_signature_ladder.png` |
 | `hermetic_curved_room` | `curvature_signature_ladder` | `published` | Observed | 2 | MISSING | PASS | MISSING | `reports/weekend_fps_curvature_sweep_assets/curvature_signature_ladder.png` |
+| `hermetic_curved_room` | `query_observatory` | `20260607T221311Z` | Observed | 2 | PASS | PASS | OBSERVED | `output/curvature_fps_benchmark/20260607T221311Z/cells/curvature_000/row/query_storyboard_v1.png` |
+| `query_observatory` | `query_observatory` | `published` | Observed | 2 | MISSING | MISSING | OBSERVED | `reports/query_storyboard_v1.png` |
 | `renderer / hermetic_curved_room` | `cost_basin` | `published` | Observed | 2 | PASS | PASS | OBSERVED | `reports/cost_basin_artifact_v1.md` |
 | `renderer / hermetic_curved_room` | `cost_basin` | `published` | Observed | 2 | PASS | PASS | OBSERVED | `reports/cost_basin_ladder.png` |
 | `renderer / hermetic_curved_room` | `cost_basin` | `published` | Observed | 2 | PASS | PASS | OBSERVED | `reports/cost_basin_storyboard.png` |
