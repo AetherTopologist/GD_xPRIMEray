@@ -1,0 +1,1123 @@
+{
+  "schema": "xprimeray.glowing_heart.godot_fixture_candidates.v0.9",
+  "generatedUtc": "2026-06-21T23:04:00Z",
+  "source": "static_repo_scan",
+  "parityClaim": "NONE",
+  "runtimeExecuted": false,
+  "candidateCount": 64,
+  "candidates": [
+    {
+      "name": "fixture_atomic_orbital_grin_room",
+      "path": "Fixtures/fixture_atomic_orbital_grin_room.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "hermetic",
+        "atomic",
+        "closure"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "grin",
+      "closure_hint": "likely",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_blackhole_minimal",
+      "path": "Fixtures/fixture_blackhole_minimal.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "blackhole"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "blackhole",
+      "closure_hint": "unknown",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_blackhole_minimal_grin",
+      "path": "Fixtures/fixture_blackhole_minimal_grin.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "blackhole"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "blackhole",
+      "closure_hint": "unknown",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_blackhole_minimal_metric",
+      "path": "Fixtures/fixture_blackhole_minimal_metric.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "blackhole",
+        "metric"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "blackhole",
+      "closure_hint": "unknown",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_boundary_nested_shell_modes",
+      "path": "Fixtures/fixture_boundary_nested_shell_modes.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "boundary",
+        "atomic",
+        "visual",
+        "sequence"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "boundary",
+      "closure_hint": "possible",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_boundary_shell_entry_basic",
+      "path": "Fixtures/fixture_boundary_shell_entry_basic.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "boundary",
+        "visual"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "boundary",
+      "closure_hint": "possible",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_boundary_shell_policy_compare",
+      "path": "Fixtures/fixture_boundary_shell_policy_compare.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "boundary",
+        "visual"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "boundary",
+      "closure_hint": "possible",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_curved_minimal",
+      "path": "Fixtures/fixture_curved_minimal.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "curved"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "unknown",
+      "closure_hint": "possible",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_curved_minimal_backdrop",
+      "path": "Fixtures/fixture_curved_minimal_backdrop.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "curved"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "unknown",
+      "closure_hint": "possible",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_einstein_ring_minimal",
+      "path": "Fixtures/fixture_einstein_ring_minimal.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "blackhole",
+        "einstein"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "blackhole",
+      "closure_hint": "unknown",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_einstein_ring_minimal_grin",
+      "path": "Fixtures/fixture_einstein_ring_minimal_grin.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "blackhole",
+        "einstein"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "blackhole",
+      "closure_hint": "unknown",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_einstein_ring_minimal_metric",
+      "path": "Fixtures/fixture_einstein_ring_minimal_metric.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "blackhole",
+        "einstein",
+        "metric"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "blackhole",
+      "closure_hint": "unknown",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_hermetic_curved_room",
+      "path": "Fixtures/fixture_hermetic_curved_room.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "hermetic",
+        "curved",
+        "closure"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "unknown",
+      "closure_hint": "likely",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_hermetic_observatory_grin",
+      "path": "Fixtures/fixture_hermetic_observatory_grin.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "hermetic",
+        "curved",
+        "observatory"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "grin",
+      "closure_hint": "likely",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_hermetic_observatory_straight",
+      "path": "Fixtures/fixture_hermetic_observatory_straight.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "hermetic",
+        "observatory"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "grin",
+      "closure_hint": "likely",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_overspace_hermetic_room",
+      "path": "Fixtures/fixture_overspace_hermetic_room.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "hermetic",
+        "boundary",
+        "wormhole",
+        "portal",
+        "visual"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "wormhole",
+      "closure_hint": "likely",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_overspace_hermetic_room_field_variant",
+      "path": "Fixtures/fixture_overspace_hermetic_room_field_variant.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "hermetic",
+        "boundary",
+        "wormhole",
+        "portal",
+        "visual"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "wormhole",
+      "closure_hint": "likely",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_overspace_hermetic_room_topology_variant",
+      "path": "Fixtures/fixture_overspace_hermetic_room_topology_variant.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "hermetic",
+        "boundary",
+        "wormhole",
+        "portal",
+        "visual"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "wormhole",
+      "closure_hint": "likely",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_overspace_wormhole_witness_exit_room",
+      "path": "Fixtures/fixture_overspace_wormhole_witness_exit_room.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "hermetic",
+        "boundary",
+        "wormhole",
+        "portal",
+        "visual"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "wormhole",
+      "closure_hint": "likely",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_overspace_wormhole_witness_mouth_room",
+      "path": "Fixtures/fixture_overspace_wormhole_witness_mouth_room.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "hermetic",
+        "boundary",
+        "wormhole",
+        "portal",
+        "visual"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "wormhole",
+      "closure_hint": "likely",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_overspace_wormhole_witness_room",
+      "path": "Fixtures/fixture_overspace_wormhole_witness_room.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "hermetic",
+        "boundary",
+        "wormhole",
+        "portal",
+        "visual"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "wormhole",
+      "closure_hint": "likely",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_overspace_wormhole_witness_throat_room",
+      "path": "Fixtures/fixture_overspace_wormhole_witness_throat_room.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "hermetic",
+        "boundary",
+        "wormhole",
+        "portal",
+        "visual"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "wormhole",
+      "closure_hint": "likely",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_wormhole_transport_demo",
+      "path": "Fixtures/fixture_wormhole_transport_demo.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "boundary",
+        "wormhole",
+        "portal",
+        "demo",
+        "visual"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "wormhole",
+      "closure_hint": "possible",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "BoundaryLayerFixtures",
+      "path": "Docs/BoundaryLayerFixtures.md",
+      "source_type": "md",
+      "detected_tags": [
+        "fixture",
+        "boundary",
+        "atomic",
+        "visual",
+        "sequence"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "boundary",
+      "closure_hint": "possible",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "canonical_fixtures",
+      "path": "Docs/Observatory_Gallery/canonical_fixtures.md",
+      "source_type": "md",
+      "detected_tags": [
+        "fixture",
+        "hermetic",
+        "curved",
+        "observatory",
+        "closure",
+        "metric",
+        "visual"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "metric",
+      "closure_hint": "likely",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "research_fixtures",
+      "path": "Docs/Observatory_Gallery/research_fixtures.md",
+      "source_type": "md",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "hermetic",
+        "curved",
+        "boundary",
+        "wormhole",
+        "observatory",
+        "atomic",
+        "portal",
+        "metric",
+        "visual",
+        "sequence"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "wormhole",
+      "closure_hint": "likely",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "atomic_orbital_grin_room_fixture",
+      "path": "Docs/Research/atomic_orbital_grin_room_fixture.md",
+      "source_type": "md",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "hermetic",
+        "curved",
+        "atomic",
+        "closure"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "grin",
+      "closure_hint": "likely",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "atomic_orbital_visual_observatory_fixture",
+      "path": "Docs/Research/atomic_orbital_visual_observatory_fixture.md",
+      "source_type": "md",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "observatory",
+        "atomic",
+        "closure",
+        "metric",
+        "visual"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "metric",
+      "closure_hint": "likely",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "curved_minimal_backdrop_fixture",
+      "path": "Docs/Research/curved_minimal_backdrop_fixture.md",
+      "source_type": "md",
+      "detected_tags": [
+        "fixture",
+        "curved"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "unknown",
+      "closure_hint": "possible",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_001_radial_grin_baseline",
+      "path": "Docs/Research/fixture_001_radial_grin_baseline.md",
+      "source_type": "md",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "curved",
+        "metric",
+        "visual"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "metric",
+      "closure_hint": "possible",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "grin_fixture_auto_calibration_phase_plan",
+      "path": "Docs/Research/grin_fixture_auto_calibration_phase_plan.md",
+      "source_type": "md",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "curved",
+        "wormhole",
+        "metric"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "wormhole",
+      "closure_hint": "possible",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "domain_resolver_stress_fixture",
+      "path": "Docs/validation/domain_resolver_stress_fixture.md",
+      "source_type": "md",
+      "detected_tags": [
+        "fixture",
+        "curved",
+        "blackhole",
+        "einstein",
+        "boundary",
+        "metric",
+        "visual"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "boundary",
+      "closure_hint": "possible",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "hermetic_fixture_rule",
+      "path": "Docs/validation/hermetic_fixture_rule.md",
+      "source_type": "md",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "hermetic",
+        "boundary",
+        "portal",
+        "demo"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "boundary",
+      "closure_hint": "likely",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "observatory_fixture_index",
+      "path": "reports/observatory_fixture_index.md",
+      "source_type": "md",
+      "detected_tags": [
+        "fixture",
+        "hermetic",
+        "curved",
+        "observatory",
+        "closure",
+        "visual"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "unknown",
+      "closure_hint": "likely",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_observatory_report",
+      "path": "reports/observatory_fixtures/curved_minimal/fixture_observatory_report.md",
+      "source_type": "md",
+      "detected_tags": [
+        "fixture",
+        "curved",
+        "observatory",
+        "metric",
+        "visual"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "metric",
+      "closure_hint": "possible",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_observatory_report",
+      "path": "reports/observatory_fixtures/hermetic_curved_room/fixture_observatory_report.md",
+      "source_type": "md",
+      "detected_tags": [
+        "fixture",
+        "hermetic",
+        "curved",
+        "observatory",
+        "closure",
+        "metric",
+        "visual"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "metric",
+      "closure_hint": "likely",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_observatory_report",
+      "path": "reports/observatory_fixtures/oracle_closure/fixture_observatory_report.md",
+      "source_type": "md",
+      "detected_tags": [
+        "fixture",
+        "curved",
+        "observatory",
+        "closure",
+        "visual"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "unknown",
+      "closure_hint": "likely",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "summary",
+      "path": "reports/observatory_fixtures/curved_minimal/summary.json",
+      "source_type": "json",
+      "detected_tags": [
+        "fixture",
+        "curved",
+        "observatory",
+        "metric",
+        "visual"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "metric",
+      "closure_hint": "possible",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "summary",
+      "path": "reports/observatory_fixtures/hermetic_curved_room/summary.json",
+      "source_type": "json",
+      "detected_tags": [
+        "fixture",
+        "hermetic",
+        "curved",
+        "observatory",
+        "closure",
+        "metric",
+        "visual"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "metric",
+      "closure_hint": "likely",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "summary",
+      "path": "reports/observatory_fixtures/oracle_closure/summary.json",
+      "source_type": "json",
+      "detected_tags": [
+        "fixture",
+        "curved",
+        "observatory",
+        "closure",
+        "metric",
+        "visual"
+      ],
+      "likely_category": "READY_CANDIDATE",
+      "transport_hint": "metric",
+      "closure_hint": "likely",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_domain_resolver_stress",
+      "path": "Fixtures/fixture_domain_resolver_stress.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture"
+      ],
+      "likely_category": "NEEDS_REVIEW",
+      "transport_hint": "unknown",
+      "closure_hint": "unknown",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "offaxis_observe_targets",
+      "path": "Fixtures/offaxis_observe_targets.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture"
+      ],
+      "likely_category": "NEEDS_REVIEW",
+      "transport_hint": "unknown",
+      "closure_hint": "unknown",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_note_pattern",
+      "path": "Docs/Research/fixture_note_pattern.md",
+      "source_type": "md",
+      "detected_tags": [
+        "fixture",
+        "metric"
+      ],
+      "likely_category": "NEEDS_REVIEW",
+      "transport_hint": "metric",
+      "closure_hint": "unknown",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_atomic_orbital_visual_observatory",
+      "path": "Fixtures/fixture_atomic_orbital_visual_observatory.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "observatory",
+        "atomic",
+        "visual"
+      ],
+      "likely_category": "EXPERIMENTAL",
+      "transport_hint": "grin",
+      "closure_hint": "unlikely",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_grin_basic_visual",
+      "path": "Fixtures/fixture_grin_basic_visual.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "visual"
+      ],
+      "likely_category": "EXPERIMENTAL",
+      "transport_hint": "grin",
+      "closure_hint": "unlikely",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_grin_basic_visual_linear",
+      "path": "Fixtures/fixture_grin_basic_visual_linear.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "visual"
+      ],
+      "likely_category": "EXPERIMENTAL",
+      "transport_hint": "grin",
+      "closure_hint": "unlikely",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_grin_basic_visual_linear_dual_attractor",
+      "path": "Fixtures/fixture_grin_basic_visual_linear_dual_attractor.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "visual"
+      ],
+      "likely_category": "EXPERIMENTAL",
+      "transport_hint": "grin",
+      "closure_hint": "unlikely",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_grin_basic_visual_linear_offset",
+      "path": "Fixtures/fixture_grin_basic_visual_linear_offset.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "visual"
+      ],
+      "likely_category": "EXPERIMENTAL",
+      "transport_hint": "grin",
+      "closure_hint": "unlikely",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_grin_basic_visual_offaxis",
+      "path": "Fixtures/fixture_grin_basic_visual_offaxis.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "visual"
+      ],
+      "likely_category": "EXPERIMENTAL",
+      "transport_hint": "grin",
+      "closure_hint": "unlikely",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_grin_basic_visual_offaxis_observe",
+      "path": "Fixtures/fixture_grin_basic_visual_offaxis_observe.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "visual"
+      ],
+      "likely_category": "EXPERIMENTAL",
+      "transport_hint": "grin",
+      "closure_hint": "unlikely",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_grin_basic_visual_straight",
+      "path": "Fixtures/fixture_grin_basic_visual_straight.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "visual"
+      ],
+      "likely_category": "EXPERIMENTAL",
+      "transport_hint": "grin",
+      "closure_hint": "unlikely",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_grin_basic_visual_straight_offaxis",
+      "path": "Fixtures/fixture_grin_basic_visual_straight_offaxis.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "visual"
+      ],
+      "likely_category": "EXPERIMENTAL",
+      "transport_hint": "grin",
+      "closure_hint": "unlikely",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_grin_basic_visual_straight_offaxis_observe",
+      "path": "Fixtures/fixture_grin_basic_visual_straight_offaxis_observe.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "visual"
+      ],
+      "likely_category": "EXPERIMENTAL",
+      "transport_hint": "grin",
+      "closure_hint": "unlikely",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_metric_basic_visual",
+      "path": "Fixtures/fixture_metric_basic_visual.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "metric",
+        "visual"
+      ],
+      "likely_category": "EXPERIMENTAL",
+      "transport_hint": "metric",
+      "closure_hint": "unlikely",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_metric_basic_visual_offaxis",
+      "path": "Fixtures/fixture_metric_basic_visual_offaxis.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "metric",
+        "visual"
+      ],
+      "likely_category": "EXPERIMENTAL",
+      "transport_hint": "metric",
+      "closure_hint": "unlikely",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_metric_basic_visual_offaxis_observe",
+      "path": "Fixtures/fixture_metric_basic_visual_offaxis_observe.tscn",
+      "source_type": "tscn",
+      "detected_tags": [
+        "fixture",
+        "metric",
+        "visual"
+      ],
+      "likely_category": "EXPERIMENTAL",
+      "transport_hint": "metric",
+      "closure_hint": "unlikely",
+      "godot_runtime_required": true,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_002_linear_transport_baseline",
+      "path": "Docs/Research/fixture_002_linear_transport_baseline.md",
+      "source_type": "md",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "metric",
+        "visual"
+      ],
+      "likely_category": "EXPERIMENTAL",
+      "transport_hint": "metric",
+      "closure_hint": "unlikely",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_003_offset_field_baseline",
+      "path": "Docs/Research/fixture_003_offset_field_baseline.md",
+      "source_type": "md",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "metric",
+        "visual",
+        "sequence"
+      ],
+      "likely_category": "EXPERIMENTAL",
+      "transport_hint": "metric",
+      "closure_hint": "unlikely",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_004_dual_attractor_baseline",
+      "path": "Docs/Research/fixture_004_dual_attractor_baseline.md",
+      "source_type": "md",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "metric",
+        "visual"
+      ],
+      "likely_category": "EXPERIMENTAL",
+      "transport_hint": "metric",
+      "closure_hint": "unlikely",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "multi_object_causal_stress_fixture",
+      "path": "Docs/Research/multi_object_causal_stress_fixture.md",
+      "source_type": "md",
+      "detected_tags": [
+        "fixture",
+        "grin",
+        "atomic",
+        "metric"
+      ],
+      "likely_category": "EXPERIMENTAL",
+      "transport_hint": "metric",
+      "closure_hint": "unknown",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_observatory_report",
+      "path": "reports/observatory_fixtures/cathedral_probe/fixture_observatory_report.md",
+      "source_type": "md",
+      "detected_tags": [
+        "fixture",
+        "observatory",
+        "visual"
+      ],
+      "likely_category": "EXPERIMENTAL",
+      "transport_hint": "unknown",
+      "closure_hint": "unlikely",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "fixture_observatory_report",
+      "path": "reports/observatory_fixtures/object_island/fixture_observatory_report.md",
+      "source_type": "md",
+      "detected_tags": [
+        "fixture",
+        "observatory",
+        "metric",
+        "visual"
+      ],
+      "likely_category": "EXPERIMENTAL",
+      "transport_hint": "metric",
+      "closure_hint": "unlikely",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "summary",
+      "path": "reports/observatory_fixtures/cathedral_probe/summary.json",
+      "source_type": "json",
+      "detected_tags": [
+        "fixture",
+        "observatory",
+        "metric",
+        "visual"
+      ],
+      "likely_category": "EXPERIMENTAL",
+      "transport_hint": "metric",
+      "closure_hint": "unlikely",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    },
+    {
+      "name": "summary",
+      "path": "reports/observatory_fixtures/object_island/summary.json",
+      "source_type": "json",
+      "detected_tags": [
+        "fixture",
+        "observatory",
+        "metric",
+        "visual"
+      ],
+      "likely_category": "EXPERIMENTAL",
+      "transport_hint": "metric",
+      "closure_hint": "unlikely",
+      "godot_runtime_required": false,
+      "parity_claim": "NONE",
+      "notes": "Best-effort static metadata only; scene not executed."
+    }
+  ]
+}
