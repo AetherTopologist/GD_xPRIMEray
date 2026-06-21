@@ -32,6 +32,7 @@ static int Run(string[] args)
         {
             var outputPath = WriteArtifacts(options, result, report);
             Console.WriteLine($"Artifacts: {NormalizePath(outputPath)}");
+            Console.WriteLine($"Snapshot: {NormalizePath(Path.Combine(outputPath, "snapshot.ppm"))}");
         }
 
         return report.Passed ? 0 : 2;
@@ -169,6 +170,9 @@ static string WriteArtifacts(RunOptions options, TransportResult result, Validat
     CsvReportWriter.Write(outputDirectory, result, report);
     MarkdownSummaryWriter.Write(outputDirectory, result, report);
     ObservatoryEntryWriter.Write(outputDirectory, manifest);
+    PpmSnapshotWriter.Write(outputDirectory, result);
+    HeatmapCsvWriter.Write(outputDirectory, result);
+    AsciiSnapshotWriter.Write(outputDirectory, result);
     return outputDirectory;
 }
 

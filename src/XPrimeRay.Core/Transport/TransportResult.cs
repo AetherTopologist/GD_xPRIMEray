@@ -18,6 +18,7 @@ public sealed record TransportResult
     public float MaxBendMagnitude { get; init; }
     public bool HasInvalidValues { get; init; }
     public string Note { get; init; } = "";
+    public IReadOnlyList<RayMetric> RayMetrics { get; init; } = Array.Empty<RayMetric>();
 
     public static TransportResult FromArtifactFixture(FixtureDefinition fixture, string note)
     {
@@ -34,6 +35,7 @@ public sealed record TransportResult
             MaxStepsPerRay = fixture.Transport.MaxStepsPerRay,
             StepsPerRay = fixture.Transport.MaxStepsPerRay,
             Note = note,
+            RayMetrics = Array.Empty<RayMetric>(),
         };
     }
 }

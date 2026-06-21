@@ -46,6 +46,7 @@ public sealed class TransportRunner
         var bendSum = 0.0;
         var maxBend = 0f;
         var hasInvalidValues = false;
+        var rayMetrics = new List<RayMetric>(rays);
 
         for (var y = 0; y < height; y++)
         {
@@ -53,6 +54,7 @@ public sealed class TransportRunner
             {
                 var rayDirection = BuildRayDirection(x, y, width, height, aspect, tanHalfFov, forward, right, up);
                 var state = MetricRayState.Initialize(origin, rayDirection, stepSize);
+                var rayBendSum = 0.0;
 
                 for (var step = 0; step < stepsPerRay; step++)
                 {
@@ -72,6 +74,7 @@ public sealed class TransportRunner
                     }
 
                     bendSum += bendMagnitude;
+                    rayBendSum += bendMagnitude;
                     maxBend = MathF.Max(maxBend, bendMagnitude);
 
                     var newDirection = NormalizeOrFallback(state.Direction + bend, state.Direction);
@@ -91,6 +94,15 @@ public sealed class TransportRunner
                     state.IntegrationSteps++;
                     state.ResetFrameFromDirection();
                 }
+
+                var rayMeanBend = stepsPerRay > 0 ? rayBendSum / stepsPerRay : 0.0;
+                if (!double.IsFinite(rayMeanBend))
+                {
+                    hasInvalidValues = true;
+                    rayMeanBend = 0.0;
+                }
+
+                rayMetrics.Add(new RayMetric(x, y, rayMeanBend));
             }
         }
 
@@ -118,6 +130,7 @@ public sealed class TransportRunner
             MaxBendMagnitude = maxBend,
             HasInvalidValues = hasInvalidValues,
             Note = FirstPulseNote,
+            RayMetrics = rayMetrics,
         };
     }
 

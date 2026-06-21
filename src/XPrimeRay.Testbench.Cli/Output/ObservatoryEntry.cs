@@ -35,7 +35,7 @@ public sealed record ObservatoryEntry
     public string Source { get; init; } = "cli";
 
     [JsonPropertyName("phase")]
-    public string Phase { get; init; } = "Project Glowing Heart v0.4";
+    public string Phase { get; init; } = "";
 
     public static ObservatoryEntry FromManifest(RunManifest manifest, string manifestSourcePath)
     {
@@ -49,6 +49,7 @@ public sealed record ObservatoryEntry
             Verdict = validation == "PASS" ? "OBSERVED" : "FAIL",
             Timestamp = manifest.TimestampUtc,
             SourcePath = manifestSourcePath,
+            Phase = manifest.Phase,
         };
     }
 }

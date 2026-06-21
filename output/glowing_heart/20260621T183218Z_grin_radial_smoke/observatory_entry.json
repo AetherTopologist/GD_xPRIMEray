@@ -1,0 +1,13 @@
+{
+  "category": "Experimental",
+  "fixture": "grin_radial_smoke",
+  "run_id": "20260621T183218Z_grin_radial_smoke",
+  "artifact_type": "glowing_heart_core_smoke",
+  "coverage": "PASS",
+  "closure": "MISSING",
+  "verdict": "OBSERVED",
+  "timestamp": "2026-06-21T18:32:18Z",
+  "source_path": "output/glowing_heart/20260621T183218Z_grin_radial_smoke/manifest.json",
+  "source": "cli",
+  "phase": "Project Glowing Heart v0.6"
+}

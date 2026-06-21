@@ -30,9 +30,15 @@ public static class MarkdownSummaryWriter
         markdown.AppendLine($"- Mean bend: {FormatFloat(result.MeanBendMagnitude)}");
         markdown.AppendLine($"- Max bend: {FormatFloat(result.MaxBendMagnitude)}");
         markdown.AppendLine();
+        markdown.AppendLine("## Human Observable Artifacts");
+        markdown.AppendLine();
+        markdown.AppendLine("- `snapshot.ppm` - grayscale PPM visualization of per-pixel bend magnitude");
+        markdown.AppendLine("- `snapshot_heatmap.csv` - per-ray bend magnitude table");
+        markdown.AppendLine("- `snapshot_ascii.txt` - terminal-viewable bend magnitude map");
+        markdown.AppendLine();
         markdown.AppendLine("## Interpretation");
         markdown.AppendLine();
-        markdown.AppendLine("This run is a Project Glowing Heart v0.4 Observatory entry packet. It proves the Core CLI can emit portable evidence and a catalog-shaped Observatory entry from a deterministic field-driven smoke fixture without launching Godot.");
+        markdown.AppendLine("This run is a Project Glowing Heart v0.6 first human observable snapshot. It proves the Core CLI can emit a visible transport metric artifact from a deterministic field-driven smoke fixture without launching Godot.");
         markdown.AppendLine();
         markdown.AppendLine("## Limitations");
         markdown.AppendLine();
