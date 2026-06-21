@@ -168,6 +168,7 @@ static string WriteArtifacts(RunOptions options, TransportResult result, Validat
     ManifestWriter.Write(outputDirectory, manifest);
     CsvReportWriter.Write(outputDirectory, result, report);
     MarkdownSummaryWriter.Write(outputDirectory, result, report);
+    ObservatoryEntryWriter.Write(outputDirectory, manifest);
     return outputDirectory;
 }
 

@@ -6,11 +6,11 @@ namespace XPrimeRay.Testbench.Cli.Output;
 
 public sealed record RunManifest
 {
-    public string Schema { get; init; } = "xprimeray.glowing_heart.run_manifest.v0.3";
+    public string Schema { get; init; } = "xprimeray.glowing_heart.run_manifest.v0.4";
     public string RunId { get; init; } = "";
     public string TimestampUtc { get; init; } = "";
     public string Source { get; init; } = "cli";
-    public string Phase { get; init; } = "Project Glowing Heart v0.3";
+    public string Phase { get; init; } = "Project Glowing Heart v0.4";
     public FixtureManifest Fixture { get; init; } = new();
     public ResultManifest Result { get; init; } = new();
     public ArtifactManifest Artifacts { get; init; } = new();
@@ -86,4 +86,5 @@ public sealed record ArtifactManifest
 {
     public string RayMetricsCsv { get; init; } = "ray_metrics.csv";
     public string RunSummaryMd { get; init; } = "run_summary.md";
+    public string ObservatoryEntryJson { get; init; } = "observatory_entry.json";
 }

@@ -1,0 +1,34 @@
+{
+  "schema": "xprimeray.glowing_heart.run_manifest.v0.4",
+  "runId": "20260620T233624Z_grin_radial_smoke",
+  "timestampUtc": "2026-06-20T23:36:24Z",
+  "source": "cli",
+  "phase": "Project Glowing Heart v0.4",
+  "fixture": {
+    "name": "grin_radial_smoke",
+    "path": "fixtures/grin_radial_smoke.json",
+    "mode": "radial_grin_smoke"
+  },
+  "result": {
+    "validation": "PASS",
+    "rays": 880,
+    "hits": 0,
+    "misses": 880,
+    "stepsPerRay": 32,
+    "fieldSamples": 28160,
+    "meanBend": 0.000983294914,
+    "maxBend": 0.00562361022
+  },
+  "artifacts": {
+    "rayMetricsCsv": "ray_metrics.csv",
+    "runSummaryMd": "run_summary.md",
+    "observatoryEntryJson": "observatory_entry.json"
+  },
+  "limitations": [
+    "Core smoke transport only",
+    "Godot parity is not claimed",
+    "Hermetic closure is not claimed",
+    "Collision behavior is not modeled",
+    "Portal behavior is not modeled"
+  ]
+}

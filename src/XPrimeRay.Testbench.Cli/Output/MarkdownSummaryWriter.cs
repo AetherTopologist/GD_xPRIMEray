@@ -32,7 +32,7 @@ public static class MarkdownSummaryWriter
         markdown.AppendLine();
         markdown.AppendLine("## Interpretation");
         markdown.AppendLine();
-        markdown.AppendLine("This run is a Project Glowing Heart v0.3 observable output artifact. It proves the Core CLI can emit portable evidence from a deterministic field-driven smoke fixture without launching Godot.");
+        markdown.AppendLine("This run is a Project Glowing Heart v0.4 Observatory entry packet. It proves the Core CLI can emit portable evidence and a catalog-shaped Observatory entry from a deterministic field-driven smoke fixture without launching Godot.");
         markdown.AppendLine();
         markdown.AppendLine("## Limitations");
         markdown.AppendLine();
