@@ -1,0 +1,65 @@
+{
+  "schema": "xprimeray.glowing_heart.shared_fixture_candidate.v1.0",
+  "generatedUtc": "2026-06-21T23:10:03Z",
+  "parityClaim": "NONE",
+  "runtimeExecuted": false,
+  "coreFixture": {
+    "name": "grin_radial_smoke",
+    "path": "fixtures/grin_radial_smoke.json",
+    "mode": "radial_grin_smoke",
+    "rayGrid": {
+      "width": 40,
+      "height": 22
+    },
+    "transport": {
+      "maxStepsPerRay": 32,
+      "stepSize": 0.05
+    },
+    "fields": [
+      {
+        "type": "grin_radial",
+        "radiusOuter": 1.5,
+        "amplitude": 0.25,
+        "curveType": "Power",
+        "gamma": 1.0
+      }
+    ]
+  },
+  "godotCandidate": {
+    "name": "fixture_hermetic_observatory_grin",
+    "path": "Fixtures/fixture_hermetic_observatory_grin.tscn",
+    "likely_category": "READY_CANDIDATE",
+    "transport_hint": "grin",
+    "closure_hint": "likely",
+    "detected_tags": [
+      "curved",
+      "fixture",
+      "grin",
+      "hermetic",
+      "observatory"
+    ],
+    "selectionConfidence": "HIGH",
+    "selectionReason": "Preferred Godot GRIN observatory fixture found in the v0.9 candidate index."
+  },
+  "sharedConcepts": [
+    "fixture",
+    "grin",
+    "field-driven bending",
+    "observatory artifact"
+  ],
+  "differences": [
+    "Core fixture is simplified JSON; Godot fixture is a .tscn scene.",
+    "Core snapshot visualizes bend magnitude; Godot artifacts are renderer/HUD/observatory outputs.",
+    "Core smoke fixture has no closure claim; Godot candidate may involve hermetic closure.",
+    "Core currently has no geometry, collision, portal, or scene tree."
+  ],
+  "normalizationNeeded": [
+    "Shared fixture schema",
+    "Shared observer/camera definition",
+    "Shared field parameter mapping",
+    "Shared validation vocabulary",
+    "Shared snapshot metric naming",
+    "Godot scene metadata export path"
+  ],
+  "nextBridgeStep": "Create a static Godot fixture metadata export for the selected candidate without executing Godot."
+}

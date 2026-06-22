@@ -1,0 +1,293 @@
+{
+  "schema": "xprimeray.glowing_heart.godot_fixture_export.v1.1",
+  "generatedUtc": "2026-06-22T00:55:48Z",
+  "runtimeExecuted": false,
+  "parityClaim": "NONE",
+  "source": "static_tscn_text_scan",
+  "selectedFrom": "reports/glowing_heart_shared_fixture_candidate.preview.json",
+  "fixture": {
+    "name": "fixture_hermetic_observatory_grin",
+    "path": "Fixtures/fixture_hermetic_observatory_grin.tscn",
+    "fileSizeBytes": 5078,
+    "lineCount": 136,
+    "gdSceneHeader": "[gd_scene load_steps=12 format=3]"
+  },
+  "externalResources": [
+    {
+      "type": "Script",
+      "path": "res://RayBeamRenderer.cs",
+      "id": "1_rbr"
+    },
+    {
+      "type": "Script",
+      "path": "res://FieldSource3D.cs",
+      "id": "2_field"
+    }
+  ],
+  "subResources": [
+    {
+      "type": "BoxMesh",
+      "id": "BoxMesh_wall"
+    },
+    {
+      "type": "BoxShape3D",
+      "id": "BoxShape_wall"
+    },
+    {
+      "type": "StandardMaterial3D",
+      "id": "Mat_front"
+    },
+    {
+      "type": "StandardMaterial3D",
+      "id": "Mat_back"
+    },
+    {
+      "type": "StandardMaterial3D",
+      "id": "Mat_left"
+    },
+    {
+      "type": "StandardMaterial3D",
+      "id": "Mat_right"
+    },
+    {
+      "type": "StandardMaterial3D",
+      "id": "Mat_floor"
+    },
+    {
+      "type": "StandardMaterial3D",
+      "id": "Mat_ceiling"
+    }
+  ],
+  "nodes": [
+    {
+      "name": "FixtureHermeticObservatoryGrin",
+      "type": "Node3D",
+      "parent": null
+    },
+    {
+      "name": "Camera3D",
+      "type": "Camera3D",
+      "parent": "."
+    },
+    {
+      "name": "receiver_front",
+      "type": "StaticBody3D",
+      "parent": "."
+    },
+    {
+      "name": "MeshInstance3D",
+      "type": "MeshInstance3D",
+      "parent": "receiver_front"
+    },
+    {
+      "name": "CollisionShape3D",
+      "type": "CollisionShape3D",
+      "parent": "receiver_front"
+    },
+    {
+      "name": "receiver_back",
+      "type": "StaticBody3D",
+      "parent": "."
+    },
+    {
+      "name": "MeshInstance3D",
+      "type": "MeshInstance3D",
+      "parent": "receiver_back"
+    },
+    {
+      "name": "CollisionShape3D",
+      "type": "CollisionShape3D",
+      "parent": "receiver_back"
+    },
+    {
+      "name": "receiver_left",
+      "type": "StaticBody3D",
+      "parent": "."
+    },
+    {
+      "name": "MeshInstance3D",
+      "type": "MeshInstance3D",
+      "parent": "receiver_left"
+    },
+    {
+      "name": "CollisionShape3D",
+      "type": "CollisionShape3D",
+      "parent": "receiver_left"
+    },
+    {
+      "name": "receiver_right",
+      "type": "StaticBody3D",
+      "parent": "."
+    },
+    {
+      "name": "MeshInstance3D",
+      "type": "MeshInstance3D",
+      "parent": "receiver_right"
+    },
+    {
+      "name": "CollisionShape3D",
+      "type": "CollisionShape3D",
+      "parent": "receiver_right"
+    },
+    {
+      "name": "receiver_floor",
+      "type": "StaticBody3D",
+      "parent": "."
+    },
+    {
+      "name": "MeshInstance3D",
+      "type": "MeshInstance3D",
+      "parent": "receiver_floor"
+    },
+    {
+      "name": "CollisionShape3D",
+      "type": "CollisionShape3D",
+      "parent": "receiver_floor"
+    },
+    {
+      "name": "receiver_ceiling",
+      "type": "StaticBody3D",
+      "parent": "."
+    },
+    {
+      "name": "MeshInstance3D",
+      "type": "MeshInstance3D",
+      "parent": "receiver_ceiling"
+    },
+    {
+      "name": "CollisionShape3D",
+      "type": "CollisionShape3D",
+      "parent": "receiver_ceiling"
+    },
+    {
+      "name": "FieldSource3D",
+      "type": "Node3D",
+      "parent": "."
+    },
+    {
+      "name": "RayBeamRenderer",
+      "type": "Node3D",
+      "parent": "."
+    }
+  ],
+  "interestingReferences": {
+    "FieldSource3D": {
+      "count": 2,
+      "examples": [
+        "[ext_resource type=\"Script\" path=\"res://FieldSource3D.cs\" id=\"2_field\"]",
+        "[node name=\"FieldSource3D\" type=\"Node3D\" parent=\".\"]"
+      ]
+    },
+    "Camera3D": {
+      "count": 2,
+      "examples": [
+        "[node name=\"Camera3D\" type=\"Camera3D\" parent=\".\"]",
+        "CameraPath = NodePath(\"../Camera3D\")"
+      ]
+    },
+    "Grin": {
+      "count": 3,
+      "examples": [
+        "; Fixture: hermetic observatory GRIN",
+        "; Purpose: sealed calibration chamber for full-pixel validation with GRIN field enabled.",
+        "[node name=\"FixtureHermeticObservatoryGrin\" type=\"Node3D\"]"
+      ]
+    },
+    "GRIN": {
+      "count": 3,
+      "examples": [
+        "; Fixture: hermetic observatory GRIN",
+        "; Purpose: sealed calibration chamber for full-pixel validation with GRIN field enabled.",
+        "[node name=\"FixtureHermeticObservatoryGrin\" type=\"Node3D\"]"
+      ]
+    },
+    "Hermetic": {
+      "count": 8,
+      "examples": [
+        "; Fixture: hermetic observatory GRIN",
+        "[node name=\"FixtureHermeticObservatoryGrin\" type=\"Node3D\"]",
+        "[node name=\"receiver_front\" type=\"StaticBody3D\" parent=\".\" groups=[\"fixture_background\", \"fixture_geometry\", \"hermetic_receiver\", \"raytrace_geometry\"]]",
+        "[node name=\"receiver_back\" type=\"StaticBody3D\" parent=\".\" groups=[\"fixture_background\", \"fixture_geometry\", \"hermetic_receiver\", \"raytrace_geometry\"]]",
+        "[node name=\"receiver_left\" type=\"StaticBody3D\" parent=\".\" groups=[\"fixture_background\", \"fixture_geometry\", \"hermetic_receiver\", \"raytrace_geometry\"]]"
+      ]
+    },
+    "Observatory": {
+      "count": 2,
+      "examples": [
+        "; Fixture: hermetic observatory GRIN",
+        "[node name=\"FixtureHermeticObservatoryGrin\" type=\"Node3D\"]"
+      ]
+    },
+    "Ray": {
+      "count": 11,
+      "examples": [
+        "; Contract: missHits == 0; curved transport rays must still terminate on a receiver wall.",
+        "[ext_resource type=\"Script\" path=\"res://RayBeamRenderer.cs\" id=\"1_rbr\"]",
+        "[node name=\"receiver_front\" type=\"StaticBody3D\" parent=\".\" groups=[\"fixture_background\", \"fixture_geometry\", \"hermetic_receiver\", \"raytrace_geometry\"]]",
+        "[node name=\"receiver_back\" type=\"StaticBody3D\" parent=\".\" groups=[\"fixture_background\", \"fixture_geometry\", \"hermetic_receiver\", \"raytrace_geometry\"]]",
+        "[node name=\"receiver_left\" type=\"StaticBody3D\" parent=\".\" groups=[\"fixture_background\", \"fixture_geometry\", \"hermetic_receiver\", \"raytrace_geometry\"]]"
+      ]
+    },
+    "Receiver": {
+      "count": 19,
+      "examples": [
+        "; Contract: missHits == 0; curved transport rays must still terminate on a receiver wall.",
+        "[node name=\"receiver_front\" type=\"StaticBody3D\" parent=\".\" groups=[\"fixture_background\", \"fixture_geometry\", \"hermetic_receiver\", \"raytrace_geometry\"]]",
+        "[node name=\"MeshInstance3D\" type=\"MeshInstance3D\" parent=\"receiver_front\"]",
+        "[node name=\"CollisionShape3D\" type=\"CollisionShape3D\" parent=\"receiver_front\"]",
+        "[node name=\"receiver_back\" type=\"StaticBody3D\" parent=\".\" groups=[\"fixture_background\", \"fixture_geometry\", \"hermetic_receiver\", \"raytrace_geometry\"]]"
+      ]
+    },
+    "Closure": {
+      "count": 0,
+      "examples": []
+    },
+    "Boundary": {
+      "count": 0,
+      "examples": []
+    },
+    "Metric": {
+      "count": 0,
+      "examples": []
+    },
+    "Transport": {
+      "count": 1,
+      "examples": [
+        "; Contract: missHits == 0; curved transport rays must still terminate on a receiver wall."
+      ]
+    },
+    "Renderer": {
+      "count": 2,
+      "examples": [
+        "[ext_resource type=\"Script\" path=\"res://RayBeamRenderer.cs\" id=\"1_rbr\"]",
+        "[node name=\"RayBeamRenderer\" type=\"Node3D\" parent=\".\"]"
+      ]
+    },
+    "Probe": {
+      "count": 0,
+      "examples": []
+    },
+    "HUD": {
+      "count": 0,
+      "examples": []
+    }
+  },
+  "classifiedHints": {
+    "hasCamera": true,
+    "hasFieldSource": true,
+    "hasGrinSignal": true,
+    "hasHermeticSignal": true,
+    "hasObservatorySignal": true,
+    "hasReceiverSignal": true,
+    "hasClosureSignal": true,
+    "hasBoundarySignal": false,
+    "hasWormholeSignal": false
+  },
+  "limitations": [
+    "Static text scan only",
+    "Godot runtime was not executed",
+    "Scene graph was not instantiated",
+    "Exported values are metadata hints, not validated runtime state",
+    "No parity or closure claim is made"
+  ]
+}
