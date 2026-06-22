@@ -1,0 +1,96 @@
+{
+  "schema": "xprimeray.glowing_heart.gap_matrix.v1.2",
+  "generatedUtc": "2026-06-22T01:00:40Z",
+  "runtimeExecuted": false,
+  "parityClaim": "NONE",
+  "coreFixture": "fixtures/grin_radial_smoke.json",
+  "godotFixture": "Fixtures/fixture_hermetic_observatory_grin.tscn",
+  "rows": [
+    {
+      "category": "Fixture Identity",
+      "status": "MATCH",
+      "reason": "Core fixture exists at fixtures/grin_radial_smoke.json; Godot fixture export exists at Fixtures/fixture_hermetic_observatory_grin.tscn."
+    },
+    {
+      "category": "Observer / Camera",
+      "status": "PARTIAL",
+      "reason": "Core observer exists; Godot Camera3D detected, but no shared observer/camera schema exists."
+    },
+    {
+      "category": "Field Definition",
+      "status": "PARTIAL",
+      "reason": "Core has a grin_radial field; Godot export has GRIN/FieldSource signals, but field parameters are not normalized."
+    },
+    {
+      "category": "Transport Concept",
+      "status": "PARTIAL",
+      "reason": "Core has radial_grin_smoke transport settings; Godot export has Ray/Renderer/Transport references, but no shared transport baseline."
+    },
+    {
+      "category": "Validation",
+      "status": "PARTIAL",
+      "reason": "Core validation metadata exists; Godot export has static closure/contract signals, but validation vocabulary is not shared."
+    },
+    {
+      "category": "Closure Concept",
+      "status": "MISSING_IN_CORE",
+      "reason": "Godot export has closure-style signals; Core smoke fixture explicitly does not require hermetic closure."
+    },
+    {
+      "category": "Receiver Concept",
+      "status": "MISSING_IN_CORE",
+      "reason": "Godot export includes receiver nodes/groups; Core smoke fixture has no receiver or collision target concept."
+    },
+    {
+      "category": "Snapshot Output",
+      "status": "PARTIAL",
+      "reason": "Core packets include metric snapshots; Godot side is represented as renderer/observatory output metadata, not a shared snapshot type."
+    },
+    {
+      "category": "Observatory Artifact",
+      "status": "MATCH",
+      "reason": "Both sides are represented in the Glowing Heart observatory artifact chain."
+    },
+    {
+      "category": "Runtime Dependency",
+      "status": "PARTIAL",
+      "reason": "Core fixture can run outside Godot; Godot fixture is a scene that requires Godot for runtime behavior."
+    },
+    {
+      "category": "Scene Graph",
+      "status": "MISSING_IN_CORE",
+      "reason": "Godot export has scene nodes; Core fixture is JSON metadata plus transport settings with no scene graph."
+    },
+    {
+      "category": "Geometry",
+      "status": "MISSING_IN_CORE",
+      "reason": "Godot export includes StaticBody3D receiver geometry; Core smoke fixture has no geometry or collision model."
+    },
+    {
+      "category": "Portal / Wormhole",
+      "status": "UNKNOWN",
+      "reason": "No portal or wormhole signal is present in the Core fixture or static Godot export."
+    },
+    {
+      "category": "Boundary Modeling",
+      "status": "UNKNOWN",
+      "reason": "No explicit boundary modeling signal is present in the static Godot export; Core fixture has no boundary model."
+    }
+  ],
+  "summary": {
+    "MATCH": 2,
+    "PARTIAL": 6,
+    "MISSING_IN_CORE": 4,
+    "MISSING_IN_GODOT_EXPORT": 0,
+    "UNKNOWN": 2
+  },
+  "readinessScore": 50,
+  "readinessMethod": "MATCH = 10 points; PARTIAL = 5 points; everything else = 0; capped at 100.",
+  "recommendedNormalizationTargets": [
+    "Shared fixture schema",
+    "Shared observer/camera definition",
+    "Shared field parameter vocabulary",
+    "Shared transport baseline vocabulary",
+    "Shared validation and closure vocabulary"
+  ]
+}
