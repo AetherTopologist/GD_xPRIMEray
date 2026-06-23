@@ -1,0 +1,114 @@
+{
+  "identity": {
+    "name": "glowing_heart_grin_bridge",
+    "version": "v0.preview",
+    "description": "Metadata bridge candidate linking Core radial GRIN smoke fixture to Godot hermetic observatory GRIN fixture.",
+    "parityClaim": "NONE",
+    "runtimeExecuted": false
+  },
+  "sourceLinks": {
+    "coreFixturePath": "fixtures/grin_radial_smoke.json",
+    "godotFixturePath": "Fixtures/fixture_hermetic_observatory_grin.tscn",
+    "godotExportPath": "reports/glowing_heart_godot_fixture_export.preview.json",
+    "gapMatrixPath": "reports/glowing_heart_gap_matrix.preview.json",
+    "candidatePacketPath": "reports/glowing_heart_shared_fixture_candidate.preview.json"
+  },
+  "observer": {
+    "source": "core",
+    "origin": [
+      0,
+      0,
+      -2
+    ],
+    "forward": [
+      0,
+      0,
+      1
+    ],
+    "up": [
+      0,
+      1,
+      0
+    ],
+    "fovDegrees": 60
+  },
+  "rayGrid": {
+    "width": 40,
+    "height": 22
+  },
+  "fields": [
+    {
+      "source": "core",
+      "type": "grin_radial",
+      "center": [
+        0,
+        0,
+        0
+      ],
+      "radiusOuter": 1.5,
+      "amplitude": 0.25,
+      "curveType": "Power",
+      "gamma": 1.0
+    }
+  ],
+  "transport": {
+    "source": "core",
+    "mode": "radial_grin_smoke",
+    "maxStepsPerRay": 32,
+    "stepSize": 0.05,
+    "integrator": "smoke_stepper"
+  },
+  "geometry": {
+    "present": false,
+    "source": "core",
+    "notes": "Core radial GRIN smoke fixture does not model scene geometry yet."
+  },
+  "receivers": {
+    "present": true,
+    "count": null,
+    "source": "godot_static_export",
+    "notes": "Receiver signal detected in static Godot fixture export; count not normalized."
+  },
+  "validation": {
+    "source": "mixed_metadata",
+    "requireHermeticClosure": false,
+    "maxMisses": 880,
+    "closureHint": "godot_static_export_has_closure_signal",
+    "coverageHint": "core_smoke_pass"
+  },
+  "snapshots": {
+    "coreSnapshotType": "bend_magnitude_metric_snapshot",
+    "godotSnapshotType": "renderer_or_observatory_snapshot_candidate",
+    "comparisonReady": false,
+    "notes": "Core emits metric snapshots; Godot selected fixture has not yet exported a comparable snapshot."
+  },
+  "artifacts": {
+    "coreManifestPath": "output/glowing_heart/latest/manifest.json",
+    "coreSnapshotPath": "output/glowing_heart/latest/snapshot.ppm",
+    "godotCandidatePath": "Fixtures/fixture_hermetic_observatory_grin.tscn",
+    "gapMatrixPath": "reports/glowing_heart_gap_matrix.preview.json"
+  },
+  "runtimeHints": {
+    "requiresGodot": false,
+    "requiresSnapshotBuilder": false,
+    "requiresSceneTree": false,
+    "requiresPhysics": false
+  },
+  "limitations": [
+    "Schema draft only",
+    "Shared fixture instance candidate only",
+    "Godot runtime was not executed",
+    "Godot scene graph was not instantiated",
+    "No parity claim",
+    "No closure equivalence claim",
+    "No transport equivalence claim",
+    "No pixel comparison claim"
+  ],
+  "normalizationNotes": [
+    "Observer/camera mapping must be normalized before pixel comparison",
+    "Field parameter vocabulary must be normalized between Core and Godot",
+    "Validation vocabulary must distinguish smoke coverage from hermetic closure",
+    "Snapshot metric naming must distinguish bend magnitude from rendered intensity",
+    "Receiver and closure semantics must be exported from Godot metadata before parity review"
+  ]
+}
