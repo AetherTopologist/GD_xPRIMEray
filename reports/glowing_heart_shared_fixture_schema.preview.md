@@ -1,6 +1,6 @@
 # Project Glowing Heart Shared Fixture Schema Draft (Preview)
 
-Generated: 2026-06-22T04:52:41Z
+Generated: 2026-06-24T00:41:35Z
 
 Parity claim: NONE
 
@@ -40,6 +40,17 @@ schemas/glowing_heart/shared_fixture_schema.v0.preview.json
 - Shared validation vocabulary
 - Shared snapshot metric naming
 - Godot scene metadata export standard
+
+## v1.4.1 Source Label Alignment
+
+The preview schema now accepts source labels used by the first shared fixture instance:
+
+- godot_static_export
+- mixed_metadata
+- core_artifact
+- godot_artifact
+
+This remains a preview vocabulary and does not imply parity.
 
 ## Example Instance
 

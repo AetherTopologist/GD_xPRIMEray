@@ -20,6 +20,16 @@ DEFAULT_GAP_MATRIX = Path("reports/glowing_heart_gap_matrix.preview.json")
 DEFAULT_CANDIDATE_PACKET = Path("reports/glowing_heart_shared_fixture_candidate.preview.json")
 DEFAULT_SCHEMA = Path("schemas/glowing_heart/shared_fixture_schema.v0.preview.json")
 DEFAULT_REPORT = Path("reports/glowing_heart_shared_fixture_schema.preview.md")
+SOURCE_LABELS = [
+    "core",
+    "godot",
+    "shared",
+    "unknown",
+    "godot_static_export",
+    "mixed_metadata",
+    "core_artifact",
+    "godot_artifact",
+]
 
 
 class SchemaDraftError(Exception):
@@ -61,7 +71,7 @@ def nullable_number() -> dict[str, Any]:
 
 
 def source_enum() -> dict[str, Any]:
-    return {"type": "string", "enum": ["core", "godot", "shared", "unknown"]}
+    return {"$ref": "#/$defs/sourceLabel"}
 
 
 def build_schema() -> dict[str, Any]:
@@ -71,6 +81,12 @@ def build_schema() -> dict[str, Any]:
         "title": "Project Glowing Heart Shared Fixture Schema Preview",
         "description": "Preview draft for a neutral fixture vocabulary between xPRIMEray-Core and GD_xPRIMEray. This is not a parity guarantee.",
         "type": "object",
+        "$defs": {
+            "sourceLabel": {
+                "type": "string",
+                "enum": SOURCE_LABELS,
+            }
+        },
         "required": [
             "identity",
             "observer",
@@ -422,6 +438,17 @@ def build_report(schema_path: Path, example: dict[str, Any], gap_matrix: dict[st
 
     lines.extend(
         [
+            "",
+            "## v1.4.1 Source Label Alignment",
+            "",
+            "The preview schema now accepts source labels used by the first shared fixture instance:",
+            "",
+            "- godot_static_export",
+            "- mixed_metadata",
+            "- core_artifact",
+            "- godot_artifact",
+            "",
+            "This remains a preview vocabulary and does not imply parity.",
             "",
             "## Example Instance",
             "",

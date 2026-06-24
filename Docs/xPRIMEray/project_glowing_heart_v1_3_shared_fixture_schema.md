@@ -29,3 +29,7 @@ reports/glowing_heart_shared_fixture_schema.preview.md
 ## Next milestone
 
 v1.4 should create the first shared fixture instance candidate using this schema draft.
+
+## v1.4.1 Note
+
+The preview source vocabulary was aligned with the first shared fixture instance. The schema now accepts `godot_static_export`, `mixed_metadata`, `core_artifact`, and `godot_artifact` as preview provenance labels. This does not imply parity.

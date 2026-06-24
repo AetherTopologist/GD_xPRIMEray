@@ -4,6 +4,21 @@
   "title": "Project Glowing Heart Shared Fixture Schema Preview",
   "description": "Preview draft for a neutral fixture vocabulary between xPRIMEray-Core and GD_xPRIMEray. This is not a parity guarantee.",
   "type": "object",
+  "$defs": {
+    "sourceLabel": {
+      "type": "string",
+      "enum": [
+        "core",
+        "godot",
+        "shared",
+        "unknown",
+        "godot_static_export",
+        "mixed_metadata",
+        "core_artifact",
+        "godot_artifact"
+      ]
+    }
+  },
   "required": [
     "identity",
     "observer",
@@ -85,13 +100,7 @@
       "additionalProperties": false,
       "properties": {
         "source": {
-          "type": "string",
-          "enum": [
-            "core",
-            "godot",
-            "shared",
-            "unknown"
-          ]
+          "$ref": "#/$defs/sourceLabel"
         },
         "origin": {
           "description": "Observer origin.",
@@ -182,13 +191,7 @@
         "additionalProperties": false,
         "properties": {
           "source": {
-            "type": "string",
-            "enum": [
-              "core",
-              "godot",
-              "shared",
-              "unknown"
-            ]
+            "$ref": "#/$defs/sourceLabel"
           },
           "type": {
             "type": "string",
@@ -253,13 +256,7 @@
       "additionalProperties": false,
       "properties": {
         "source": {
-          "type": "string",
-          "enum": [
-            "core",
-            "godot",
-            "shared",
-            "unknown"
-          ]
+          "$ref": "#/$defs/sourceLabel"
         },
         "mode": {
           "type": [
@@ -296,13 +293,7 @@
           "type": "boolean"
         },
         "source": {
-          "type": "string",
-          "enum": [
-            "core",
-            "godot",
-            "shared",
-            "unknown"
-          ]
+          "$ref": "#/$defs/sourceLabel"
         },
         "notes": {
           "type": "string"
@@ -324,13 +315,7 @@
           "minimum": 0
         },
         "source": {
-          "type": "string",
-          "enum": [
-            "core",
-            "godot",
-            "shared",
-            "unknown"
-          ]
+          "$ref": "#/$defs/sourceLabel"
         },
         "notes": {
           "type": "string"
@@ -349,13 +334,7 @@
       "additionalProperties": false,
       "properties": {
         "source": {
-          "type": "string",
-          "enum": [
-            "core",
-            "godot",
-            "shared",
-            "unknown"
-          ]
+          "$ref": "#/$defs/sourceLabel"
         },
         "requireHermeticClosure": {
           "type": [
