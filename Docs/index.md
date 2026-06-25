@@ -110,6 +110,22 @@ description: Curved-ray optical transport observatory — GRIN field integration
 
 ---
 
+## Project Glowing Heart
+
+Project Glowing Heart is the active Core extraction and bridge track for xPRIMEray. The current public-safe state is metadata-first: Core emits standalone preview artifacts, the Godot side has static fixture exports, and the bridge has shared fixture, schema, observer, and reconciliation packets. It does **not** claim parity, runtime equivalence, closure equivalence, or pixel comparison readiness.
+
+| Latest bridge artifact | Status |
+|---|---|
+| Shared fixture schema and instance | Preview draft / candidate |
+| Shared observer contract | Preview contract |
+| Core and Godot observer instances | Metadata generated |
+| Observer reconciliation | Pixel comparison not ready |
+| Public demo posture | Safe with limits; no parity or validation claims |
+
+→ [Project Glowing Heart v1.8.1 Observer Reconciliation](xPRIMEray/project_glowing_heart_v1_8_1_observer_reconciliation.md) · [Shared Observer Contract](xPRIMEray/project_glowing_heart_v1_7_shared_observer_contract.md) · [Public Demo Readiness](xPRIMEray/project_glowing_heart_v1_5_public_demo_readiness.md)
+
+---
+
 ## What This Is
 
 - **A null-geodesic integrator** — curved rays are first-class primitives. Transport is solved, not faked with lens shaders or post-process distortion.

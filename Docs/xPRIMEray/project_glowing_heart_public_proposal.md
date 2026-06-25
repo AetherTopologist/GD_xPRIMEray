@@ -117,7 +117,7 @@ The Core does not know what Godot is. Adapters translate engine-specific concept
 
 #### The Bee Sigil
 
-![Bee Sigil](../../assets/sigils/bee-sigil.svg)
+Bee sigil asset placeholder: `assets/sigils/bee-sigil.svg`.
 
 The bee navigates by polarized sky light — a channel of information entirely outside the human visual umwelt. It builds in hexagonal efficiency. It perceives what we cannot.
 
@@ -162,9 +162,9 @@ This is not a validated closure fixture. It is a perceptual demonstration — an
 
 - [xprimeray-core on GitHub](#) *(available at Phase 8)*
 - [Observatory Catalog](/observatory)
-- [Architecture Review](../../Docs/xPRIMEray/project_glowing_heart_review.md)
-- [Glossary](../../Docs/glossary.md)
-- [Start Here for Contributors](../../Docs/start_here.md)
+- [Architecture Review](project_glowing_heart_review.md)
+- [Glossary](../glossary.md)
+- [Start Here for Contributors](../start_here.md)
 
 ---
 

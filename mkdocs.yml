@@ -3,8 +3,8 @@ site_description: Curved Ray Transport Engine for GRIN Fields — hybrid symboli
 site_author: AetherTopologist
 site_url: https://xprimeray.github.io/GD_xPRIMEray/
 
-repo_name: AetherTopologist/GD_xPRIMEray
-repo_url: https://github.com/AetherTopologist/GD_xPRIMEray
+repo_name: xPRIMEray/GD_xPRIMEray
+repo_url: https://github.com/xPRIMEray/GD_xPRIMEray
 edit_uri: edit/main/Docs/
 
 docs_dir: Docs
@@ -114,7 +114,7 @@ extra_css:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/AetherTopologist/GD_xPRIMEray
+      link: https://github.com/xPRIMEray/GD_xPRIMEray
       name: xPRIMEray on GitHub
   analytics:
     feedback:
@@ -137,6 +137,32 @@ nav:
   - Overview:
       - Transport Observatory: Overview/TRANSPORT_OBSERVATORY_OVERVIEW.md
       - Feature Index: FEATURE_INDEX.md
+
+  - Project Glowing Heart:
+      - Public Proposal: xPRIMEray/project_glowing_heart_public_proposal.md
+      - Engineering Review: xPRIMEray/project_glowing_heart_review.md
+      - Execution Plan: xPRIMEray/project_glowing_heart_execution_plan.md
+      - Core Split Proposal: xPRIMEray/xPRIMEray-Core_Split.md
+      - v0.1 Baseline: xPRIMEray/project_glowing_heart_v0_1_baseline.md
+      - v0.1 Artifact: xPRIMEray/project_glowing_heart_v0_1_artifact.md
+      - v0.2 First Pulse: xPRIMEray/project_glowing_heart_v0_2_first_pulse.md
+      - v0.3 Observable Output: xPRIMEray/project_glowing_heart_v0_3_observable_output.md
+      - v0.4 Observatory Entry: xPRIMEray/project_glowing_heart_v0_4_observatory_entry.md
+      - v0.6 Human Observable: xPRIMEray/project_glowing_heart_v0_6_first_human_observable.md
+      - v0.7 Preview Gallery: xPRIMEray/project_glowing_heart_v0_7_preview_gallery.md
+      - v0.8 Bridge Card: xPRIMEray/project_glowing_heart_v0_8_bridge_card.md
+      - v0.9 Godot Fixture Metadata: xPRIMEray/project_glowing_heart_v0_9_godot_fixture_metadata.md
+      - v1.0 Shared Fixture Candidate: xPRIMEray/project_glowing_heart_v1_0_shared_fixture_candidate.md
+      - v1.1 Godot Fixture Export: xPRIMEray/project_glowing_heart_v1_1_godot_fixture_export.md
+      - v1.2 Gap Matrix: xPRIMEray/project_glowing_heart_v1_2_gap_matrix.md
+      - v1.3 Shared Fixture Schema: xPRIMEray/project_glowing_heart_v1_3_shared_fixture_schema.md
+      - v1.4 Shared Fixture Instance: xPRIMEray/project_glowing_heart_v1_4_shared_fixture_instance.md
+      - v1.4.1 Schema Alignment: xPRIMEray/project_glowing_heart_v1_4_1_schema_alignment.md
+      - v1.5 Public Demo Readiness: xPRIMEray/project_glowing_heart_v1_5_public_demo_readiness.md
+      - v1.6 Grok Handoff: xPRIMEray/project_glowing_heart_v1_6_grok_handoff.md
+      - v1.7 Shared Observer Contract: xPRIMEray/project_glowing_heart_v1_7_shared_observer_contract.md
+      - v1.8 Observer Instances: xPRIMEray/project_glowing_heart_v1_8_observer_instances.md
+      - v1.8.1 Observer Reconciliation: xPRIMEray/project_glowing_heart_v1_8_1_observer_reconciliation.md
 
   - Observatory Gallery:
       - Home: Observatory_Gallery/index.md
