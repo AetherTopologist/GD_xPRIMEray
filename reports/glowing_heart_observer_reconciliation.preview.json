@@ -1,0 +1,191 @@
+{
+  "schema": "xprimeray.glowing_heart.observer_reconciliation.v1.8.1",
+  "generatedUtc": "2026-06-24T21:52:08Z",
+  "runtimeExecuted": false,
+  "parityClaim": "NONE",
+  "input": "reports/glowing_heart_observer_instances.preview.json",
+  "pixelComparisonReady": false,
+  "summary": {
+    "MATCH": 3,
+    "MISMATCH": 3,
+    "PARTIAL": 1,
+    "UNKNOWN": 6
+  },
+  "metrics": {
+    "positionDeltaEuclidean": 2.0,
+    "forwardDot": -1.0,
+    "upDot": 1.0,
+    "fovDeltaDegrees": 15.0,
+    "nearDelta": null,
+    "farDelta": null
+  },
+  "checks": [
+    {
+      "category": "position",
+      "status": "MISMATCH",
+      "core": [
+        0,
+        0,
+        -2
+      ],
+      "godot": [
+        0,
+        0,
+        0
+      ],
+      "reason": "Core and Godot observer positions differ."
+    },
+    {
+      "category": "forward",
+      "status": "MISMATCH",
+      "core": [
+        0,
+        0,
+        1
+      ],
+      "godot": [
+        0,
+        0,
+        -1
+      ],
+      "reason": "Core and Godot forward vectors oppose each other."
+    },
+    {
+      "category": "up",
+      "status": "MATCH",
+      "core": [
+        0,
+        1,
+        0
+      ],
+      "godot": [
+        0,
+        1,
+        0
+      ],
+      "reason": "Core and Godot up vectors match."
+    },
+    {
+      "category": "fov_degrees",
+      "status": "MISMATCH",
+      "core": 60,
+      "godot": 75,
+      "reason": "Core and Godot FOV degrees differ."
+    },
+    {
+      "category": "fov_axis",
+      "status": "MATCH",
+      "core": "vertical",
+      "godot": "vertical",
+      "reason": "Core and Godot FOV axes match."
+    },
+    {
+      "category": "resolution",
+      "status": "UNKNOWN",
+      "core": {
+        "width": 40,
+        "height": 22,
+        "source": "rayGrid"
+      },
+      "godot": {
+        "width": null,
+        "height": null,
+        "source": "unknown_static_tscn"
+      },
+      "reason": "Godot resolution is unknown from static metadata."
+    },
+    {
+      "category": "projection_type",
+      "status": "MATCH",
+      "core": "perspective",
+      "godot": "perspective",
+      "reason": "Core and Godot projection types match."
+    },
+    {
+      "category": "near",
+      "status": "UNKNOWN",
+      "core": null,
+      "godot": 0.01,
+      "reason": "Core near clip plane is not specified; comparison is underspecified."
+    },
+    {
+      "category": "far",
+      "status": "UNKNOWN",
+      "core": null,
+      "godot": 40,
+      "reason": "Core far clip plane is not specified; comparison is underspecified."
+    },
+    {
+      "category": "coordinate_handedness",
+      "status": "PARTIAL",
+      "core": "right_handed_inferred",
+      "godot": "right_handed_godot_3d",
+      "reason": "Both observers indicate right-handed coordinates, but labels are source-specific/inferred."
+    },
+    {
+      "category": "pixel_sampling",
+      "status": "UNKNOWN",
+      "core": {
+        "samplePosition": "center",
+        "xConvention": "x_plus_0_5",
+        "yConvention": "y_plus_0_5_then_ndc_y_flip",
+        "source": "TransportRunner",
+        "inferred": true
+      },
+      "godot": {
+        "samplePosition": "unknown",
+        "source": "static_tscn_unavailable"
+      },
+      "reason": "Godot pixel sampling convention is unknown from static metadata."
+    },
+    {
+      "category": "image_origin",
+      "status": "UNKNOWN",
+      "core": {
+        "source": "TransportRunner",
+        "origin": "top_left",
+        "rowOrder": "top_to_bottom",
+        "inferred": true
+      },
+      "godot": {
+        "source": "static_tscn_unavailable",
+        "origin": "unknown",
+        "rowOrder": "unknown"
+      },
+      "reason": "Godot image origin and row order are unknown from static metadata."
+    },
+    {
+      "category": "aspect_policy",
+      "status": "UNKNOWN",
+      "core": {
+        "source": "TransportRunner",
+        "policy": "horizontal_scaled_by_width_over_height",
+        "inferred": true
+      },
+      "godot": {
+        "source": "static_tscn_unavailable",
+        "policy": "unknown"
+      },
+      "reason": "Godot aspect policy is unknown from static metadata."
+    }
+  ],
+  "blockingDeltas": [
+    "Core and Godot observer positions differ.",
+    "Core and Godot forward vectors oppose each other.",
+    "Core and Godot FOV degrees differ.",
+    "Godot resolution is unknown from static metadata.",
+    "Godot pixel sampling convention is unknown from static metadata.",
+    "Godot image origin and row order are unknown from static metadata.",
+    "Godot aspect policy is unknown from static metadata.",
+    "Core near/far are not specified in the Core fixture.",
+    "Both observers indicate right-handed coordinates, but labels are source-specific/inferred."
+  ],
+  "recommendedNextActions": [
+    "Define a v1.8.2 shared observer target with explicit agreed values: position, forward, up, FOV, resolution, projection, near/far, pixel sampling, image origin, and aspect policy.",
+    "Create a shared observer target instance with explicit agreed pose/FOV/resolution.",
+    "Update Core fixture or shared instance to reference that target.",
+    "Export or statically define a Godot observer candidate matching that target.",
+    "Add pixelSampling, imageOrigin, and aspectPolicy to enforced observer instances.",
+    "Only attempt difference.ppm after observer reconciliation passes."
+  ]
+}

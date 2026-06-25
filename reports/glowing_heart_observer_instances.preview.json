@@ -1,0 +1,156 @@
+{
+  "schema": "xprimeray.glowing_heart.observer_instances.v1.8",
+  "generatedUtc": "2026-06-24T03:20:56Z",
+  "runtimeExecuted": false,
+  "parityClaim": "NONE",
+  "contract": "schemas/glowing_heart/shared_observer_contract.v0.preview.json",
+  "coreObserver": {
+    "source": "core_fixture",
+    "fixturePath": "fixtures/grin_radial_smoke.json",
+    "position": [
+      0,
+      0,
+      -2
+    ],
+    "forward": [
+      0,
+      0,
+      1
+    ],
+    "up": [
+      0,
+      1,
+      0
+    ],
+    "fov": {
+      "degrees": 60,
+      "axis": "vertical",
+      "basis": "inferred_from_core_transport_runner",
+      "inferred": true
+    },
+    "resolution": {
+      "width": 40,
+      "height": 22,
+      "source": "rayGrid"
+    },
+    "projection": {
+      "type": "perspective",
+      "orthographic_size": null,
+      "inferred": true
+    },
+    "near": null,
+    "far": null,
+    "coordinate_system": {
+      "source": "core_fixture",
+      "handedness": "right_handed_inferred",
+      "world_up_axis": "+Y",
+      "forward_axis": "explicit_vector",
+      "units": "scene_units",
+      "notes": "Core fixture uses explicit forward/up vectors. Handedness inferred from System.Numerics vector math and TransportRunner behavior.",
+      "inferred": true
+    },
+    "pixelSampling": {
+      "samplePosition": "center",
+      "xConvention": "x_plus_0_5",
+      "yConvention": "y_plus_0_5_then_ndc_y_flip",
+      "source": "TransportRunner",
+      "inferred": true
+    },
+    "aspectPolicy": {
+      "source": "TransportRunner",
+      "policy": "horizontal_scaled_by_width_over_height",
+      "inferred": true
+    },
+    "imageOrigin": {
+      "source": "TransportRunner",
+      "origin": "top_left",
+      "rowOrder": "top_to_bottom",
+      "inferred": true
+    },
+    "confidence": "HIGH",
+    "extractionMethod": "json_fixture_plus_code_convention"
+  },
+  "godotObserver": {
+    "source": "godot_static_tscn",
+    "fixturePath": "Fixtures/fixture_hermetic_observatory_grin.tscn",
+    "cameraNode": {
+      "name": "Camera3D",
+      "type": "Camera3D",
+      "parent": "."
+    },
+    "position": [
+      0,
+      0,
+      0
+    ],
+    "positionInferred": true,
+    "forward": [
+      0,
+      0,
+      -1
+    ],
+    "forwardInferred": true,
+    "up": [
+      0,
+      1,
+      0
+    ],
+    "upInferred": true,
+    "fov": {
+      "degrees": 75,
+      "axis": "vertical",
+      "basis": "Godot Camera3D default/tscn property",
+      "inferred": false
+    },
+    "resolution": {
+      "width": null,
+      "height": null,
+      "source": "unknown_static_tscn"
+    },
+    "projection": {
+      "type": "perspective",
+      "orthographic_size": null,
+      "inferred": true
+    },
+    "near": 0.01,
+    "far": 40,
+    "coordinate_system": {
+      "source": "godot_static_tscn",
+      "handedness": "right_handed_godot_3d",
+      "world_up_axis": "+Y",
+      "forward_axis": "-Z_camera_forward",
+      "units": "godot_scene_units",
+      "notes": "Static inference only; scene was not instantiated.",
+      "inferred": true
+    },
+    "pixelSampling": {
+      "samplePosition": "unknown",
+      "source": "static_tscn_unavailable"
+    },
+    "aspectPolicy": {
+      "source": "static_tscn_unavailable",
+      "policy": "unknown"
+    },
+    "imageOrigin": {
+      "source": "static_tscn_unavailable",
+      "origin": "unknown",
+      "rowOrder": "unknown"
+    },
+    "confidence": "MEDIUM",
+    "extractionMethod": "static_tscn_text_scan_plus_godot_defaults"
+  },
+  "notes": [
+    "Observer instances are side-by-side only; they are not reconciled.",
+    "Core FOV axis and ray conventions are inferred from TransportRunner behavior.",
+    "Godot pose vectors are inferred from Camera3D defaults because no camera transform is explicit in the static .tscn.",
+    "Godot resolution, pixel sampling, aspect policy, and image origin are not available from static .tscn text."
+  ],
+  "limitations": [
+    "Godot runtime was not executed.",
+    "Godot scene graph was not instantiated.",
+    "No parity claim.",
+    "No pixel comparison.",
+    "No renderer equivalence claim.",
+    "No transport equivalence claim."
+  ]
+}

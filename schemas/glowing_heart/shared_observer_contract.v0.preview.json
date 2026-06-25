@@ -1,0 +1,443 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://xprimeray.dev/schemas/glowing-heart/shared-observer-contract/v0.preview.json",
+  "title": "Project Glowing Heart Shared Observer Contract Preview",
+  "description": "Preview contract for describing one observer/camera vocabulary across xPRIMEray-Core and GD_xPRIMEray. This is the observer normalization prerequisite for future pixel comparison and difference.ppm work; it is not a parity claim.",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "parityClaim",
+    "runtimeExecuted",
+    "coordinate_system",
+    "position",
+    "forward",
+    "up",
+    "fov",
+    "resolution",
+    "projection",
+    "near",
+    "far",
+    "right_vector",
+    "aspect_policy",
+    "pixel_sampling",
+    "image_origin",
+    "pixel_aspect_ratio",
+    "snapshot_channel",
+    "normalizationNotes",
+    "limitations"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "vec3": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "number"
+        }
+      ],
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "sourceLabel": {
+      "type": "string",
+      "enum": [
+        "core",
+        "godot",
+        "shared",
+        "unknown"
+      ]
+    }
+  },
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "xprimeray.glowing_heart.shared_observer_contract.v0.preview"
+    },
+    "version": {
+      "type": "string",
+      "const": "v0.preview"
+    },
+    "parityClaim": {
+      "type": "string",
+      "const": "NONE"
+    },
+    "runtimeExecuted": {
+      "type": "boolean",
+      "const": false
+    },
+    "coordinate_system": {
+      "description": "Shared basis and handedness required before observer vectors can be compared.",
+      "type": "object",
+      "required": [
+        "source",
+        "handedness",
+        "world_up_axis",
+        "forward_axis",
+        "vector_space",
+        "units",
+        "notes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/sourceLabel"
+        },
+        "handedness": {
+          "type": "string",
+          "enum": [
+            "right_handed",
+            "left_handed",
+            "unknown"
+          ]
+        },
+        "world_up_axis": {
+          "type": "string",
+          "enum": [
+            "+Y",
+            "-Y",
+            "+Z",
+            "-Z",
+            "unknown"
+          ]
+        },
+        "forward_axis": {
+          "type": "string",
+          "enum": [
+            "+X",
+            "-X",
+            "+Y",
+            "-Y",
+            "+Z",
+            "-Z",
+            "vector",
+            "unknown"
+          ]
+        },
+        "vector_space": {
+          "type": "string",
+          "enum": [
+            "shared_world",
+            "camera_local",
+            "engine_native",
+            "unknown"
+          ]
+        },
+        "units": {
+          "type": "string",
+          "enum": [
+            "scene_units",
+            "meters",
+            "normalized",
+            "unknown"
+          ]
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "position": {
+      "description": "Observer/camera world position in the shared coordinate system. This maps from Core observer.origin when the source is a Core fixture.",
+      "$ref": "#/$defs/vec3"
+    },
+    "forward": {
+      "description": "Normalized observer/camera forward direction in the shared coordinate system.",
+      "$ref": "#/$defs/vec3"
+    },
+    "up": {
+      "description": "Normalized observer/camera up direction in the shared coordinate system.",
+      "$ref": "#/$defs/vec3"
+    },
+    "fov": {
+      "description": "Field of view definition. Axis must be explicit before pixel comparison.",
+      "type": "object",
+      "required": [
+        "degrees",
+        "axis"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "degrees": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 180
+        },
+        "axis": {
+          "type": "string",
+          "enum": [
+            "vertical",
+            "horizontal",
+            "diagonal",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "resolution": {
+      "description": "Pixel dimensions for the observer output target.",
+      "type": "object",
+      "required": [
+        "width",
+        "height"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "projection": {
+      "description": "Projection model used to map rays/pixels.",
+      "type": "object",
+      "required": [
+        "type",
+        "frustum"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "perspective",
+            "orthographic",
+            "unknown"
+          ]
+        },
+        "orthographic_size": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0
+        },
+        "frustum": {
+          "description": "Perspective or orthographic frustum shape.",
+          "type": "string",
+          "enum": [
+            "symmetric",
+            "offset",
+            "engine_native",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "near": {
+      "description": "Near clip plane distance.",
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "far": {
+      "description": "Far clip plane distance. Must be greater than near in contract instances.",
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "right_vector": {
+      "description": "Rule used to derive the observer right vector from forward/up.",
+      "type": "object",
+      "required": [
+        "derivation",
+        "reorthogonalize_up"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "derivation": {
+          "type": "string",
+          "enum": [
+            "cross_up_forward",
+            "cross_forward_up",
+            "explicit",
+            "engine_native",
+            "unknown"
+          ]
+        },
+        "explicit": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/vec3"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reorthogonalize_up": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "aspect_policy": {
+      "description": "Policy for deriving horizontal/vertical frustum scaling from resolution.",
+      "type": "object",
+      "required": [
+        "source",
+        "mode"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/sourceLabel"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "resolution_width_over_height",
+            "viewport_width_over_height",
+            "fixed",
+            "engine_native",
+            "unknown"
+          ]
+        },
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "pixel_sampling": {
+      "description": "Pixel sample location used to construct rays.",
+      "type": "object",
+      "required": [
+        "mode",
+        "x",
+        "y"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "center",
+            "corner",
+            "multi_sample",
+            "engine_native",
+            "unknown"
+          ]
+        },
+        "x": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "y": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "image_origin": {
+      "description": "Image-space origin and row order for mapping pixels to rays.",
+      "type": "object",
+      "required": [
+        "origin",
+        "row_order",
+        "ndc_y"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "origin": {
+          "type": "string",
+          "enum": [
+            "top_left",
+            "bottom_left",
+            "engine_native",
+            "unknown"
+          ]
+        },
+        "row_order": {
+          "type": "string",
+          "enum": [
+            "top_to_bottom",
+            "bottom_to_top",
+            "engine_native",
+            "unknown"
+          ]
+        },
+        "ndc_y": {
+          "type": "string",
+          "enum": [
+            "positive_up",
+            "positive_down",
+            "engine_native",
+            "unknown"
+          ]
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "pixel_aspect_ratio": {
+      "description": "Pixel width divided by pixel height.",
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "snapshot_channel": {
+      "description": "Output channel semantics associated with this observer contract instance.",
+      "type": "object",
+      "required": [
+        "type",
+        "comparisonReady"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "bend_magnitude_metric",
+            "rendered_intensity",
+            "rgb_render",
+            "depth",
+            "unknown"
+          ]
+        },
+        "comparisonReady": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "normalizationNotes": {
+      "description": "Known mapping work required before Core and Godot observer outputs can be compared.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "limitations": {
+      "description": "Non-parity limits that must travel with this preview contract.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

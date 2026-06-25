@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("XPrimeRay.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fa7ceb3ebe403fb5881702681f46369fdb00a5c9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2b4784415dc856589544fdd006aec1829a9cd9d1")]
 [assembly: System.Reflection.AssemblyProductAttribute("XPrimeRay.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("XPrimeRay.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
