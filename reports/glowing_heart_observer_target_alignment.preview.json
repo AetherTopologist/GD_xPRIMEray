@@ -1,0 +1,366 @@
+{
+  "schema": "xprimeray.glowing_heart.observer_target_alignment.v1.8.3",
+  "generatedUtc": "2026-06-26T15:50:33Z",
+  "runtimeExecuted": false,
+  "parityClaim": "NONE",
+  "target": "fixtures/shared/glowing_heart_observer_target.v0.preview.json",
+  "pixelComparisonReady": false,
+  "coreVsTarget": {
+    "summary": {
+      "MATCH": 10,
+      "MISMATCH": 0,
+      "PARTIAL": 1,
+      "UNKNOWN": 2
+    },
+    "pixelComparisonReady": false,
+    "metrics": {
+      "positionDeltaEuclidean": 0.0,
+      "forwardDot": 1.0,
+      "upDot": 1.0,
+      "fovDeltaDegrees": 0.0,
+      "nearDelta": null,
+      "farDelta": null
+    },
+    "checks": [
+      {
+        "category": "position",
+        "status": "MATCH",
+        "side": [
+          0,
+          0,
+          -2
+        ],
+        "target": [
+          0,
+          0,
+          -2
+        ],
+        "reason": "Core observer position matches the shared target."
+      },
+      {
+        "category": "forward",
+        "status": "MATCH",
+        "side": [
+          0,
+          0,
+          1
+        ],
+        "target": [
+          0,
+          0,
+          1
+        ],
+        "reason": "Core observer forward matches the shared target."
+      },
+      {
+        "category": "up",
+        "status": "MATCH",
+        "side": [
+          0,
+          1,
+          0
+        ],
+        "target": [
+          0,
+          1,
+          0
+        ],
+        "reason": "Core observer up matches the shared target."
+      },
+      {
+        "category": "fov_degrees",
+        "status": "MATCH",
+        "side": 60,
+        "target": 60,
+        "reason": "Core observer fov_degrees matches the shared target."
+      },
+      {
+        "category": "fov_axis",
+        "status": "MATCH",
+        "side": "vertical",
+        "target": "vertical",
+        "reason": "Core observer fov_axis matches the shared target."
+      },
+      {
+        "category": "resolution",
+        "status": "MATCH",
+        "side": {
+          "width": 40,
+          "height": 22,
+          "source": "rayGrid"
+        },
+        "target": {
+          "width": 40,
+          "height": 22
+        },
+        "reason": "Core observer resolution matches the shared target."
+      },
+      {
+        "category": "projection_type",
+        "status": "MATCH",
+        "side": "perspective",
+        "target": "perspective",
+        "reason": "Core observer projection_type matches the shared target."
+      },
+      {
+        "category": "near",
+        "status": "UNKNOWN",
+        "side": null,
+        "target": 0.01,
+        "reason": "Core observer near is underspecified relative to the shared target."
+      },
+      {
+        "category": "far",
+        "status": "UNKNOWN",
+        "side": null,
+        "target": 40,
+        "reason": "Core observer far is underspecified relative to the shared target."
+      },
+      {
+        "category": "coordinate_handedness",
+        "status": "PARTIAL",
+        "side": "right_handed_inferred",
+        "target": "right_handed",
+        "reason": "Core observer coordinate_handedness partially matches the shared target but uses source-specific vocabulary."
+      },
+      {
+        "category": "pixel_sampling",
+        "status": "MATCH",
+        "side": {
+          "samplePosition": "center",
+          "xConvention": "x_plus_0_5",
+          "yConvention": "y_plus_0_5_then_ndc_y_flip",
+          "source": "TransportRunner",
+          "inferred": true
+        },
+        "target": {
+          "samplePosition": "center",
+          "xConvention": "x_plus_0_5",
+          "yConvention": "y_plus_0_5_then_ndc_y_flip"
+        },
+        "reason": "Core observer pixel_sampling matches the shared target."
+      },
+      {
+        "category": "image_origin",
+        "status": "MATCH",
+        "side": {
+          "source": "TransportRunner",
+          "origin": "top_left",
+          "rowOrder": "top_to_bottom",
+          "inferred": true
+        },
+        "target": {
+          "origin": "top_left",
+          "rowOrder": "top_to_bottom"
+        },
+        "reason": "Core observer image_origin matches the shared target."
+      },
+      {
+        "category": "aspect_policy",
+        "status": "MATCH",
+        "side": {
+          "source": "TransportRunner",
+          "policy": "horizontal_scaled_by_width_over_height",
+          "inferred": true
+        },
+        "target": {
+          "policy": "horizontal_scaled_by_width_over_height"
+        },
+        "reason": "Core observer aspect_policy matches the shared target."
+      }
+    ],
+    "blockingDeltas": [
+      "Core observer near is underspecified relative to the shared target.",
+      "Core observer far is underspecified relative to the shared target.",
+      "Core observer coordinate_handedness partially matches the shared target but uses source-specific vocabulary."
+    ],
+    "recommendedActions": [
+      "Make near/far explicit in Core fixture or shared instance.",
+      "Confirm observer contract fields are emitted by Core tooling.",
+      "Normalize inferred right-handed coordinate labels to the shared target vocabulary."
+    ]
+  },
+  "godotVsTarget": {
+    "summary": {
+      "MATCH": 5,
+      "MISMATCH": 3,
+      "PARTIAL": 1,
+      "UNKNOWN": 4
+    },
+    "pixelComparisonReady": false,
+    "metrics": {
+      "positionDeltaEuclidean": 2.0,
+      "forwardDot": -1.0,
+      "upDot": 1.0,
+      "fovDeltaDegrees": 15.0,
+      "nearDelta": 0.0,
+      "farDelta": 0.0
+    },
+    "checks": [
+      {
+        "category": "position",
+        "status": "MISMATCH",
+        "side": [
+          0,
+          0,
+          0
+        ],
+        "target": [
+          0,
+          0,
+          -2
+        ],
+        "reason": "Godot observer position differs from the shared target."
+      },
+      {
+        "category": "forward",
+        "status": "MISMATCH",
+        "side": [
+          0,
+          0,
+          -1
+        ],
+        "target": [
+          0,
+          0,
+          1
+        ],
+        "reason": "Godot observer forward vector opposes the shared target."
+      },
+      {
+        "category": "up",
+        "status": "MATCH",
+        "side": [
+          0,
+          1,
+          0
+        ],
+        "target": [
+          0,
+          1,
+          0
+        ],
+        "reason": "Godot observer up matches the shared target."
+      },
+      {
+        "category": "fov_degrees",
+        "status": "MISMATCH",
+        "side": 75,
+        "target": 60,
+        "reason": "Godot observer fov_degrees differs from the shared target."
+      },
+      {
+        "category": "fov_axis",
+        "status": "MATCH",
+        "side": "vertical",
+        "target": "vertical",
+        "reason": "Godot observer fov_axis matches the shared target."
+      },
+      {
+        "category": "resolution",
+        "status": "UNKNOWN",
+        "side": {
+          "width": null,
+          "height": null,
+          "source": "unknown_static_tscn"
+        },
+        "target": {
+          "width": 40,
+          "height": 22
+        },
+        "reason": "Godot observer resolution is unknown or underspecified relative to the shared target."
+      },
+      {
+        "category": "projection_type",
+        "status": "MATCH",
+        "side": "perspective",
+        "target": "perspective",
+        "reason": "Godot observer projection_type matches the shared target."
+      },
+      {
+        "category": "near",
+        "status": "MATCH",
+        "side": 0.01,
+        "target": 0.01,
+        "reason": "Godot observer near matches the shared target."
+      },
+      {
+        "category": "far",
+        "status": "MATCH",
+        "side": 40,
+        "target": 40,
+        "reason": "Godot observer far matches the shared target."
+      },
+      {
+        "category": "coordinate_handedness",
+        "status": "PARTIAL",
+        "side": "right_handed_godot_3d",
+        "target": "right_handed",
+        "reason": "Godot observer coordinate_handedness partially matches the shared target but uses source-specific vocabulary."
+      },
+      {
+        "category": "pixel_sampling",
+        "status": "UNKNOWN",
+        "side": {
+          "samplePosition": "unknown",
+          "source": "static_tscn_unavailable"
+        },
+        "target": {
+          "samplePosition": "center",
+          "xConvention": "x_plus_0_5",
+          "yConvention": "y_plus_0_5_then_ndc_y_flip"
+        },
+        "reason": "Godot observer pixel_sampling is unknown or underspecified relative to the shared target."
+      },
+      {
+        "category": "image_origin",
+        "status": "UNKNOWN",
+        "side": {
+          "source": "static_tscn_unavailable",
+          "origin": "unknown",
+          "rowOrder": "unknown"
+        },
+        "target": {
+          "origin": "top_left",
+          "rowOrder": "top_to_bottom"
+        },
+        "reason": "Godot observer image_origin is unknown or underspecified relative to the shared target."
+      },
+      {
+        "category": "aspect_policy",
+        "status": "UNKNOWN",
+        "side": {
+          "source": "static_tscn_unavailable",
+          "policy": "unknown"
+        },
+        "target": {
+          "policy": "horizontal_scaled_by_width_over_height"
+        },
+        "reason": "Godot observer aspect_policy is unknown or underspecified relative to the shared target."
+      }
+    ],
+    "blockingDeltas": [
+      "Godot observer position differs from the shared target.",
+      "Godot observer forward vector opposes the shared target.",
+      "Godot observer fov_degrees differs from the shared target.",
+      "Godot observer resolution is unknown or underspecified relative to the shared target.",
+      "Godot observer coordinate_handedness partially matches the shared target but uses source-specific vocabulary.",
+      "Godot observer pixel_sampling is unknown or underspecified relative to the shared target.",
+      "Godot observer image_origin is unknown or underspecified relative to the shared target.",
+      "Godot observer aspect_policy is unknown or underspecified relative to the shared target."
+    ],
+    "recommendedActions": [
+      "Configure or document Camera3D pose to target position [0,0,-2].",
+      "Configure Camera3D to look along target forward [0,0,1], or document adapter transform.",
+      "Set/confirm FOV 60 vertical.",
+      "Define output resolution 40x22 for comparison fixture.",
+      "Export pixel sampling, image origin, and aspect policy.",
+      "Normalize Godot coordinate labels to the shared target vocabulary."
+    ]
+  },
+  "globalNextActions": [
+    "Do not attempt difference.ppm until both sides match the target.",
+    "Create a snapshot channel contract before comparing pixels.",
+    "Keep public language at perceptual demo / engineering prototype level."
+  ]
+}
