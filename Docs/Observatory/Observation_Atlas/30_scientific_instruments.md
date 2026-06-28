@@ -4,6 +4,8 @@
 
 Scientific instruments couple a phenomenon, interaction region, detector, calibration process, and reported measurement. Atlas examples include CPC and particle counters, SEM, TEM, STM, AFM, spectrometers, cameras, and detector arrays.
 
+Entries in this family should follow the shared [Observer Grammar](observer_grammar.md).
+
 ## Instrument Families
 
 | Family | Observation emphasis |

@@ -1,5 +1,7 @@
 # Project Glowing Heart v1.8.5 — Architecture Vision & Version Strategy
 
+Atlas integration reference: the [Atlas Constitution](../Observatory/Observation_Atlas/ATLAS_CONSTITUTION.md) governs observer, representation, evidence, translation, and claim-boundary language used by future Glowing Heart interfaces.
+
 You are working inside `/home/bb/code/godot_xPRIMEray`.
 
 This is a documentation and roadmap task.

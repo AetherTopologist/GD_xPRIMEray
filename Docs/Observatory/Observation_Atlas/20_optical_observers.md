@@ -4,6 +4,8 @@
 
 Optical observers shape and collect light before detection. The family includes lenses, mirrors, apertures, microscopes, telescopes, fiber systems, gradient-index media, and compound optical assemblies.
 
+Entries in this family should follow the shared [Observer Grammar](observer_grammar.md).
+
 ## Observation Layers
 
 | Layer | Capability description |

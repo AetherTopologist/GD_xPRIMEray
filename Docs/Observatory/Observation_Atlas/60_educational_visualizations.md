@@ -4,6 +4,8 @@
 
 Educational visualizations translate structures, models, and measurements into forms intended for learning. Examples include orbital and eigenmode views, curvature fields, ray-path diagrams, false-color measurements, animated explanations, and artistic transport studies.
 
+Each entry should use the [Representation Grammar](representation_grammar.md) to disclose how source material becomes an artifact and which claims remain outside its scope.
+
 ## Representation Classes
 
 | Class | Required distinction |

@@ -4,6 +4,8 @@
 
 Biological observers convert environmental signals into organism-specific responses. Relevant examples include the human eye, retina, photoreceptors, compound eyes, polarization-sensitive vision, echolocation, and other sensory systems.
 
+Entries in this family should follow the shared [Observer Grammar](observer_grammar.md).
+
 ## Observation Layers
 
 | Layer | Atlas question |

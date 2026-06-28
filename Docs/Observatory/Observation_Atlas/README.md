@@ -4,6 +4,8 @@ A living map of observation systems, from human vision and optical instruments t
 
 The Observation Atlas documents the family of biological, optical, scientific, computational, and educational observers that inspire, contextualize, and guide xPRIMEray.
 
+The [Atlas Constitution](ATLAS_CONSTITUTION.md) defines the permanent reasoning principles for this map. The [Observer Grammar](observer_grammar.md) and [Representation Grammar](representation_grammar.md) turn those principles into reusable descriptive sequences.
+
 ## Why this exists
 
 xPRIMEray is not only a renderer. It is becoming an observatory framework: a way to describe observers, transport, receivers, measurements, and representations.

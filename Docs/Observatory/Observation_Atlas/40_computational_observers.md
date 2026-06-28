@@ -4,6 +4,8 @@
 
 Computational observers select, transport, sample, and encode simulated information. Examples include raster cameras, ray tracers, path tracers, field-aware ray systems, metric transport, diagnostic probes, and numerical detectors.
 
+Entries in this family should follow the shared [Observer Grammar](observer_grammar.md).
+
 ## Observer Families
 
 | Family | Observation model |

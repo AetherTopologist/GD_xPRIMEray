@@ -4,6 +4,8 @@
 
 The Observation Atlas documents the family of biological, optical, scientific, computational, and educational observers that inspire, contextualize, and guide xPRIMEray.
 
+The [Atlas Constitution](ATLAS_CONSTITUTION.md) governs this foundations page and every Atlas entry. Its [Observer Grammar](observer_grammar.md) and the companion [Representation Grammar](representation_grammar.md) provide the shared descriptive structure.
+
 An observer is treated broadly: a sensing organism, optical assembly, detector, simulation camera, measurement channel, or educational representation can each select and encode part of a phenomenon. The Atlas records what each observer receives, transforms, measures, and presents.
 
 ## Organizing Questions
