@@ -4,6 +4,8 @@
 
 Created a shared observer target artifact for the Glowing Heart GRIN bridge. The target uses the explicit Core smoke observer pose, FOV, resolution, sampling, image origin, and aspect policy, while adopting the selected Godot candidate `far=40` clip value to remove one avoidable future mismatch.
 
+The v1.8.4 cleanup adds `right_vector`, `pixel_aspect_ratio`, and `snapshot_channel` placeholders. Existing camelCase bridge fields remain stable, with their snake_case observer contract mappings documented in `contractFieldMapping`.
+
 ## What this proves
 
 The project now has a named observer target that Core and Godot can both align to before any future pixel comparison.

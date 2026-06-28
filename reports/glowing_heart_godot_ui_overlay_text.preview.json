@@ -1,0 +1,192 @@
+{
+  "schema": "xprimeray.glowing_heart.godot_ui_overlay_text.v2.2",
+  "generatedUtc": "2026-06-27T00:00:00Z",
+  "runtimeExecuted": false,
+  "parityClaim": "NONE",
+  "validationClaim": "NONE",
+  "readiness": {
+    "status": "SAFE_WITH_LIMITS",
+    "safeForGodotVisualDemoFraming": true,
+    "safeForPhysicsValidationClaims": false,
+    "safeForPixelParityClaims": false,
+    "pixelComparisonReady": false
+  },
+  "demoCandidate": {
+    "path": "Fixtures/fixture_hermetic_observatory_grin.tscn",
+    "name": "fixture_hermetic_observatory_grin",
+    "rank": 1,
+    "demoSafety": "SAFE_WITH_LIMITS",
+    "claimBoundary": "Visual / perceptual demo only; no parity or validation claim."
+  },
+  "primaryPhrase": "Experimental observatory visualization. Perceptual demonstration only. No parity or validation claim.",
+  "banner": {
+    "primary": "EXPERIMENTAL OBSERVATORY VISUALIZATION  ·  PERCEPTUAL DEMO ONLY  ·  NO PARITY OR VALIDATION CLAIM",
+    "secondary": "Godot observatory shell  ·  Observer bridge measured, pixel comparison not ready"
+  },
+  "disclaimerBlock": [
+    "Experimental observatory visualization.",
+    "Perceptual demonstration only.",
+    "No parity or validation claim.",
+    "Engineering prototype — work in progress."
+  ],
+  "demoTitle": "Project Glowing Heart — GRIN Observatory Preview",
+  "demoOneLiner": "See how xPRIMEray visualizes curved-ray transport in a controlled GRIN observatory scene — an engineering preview, not a physics proof.",
+  "panels": {
+    "observer": {
+      "title": "Observer (Preview)",
+      "labels": {
+        "viewSource": "Godot Camera3D",
+        "bridgeStatus": "Observer bridge defined and measured",
+        "comparisonStatus": "Pixel comparison not ready",
+        "parity": "None claimed",
+        "alignmentNote": "Core and Godot observer fields still differ"
+      },
+      "tooltip": "The observer bridge names the camera contract both sides must meet before pixel comparison. Measurement exists; alignment is incomplete."
+    },
+    "field": {
+      "title": "Field (GRIN Preview)",
+      "labels": {
+        "sceneType": "Sealed GRIN observatory",
+        "transportMode": "Curved-ray GRIN transport",
+        "fieldRole": "Refractive field visualization",
+        "fixture": "fixture_hermetic_observatory_grin"
+      },
+      "tooltip": "This scene exercises GRIN field visualization in a sealed observatory layout. It is a perceptual engineering preview."
+    },
+    "snapshot": {
+      "title": "Snapshot (Godot View)",
+      "labels": {
+        "outputType": "Godot runtime viewport",
+        "coreArtifact": "Not shown in this demo packet",
+        "channel": "Visual preview only",
+        "determinism": "Not a parity reference frame"
+      },
+      "coreArtifactCaption": "Core CLI preview artifact — not compared to Godot in this demo"
+    },
+    "limitations": {
+      "title": "Limitations",
+      "items": [
+        "No Core/Godot parity claim",
+        "No pixel equivalence or difference map",
+        "No scientific or physics validation",
+        "Hermetic closure not demonstrated here",
+        "No institutional endorsement",
+        "Demo shows Godot visualization only"
+      ],
+      "compactStrip": "Limitations: no parity · no pixel equivalence · no validation · engineering prototype"
+    }
+  },
+  "overlayTiers": {
+    "required": [
+      "Experimental observatory visualization.",
+      "Perceptual demonstration only.",
+      "No parity or validation claim.",
+      "Engineering prototype — work in progress."
+    ],
+    "context": [
+      "Godot observatory shell — visualization, not instrument output.",
+      "Observer bridge defined and measured; pixel comparison not ready.",
+      "GRIN field preview in a sealed observatory scene.",
+      "Active Project Glowing Heart engineering initiative.",
+      "Preview artifact — inspectable trail, not a finished product."
+    ],
+    "footer": [
+      "Fixture: fixture_hermetic_observatory_grin",
+      "Captured: {date_utc}",
+      "parity_claim=NONE",
+      "Project Glowing Heart — work in progress"
+    ]
+  },
+  "forbiddenTerms": [
+    "proof",
+    "proved",
+    "validated",
+    "verified",
+    "matches reality",
+    "pixel parity",
+    "physically complete",
+    "scientific confirmation",
+    "closure proven",
+    "equivalent output",
+    "identical output",
+    "confirms physics",
+    "ground truth",
+    "reference render"
+  ],
+  "safeReplacements": {
+    "proof": "preview",
+    "validated": "experimental",
+    "verified": "under development",
+    "matches reality": "perceptual visualization",
+    "pixel parity": "pixel comparison not ready",
+    "physically complete": "engineering prototype",
+    "scientific confirmation": "no validation claim",
+    "closure proven": "closure not demonstrated here",
+    "equivalent output": "separate outputs, not compared"
+  },
+  "screenshotLayout": {
+    "recommended": "single_godot_viewport",
+    "observatoryMode": "Presentation",
+    "observatoryModeShortcut": "Ctrl+6",
+    "sideBySideAllowed": false,
+    "sideBySideReason": "Observer alignment gaps remain; side-by-side invites parity misread.",
+    "requireDateStamp": true,
+    "requireFixtureName": true,
+    "requireLimitationsStrip": true
+  },
+  "misunderstandingBoundaries": [
+    {
+      "risk": "This proves wormhole physics",
+      "boundary": "Not a physics validation demo"
+    },
+    {
+      "risk": "Core and Godot match",
+      "boundary": "No Core/Godot parity claim"
+    },
+    {
+      "risk": "Pixels are equivalent",
+      "boundary": "Pixel comparison not ready"
+    },
+    {
+      "risk": "Hermetic closure is proven",
+      "boundary": "Closure status not demonstrated here"
+    },
+    {
+      "risk": "Scientifically confirmed",
+      "boundary": "No scientific confirmation or institutional endorsement"
+    },
+    {
+      "risk": "Godot replaces the Core instrument",
+      "boundary": "Godot is the observatory shell; Core is the instrument"
+    }
+  ],
+  "allowedClaims": [
+    "Project Glowing Heart is an active engineering initiative.",
+    "This is an experimental Godot observatory visualization.",
+    "The demo is a perceptual demonstration only.",
+    "The observer bridge has been defined and measured.",
+    "Pixel comparison and parity are not claimed."
+  ],
+  "forbiddenClaims": [
+    "xPRIMEray-Core matches Godot output.",
+    "The Core proves hermetic closure.",
+    "The Core validates wormhole physics.",
+    "The Core is physically complete.",
+    "The Core and Godot are pixel-equivalent.",
+    "The public demo is a scientific validation.",
+    "Any researcher or institution endorses the demo."
+  ],
+  "relatedArtifacts": [
+    "reports/glowing_heart_public_demo_readiness.preview.md",
+    "reports/glowing_heart_grok_handoff.preview.md",
+    "Docs/xPRIMEray/project_glowing_heart_v1_8_milestone.md",
+    "Docs/xPRIMEray/project_glowing_heart_architecture_vision.md"
+  ],
+  "blockingBeforeFirstScreenshot": [
+    "Capture one current Godot screenshot using Presentation mode.",
+    "Apply banner and panel captions in post.",
+    "Date-stamp and name fixture in footer.",
+    "Run misunderstanding prevention checklist.",
+    "Preserve parity_claim=NONE in any exported metadata."
+  ]
+}

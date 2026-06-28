@@ -1,0 +1,525 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://xprimeray.dev/schemas/glowing-heart/shared-snapshot-measurement-contract/v0.preview.json",
+  "title": "Project Glowing Heart Shared Snapshot and Measurement Contract Preview",
+  "description": "Preview contract for declaring what each snapshot sample measures before any cross-system comparison. A Core bend_magnitude_metric channel is NOT_COMPARABLE to a Godot rgb_render or rendered_intensity channel unless a defined transform is supplied and the policy is changed to REQUIRES_TRANSFORM. This contract does not claim parity or pixel equivalence.",
+  "$comment": "Normative boundary: bend_magnitude_metric values and rgb_render/rendered_intensity values represent different observables. Matching coordinates or image dimensions do not make those samples comparable.",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "parityClaim",
+    "runtimeExecuted",
+    "channelIdentity",
+    "channelType",
+    "units",
+    "normalization",
+    "dynamicRange",
+    "colorModel",
+    "comparisonPolicy",
+    "claimBoundary",
+    "artifactReferences",
+    "limitations"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "channelType": {
+      "type": "string",
+      "enum": [
+        "bend_magnitude_metric",
+        "rendered_intensity",
+        "rgb_render",
+        "depth",
+        "hit_miss",
+        "closure_state",
+        "unknown"
+      ]
+    },
+    "comparisonStatus": {
+      "type": "string",
+      "enum": [
+        "COMPARABLE",
+        "NOT_COMPARABLE",
+        "REQUIRES_TRANSFORM",
+        "UNKNOWN"
+      ]
+    },
+    "numericRange": {
+      "type": "object",
+      "required": [
+        "minimum",
+        "maximum"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "minimum": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "maximum": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      }
+    },
+    "artifactReference": {
+      "type": "object",
+      "required": [
+        "role",
+        "path",
+        "mediaType",
+        "requiredForComparison"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": [
+            "snapshot",
+            "metadata",
+            "observer_contract",
+            "fixture",
+            "transform_definition",
+            "provenance",
+            "other"
+          ]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mediaType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-fA-F0-9]{64}$"
+        },
+        "requiredForComparison": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "xprimeray.glowing_heart.shared_snapshot_measurement_contract.v0.preview"
+    },
+    "version": {
+      "type": "string",
+      "const": "v0.preview"
+    },
+    "parityClaim": {
+      "type": "string",
+      "const": "NONE"
+    },
+    "runtimeExecuted": {
+      "type": "boolean",
+      "const": false
+    },
+    "channelIdentity": {
+      "description": "Stable identity and provenance for the measured observation channel.",
+      "type": "object",
+      "required": [
+        "id",
+        "displayName",
+        "producer",
+        "semanticDescription"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "producer": {
+          "type": "string",
+          "enum": [
+            "core",
+            "godot",
+            "shared",
+            "unknown"
+          ]
+        },
+        "semanticDescription": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "channelType": {
+      "$ref": "#/$defs/channelType"
+    },
+    "units": {
+      "description": "Physical, normalized, categorical, or otherwise declared meaning of one stored sample.",
+      "type": "object",
+      "required": [
+        "kind",
+        "symbol",
+        "description"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "physical",
+            "scene_units",
+            "normalized",
+            "unitless_metric",
+            "categorical",
+            "unknown"
+          ]
+        },
+        "symbol": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "normalization": {
+      "description": "Mapping applied between the measured value and the stored sample.",
+      "type": "object",
+      "required": [
+        "mode",
+        "inputRange",
+        "outputRange",
+        "clamped",
+        "description"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "none",
+            "linear",
+            "logarithmic",
+            "display_referred",
+            "categorical",
+            "custom",
+            "unknown"
+          ]
+        },
+        "inputRange": {
+          "$ref": "#/$defs/numericRange"
+        },
+        "outputRange": {
+          "$ref": "#/$defs/numericRange"
+        },
+        "clamped": {
+          "type": "boolean"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "dynamicRange": {
+      "description": "Representable and expected sample ranges, including encoding precision.",
+      "type": "object",
+      "required": [
+        "representable",
+        "expected",
+        "encoding",
+        "nonFiniteAllowed"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "representable": {
+          "$ref": "#/$defs/numericRange"
+        },
+        "expected": {
+          "$ref": "#/$defs/numericRange"
+        },
+        "encoding": {
+          "type": "string",
+          "enum": [
+            "float32",
+            "float64",
+            "uint8",
+            "uint16",
+            "binary",
+            "categorical",
+            "unknown"
+          ]
+        },
+        "nonFiniteAllowed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "colorModel": {
+      "description": "Interpretation of sample components. Scalar measurements must not be silently treated as display color.",
+      "type": "object",
+      "required": [
+        "model",
+        "components",
+        "transferFunction"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "type": "string",
+          "enum": [
+            "scalar",
+            "linear_intensity",
+            "linear_rgb",
+            "srgb",
+            "depth_scalar",
+            "binary",
+            "categorical",
+            "unknown"
+          ]
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "transferFunction": {
+          "type": "string",
+          "enum": [
+            "none",
+            "linear",
+            "srgb",
+            "custom",
+            "not_applicable",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "comparisonPolicy": {
+      "description": "Declares whether this channel can be compared with another channel and which transform, if any, makes the comparison meaningful.",
+      "type": "object",
+      "required": [
+        "defaultStatus",
+        "sameChannelStatus",
+        "crossChannelRules",
+        "missingRuleStatus"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "defaultStatus": {
+          "$ref": "#/$defs/comparisonStatus"
+        },
+        "sameChannelStatus": {
+          "$ref": "#/$defs/comparisonStatus"
+        },
+        "crossChannelRules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "sourceChannelType",
+              "targetChannelType",
+              "status",
+              "transformReference",
+              "rationale"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "sourceChannelType": {
+                "$ref": "#/$defs/channelType"
+              },
+              "targetChannelType": {
+                "$ref": "#/$defs/channelType"
+              },
+              "status": {
+                "$ref": "#/$defs/comparisonStatus"
+              },
+              "transformReference": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "rationale": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "missingRuleStatus": {
+          "$ref": "#/$defs/comparisonStatus"
+        }
+      }
+    },
+    "claimBoundary": {
+      "description": "Explicit boundary on conclusions permitted from this declaration.",
+      "type": "object",
+      "required": [
+        "allowsPixelComparison",
+        "allowsParityClaim",
+        "allowedClaims",
+        "prohibitedClaims"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "allowsPixelComparison": {
+          "type": "boolean"
+        },
+        "allowsParityClaim": {
+          "type": "boolean",
+          "const": false
+        },
+        "allowedClaims": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "prohibitedClaims": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "artifactReferences": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/artifactReference"
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    }
+  },
+  "examples": [
+    {
+      "schema": "xprimeray.glowing_heart.shared_snapshot_measurement_contract.v0.preview",
+      "version": "v0.preview",
+      "parityClaim": "NONE",
+      "runtimeExecuted": false,
+      "channelIdentity": {
+        "id": "core.glowing_heart.bend_magnitude",
+        "displayName": "Core Bend Magnitude",
+        "producer": "core",
+        "semanticDescription": "Scalar magnitude of ray bending measured by the Core snapshot path. It is a measurement channel, not rendered light or color."
+      },
+      "channelType": "bend_magnitude_metric",
+      "units": {
+        "kind": "unitless_metric",
+        "symbol": null,
+        "description": "Unitless bend-magnitude metric under the producing fixture's declared convention."
+      },
+      "normalization": {
+        "mode": "none",
+        "inputRange": {
+          "minimum": 0,
+          "maximum": null
+        },
+        "outputRange": {
+          "minimum": 0,
+          "maximum": null
+        },
+        "clamped": false,
+        "description": "No display normalization is asserted by this preview contract."
+      },
+      "dynamicRange": {
+        "representable": {
+          "minimum": 0,
+          "maximum": null
+        },
+        "expected": {
+          "minimum": null,
+          "maximum": null
+        },
+        "encoding": "float32",
+        "nonFiniteAllowed": false
+      },
+      "colorModel": {
+        "model": "scalar",
+        "components": [
+          "bend_magnitude"
+        ],
+        "transferFunction": "not_applicable"
+      },
+      "comparisonPolicy": {
+        "defaultStatus": "NOT_COMPARABLE",
+        "sameChannelStatus": "COMPARABLE",
+        "crossChannelRules": [
+          {
+            "sourceChannelType": "bend_magnitude_metric",
+            "targetChannelType": "rgb_render",
+            "status": "NOT_COMPARABLE",
+            "transformReference": null,
+            "rationale": "Core bend magnitude measures ray deflection; Godot RGB measures rendered color. No shared transform is defined."
+          },
+          {
+            "sourceChannelType": "bend_magnitude_metric",
+            "targetChannelType": "rendered_intensity",
+            "status": "NOT_COMPARABLE",
+            "transformReference": null,
+            "rationale": "Core bend magnitude measures ray deflection; rendered intensity measures image brightness. No shared transform is defined."
+          }
+        ],
+        "missingRuleStatus": "UNKNOWN"
+      },
+      "claimBoundary": {
+        "allowsPixelComparison": false,
+        "allowsParityClaim": false,
+        "allowedClaims": [
+          "The channel identity and measurement semantics are declared."
+        ],
+        "prohibitedClaims": [
+          "Pixel equivalence",
+          "Renderer parity",
+          "Runtime equivalence",
+          "Transport equivalence"
+        ]
+      },
+      "artifactReferences": [
+        {
+          "role": "observer_contract",
+          "path": "schemas/glowing_heart/shared_observer_contract.v0.preview.json",
+          "mediaType": "application/schema+json",
+          "requiredForComparison": true,
+          "notes": "Observer alignment remains a separate prerequisite."
+        }
+      ],
+      "limitations": [
+        "Preview measurement vocabulary only",
+        "Godot runtime was not executed",
+        "No transform from bend magnitude to rendered output is defined",
+        "No pixel comparison",
+        "No parity claim"
+      ]
+    }
+  ]
+}

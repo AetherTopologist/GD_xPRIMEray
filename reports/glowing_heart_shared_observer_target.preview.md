@@ -1,6 +1,6 @@
 # Project Glowing Heart Shared Observer Target (Preview)
 
-Generated: 2026-06-26T02:37:58Z
+Generated: 2026-06-27T20:37:04Z
 
 Runtime executed: false
 
@@ -18,9 +18,16 @@ Parity claim: NONE
 | Projection | perspective |
 | Near | 0.01 |
 | Far | 40 |
+| Right Vector | cross_up_forward |
 | Pixel Sampling | center |
 | Image Origin | top_left |
 | Aspect Policy | horizontal_scaled_by_width_over_height |
+| Pixel Aspect Ratio | 1.0 |
+| Snapshot Channel | bend_magnitude_metric (comparison ready: false) |
+
+## Contract Field Mapping
+
+The target retains the existing camelCase bridge keys `aspectPolicy`, `pixelSampling`, and `imageOrigin` for v1.8.3 compatibility. `contractFieldMapping` documents their snake_case observer contract equivalents alongside the new snake_case fields.
 
 ## Why This Target
 

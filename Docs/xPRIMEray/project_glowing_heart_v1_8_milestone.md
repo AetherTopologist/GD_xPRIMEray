@@ -28,6 +28,7 @@ That measurement trail is the observer bridge.
 | [v1.8.1](project_glowing_heart_v1_8_1_observer_reconciliation.md) | Compared the two instances directly | They do not match; pixel comparison was blocked |
 | [v1.8.2](project_glowing_heart_v1_8_2_shared_observer_target.md) | Wrote a single shared observer target both sides should adopt | A concrete alignment goal exists |
 | [v1.8.3](project_glowing_heart_v1_8_3_observer_target_alignment.md) | Measured each side against that target | Remaining work is explicit per side |
+| [v1.8.4](project_glowing_heart_v1_8_4_observer_contract_alignment.md) | Aligned observer contract artifacts with the target | Stale far-clip wording is removed and contract placeholders are explicit |
 
 All steps produced preview artifacts only. No Godot runtime was executed for these reports.
 
@@ -112,6 +113,14 @@ Outputs:
 reports/glowing_heart_observer_target_alignment.preview.json
 reports/glowing_heart_observer_target_alignment.preview.md
 ```
+
+### v1.8.4 — Observer Contract Alignment Patch
+
+Removed the stale far-clip example and added right-vector, pixel-aspect, and snapshot-channel placeholders. The target also documents its camelCase bridge keys' snake_case contract mappings.
+
+No parity.
+No pixel comparison.
+No runtime execution.
 
 ---
 

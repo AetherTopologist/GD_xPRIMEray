@@ -68,7 +68,7 @@ schemas/glowing_heart/shared_observer_contract.v0.preview.json
     "frustum": "symmetric"
   },
   "near": 0.01,
-  "far": 1000,
+  "far": 40,
   "right_vector": {
     "derivation": "cross_up_forward",
     "explicit": null,
@@ -105,7 +105,7 @@ schemas/glowing_heart/shared_observer_contract.v0.preview.json
     "Confirm near/far clipping behavior before difference.ppm generation.",
     "Resolve current bridge candidate pose mismatch: Core origin [0, 0, -2] looking +Z vs Godot Camera3D identity looking engine-native -Z.",
     "Resolve current bridge candidate FOV mismatch: Core 60 degrees vs Godot scene 75 degrees.",
-    "Resolve current bridge candidate far clip mismatch: example/Core comparison target 1000 vs Godot scene 40."
+    "The shared observer target adopts far=40 from the selected Godot candidate to reduce one known mismatch. Core should make this clip plane explicit before pixel comparison."
   ],
   "limitations": [
     "Preview observer vocabulary only",
@@ -136,7 +136,14 @@ The audit also records current bridge candidate mismatches that must be resolved
 
 - Core pose: position `[0, 0, -2]`, forward `[0, 0, 1]`; Godot Camera3D is currently identity with engine-native default forward.
 - Core FOV: 60 degrees; Godot scene FOV: 75 degrees.
-- Core/example far plane target: 1000; Godot scene far plane: 40.
+- The shared observer target adopts `far=40` from the selected Godot candidate. Core still needs to make this clip plane explicit before pixel comparison.
+
+## v1.8.4 Alignment Notes
+
+- The shared observer target now uses far=40.
+- The target includes right_vector, pixel_aspect_ratio, and snapshot_channel placeholders.
+- Existing target JSON retains camelCase bridge keys but documents their snake_case contract mappings.
+- This remains a preview contract and does not imply parity.
 
 ## What This Does Not Prove
 

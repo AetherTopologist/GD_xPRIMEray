@@ -132,6 +132,12 @@ def build_target_observer(
             "forward_axis": "explicit_vector",
             "units": "scene_units",
         },
+        "right_vector": {
+            "derivation": "cross_up_forward",
+            "explicit": None,
+            "reorthogonalize_up": True,
+            "notes": "Matches current Core TransportRunner convention; Godot adapter transform still requires review.",
+        },
         "pixelSampling": {
             "samplePosition": "center",
             "xConvention": "x_plus_0_5",
@@ -143,6 +149,20 @@ def build_target_observer(
         },
         "aspectPolicy": {
             "policy": "horizontal_scaled_by_width_over_height",
+        },
+        "pixel_aspect_ratio": 1.0,
+        "snapshot_channel": {
+            "type": "bend_magnitude_metric",
+            "comparisonReady": False,
+            "notes": "Core emits bend-magnitude metric snapshots. Godot rendered channel is not yet normalized; v1.9 will define shared snapshot/channel semantics.",
+        },
+        "contractFieldMapping": {
+            "aspectPolicy": "aspect_policy",
+            "pixelSampling": "pixel_sampling",
+            "imageOrigin": "image_origin",
+            "right_vector": "right_vector",
+            "pixel_aspect_ratio": "pixel_aspect_ratio",
+            "snapshot_channel": "snapshot_channel",
         },
     }
 
@@ -218,9 +238,16 @@ Parity claim: NONE
 | Projection | {projection["type"]} |
 | Near | {observer["near"]} |
 | Far | {observer["far"]} |
+| Right Vector | {observer["right_vector"]["derivation"]} |
 | Pixel Sampling | {pixel_sampling["samplePosition"]} |
 | Image Origin | {image_origin["origin"]} |
 | Aspect Policy | {aspect_policy["policy"]} |
+| Pixel Aspect Ratio | {observer["pixel_aspect_ratio"]} |
+| Snapshot Channel | {observer["snapshot_channel"]["type"]} (comparison ready: false) |
+
+## Contract Field Mapping
+
+The target retains the existing camelCase bridge keys `aspectPolicy`, `pixelSampling`, and `imageOrigin` for v1.8.3 compatibility. `contractFieldMapping` documents their snake_case observer contract equivalents alongside the new snake_case fields.
 
 ## Why This Target
 
