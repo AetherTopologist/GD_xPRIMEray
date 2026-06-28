@@ -179,6 +179,7 @@ nav:
 
   - Observatory:
       - Observatory Atlas: Observatory/observatory_atlas.md
+      - Observation Atlas: Observatory/Observation_Atlas/README.md
       - Chapters:
           - Ch 1 — Dual Reality: Observatory/chapters/chapter_01.md
           - Ch 2 — Observer Disagreement: Observatory/chapters/chapter_02.md
