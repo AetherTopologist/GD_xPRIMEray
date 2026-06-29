@@ -1,6 +1,10 @@
 # Representation Grammar
 
+The Observer Grammar follows signal *into* the receiver. The Representation Grammar follows evidence *out* to the reader — through encoding choices, medium, and the file or view you actually inspect.
+
 The Representation Grammar describes how source material becomes a persistent form that a reader can inspect. It complements the [Observer Grammar](observer_grammar.md) and the Representation Principle in the [Atlas Constitution](ATLAS_CONSTITUTION.md).
+
+If two representations look alike, check this chain before assuming they measure the same thing.
 
 ```mermaid
 flowchart LR
@@ -31,16 +35,12 @@ The representation is the organized form perceived by the reader, such as an ima
 
 The artifact is the persistent file or object that preserves the representation and its evidence trail. Record path, format, version, provenance, source references, transform references, and reproducibility instructions where applicable.
 
-## Claim Boundary Node
+## Claim boundary (required last step)
 
-The claim boundary states what the artifact supports, what is inferred, and what remains unknown. It must account for every transformation between Source and Artifact. Visual clarity, realism, or resemblance does not expand the supported claim.
+State what the artifact supports, what is inferred, and what remains unknown — including every transform from Source to Artifact. A clear or realistic image does not, by itself, support a stronger claim.
 
-## Use Rule
+## Before comparing two representations
 
-Changing any node can create a different representation even when the source is unchanged. Two artifacts require a declared comparison basis and, where necessary, a documented transform before their representations can be treated as comparable.
+A change at any node — encoding, medium, normalization, annotation — can produce a different representation from the same source. Two artifacts need a stated comparison basis and, when required, a documented transform. Resemblance is not equivalence.
 
-## Claim Boundary
-
-No parity claim.
-No physics validation claim.
-No claim that artistic or speculative visualizations are scientific proof.
+For project-wide reading limits, see [Reading boundary](README.md#reading-boundary).

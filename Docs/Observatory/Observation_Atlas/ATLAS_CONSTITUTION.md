@@ -1,24 +1,26 @@
 # Atlas Constitution
 
-**Observation Atlas — Permanent Engineering Philosophy**
+**Observation Atlas — Field Rules**
 
-This document defines the reasoning principles behind the Observation Atlas. It is not a milestone, a roadmap, or a marketing artifact. It does not change with versioning cycles. When a section, page, capability claim, or visualization conflicts with these doctrines, the doctrine stands and the page requires revision.
+These are the standing rules for how Atlas entries are written and read. They do not change with milestone numbering. If a page conflicts with a rule here, the page should be corrected — not the rule relaxed for convenience.
+
+This document is not a milestone, a roadmap, or a marketing artifact.
 
 ---
 
-## Doctrine 1 — Observation First
+## Rule 1 — Observation first
 
-Observations precede images.
+Start with what is being observed, not with how pretty the output looks.
 
-An image is one form of artifact that an observation may produce. It is not the observation itself. The observation is the act of a receiver encountering a phenomenon under declared conditions, producing a measurement with declared units, uncertainty, and scope.
+An image is one kind of artifact an observation may leave behind. The observation itself is: a receiver encountering a phenomenon under stated conditions, producing a measurement with stated units, uncertainty, and scope.
 
 The Atlas does not begin with what something looks like. It begins with what is being observed, by what, under what conditions, and what the receiver actually records. Images, renders, visualizations, and diagrams appear later in the chain — as artifacts of a completed observation, or as representations of a hypothetical one.
 
-This doctrine prevents any entry from substituting visual appeal for observational rigor.
+This rule prevents any entry from substituting visual appeal for observational rigor.
 
 ---
 
-## Doctrine 2 — Observer Grammar
+## Rule 2 — Observer grammar
 
 Every observer in the Atlas answers the same sequence of questions. No entry is complete until every node in the grammar is addressed or explicitly marked unknown.
 
@@ -34,11 +36,11 @@ Phenomenon
   → Claim Boundary    (what is supported, what is inferred, what is unknown?)
 ```
 
-An observer entry that stops at Artifact and does not reach Interpretation and Claim Boundary is incomplete. An observer entry that reaches Claim Boundary and declares Supported where the evidence supports only Inferred is a defect.
+An observer entry that stops at Artifact and does not reach Interpretation and Claim Boundary is incomplete. An observer entry that reaches Claim Boundary and declares Supported where the evidence supports only Inferred is an incomplete or misleading entry.
 
 ---
 
-## Doctrine 3 — Representation Principle
+## Rule 3 — Representation principle
 
 The Atlas organizes representations of observations, not reality itself.
 
@@ -50,19 +52,19 @@ No representation is neutral. Every entry in the Atlas should make its represent
 
 ---
 
-## Doctrine 4 — Atlas Principle
+## Rule 4 — Map, not ranking
 
-The Atlas maps relationships rather than rankings.
+The Atlas is a map of observation systems, not a ranking of technologies.
 
-The Atlas does not rank observer families by quality, realism, scientific authority, or capability. It maps how observer families relate to one another: what they share in grammar structure, where their measurement vocabularies overlap, where comparison requires a declared transform, and where comparison is not currently supported by evidence.
+It records how observer families relate: shared grammar nodes, overlapping vocabulary, where comparison needs a declared transform, and where comparison is not supported by current evidence.
 
 A biological observer and a computational observer may share a field in the Observer Grammar — both have a Receiver, for instance — without this implying equivalence. The shared grammar node is a navigational tool. It is not a claim that retinal transduction and ray integration are the same process.
 
-Entries that position one observer family as superior to another, or that imply a hierarchy of observational validity, require revision.
+Entries that position one observer family as superior to another, or that imply a hierarchy of observational validity, should be corrected.
 
 ---
 
-## Doctrine 5 — Evidence Ladder
+## Rule 5 — Evidence ladder
 
 Every capability claim in the Atlas is placed at a specific maturity level. No claim may exceed its evidence.
 
@@ -70,27 +72,29 @@ Every capability claim in the Atlas is placed at a specific maturity level. No c
 Vision             — Direction stated; no implementation exists
 Prototype          — Minimal implementation exists; scope is narrow
 Experimental       — Implementation produces inspectable results; determinism verified
-Internal Validation — Results validated against a declared reference under controlled conditions
+Internal Validation — Results checked against a declared reference under stated conditions within this project's evidence trail
 Public Demo        — Results demonstrated publicly; claim scope declared and bounded
 Research Ready     — Methodology documented; results reproducible by a reader following the record
-Production Ready   — Validated, stable, maintained, suitable for external dependence
+Production Ready   — Stable, maintained, suitable for external dependence under declared scope
 ```
 
-Moving a claim up the ladder requires new evidence, not revision of the label. Labeling a Vision-level capability as Experimental because it is aspirationally plausible is a defect. Labeling an Experimental capability as Vision because the scope is narrow is also a defect — it suppresses evidence.
+Internal Validation is not a public physics-validation or parity claim unless explicitly scoped and cited.
 
-When two documents in the Atlas assign different maturity levels to the same capability, both documents require revision. The disagreement is a defect in both, not a choice between two valid views.
+Moving a claim up the ladder requires new evidence, not revision of the label. Labeling a Vision-level capability as Experimental because it is aspirationally plausible is an incomplete or misleading entry. Labeling an Experimental capability as Vision because the scope is narrow also suppresses evidence and should be corrected.
+
+When two documents in the Atlas assign different maturity levels to the same capability, both documents should be corrected. The disagreement is an error in both, not a choice between two valid views.
 
 ---
 
-## Doctrine 6 — Claim Boundary
+## Rule 6 — Claim boundary
 
-Every observer, artifact, and visualization in the Atlas explicitly declares the standing of its claims across three categories:
+Every entry classifies what may be said today:
 
-**Supported** — The claim is backed by inspectable evidence available in this repository or a cited external source. A reader following the reference can verify the claim independently.
+**Supported** — Inspectable evidence exists in this repository or a cited external source. A reader can follow the reference and verify the claim independently.
 
-**Inferred** — The claim follows from supported evidence by reasoning that is stated and checkable, but the inference has not been validated by an independent measurement or replication. The basis for the inference is declared.
+**Inferred** — Reasoning from supported evidence is stated and checkable, but independent replication or measurement may not exist yet. The basis for the inference is declared.
 
-**Unknown** — The claim cannot currently be made. Either the evidence does not exist, the measurement has not been performed, or the comparison basis has not been established. Unknown is not a negative result. It is an accurate statement of current knowledge.
+**Unknown** — Evidence or comparison basis is absent. Either the measurement has not been performed, or the comparison basis has not been established. Unknown is honest scope, not failure.
 
 No fourth category exists. Absence of evidence is Unknown, not Supported. Plausibility is not evidence. Analogy is not a documented transform. A claim that is visually compelling but not backed by inspectable evidence is Unknown until evidence is produced.
 
@@ -98,11 +102,11 @@ The phrase "no parity claim" in Atlas documents means: no claim that two observe
 
 ---
 
-## Doctrine 7 — Translation Principle
+## Rule 7 — Translation principle
 
 The Atlas provides a shared descriptive language across biological, optical, scientific, computational, and educational observer systems without assuming equivalence between them.
 
-The Observer Grammar (Doctrine 2) is a translation frame. It allows a human retina, a scanning electron microscope, a GRIN ray integrator, and an educational orbital diagram to be described in the same structural vocabulary. This shared vocabulary makes relationships visible and comparisons explicit.
+The Observer Grammar (Rule 2) is a translation frame. It allows a human retina, a scanning electron microscope, a GRIN ray integrator, and an educational orbital diagram to be described in the same structural vocabulary. This shared vocabulary makes relationships visible and comparisons explicit.
 
 Translation is not equivalence. Describing a GRIN transport observer and a spectrometer in the same grammar does not imply that bend magnitude and spectral channel are the same kind of measurement. It implies that both have a Receiver, a Measurement, an Artifact, and a Claim Boundary — and that the differences between them can be stated precisely within that shared frame.
 
@@ -110,6 +114,6 @@ Any bridge drawn between observer families in the Atlas must be supported by a d
 
 ---
 
-## Closing Statement
+## Closing note
 
-The Atlas welcomes exploration. Every bridge between territories must be supported by inspectable evidence rather than analogy alone.
+The Atlas is meant to invite careful comparison: same questions, different receivers, different limits. Bridges between territories are welcome when they cite evidence, declare transforms, or plainly mark speculation at Vision maturity. Analogy alone is not a bridge.

@@ -1,6 +1,8 @@
 # Observer Grammar
 
-The Observer Grammar expands Doctrine 2 of the [Atlas Constitution](ATLAS_CONSTITUTION.md). It is the shared sequence for describing biological, optical, scientific, computational, and educational observers. It is a translation frame, not an equivalence claim.
+Use this sequence when reading or writing any Atlas territory — biological, optical, scientific, computational, or educational. It answers one question in nine steps: *what happened between the phenomenon and the claim?*
+
+The Observer Grammar expands Rule 2 of the [Atlas Constitution](ATLAS_CONSTITUTION.md). It is the shared sequence for describing biological, optical, scientific, computational, and educational observers. It is a translation frame, not an equivalence claim.
 
 ```mermaid
 flowchart LR
@@ -14,11 +16,13 @@ flowchart LR
     N --> C[Claim Boundary]
 ```
 
-## Grammar Nodes
+Same chart for every observer family. Shared nodes aid navigation; they do not imply equivalent physics or measurement.
+
+## The nine nodes (what to record at each step)
 
 ### Phenomenon
 
-Name what is being observed. Separate the phenomenon from the image, signal, or model later used to represent it. For speculative or computational entries, state whether the phenomenon is physical, simulated, conceptual, or unknown.
+Name the subject of observation, not the picture of it. Separate the phenomenon from the image, signal, or model later used to represent it. For speculative or computational entries, state whether the phenomenon is physical, simulated, conceptual, or unknown.
 
 ### Field
 
@@ -38,7 +42,7 @@ Identify the component that records the interaction and its sensitivity, range, 
 
 ### Measurement
 
-Declare the recorded quantity, units, calibration, normalization, dynamic range, uncertainty, and channel semantics. Unknown values remain explicit. Similar storage layouts do not establish comparable measurements.
+State what the number *means*, not only how it is stored. Declare the recorded quantity, units, calibration, normalization, dynamic range, uncertainty, and channel semantics. Unknown values remain explicit. Similar storage layouts do not establish comparable measurements.
 
 ### Artifact
 
@@ -50,14 +54,10 @@ State the reasoning that connects the artifact to a claim. Separate direct readi
 
 ### Claim Boundary
 
-Classify conclusions as `Supported`, `Inferred`, or `Unknown` under the Constitution. Name prohibited conclusions directly when a representation could invite overreading. No observer entry is complete if this node is absent.
+End here. State what may and may not be concluded. Classify conclusions as `Supported`, `Inferred`, or `Unknown` under the Constitution. Name prohibited conclusions directly when a representation could invite overreading. No observer entry is complete if this node is absent.
 
-## Completion Rule
+## When is an entry complete?
 
-Every node must be answered or explicitly marked `Unknown`. An entry that stops at Artifact, silently fills an unknown, or treats analogy as a transform is incomplete.
+Every node is answered or marked `Unknown`. Stopping at Artifact without Interpretation and Claim Boundary leaves the reader guessing what the evidence supports. Treating analogy as a documented transform overstates the case.
 
-## Claim Boundary
-
-No parity claim.
-No physics validation claim.
-No claim that artistic or speculative visualizations are scientific proof.
+For project-wide reading limits, see [Reading boundary](README.md#reading-boundary).
