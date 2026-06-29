@@ -20,10 +20,8 @@ Entries in this family should follow the shared [Observer Grammar](observer_gram
 
 Biological observation motivates explicit receiver models and reminds computational systems that a rendered pixel is not perception itself. Future observer declarations may describe spectral response, acuity, field of view, adaptation, or sampling, but no biological equivalence is currently asserted.
 
-Project Glowing Heart provides the emerging protocol layer for describing fixtures, observers, snapshots, measurements, artifacts, and future comparisons. Biological models would require extensions beyond the current preview camera and measurement contracts.
+Biological models would require extensions beyond the current preview camera and measurement contracts. See [Project Glowing Heart](README.md#relationship-to-project-glowing-heart).
 
-## Claim Boundary
+## Reading boundary
 
-No parity claim.
-No physics validation claim.
-No claim that artistic or speculative visualizations are scientific proof.
+This territory follows the Atlas [reading boundary](README.md#reading-boundary).

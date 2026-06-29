@@ -20,10 +20,8 @@ Entries in this family should follow the shared [Observer Grammar](observer_gram
 
 Each instrument entry should identify stimulus, interaction mechanism, detector, calibration, units, dynamic range, reconstruction, artifacts, and uncertainty. Similar-looking outputs from different instruments remain distinct measurement channels unless a documented transform establishes a comparison basis.
 
-Project Glowing Heart provides the emerging protocol layer for describing fixtures, observers, snapshots, measurements, artifacts, and future comparisons. Its v1.9 measurement vocabulary is an early computational analogue, not an instrument-validation result.
+The v1.9 measurement vocabulary is an early computational analogue, not an instrument-validation result. See [Project Glowing Heart](README.md#relationship-to-project-glowing-heart).
 
-## Claim Boundary
+## Reading boundary
 
-No parity claim.
-No physics validation claim.
-No claim that artistic or speculative visualizations are scientific proof.
+This territory follows the Atlas [reading boundary](README.md#reading-boundary).

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("XPrimeRay.Testbench.Cli")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c90e74fecdd68d8449599bbf84b4e02c7054f0d5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ac2726c18a5a4543621eec5ae9941084edc4847b")]
 [assembly: System.Reflection.AssemblyProductAttribute("XPrimeRay.Testbench.Cli")]
 [assembly: System.Reflection.AssemblyTitleAttribute("XPrimeRay.Testbench.Cli")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

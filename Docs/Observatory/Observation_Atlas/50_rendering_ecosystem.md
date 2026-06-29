@@ -1,17 +1,19 @@
-# 50 Rendering Ecosystem
+# 50 Rendering & Engines
+
+**The Atlas is a map of observation systems, not a ranking of technologies.** This territory names engine and renderer *context* for computational observation — not a shootout or compatibility scorecard.
 
 ## Scope
 
-The rendering ecosystem provides engines, offline renderers, ray-intersection libraries, GPU frameworks, scene formats, and color pipelines that contextualize computational observation.
+Rendering and engine systems provide viewports, cameras, scene graphs, offline integrators, intersection libraries, GPU frameworks, scene formats, and color pipelines that contextualize computational observation.
 
-## Ecosystem Map
+## Context map
 
 | Technology | Atlas context |
 |---|---|
 | Blender | Content creation and offline or interactive rendering workflows |
 | Godot | Real-time engine and the first xPRIMEray observatory shell |
-| Unreal Engine | Real-time engine, scene system, and rendering ecosystem |
-| Unity | Real-time engine, scene system, and rendering ecosystem |
+| Unreal Engine | Real-time engine, scene system, and rendering stack |
+| Unity | Real-time engine, scene system, and rendering stack |
 | Mitsuba | Research-oriented rendering and differentiable rendering context |
 | PBRT | Reference-oriented physically based rendering concepts and implementation |
 | Embree | CPU ray-intersection kernel context |
@@ -19,10 +21,8 @@ The rendering ecosystem provides engines, offline renderers, ray-intersection li
 
 Inclusion identifies a relevant capability family. It does not assert plugin compatibility, feature equivalence, output agreement, performance, endorsement, or rank. The [Renderer Landscape](../technology_landscape/renderer_landscape.md) and [Adapter Landscape](../technology_landscape/adapter_landscape.md) provide further context.
 
-Project Glowing Heart provides the emerging protocol layer for describing fixtures, observers, snapshots, measurements, artifacts, and future comparisons. Adapter claims require explicit contracts and evidence for each technology.
+Adapter claims require explicit contracts and evidence for each technology. See [Project Glowing Heart](README.md#relationship-to-project-glowing-heart).
 
-## Claim Boundary
+## Reading boundary
 
-No parity claim.
-No physics validation claim.
-No claim that artistic or speculative visualizations are scientific proof.
+This territory follows the Atlas [reading boundary](README.md#reading-boundary). Visual resemblance between engine output and Core artifacts is not evidence of equivalence.

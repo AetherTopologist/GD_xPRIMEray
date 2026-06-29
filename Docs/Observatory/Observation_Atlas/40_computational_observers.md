@@ -21,10 +21,8 @@ Entries in this family should follow the shared [Observer Grammar](observer_gram
 
 The standalone Core CLI and artifacts are documented from [v0.1](../../xPRIMEray/project_glowing_heart_v0_1_baseline.md). The shared observer vocabulary appears in [v1.7](../../xPRIMEray/project_glowing_heart_v1_7_shared_observer_contract.md), target alignment in [v1.8](../../xPRIMEray/project_glowing_heart_v1_8_milestone.md), and measurement-channel semantics in [v1.9](../../xPRIMEray/project_glowing_heart_v1_9_shared_snapshot_measurement_contract.md).
 
-Project Glowing Heart provides the emerging protocol layer for describing fixtures, observers, snapshots, measurements, artifacts, and future comparisons. Current evidence does not establish renderer, runtime, transport, or pixel equivalence.
+Current evidence does not establish renderer, runtime, transport, or pixel equivalence. See [Project Glowing Heart](README.md#relationship-to-project-glowing-heart).
 
-## Claim Boundary
+## Reading boundary
 
-No parity claim.
-No physics validation claim.
-No claim that artistic or speculative visualizations are scientific proof.
+This territory follows the Atlas [reading boundary](README.md#reading-boundary).

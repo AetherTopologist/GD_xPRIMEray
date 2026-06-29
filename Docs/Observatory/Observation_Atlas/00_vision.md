@@ -1,14 +1,24 @@
 # 00 Vision
 
-## Atlas Concept
+If you only read one page after the [README](README.md): **the Atlas is a map of observation systems, not a ranking of technologies.** Use it to compare *how observation works*, not *which tool wins*.
 
-The Observation Atlas documents the family of biological, optical, scientific, computational, and educational observers that inspire, contextualize, and guide xPRIMEray.
+## Atlas concept
 
-The [Atlas Constitution](ATLAS_CONSTITUTION.md) governs this foundations page and every Atlas entry. Its [Observer Grammar](observer_grammar.md) and the companion [Representation Grammar](representation_grammar.md) provide the shared descriptive structure.
+An **observer** is anything that selects part of a phenomenon and turns it into a storable signal:
 
-An observer is treated broadly: a sensing organism, optical assembly, detector, simulation camera, measurement channel, or educational representation can each select and encode part of a phenomenon. The Atlas records what each observer receives, transforms, measures, and presents.
+- a sensing organism (eye, retina, echolocation)
+- an optical assembly (lens, telescope, GRIN cell)
+- a laboratory detector (SEM, spectrometer, particle counter)
+- a computational camera (raster, ray tracer, field-transport integrator)
+- an educational or interpretive view (orbital diagram, curvature field sketch)
 
-## Organizing Questions
+The Atlas records what each observer **receives**, **transforms**, **measures**, and **presents** — and where claims must stop.
+
+The [Atlas Constitution](ATLAS_CONSTITUTION.md) governs this page and every Atlas entry. Its [Observer Grammar](observer_grammar.md) and [Representation Grammar](representation_grammar.md) provide the shared descriptive structure.
+
+## Questions every territory answers
+
+Whether the observer is biological, optical, scientific, computational, or educational, the Atlas asks:
 
 - What phenomenon reaches the observer?
 - What receiver or detector responds?
@@ -17,14 +27,14 @@ An observer is treated broadly: a sensing organism, optical assembly, detector, 
 - Which artifacts preserve the observation and its provenance?
 - Which claims are supported, blocked, or outside scope?
 
-## Protocol and Map
+## Protocol and map
 
-Project Glowing Heart provides the emerging protocol layer for describing fixtures, observers, snapshots, measurements, artifacts, and future comparisons. The Atlas supplies the broader map of observer families that may inform those protocols.
+**Project Glowing Heart** is this repository's protocol, artifact, and measurement program — preview contracts for fixtures, observers, snapshot channels, artifacts, and future difference packets.
 
-The Atlas is descriptive and revisioned. It does not collapse biological perception, laboratory instrumentation, rendering, and simulation into one equivalence class.
+**The Observation Atlas** is the broader map: observer families that inform those contracts and keep terminology honest across domains.
 
-## Claim Boundary
+The map is descriptive and revisioned. It does not merge perception, lab instrumentation, rendering, and simulation into a single "ground truth." The Atlas does not duplicate Glowing Heart milestones. See [Relationship to Project Glowing Heart](README.md#relationship-to-project-glowing-heart).
 
-No parity claim.
-No physics validation claim.
-No claim that artistic or speculative visualizations are scientific proof.
+## Reading boundary
+
+This page follows the Atlas [reading boundary](README.md#reading-boundary).

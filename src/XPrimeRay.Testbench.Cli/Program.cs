@@ -1,3 +1,4 @@
+using XPrimeRay.Core.Comparison;
 using XPrimeRay.Core.Fixtures;
 using XPrimeRay.Core.Transport;
 using XPrimeRay.Core.Validation;
@@ -30,7 +31,7 @@ static int Run(string[] args)
         PrintSummary(result, report);
         if (options.OutputEnabled)
         {
-            var outputPath = WriteArtifacts(options, result, report);
+            var outputPath = WriteArtifacts(options, fixture, result, report);
             Console.WriteLine($"Artifacts: {NormalizePath(outputPath)}");
             Console.WriteLine($"Snapshot: {NormalizePath(Path.Combine(outputPath, "snapshot.ppm"))}");
         }
@@ -147,7 +148,11 @@ static bool TryParseArgs(string[] args, out RunOptions options, out string error
     return true;
 }
 
-static string WriteArtifacts(RunOptions options, TransportResult result, ValidationReport report)
+static string WriteArtifacts(
+    RunOptions options,
+    FixtureDefinition fixture,
+    TransportResult result,
+    ValidationReport report)
 {
     var runStamp = DateTimeOffset.UtcNow;
     var outputDirectory = ManifestWriter.CreateRunDirectory(
@@ -173,6 +178,12 @@ static string WriteArtifacts(RunOptions options, TransportResult result, Validat
     PpmSnapshotWriter.Write(outputDirectory, result);
     HeatmapCsvWriter.Write(outputDirectory, result);
     AsciiSnapshotWriter.Write(outputDirectory, result);
+    var differencePacket = DifferencePacket.CreateCoreIdentityPacket(
+        fixture,
+        fixturePath,
+        runId,
+        runStamp);
+    DifferencePacketWriter.Write(outputDirectory, differencePacket);
     return outputDirectory;
 }
 

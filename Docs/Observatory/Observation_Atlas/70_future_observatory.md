@@ -16,12 +16,10 @@ The future Observatory is a roadmap for composing observer, detector, transport,
 | Difference packet | Bind comparable observations, policies, transforms, tolerances, and results | Vision |
 | Multi-observer Observatory | Explore one fixture through multiple declared observers and representations | Vision |
 
-Project Glowing Heart provides the emerging protocol layer for describing fixtures, observers, snapshots, measurements, artifacts, and future comparisons. The architecture path is summarized in the [Glowing Heart Atlas link note](../../xPRIMEray/project_glowing_heart_atlas_link.md).
+The architecture path is summarized in the [Glowing Heart Atlas link note](../../xPRIMEray/project_glowing_heart_atlas_link.md). See [Project Glowing Heart](README.md#relationship-to-project-glowing-heart).
 
-Roadmap labels use the same maturity ladder as the [Capability Matrix](capability_matrix.md). Planned work remains planned until repository evidence supports a status change.
+Roadmap labels use the same maturity ladder as the [Capability Matrix](capability_matrix.md). Planned work remains planned until repository evidence supports a status change. This is a direction map, not a ranking of futures.
 
-## Claim Boundary
+## Reading boundary
 
-No parity claim.
-No physics validation claim.
-No claim that artistic or speculative visualizations are scientific proof.
+This territory follows the Atlas [reading boundary](README.md#reading-boundary).

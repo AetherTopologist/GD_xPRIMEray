@@ -90,4 +90,6 @@ public sealed record ArtifactManifest
     public string SnapshotPpm { get; init; } = "snapshot.ppm";
     public string SnapshotHeatmapCsv { get; init; } = "snapshot_heatmap.csv";
     public string SnapshotAsciiTxt { get; init; } = "snapshot_ascii.txt";
+    public string DifferencePacketJson { get; init; } = "difference_packet.json";
+    public string DifferenceSummaryMd { get; init; } = "difference_summary.md";
 }

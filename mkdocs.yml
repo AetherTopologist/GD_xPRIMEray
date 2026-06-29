@@ -139,6 +139,10 @@ nav:
       - Feature Index: FEATURE_INDEX.md
 
   - Project Glowing Heart:
+      - Atlas Link: xPRIMEray/project_glowing_heart_atlas_link.md
+      - v1.8 Observer Milestone: xPRIMEray/project_glowing_heart_v1_8_milestone.md
+      - v1.9 Snapshot Contract: xPRIMEray/project_glowing_heart_v1_9_shared_snapshot_measurement_contract.md
+      - Public Demo Readiness: xPRIMEray/project_glowing_heart_v1_5_public_demo_readiness.md
       - Public Proposal: xPRIMEray/project_glowing_heart_public_proposal.md
       - Engineering Review: xPRIMEray/project_glowing_heart_review.md
       - Execution Plan: xPRIMEray/project_glowing_heart_execution_plan.md
@@ -158,7 +162,6 @@ nav:
       - v1.3 Shared Fixture Schema: xPRIMEray/project_glowing_heart_v1_3_shared_fixture_schema.md
       - v1.4 Shared Fixture Instance: xPRIMEray/project_glowing_heart_v1_4_shared_fixture_instance.md
       - v1.4.1 Schema Alignment: xPRIMEray/project_glowing_heart_v1_4_1_schema_alignment.md
-      - v1.5 Public Demo Readiness: xPRIMEray/project_glowing_heart_v1_5_public_demo_readiness.md
       - v1.6 Grok Handoff: xPRIMEray/project_glowing_heart_v1_6_grok_handoff.md
       - v1.7 Shared Observer Contract: xPRIMEray/project_glowing_heart_v1_7_shared_observer_contract.md
       - v1.8 Observer Instances: xPRIMEray/project_glowing_heart_v1_8_observer_instances.md
@@ -179,7 +182,23 @@ nav:
 
   - Observatory:
       - Observatory Atlas: Observatory/observatory_atlas.md
-      - Observation Atlas: Observatory/Observation_Atlas/README.md
+      - Observation Atlas:
+          - Home: Observatory/Observation_Atlas/README.md
+          - Visual Wayfinding: Observatory/Observation_Atlas/visual_wayfinding.md
+          - Observer Journey: Observatory/Observation_Atlas/observer_journey.md
+          - Vision: Observatory/Observation_Atlas/00_vision.md
+          - Capability Matrix: Observatory/Observation_Atlas/capability_matrix.md
+          - Constitution: Observatory/Observation_Atlas/ATLAS_CONSTITUTION.md
+          - Observer Grammar: Observatory/Observation_Atlas/observer_grammar.md
+          - Representation Grammar: Observatory/Observation_Atlas/representation_grammar.md
+          - Biological Observers: Observatory/Observation_Atlas/10_biological_observers.md
+          - Optical Observers: Observatory/Observation_Atlas/20_optical_observers.md
+          - Scientific Instruments: Observatory/Observation_Atlas/30_scientific_instruments.md
+          - Computational Observers: Observatory/Observation_Atlas/40_computational_observers.md
+          - Rendering Ecosystem: Observatory/Observation_Atlas/50_rendering_ecosystem.md
+          - Educational Visualizations: Observatory/Observation_Atlas/60_educational_visualizations.md
+          - Future Observatory: Observatory/Observation_Atlas/70_future_observatory.md
+          - Revision History: Observatory/Observation_Atlas/revision_history.md
       - Chapters:
           - Ch 1 — Dual Reality: Observatory/chapters/chapter_01.md
           - Ch 2 — Observer Disagreement: Observatory/chapters/chapter_02.md

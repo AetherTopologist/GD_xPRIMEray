@@ -70,6 +70,18 @@ description: Curved-ray optical transport observatory — GRIN field integration
 
 ---
 
+## Three ways to enter
+
+| Entry | What you will find |
+|---|---|
+| [xPRIMEray Runtime](start_here.md) | Curved-ray observatory and diagnostics |
+| [Project Glowing Heart](xPRIMEray/project_glowing_heart_atlas_link.md) | Protocol and artifact trail |
+| [Observation Atlas](Observatory/Observation_Atlas/README.md) | Observer field guide, not a ranking |
+
+Observatory Atlas is the chapter tour. Observation Atlas is the observer map.
+
+---
+
 ## What xPRIMEray Is
 
 === "Renderer"

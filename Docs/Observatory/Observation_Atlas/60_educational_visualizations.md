@@ -1,12 +1,14 @@
-# 60 Educational Visualizations
+# 60 Educational & Interpretive Views
+
+Educational and interpretive material explains structures and models for learning. It is **not** scientific proof unless backed by declared measurement channels and evidence.
 
 ## Scope
 
-Educational visualizations translate structures, models, and measurements into forms intended for learning. Examples include orbital and eigenmode views, curvature fields, ray-path diagrams, false-color measurements, animated explanations, and artistic transport studies.
+Examples include orbital and eigenmode views, curvature fields, ray-path diagrams, false-color measurements, animated explanations, and artistic transport studies.
 
-Each entry should use the [Representation Grammar](representation_grammar.md) to disclose how source material becomes an artifact and which claims remain outside its scope.
+Each entry should use the [Representation Grammar](representation_grammar.md) to disclose how source material becomes an artifact and which claims remain outside its scope. Visual similarity is not evidence of equivalence.
 
-## Representation Classes
+## Representation classes
 
 | Class | Required distinction |
 |---|---|
@@ -16,14 +18,12 @@ Each entry should use the [Representation Grammar](representation_grammar.md) to
 | Artistic interpretation | Explores visual language without serving as evidence of physical truth |
 | Speculative visualization | Presents a possible or imagined observer experience with explicit uncertainty |
 
-## Atlas Practice
+## Atlas practice
 
-Captions should name the representation class, source artifacts, transformations, and known limitations. Visual resemblance is not validation. False color, interpolation, compositing, and aesthetic post-processing should be disclosed when they affect interpretation.
+Captions should name the representation class, source artifacts, transformations, and known limitations. False color, interpolation, compositing, and aesthetic post-processing should be disclosed when they affect interpretation.
 
-Project Glowing Heart provides the emerging protocol layer for describing fixtures, observers, snapshots, measurements, artifacts, and future comparisons. Its claim boundaries can help educational views remain legible about what is measured, derived, or imagined.
+Claim boundaries from [Project Glowing Heart](README.md#relationship-to-project-glowing-heart) can help educational views remain clear about what is measured, derived, or imagined.
 
-## Claim Boundary
+## Reading boundary
 
-No parity claim.
-No physics validation claim.
-No claim that artistic or speculative visualizations are scientific proof.
+This territory follows the Atlas [reading boundary](README.md#reading-boundary).
