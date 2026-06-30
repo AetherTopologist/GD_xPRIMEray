@@ -1,0 +1,215 @@
+{
+  "graphId": "atlas.observer_grammar.v0_1",
+  "title": "Observer Grammar",
+  "description": "The shared descriptive sequence used to document an observer from phenomenon through claim boundary.",
+  "version": "v0.1",
+  "nodes": [
+    {
+      "id": "phenomenon",
+      "label": "Phenomenon",
+      "type": "grammar_node",
+      "category": "observer_grammar",
+      "maturity": "Prototype",
+      "description": "The physical, computational, conceptual, or unknown subject being observed.",
+      "claimBoundary": "The phenomenon is distinct from its representation.",
+      "links": [],
+      "tags": ["source"]
+    },
+    {
+      "id": "field",
+      "label": "Field",
+      "type": "grammar_node",
+      "category": "observer_grammar",
+      "maturity": "Prototype",
+      "description": "The carrier or structure through which the phenomenon is expressed.",
+      "claimBoundary": "A declared field model is not a broad physical conclusion.",
+      "links": [],
+      "tags": ["carrier"]
+    },
+    {
+      "id": "transport",
+      "label": "Transport",
+      "type": "grammar_node",
+      "category": "observer_grammar",
+      "maturity": "Prototype",
+      "description": "The declared evolution or propagation toward an observer.",
+      "claimBoundary": "Implemented transport and analogy must remain distinct.",
+      "links": [],
+      "tags": ["propagation"]
+    },
+    {
+      "id": "interaction",
+      "label": "Interaction",
+      "type": "grammar_node",
+      "category": "observer_grammar",
+      "maturity": "Prototype",
+      "description": "The event at the sensing boundary or interaction region.",
+      "claimBoundary": "Selection effects and losses remain explicit.",
+      "links": [],
+      "tags": ["boundary"]
+    },
+    {
+      "id": "receiver",
+      "label": "Receiver",
+      "type": "grammar_node",
+      "category": "observer_grammar",
+      "maturity": "Prototype",
+      "description": "The biological, optical, instrumental, or computational component that records an interaction.",
+      "claimBoundary": "Shared receiver vocabulary does not imply shared mechanisms.",
+      "links": [],
+      "tags": ["detector"]
+    },
+    {
+      "id": "measurement",
+      "label": "Measurement",
+      "type": "grammar_node",
+      "category": "observer_grammar",
+      "maturity": "Prototype",
+      "description": "The recorded quantity with declared units, range, calibration, and channel semantics.",
+      "claimBoundary": "Different measurement channels require an explicit comparison basis.",
+      "links": [],
+      "tags": ["channel"]
+    },
+    {
+      "id": "artifact",
+      "label": "Artifact",
+      "type": "grammar_node",
+      "category": "observer_grammar",
+      "maturity": "Prototype",
+      "description": "The persistent object that preserves the measurement or its representation.",
+      "claimBoundary": "An artifact preserves evidence within its recorded provenance and scope.",
+      "links": [],
+      "tags": ["evidence"]
+    },
+    {
+      "id": "interpretation",
+      "label": "Interpretation",
+      "type": "grammar_node",
+      "category": "observer_grammar",
+      "maturity": "Prototype",
+      "description": "The stated reasoning that connects an artifact to a bounded conclusion.",
+      "claimBoundary": "Direct reading, inference, analogy, and speculation remain labeled.",
+      "links": [],
+      "tags": ["reasoning"]
+    },
+    {
+      "id": "claim_boundary",
+      "label": "Claim Boundary",
+      "type": "grammar_node",
+      "category": "observer_grammar",
+      "maturity": "Prototype",
+      "description": "The explicit supported, inferred, and unknown limits of the entry.",
+      "claimBoundary": "No observer entry is complete without this boundary.",
+      "links": [
+        {
+          "label": "Observer Grammar",
+          "href": "../observer_grammar.md"
+        }
+      ],
+      "tags": ["claims"]
+    }
+  ],
+  "edges": [
+    {
+      "id": "phenomenon_describes_field",
+      "from": "phenomenon",
+      "to": "field",
+      "relationship": "describes",
+      "label": "describes",
+      "claimBoundary": "Sequence describes structure, not causation."
+    },
+    {
+      "id": "field_describes_transport",
+      "from": "field",
+      "to": "transport",
+      "relationship": "describes",
+      "label": "describes",
+      "claimBoundary": "Sequence describes structure, not causation."
+    },
+    {
+      "id": "transport_describes_interaction",
+      "from": "transport",
+      "to": "interaction",
+      "relationship": "describes",
+      "label": "describes",
+      "claimBoundary": "Sequence describes structure, not causation."
+    },
+    {
+      "id": "interaction_describes_receiver",
+      "from": "interaction",
+      "to": "receiver",
+      "relationship": "describes",
+      "label": "describes",
+      "claimBoundary": "Sequence describes structure, not causation."
+    },
+    {
+      "id": "receiver_describes_measurement",
+      "from": "receiver",
+      "to": "measurement",
+      "relationship": "describes",
+      "label": "describes",
+      "claimBoundary": "Sequence describes structure, not causation."
+    },
+    {
+      "id": "measurement_describes_artifact",
+      "from": "measurement",
+      "to": "artifact",
+      "relationship": "describes",
+      "label": "describes",
+      "claimBoundary": "Sequence describes structure, not causation."
+    },
+    {
+      "id": "artifact_describes_interpretation",
+      "from": "artifact",
+      "to": "interpretation",
+      "relationship": "describes",
+      "label": "describes",
+      "claimBoundary": "Sequence describes structure, not causation."
+    },
+    {
+      "id": "interpretation_describes_claim_boundary",
+      "from": "interpretation",
+      "to": "claim_boundary",
+      "relationship": "describes",
+      "label": "describes",
+      "claimBoundary": "Sequence describes structure, not causation."
+    }
+  ],
+  "groups": [
+    {
+      "id": "observer_grammar_sequence",
+      "label": "Observer Grammar Sequence",
+      "description": "All required grammar nodes in descriptive order.",
+      "nodeIds": [
+        "phenomenon",
+        "field",
+        "transport",
+        "interaction",
+        "receiver",
+        "measurement",
+        "artifact",
+        "interpretation",
+        "claim_boundary"
+      ]
+    }
+  ],
+  "claimBoundary": "Shared grammar does not imply shared physics or measurement equivalence.",
+  "evidence": [
+    {
+      "label": "Atlas Constitution",
+      "reference": "Docs/Observatory/Observation_Atlas/ATLAS_CONSTITUTION.md",
+      "kind": "repository_doc"
+    },
+    {
+      "label": "Observer Grammar",
+      "reference": "Docs/Observatory/Observation_Atlas/observer_grammar.md",
+      "kind": "repository_doc"
+    }
+  ],
+  "renderHints": {
+    "direction": "LR",
+    "layout": "flowchart",
+    "showGroups": false,
+    "preferredLabel": "Observer Grammar"
+  }
+}

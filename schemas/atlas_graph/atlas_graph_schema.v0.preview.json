@@ -1,0 +1,315 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://xprimeray.dev/schemas/atlas-graph/v0.preview.json",
+  "title": "Project Atlas Graph Contract Preview",
+  "description": "Structured map of Atlas concepts, relationships, evidence, rendering hints, and claim boundaries.",
+  "type": "object",
+  "required": [
+    "graphId",
+    "title",
+    "description",
+    "version",
+    "nodes",
+    "edges",
+    "groups",
+    "claimBoundary",
+    "evidence",
+    "renderHints"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "maturity": {
+      "type": "string",
+      "enum": [
+        "Vision",
+        "Prototype",
+        "Experimental",
+        "Internal Validation",
+        "Public Demo",
+        "Research Ready",
+        "Production Ready"
+      ]
+    },
+    "nodeType": {
+      "type": "string",
+      "enum": [
+        "observer",
+        "grammar_node",
+        "artifact",
+        "contract",
+        "measurement",
+        "representation",
+        "project",
+        "future",
+        "territory"
+      ]
+    },
+    "relationship": {
+      "type": "string",
+      "enum": [
+        "reading_path",
+        "describes",
+        "produces",
+        "requires",
+        "contextualizes",
+        "measures",
+        "represents",
+        "planned",
+        "related_to"
+      ]
+    },
+    "link": {
+      "type": "object",
+      "required": [
+        "label",
+        "href"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "href": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "node": {
+      "type": "object",
+      "required": [
+        "id",
+        "label",
+        "type",
+        "category",
+        "maturity",
+        "description",
+        "claimBoundary",
+        "links",
+        "tags"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "$ref": "#/$defs/nodeType"
+        },
+        "category": {
+          "type": "string",
+          "minLength": 1
+        },
+        "maturity": {
+          "$ref": "#/$defs/maturity"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "claimBoundary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/link"
+          }
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "required": [
+        "id",
+        "from",
+        "to",
+        "relationship",
+        "label",
+        "claimBoundary"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "from": {
+          "type": "string",
+          "minLength": 1
+        },
+        "to": {
+          "type": "string",
+          "minLength": 1
+        },
+        "relationship": {
+          "$ref": "#/$defs/relationship"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "claimBoundary": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "group": {
+      "type": "object",
+      "required": [
+        "id",
+        "label",
+        "description",
+        "nodeIds"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "nodeIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "required": [
+        "label",
+        "reference",
+        "kind"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "repository_doc",
+            "schema",
+            "report",
+            "artifact",
+            "external_source",
+            "other"
+          ]
+        }
+      }
+    }
+  },
+  "properties": {
+    "graphId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.-]*$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "const": "v0.1"
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/node"
+      },
+      "minItems": 1
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/edge"
+      }
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/group"
+      }
+    },
+    "claimBoundary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/evidence"
+      }
+    },
+    "renderHints": {
+      "type": "object",
+      "required": [
+        "direction",
+        "layout",
+        "showGroups"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "direction": {
+          "type": "string",
+          "enum": [
+            "LR",
+            "RL",
+            "TB",
+            "BT"
+          ]
+        },
+        "layout": {
+          "type": "string",
+          "enum": [
+            "flowchart",
+            "layered",
+            "radial",
+            "manual"
+          ]
+        },
+        "showGroups": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}
