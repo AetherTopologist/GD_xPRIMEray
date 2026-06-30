@@ -3,6 +3,10 @@
   "title": "Observer Journey",
   "description": "A suggested reading route across observer families and Project Glowing Heart toward a future interactive workbench.",
   "version": "v0.1",
+  "notes": [
+    "Maturity means Atlas documentation maturity, not observer quality."
+  ],
+  "plainTerms": "Follow this graph as a visitor reading route. Evidence depth describes the Atlas documentation for each node, not the quality of the observer or technology.",
   "nodes": [
     {
       "id": "human_eye",
@@ -183,7 +187,7 @@
       ]
     }
   ],
-  "claimBoundary": "Navigation aid, not a ranking or maturity ladder.",
+  "claimBoundary": "This graph is a reading route, not a ranking or maturity ladder.",
   "evidence": [
     {
       "label": "Observer Journey",

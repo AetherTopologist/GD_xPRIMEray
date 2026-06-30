@@ -3,6 +3,7 @@
   "$id": "https://xprimeray.dev/schemas/atlas-graph/v0.preview.json",
   "title": "Project Atlas Graph Contract Preview",
   "description": "Structured map of Atlas concepts, relationships, evidence, rendering hints, and claim boundaries.",
+  "$comment": "JSON Schema validates document shape. Edge.from, edge.to, and group.nodeIds referential integrity is enforced by tools/atlas_graph_validate.py.",
   "type": "object",
   "required": [
     "graphId",
@@ -21,6 +22,7 @@
     "maturity": {
       "type": "string",
       "enum": [
+        "Not Applicable",
         "Vision",
         "Prototype",
         "Experimental",
@@ -250,6 +252,19 @@
       "type": "string",
       "const": "v0.1"
     },
+    "notes": {
+      "description": "Optional editorial or governance notes that do not change graph relationships.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "plainTerms": {
+      "description": "Optional visitor-facing explanation rendered near the top of Markdown previews.",
+      "type": "string",
+      "minLength": 1
+    },
     "nodes": {
       "type": "array",
       "items": {
@@ -308,6 +323,20 @@
         },
         "showGroups": {
           "type": "boolean"
+        },
+        "edgeStyles": {
+          "description": "Optional renderer-specific style names keyed by relationship or edge id.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "nodeShapes": {
+          "description": "Optional renderer-specific shape names keyed by node type or node id.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         }
       }
     }

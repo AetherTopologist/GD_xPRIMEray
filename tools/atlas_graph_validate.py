@@ -49,6 +49,7 @@ NODE_TYPES = {
     "territory",
 }
 MATURITY_LABELS = {
+    "Not Applicable",
     "Vision",
     "Prototype",
     "Experimental",
@@ -78,6 +79,17 @@ EVIDENCE_KINDS = {
 }
 RENDER_DIRECTIONS = {"LR", "RL", "TB", "BT"}
 RENDER_LAYOUTS = {"flowchart", "layered", "radial", "manual"}
+RELATIONSHIP_LABEL_TERMS = {
+    "reading_path": ("reading", "route", "journey"),
+    "describes": ("describe",),
+    "produces": ("produce", "emit", "output", "support"),
+    "requires": ("require", "depend", "need"),
+    "contextualizes": ("context", "situate", "orient"),
+    "measures": ("measure",),
+    "represents": ("represent",),
+    "planned": ("plan", "future"),
+    "related_to": ("related", "associate", "connect"),
+}
 
 
 def load_graph(path: Path) -> dict[str, Any]:
@@ -229,6 +241,40 @@ def validate_graph(graph: dict[str, Any]) -> list[str]:
     return errors
 
 
+def graph_warnings(graph: dict[str, Any]) -> list[str]:
+    warnings: list[str] = []
+    boundaries: list[tuple[str, Any]] = [("claimBoundary", graph.get("claimBoundary"))]
+    for collection_name in ("nodes", "edges"):
+        collection = graph.get(collection_name)
+        if not isinstance(collection, list):
+            continue
+        for index, item in enumerate(collection):
+            if isinstance(item, dict):
+                boundaries.append(
+                    (f"{collection_name}[{index}].claimBoundary", item.get("claimBoundary"))
+                )
+    for label, value in boundaries:
+        if isinstance(value, str) and len(value.strip()) < 20:
+            warnings.append(f"{label} is shorter than 20 characters")
+
+    edges = graph.get("edges")
+    if isinstance(edges, list):
+        for index, edge in enumerate(edges):
+            if not isinstance(edge, dict):
+                continue
+            relationship = edge.get("relationship")
+            edge_label = edge.get("label")
+            terms = RELATIONSHIP_LABEL_TERMS.get(relationship)
+            if terms is None or not isinstance(edge_label, str):
+                continue
+            normalized = edge_label.lower().replace("_", " ").replace("-", " ")
+            if not any(term in normalized for term in terms):
+                warnings.append(
+                    f"edges[{index}].label {edge_label!r} may conflict with relationship {relationship!r}"
+                )
+    return warnings
+
+
 def main(argv: list[str]) -> int:
     if len(argv) != 2:
         print("Usage: atlas_graph_validate.py <graph.json>", file=sys.stderr)
@@ -244,6 +290,7 @@ def main(argv: list[str]) -> int:
         return 1
 
     errors = validate_graph(graph)
+    warnings = graph_warnings(graph)
     print(f"[atlas-graph-validate] {'PASS' if not errors else 'FAIL'}")
     print(f"graph={path.as_posix()}")
     print(f"nodes={len(graph.get('nodes', []))}")
@@ -251,6 +298,9 @@ def main(argv: list[str]) -> int:
     print(f"groups={len(graph.get('groups', []))}")
     for error in errors:
         print(f"error={error}")
+    for warning in warnings:
+        print(f"warning={warning}")
+    print(f"warnings={len(warnings)}")
     return 0 if not errors else 1
 
 

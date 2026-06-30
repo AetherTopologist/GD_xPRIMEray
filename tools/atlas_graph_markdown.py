@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from atlas_graph_validate import load_graph, validate_graph
+from atlas_graph_validate import graph_warnings, load_graph, validate_graph
 
 
 def markdown_cell(value: Any) -> str:
@@ -26,21 +26,46 @@ def render_markdown(graph: dict[str, Any]) -> str:
     lines = [
         f"# {graph['title']} (Preview)",
         "",
+        "**The Atlas is a map of observation systems, not a ranking of technologies.**",
+        "",
         graph["description"],
         "",
         f"Graph ID: `{graph['graphId']}`",
         "",
         f"Version: `{graph['version']}`",
         "",
-        "## Claim Boundary",
-        "",
-        graph["claimBoundary"],
-        "",
-        "## Nodes",
-        "",
-        "| ID | Label | Type | Category | Maturity | Description | Claim Boundary |",
-        "|---|---|---|---|---|---|---|",
     ]
+    if graph.get("plainTerms"):
+        lines.extend(["## In plain terms", "", graph["plainTerms"], ""])
+
+    lines.extend(
+        [
+            "## Claim Boundary",
+            "",
+            graph["claimBoundary"],
+            "",
+            "## Diagram",
+            "",
+            "```mermaid",
+            f"flowchart {direction}",
+        ]
+    )
+    for node in nodes:
+        lines.append(f"    {node['id']}[\"{mermaid_text(node['label'])}\"]")
+    for edge in edges:
+        lines.append(
+            f"    {edge['from']} -->|{mermaid_text(edge['label'])}| {edge['to']}"
+        )
+    lines.extend(
+        [
+            "```",
+            "",
+            "## Nodes",
+            "",
+            "| ID | Label | Type | Category | Evidence depth | Description | Claim Boundary |",
+            "|---|---|---|---|---|---|---|",
+        ]
+    )
     for node in nodes:
         lines.append(
             "| "
@@ -70,14 +95,7 @@ def render_markdown(graph: dict[str, Any]) -> str:
             + " |"
         )
 
-    lines.extend(["", "## Diagram", "", "```mermaid", f"flowchart {direction}"])
-    for node in nodes:
-        lines.append(f"    {node['id']}[\"{mermaid_text(node['label'])}\"]")
-    for edge in edges:
-        lines.append(
-            f"    {edge['from']} -->|{mermaid_text(edge['label'])}| {edge['to']}"
-        )
-    lines.extend(["```", "", "## Evidence", ""])
+    lines.extend(["", "## Evidence", ""])
 
     if graph["evidence"]:
         lines.extend(["| Label | Reference | Kind |", "|---|---|---|"])
@@ -124,11 +142,16 @@ def main(argv: list[str]) -> int:
             print(f"error={error}", file=sys.stderr)
         return 1
 
+    warnings = graph_warnings(graph)
+
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(render_markdown(graph), encoding="utf-8")
     print("[atlas-graph-markdown] PASS")
     print(f"source={source.as_posix()}")
     print(f"output={output.as_posix()}")
+    for warning in warnings:
+        print(f"warning={warning}")
+    print(f"warnings={len(warnings)}")
     return 0
 
 
