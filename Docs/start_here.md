@@ -80,7 +80,7 @@ Three chapters that communicate the essence of xPRIMEray without background.
 
 **What you see:** A wormhole rendered twice — once with curved transport, once with straight — so the bending is directly visible as the gap between the two.
 
-**What it proves:** The curvature is not a visual effect. It is geometry: the portal boundary ring glows in the heat map because that is where light actually bends most, not because it was painted that way.
+**What this shows:** The curvature is not a visual effect. It is geometry: the portal boundary ring glows in the heat map because that is where the transport model produces the most ray deflection, not because it was painted that way.
 
 **Where to go:** [Chapter 1 — Dual Reality](Observatory/chapters/chapter_01.md)
 
@@ -95,7 +95,7 @@ Three chapters that communicate the essence of xPRIMEray without background.
 
 **What you see:** 30,839 pixels that classify differently between curved and straight transport at the same camera position.
 
-**What it proves:** Curved transport is not just different-looking — it is measurably different. The dominant transition (27,619 pixels) is geometry-hit → escaped: the GRIN field deflects rays away from surfaces they would otherwise have hit. This is a measurable, directional effect.
+**What this shows:** Curved transport is not just different-looking — it is measurably different. The dominant transition (27,619 pixels) is geometry-hit → escaped: the GRIN field deflects rays away from surfaces they would otherwise have hit. This is a measurable, directional effect.
 
 **Where to go:** [Chapter 2 — Observer Disagreement](Observatory/chapters/chapter_02.md)
 
@@ -110,7 +110,7 @@ Three chapters that communicate the essence of xPRIMEray without background.
 
 **What you see:** A render that looks correct. The Validation HUD shows 0% closure — every pixel is unresolved budget noise.
 
-**What it proves:** Plausible ≠ Correct. A renderer that runs out of integration steps produces noise that passes casual visual inspection. The only reliable detector is the closure metric.
+**What this shows:** Plausible ≠ Correct. A renderer that runs out of integration steps produces noise that passes casual visual inspection. The only reliable detector is the closure metric.
 
 **Where to go:** [Chapter 3 — Hermetic Closure](Observatory/chapters/chapter_03.md)
 

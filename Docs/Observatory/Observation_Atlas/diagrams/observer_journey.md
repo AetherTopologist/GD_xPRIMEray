@@ -2,11 +2,11 @@
 
 ```mermaid
 flowchart LR
-    B["Biological Observer"] --> O["Optical Observer"]
-    O --> S["Scientific Instrument"]
-    S --> C["Computational Observer"]
-    C --> G["Project Glowing Heart"]
-    G --> F["Future Interactive Heart"]
+    B["Biological Observer"] -->|reading path| O["Optical Observer"]
+    O -->|reading path| S["Scientific Instrument"]
+    S -->|reading path| C["Computational Observer"]
+    C -->|reading path| G["Project Glowing Heart"]
+    G -->|planned| F["Future Interactive Heart"]
 ```
 
 The route is a suggested reading sequence. Each stop remains a distinct observer territory with its own receiver, measurement, artifact, and claim boundary. Later stops do not replace or outrank earlier ones.

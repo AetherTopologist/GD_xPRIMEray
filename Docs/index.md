@@ -24,7 +24,7 @@ description: Curved-ray optical transport observatory — GRIN field integration
 <span class="xp-stat">23.8%</span>
 <span class="xp-stat-label">of pixels classify differently</span>
 <div class="xp-hook">Same scene. Same camera. Two transport models. Curved rays miss geometry that straight rays hit — not randomly, but directionally: 9 misses for every 1 new contact.</div>
-<div class="xp-why">A straight-ray renderer would report 33% more geometry hits for this scene. The difference is not a visual effect. It is physics.</div>
+<div class="xp-why">A straight-ray renderer would report 33% more geometry hits for this scene. The difference is not a visual effect. It is the result of solving the transport equation, not a lens-shader effect.</div>
 <a class="xp-exhibit-link" href="Observatory/chapters/chapter_02.md">Ch 2 — Observer Disagreement →</a>
 </div>
 
