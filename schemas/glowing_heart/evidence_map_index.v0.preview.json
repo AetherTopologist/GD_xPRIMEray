@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://xprimeray.dev/schemas/glowing-heart/evidence-map-index/v0.preview.json",
+  "title": "Project Glowing Heart Evidence Map Index v0 Preview",
+  "description": "Discovery contract linking the Difference Packet Index, Atlas Graph, Evidence Map, and Gallery. Structure does not establish scientific correctness, parity, or renderer equivalence.",
+  "type": "object",
+  "required": [
+    "indexId", "title", "version", "generatedUtc", "sources", "generatedArtifacts",
+    "renderers", "artifactChain", "graphId", "exhibitCount", "statusCounts",
+    "comparisonMode", "parityClaim", "runtimeExecuted", "exhibits", "claimBoundary"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "status": {
+      "type": "string",
+      "enum": ["Comparable", "Unknown", "NotComparable", "RequiresTransform"]
+    },
+    "claimBoundary": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "chainItem": {
+      "type": "object",
+      "required": ["stage", "path", "kind"],
+      "additionalProperties": false,
+      "properties": {
+        "stage": {
+          "type": "string",
+          "enum": ["difference_packet_index", "atlas_graph", "evidence_map", "gallery"]
+        },
+        "path": { "type": "string", "minLength": 1 },
+        "kind": { "type": "string", "enum": ["json", "svg", "markdown"] },
+        "renderer": { "type": "string", "pattern": "^tools/" }
+      }
+    },
+    "exhibit": {
+      "type": "object",
+      "required": [
+        "id", "title", "status", "rule", "graphNodeId", "gallerySectionAnchor",
+        "evidenceMapCardLabel", "claimBoundary"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "title": { "type": "string", "minLength": 1 },
+        "status": { "$ref": "#/$defs/status" },
+        "rule": { "type": "string", "minLength": 1 },
+        "graphNodeId": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "gallerySectionAnchor": { "type": "string", "pattern": "^#[a-z0-9-]+$" },
+        "evidenceMapCardLabel": { "type": "string", "minLength": 1 },
+        "claimBoundary": { "$ref": "#/$defs/claimBoundary" }
+      }
+    }
+  },
+  "properties": {
+    "indexId": { "const": "xprimeray.glowing_heart.evidence_map_index.v0.preview" },
+    "title": { "type": "string", "minLength": 1 },
+    "version": { "const": "v0.preview" },
+    "generatedUtc": { "type": "string", "format": "date-time" },
+    "sources": {
+      "type": "object",
+      "required": ["differencePacketIndex", "atlasGraph"],
+      "additionalProperties": false,
+      "properties": {
+        "differencePacketIndex": { "type": "string", "pattern": "^reports/" },
+        "atlasGraph": { "type": "string", "pattern": "^Docs/" }
+      }
+    },
+    "generatedArtifacts": {
+      "type": "object",
+      "required": ["evidenceMapSvg", "evidenceMapPreview", "galleryDocs", "galleryPreview"],
+      "additionalProperties": false,
+      "properties": {
+        "evidenceMapSvg": { "type": "string", "pattern": "^reports/" },
+        "evidenceMapPreview": { "type": "string", "pattern": "^reports/" },
+        "galleryDocs": { "type": "string", "pattern": "^Docs/" },
+        "galleryPreview": { "type": "string", "pattern": "^reports/" }
+      }
+    },
+    "renderers": {
+      "type": "object",
+      "required": ["atlasGraphBridge", "evidenceMap", "gallery"],
+      "additionalProperties": false,
+      "properties": {
+        "atlasGraphBridge": { "type": "string", "pattern": "^tools/" },
+        "evidenceMap": { "type": "string", "pattern": "^tools/" },
+        "gallery": { "type": "string", "pattern": "^tools/" }
+      }
+    },
+    "artifactChain": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/chainItem" },
+      "minItems": 4
+    },
+    "graphId": { "type": "string", "minLength": 1 },
+    "exhibitCount": { "type": "integer", "minimum": 1 },
+    "statusCounts": {
+      "type": "object",
+      "required": ["Comparable", "Unknown", "NotComparable", "RequiresTransform"],
+      "additionalProperties": false,
+      "properties": {
+        "Comparable": { "type": "integer", "minimum": 0 },
+        "Unknown": { "type": "integer", "minimum": 0 },
+        "NotComparable": { "type": "integer", "minimum": 0 },
+        "RequiresTransform": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "comparisonMode": { "const": "core_vs_core" },
+    "parityClaim": { "const": "NONE" },
+    "runtimeExecuted": { "const": false },
+    "exhibits": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/exhibit" },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "claimBoundary": { "$ref": "#/$defs/claimBoundary" }
+  }
+}

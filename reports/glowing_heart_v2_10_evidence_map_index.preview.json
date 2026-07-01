@@ -1,0 +1,148 @@
+{
+  "indexId": "xprimeray.glowing_heart.evidence_map_index.v0.preview",
+  "title": "Project Glowing Heart Evidence Map Discovery Index",
+  "version": "v0.preview",
+  "generatedUtc": "2026-07-01T03:39:51Z",
+  "sources": {
+    "differencePacketIndex": "reports/glowing_heart_v2_6_difference_packet_index.preview.json",
+    "atlasGraph": "Docs/Observatory/Observation_Atlas/Atlas_Graph/glowing_heart_difference_packet_exhibits.graph.json"
+  },
+  "generatedArtifacts": {
+    "evidenceMapSvg": "reports/glowing_heart_v2_9_evidence_map.svg",
+    "evidenceMapPreview": "reports/glowing_heart_v2_9_evidence_map.preview.md",
+    "galleryDocs": "Docs/xPRIMEray/project_glowing_heart_v2_4_difference_packet_gallery.md",
+    "galleryPreview": "reports/glowing_heart_v2_4_difference_packet_gallery.preview.md"
+  },
+  "renderers": {
+    "atlasGraphBridge": "tools/glowing_heart_index_to_atlas_graph.py",
+    "evidenceMap": "tools/atlas_graph_evidence_map_renderer.py",
+    "gallery": "tools/glowing_heart_gallery_renderer.py"
+  },
+  "artifactChain": [
+    {
+      "stage": "difference_packet_index",
+      "path": "reports/glowing_heart_v2_6_difference_packet_index.preview.json",
+      "kind": "json"
+    },
+    {
+      "stage": "atlas_graph",
+      "path": "Docs/Observatory/Observation_Atlas/Atlas_Graph/glowing_heart_difference_packet_exhibits.graph.json",
+      "kind": "json",
+      "renderer": "tools/glowing_heart_index_to_atlas_graph.py"
+    },
+    {
+      "stage": "evidence_map",
+      "path": "reports/glowing_heart_v2_9_evidence_map.svg",
+      "kind": "svg",
+      "renderer": "tools/atlas_graph_evidence_map_renderer.py"
+    },
+    {
+      "stage": "gallery",
+      "path": "Docs/xPRIMEray/project_glowing_heart_v2_4_difference_packet_gallery.md",
+      "kind": "markdown",
+      "renderer": "tools/glowing_heart_gallery_renderer.py"
+    }
+  ],
+  "graphId": "glowing_heart.difference_packet_exhibits",
+  "exhibitCount": 5,
+  "statusCounts": {
+    "Comparable": 2,
+    "Unknown": 2,
+    "NotComparable": 1,
+    "RequiresTransform": 0
+  },
+  "comparisonMode": "core_vs_core",
+  "parityClaim": "NONE",
+  "runtimeExecuted": false,
+  "exhibits": [
+    {
+      "id": "comparable_zero",
+      "title": "Comparable Zero",
+      "status": "Comparable",
+      "rule": "bend_magnitude_same_observer",
+      "graphNodeId": "comparable_zero",
+      "gallerySectionAnchor": "#comparable-zero",
+      "evidenceMapCardLabel": "Comparable Zero",
+      "claimBoundary": [
+        "Core-vs-Core only.",
+        "Not a Godot comparison.",
+        "Not image or pixel comparison.",
+        "Not parity.",
+        "Zero difference does not establish equivalence with another runtime or measurement system."
+      ]
+    },
+    {
+      "id": "comparable_nonzero",
+      "title": "Comparable Non-Zero",
+      "status": "Comparable",
+      "rule": "bend_magnitude_same_observer",
+      "graphNodeId": "comparable_nonzero",
+      "gallerySectionAnchor": "#comparable-non-zero",
+      "evidenceMapCardLabel": "Comparable Non-Zero",
+      "claimBoundary": [
+        "Core-vs-Core only.",
+        "Not a Godot comparison.",
+        "Not image or pixel comparison.",
+        "Not parity.",
+        "Non-zero difference demonstrates numeric distinction between retained Core artifacts only."
+      ]
+    },
+    {
+      "id": "unknown_observer_mismatch",
+      "title": "Unknown Observer Mismatch",
+      "status": "Unknown",
+      "rule": "bend_magnitude_context_mismatch",
+      "graphNodeId": "unknown_observer_mismatch",
+      "gallerySectionAnchor": "#unknown-observer-mismatch",
+      "evidenceMapCardLabel": "Unknown Observer Mismatch",
+      "claimBoundary": [
+        "Core-vs-Core only.",
+        "Not a Godot comparison.",
+        "Not image or pixel comparison.",
+        "Not parity.",
+        "Unknown means eligibility was not established."
+      ]
+    },
+    {
+      "id": "unknown_coordinate_grid_mismatch",
+      "title": "Unknown Coordinate-Grid Mismatch",
+      "status": "Unknown",
+      "rule": "bend_magnitude_context_mismatch",
+      "graphNodeId": "unknown_coordinate_grid_mismatch",
+      "gallerySectionAnchor": "#unknown-coordinate-grid-mismatch",
+      "evidenceMapCardLabel": "Unknown Coordinate-Grid Mismatch",
+      "claimBoundary": [
+        "Core-vs-Core only.",
+        "Not a Godot comparison.",
+        "Not image or pixel comparison.",
+        "Not parity.",
+        "Unknown means eligibility was not established."
+      ]
+    },
+    {
+      "id": "not_comparable_channel",
+      "title": "NotComparable Channel",
+      "status": "NotComparable",
+      "rule": "traversal_steps_vs_bend_not_comparable",
+      "graphNodeId": "not_comparable_channel",
+      "gallerySectionAnchor": "#notcomparable-channel",
+      "evidenceMapCardLabel": "NotComparable Channel",
+      "claimBoundary": [
+        "Core-vs-Core only.",
+        "Not a Godot comparison.",
+        "Not image or pixel comparison.",
+        "Not parity.",
+        "No bend data was relabeled as traversal steps."
+      ]
+    }
+  ],
+  "claimBoundary": [
+    "Core-vs-Core only.",
+    "Not a Godot comparison.",
+    "Not image or pixel comparison.",
+    "Not parity.",
+    "Not physical validation.",
+    "Not renderer equivalence.",
+    "Index validity describes exhibit structure, not scientific correctness."
+  ]
+}
