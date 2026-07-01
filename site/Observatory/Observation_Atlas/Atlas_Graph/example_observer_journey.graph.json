@@ -1,0 +1,209 @@
+{
+  "graphId": "atlas.observer_journey.v0_1",
+  "title": "Observer Journey",
+  "description": "A suggested reading route across observer families and Project Glowing Heart toward a future interactive workbench.",
+  "version": "v0.1",
+  "notes": [
+    "Maturity means Atlas documentation maturity, not observer quality."
+  ],
+  "plainTerms": "Follow this graph as a visitor reading route. Evidence depth describes the Atlas documentation for each node, not the quality of the observer or technology.",
+  "nodes": [
+    {
+      "id": "human_eye",
+      "label": "Human Eye",
+      "type": "observer",
+      "category": "biological_observer",
+      "maturity": "Prototype",
+      "description": "Biological receiver entry point for the Atlas reading route.",
+      "claimBoundary": "Atlas context only; no equivalence with computational cameras.",
+      "links": [
+        {
+          "label": "Biological Observers",
+          "href": "../10_biological_observers.md"
+        }
+      ],
+      "tags": [
+        "biological",
+        "receiver"
+      ]
+    },
+    {
+      "id": "microscope",
+      "label": "Microscope",
+      "type": "observer",
+      "category": "optical_observer",
+      "maturity": "Prototype",
+      "description": "Optical assembly example connecting biological reception to instrument-mediated observation.",
+      "claimBoundary": "Conceptual territory marker; no instrument model is implemented.",
+      "links": [
+        {
+          "label": "Optical Observers",
+          "href": "../20_optical_observers.md"
+        }
+      ],
+      "tags": [
+        "optical",
+        "instrument"
+      ]
+    },
+    {
+      "id": "scientific_instrument",
+      "label": "Scientific Instrument",
+      "type": "territory",
+      "category": "scientific_instrument",
+      "maturity": "Prototype",
+      "description": "Atlas territory for calibrated receivers and declared measurement channels.",
+      "claimBoundary": "Descriptive category only; no external instrument agreement is asserted.",
+      "links": [
+        {
+          "label": "Scientific Instruments",
+          "href": "../30_scientific_instruments.md"
+        }
+      ],
+      "tags": [
+        "measurement",
+        "receiver"
+      ]
+    },
+    {
+      "id": "computational_observer",
+      "label": "Computational Observer",
+      "type": "observer",
+      "category": "computational_observer",
+      "maturity": "Experimental",
+      "description": "Simulation camera, transport observer, or diagnostic receiver represented in software.",
+      "claimBoundary": "Computational output is not interchangeable with biological or laboratory measurement.",
+      "links": [
+        {
+          "label": "Computational Observers",
+          "href": "../40_computational_observers.md"
+        }
+      ],
+      "tags": [
+        "computational",
+        "observer"
+      ]
+    },
+    {
+      "id": "project_glowing_heart",
+      "label": "Project Glowing Heart",
+      "type": "project",
+      "category": "protocol_program",
+      "maturity": "Experimental",
+      "description": "Protocol and artifact trail for fixtures, observers, measurements, and comparison eligibility.",
+      "claimBoundary": "Protocol infrastructure does not establish output equivalence.",
+      "links": [
+        {
+          "label": "Glowing Heart Atlas Link",
+          "href": "../../../xPRIMEray/project_glowing_heart_atlas_link.md"
+        }
+      ],
+      "tags": [
+        "protocol",
+        "artifacts"
+      ]
+    },
+    {
+      "id": "future_interactive_heart",
+      "label": "Future Interactive Heart",
+      "type": "future",
+      "category": "future_observatory",
+      "maturity": "Vision",
+      "description": "Planned fixture-authoring workbench that writes back to traceable artifacts.",
+      "claimBoundary": "Planned direction only; no implementation is represented by this node.",
+      "links": [
+        {
+          "label": "Future Observatory",
+          "href": "../70_future_observatory.md"
+        }
+      ],
+      "tags": [
+        "planned",
+        "workbench"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "eye_to_microscope",
+      "from": "human_eye",
+      "to": "microscope",
+      "relationship": "reading_path",
+      "label": "reading path",
+      "claimBoundary": "Navigation sequence only; not a ranking."
+    },
+    {
+      "id": "microscope_to_instrument",
+      "from": "microscope",
+      "to": "scientific_instrument",
+      "relationship": "reading_path",
+      "label": "reading path",
+      "claimBoundary": "Navigation sequence only; not a ranking."
+    },
+    {
+      "id": "instrument_to_computational",
+      "from": "scientific_instrument",
+      "to": "computational_observer",
+      "relationship": "reading_path",
+      "label": "reading path",
+      "claimBoundary": "Navigation sequence only; not a ranking."
+    },
+    {
+      "id": "computational_to_glowing_heart",
+      "from": "computational_observer",
+      "to": "project_glowing_heart",
+      "relationship": "contextualizes",
+      "label": "protocol context",
+      "claimBoundary": "Context does not imply equivalence."
+    },
+    {
+      "id": "glowing_heart_to_interactive",
+      "from": "project_glowing_heart",
+      "to": "future_interactive_heart",
+      "relationship": "planned",
+      "label": "planned",
+      "claimBoundary": "Future direction only."
+    }
+  ],
+  "groups": [
+    {
+      "id": "observer_territories",
+      "label": "Observer Territories",
+      "description": "Existing Atlas territories along the suggested reading route.",
+      "nodeIds": [
+        "human_eye",
+        "microscope",
+        "scientific_instrument",
+        "computational_observer"
+      ]
+    },
+    {
+      "id": "project_path",
+      "label": "Project Path",
+      "description": "Current protocol program and planned interactive direction.",
+      "nodeIds": [
+        "project_glowing_heart",
+        "future_interactive_heart"
+      ]
+    }
+  ],
+  "claimBoundary": "This graph is a reading route, not a ranking or maturity ladder.",
+  "evidence": [
+    {
+      "label": "Observer Journey",
+      "reference": "Docs/Observatory/Observation_Atlas/observer_journey.md",
+      "kind": "repository_doc"
+    },
+    {
+      "label": "Atlas Constitution",
+      "reference": "Docs/Observatory/Observation_Atlas/ATLAS_CONSTITUTION.md",
+      "kind": "repository_doc"
+    }
+  ],
+  "renderHints": {
+    "direction": "LR",
+    "layout": "flowchart",
+    "showGroups": false,
+    "preferredLabel": "Observer Journey"
+  }
+}

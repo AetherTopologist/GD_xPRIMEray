@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://xprimeray.dev/schemas/glowing-heart/channel-registry/v0.preview.json",
+  "title": "Project Glowing Heart Channel Registry Preview",
+  "description": "Structural contract for declared Difference Packet channels. Registry membership does not validate scientific correctness or establish renderer equivalence.",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "channels",
+    "claimBoundary"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "channel": {
+      "type": "object",
+      "required": [
+        "id",
+        "producer",
+        "kind",
+        "dataType",
+        "units",
+        "representation",
+        "description"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "producer": {
+          "type": "string",
+          "enum": [
+            "core",
+            "future_godot",
+            "unknown"
+          ]
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "measurement",
+            "identity",
+            "metadata",
+            "image"
+          ]
+        },
+        "dataType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "units": {
+          "type": "string",
+          "minLength": 1
+        },
+        "representation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  },
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "xprimeray.glowing_heart.channel_registry.v0.preview"
+    },
+    "version": {
+      "type": "string",
+      "const": "v0.preview"
+    },
+    "channels": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/channel"
+      },
+      "minItems": 1
+    },
+    "claimBoundary": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    }
+  }
+}

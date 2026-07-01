@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using XPrimeRay.Core.Comparison;
 
 namespace XPrimeRay.Testbench.Cli.Output;
@@ -9,6 +10,7 @@ public static class DifferencePacketWriter
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         WriteIndented = true,
+        Converters = { new JsonStringEnumConverter() },
     };
 
     public static void Write(string outputDirectory, DifferencePacket packet)
@@ -20,9 +22,5 @@ public static class DifferencePacketWriter
             Path.Combine(outputDirectory, "difference_packet.json"),
             json + Environment.NewLine);
 
-        var summary = DifferenceSummary.FromPacket(packet);
-        File.WriteAllText(
-            Path.Combine(outputDirectory, "difference_summary.md"),
-            summary.ToMarkdown(packet));
     }
 }

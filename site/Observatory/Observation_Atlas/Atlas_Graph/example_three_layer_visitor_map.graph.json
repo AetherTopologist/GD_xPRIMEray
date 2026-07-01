@@ -1,0 +1,129 @@
+{
+  "graphId": "atlas.three_layer_visitor_map.v0_2",
+  "title": "Three-Layer Visitor Map",
+  "description": "A visitor orientation route across xPRIMEray Runtime, Project Glowing Heart, and the Observation Atlas.",
+  "version": "v0.1",
+  "notes": [
+    "Maturity means documentation evidence depth, not technology quality."
+  ],
+  "plainTerms": "Start with the runtime for engine and diagnostics, use Project Glowing Heart for protocol and artifact context, and use the Observation Atlas for the wider observer field guide.",
+  "nodes": [
+    {
+      "id": "xprimeray_runtime",
+      "label": "xPRIMEray Runtime",
+      "type": "project",
+      "category": "runtime_and_diagnostics",
+      "maturity": "Experimental",
+      "description": "Repository territory for curved-ray runtime, observatory output, and diagnostics.",
+      "claimBoundary": "Visitor orientation only; this node does not summarize runtime correctness.",
+      "links": [
+        {
+          "label": "Start Here",
+          "href": "../../../start_here.md"
+        }
+      ],
+      "tags": [
+        "runtime",
+        "diagnostics"
+      ]
+    },
+    {
+      "id": "project_glowing_heart",
+      "label": "Project Glowing Heart",
+      "type": "project",
+      "category": "protocol_and_artifacts",
+      "maturity": "Experimental",
+      "description": "Protocol and artifact trail for fixtures, observers, snapshots, measurements, and comparison eligibility.",
+      "claimBoundary": "Protocol records do not establish renderer or observer equivalence.",
+      "links": [
+        {
+          "label": "Glowing Heart Atlas Link",
+          "href": "../../../xPRIMEray/project_glowing_heart_atlas_link.md"
+        }
+      ],
+      "tags": [
+        "protocol",
+        "artifacts"
+      ]
+    },
+    {
+      "id": "observation_atlas",
+      "label": "Observation Atlas",
+      "type": "territory",
+      "category": "observer_field_guide",
+      "maturity": "Prototype",
+      "description": "Field guide mapping biological, optical, scientific, computational, and educational observers.",
+      "claimBoundary": "The field guide maps relationships without ranking observer families.",
+      "links": [
+        {
+          "label": "Observation Atlas",
+          "href": "../README.md"
+        }
+      ],
+      "tags": [
+        "atlas",
+        "field_guide"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "runtime_contextualizes_glowing_heart",
+      "from": "xprimeray_runtime",
+      "to": "project_glowing_heart",
+      "relationship": "contextualizes",
+      "label": "runtime context",
+      "claimBoundary": "The relationship is a reading aid, not an architecture dependency."
+    },
+    {
+      "id": "glowing_heart_contextualizes_atlas",
+      "from": "project_glowing_heart",
+      "to": "observation_atlas",
+      "relationship": "contextualizes",
+      "label": "protocol context",
+      "claimBoundary": "The relationship is a reading aid, not a hierarchy."
+    }
+  ],
+  "groups": [
+    {
+      "id": "visitor_entry_points",
+      "label": "Visitor Entry Points",
+      "description": "Three documentation territories available to repository visitors.",
+      "nodeIds": [
+        "xprimeray_runtime",
+        "project_glowing_heart",
+        "observation_atlas"
+      ]
+    }
+  ],
+  "claimBoundary": "This is a visitor orientation map, not an architecture dependency graph or ranking.",
+  "evidence": [
+    {
+      "label": "Repository Home",
+      "reference": "Docs/index.md",
+      "kind": "repository_doc"
+    },
+    {
+      "label": "Visual Wayfinding",
+      "reference": "Docs/Observatory/Observation_Atlas/visual_wayfinding.md",
+      "kind": "repository_doc"
+    },
+    {
+      "label": "Atlas Constitution",
+      "reference": "Docs/Observatory/Observation_Atlas/ATLAS_CONSTITUTION.md",
+      "kind": "repository_doc"
+    }
+  ],
+  "renderHints": {
+    "direction": "LR",
+    "layout": "layered",
+    "showGroups": false,
+    "edgeStyles": {
+      "contextualizes": "dashed"
+    },
+    "nodeShapes": {
+      "project": "rounded",
+      "territory": "stadium"
+    }
+  }
+}

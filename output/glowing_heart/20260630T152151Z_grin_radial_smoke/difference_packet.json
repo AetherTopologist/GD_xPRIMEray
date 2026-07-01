@@ -1,0 +1,42 @@
+{
+  "schema": "xprimeray.glowing_heart.difference_packet.v2.0",
+  "generatedUtc": "2026-06-30T15:21:51Z",
+  "runtimeExecuted": false,
+  "parityClaim": "NONE",
+  "comparisonMode": "core_vs_core",
+  "leftSnapshot": {
+    "id": "20260630T152151Z_grin_radial_smoke:snapshot_heatmap.csv",
+    "fixtureId": "grin_radial_smoke",
+    "fixturePath": "fixtures/grin_radial_smoke.json",
+    "artifactPath": "snapshot_heatmap.csv"
+  },
+  "rightSnapshot": {
+    "id": "20260630T152151Z_grin_radial_smoke:snapshot_heatmap.csv",
+    "fixtureId": "grin_radial_smoke",
+    "fixturePath": "fixtures/grin_radial_smoke.json",
+    "artifactPath": "snapshot_heatmap.csv"
+  },
+  "leftChannel": "bend_magnitude_metric",
+  "rightChannel": "bend_magnitude_metric",
+  "leftRepresentation": "scalar_grid",
+  "rightRepresentation": "scalar_grid",
+  "observerBasis": "origin=[0,0,-2];forward=[0,0,1];up=[0,1,0];fovDegrees=60",
+  "comparisonBasis": "same_core_run_same_fixture_same_observer_same_channel",
+  "status": "Comparable",
+  "comparable": true,
+  "transformRequired": false,
+  "reason": "Both snapshots declare bend_magnitude_metric under the same Core fixture and observer basis.",
+  "summary": {
+    "countCompared": 880,
+    "maxAbsDifference": 0,
+    "meanAbsDifference": 0,
+    "nonZeroCount": 0
+  },
+  "claimBoundary": [
+    "This is a Core-vs-Core self-comparison.",
+    "This is not a Godot comparison.",
+    "This is not parity.",
+    "This is not validation.",
+    "No image or cross-channel comparison was performed."
+  ]
+}

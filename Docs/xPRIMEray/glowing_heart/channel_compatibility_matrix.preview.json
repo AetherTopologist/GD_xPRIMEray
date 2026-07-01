@@ -1,0 +1,110 @@
+{
+  "schema": "xprimeray.glowing_heart.channel_compatibility_matrix.v0.preview",
+  "version": "v0.preview",
+  "registryVersion": "v0.preview",
+  "statuses": [
+    "Comparable",
+    "NotComparable",
+    "RequiresTransform",
+    "Unknown"
+  ],
+  "rules": [
+    {
+      "id": "bend_magnitude_same_observer",
+      "leftSelector": {
+        "channelId": "bend_magnitude_metric"
+      },
+      "rightSelector": {
+        "channelId": "bend_magnitude_metric"
+      },
+      "status": "Comparable",
+      "symmetric": true,
+      "requiredConditions": [
+        "same_channel_type",
+        "same_fixture_identity",
+        "same_observer_basis",
+        "same_coordinate_grid"
+      ],
+      "transformRequired": false,
+      "reason": "Bend magnitude comparison requires matching fixture comparison identity, observer basis, and coordinate grid because each scalar is tied to the retained Core fixture/sample basis."
+    },
+    {
+      "id": "ray_hit_same_fixture_observer",
+      "leftSelector": {
+        "channelId": "ray_hit_flag"
+      },
+      "rightSelector": {
+        "channelId": "ray_hit_flag"
+      },
+      "status": "Comparable",
+      "symmetric": true,
+      "requiredConditions": [
+        "same_channel_type",
+        "same_fixture_identity",
+        "same_observer_basis",
+        "same_coordinate_grid"
+      ],
+      "transformRequired": false,
+      "reason": "Hit/miss classification depends on both fixture geometry/bounds and observer sampling; two ray_hit_flag channels are comparable only when fixture comparison identity, observer basis, and coordinate grid match."
+    },
+    {
+      "id": "traversal_steps_vs_bend_not_comparable",
+      "leftSelector": {
+        "channelId": "traversal_step_count"
+      },
+      "rightSelector": {
+        "channelId": "bend_magnitude_metric"
+      },
+      "status": "NotComparable",
+      "symmetric": true,
+      "requiredConditions": [],
+      "transformRequired": false,
+      "reason": "Traversal step count and bend magnitude describe different measurement channels."
+    },
+    {
+      "id": "core_to_future_image_requires_transform",
+      "leftSelector": {
+        "producer": "core"
+      },
+      "rightSelector": {
+        "anyOf": [
+          {
+            "producer": "future_godot"
+          },
+          {
+            "kind": "image"
+          }
+        ]
+      },
+      "status": "RequiresTransform",
+      "symmetric": true,
+      "requiredConditions": [
+        "declared_transform"
+      ],
+      "transformRequired": true,
+      "reason": "Core measurement channels and future Godot/image channels require a declared transform before comparison."
+    },
+    {
+      "id": "missing_channel_declaration",
+      "leftSelector": {
+        "declarationState": "missing"
+      },
+      "rightSelector": {
+        "declarationState": "any"
+      },
+      "status": "Unknown",
+      "symmetric": true,
+      "requiredConditions": [],
+      "transformRequired": false,
+      "reason": "One or both channel declarations are missing."
+    }
+  ],
+  "defaultStatus": "Unknown",
+  "claimBoundary": [
+    "The matrix declares comparison eligibility rules only.",
+    "No Core-to-Godot or Core-to-image pair is Comparable in v2.1.",
+    "The matrix does not validate scientific correctness.",
+    "The matrix does not establish renderer equivalence.",
+    "The matrix does not prove physical truth."
+  ]
+}

@@ -1,0 +1,257 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://xprimeray.dev/schemas/glowing-heart/difference-packet/v2.0.preview.json",
+  "title": "Project Glowing Heart Difference Packet v2.0 Preview",
+  "description": "Structural schema for the Core-vs-Core Difference Packet emitted by the standalone Core CLI. The v2.0 core contract is preserved; v2.1 through v2.3 add optional preview extension fields for compatibility rules, retained-pair provenance, and fixture comparison identity. This schema validates packet structure only. It does not validate physical correctness, imply Godot parity, or imply renderer equivalence.",
+  "$comment": "The schema identifier remains xprimeray.glowing_heart.difference_packet.v2.0 for backward compatibility. No image or pixel comparison is represented by this contract.",
+  "type": "object",
+  "required": [
+    "schema",
+    "generatedUtc",
+    "runtimeExecuted",
+    "parityClaim",
+    "comparisonMode",
+    "leftSnapshot",
+    "rightSnapshot",
+    "leftChannel",
+    "rightChannel",
+    "leftRepresentation",
+    "rightRepresentation",
+    "observerBasis",
+    "comparisonBasis",
+    "status",
+    "comparable",
+    "transformRequired",
+    "reason",
+    "summary",
+    "claimBoundary"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "snapshot": {
+      "type": "object",
+      "required": [
+        "id",
+        "fixtureId",
+        "fixturePath",
+        "artifactPath"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fixtureId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fixtureComparisonIdentity": {
+          "description": "Optional v2.3 preview extension declaring the fixture-family identity used for retained comparison eligibility.",
+          "type": "string",
+          "minLength": 1
+        },
+        "fixturePath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifactPath": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  },
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "xprimeray.glowing_heart.difference_packet.v2.0"
+    },
+    "generatedUtc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "runtimeExecuted": {
+      "type": "boolean",
+      "const": false
+    },
+    "parityClaim": {
+      "type": "string",
+      "const": "NONE"
+    },
+    "comparisonMode": {
+      "type": "string",
+      "const": "core_vs_core"
+    },
+    "comparisonScope": {
+      "description": "Optional retained-comparison scope added in v2.2.",
+      "type": "string",
+      "enum": [
+        "retained_snapshot_pair"
+      ]
+    },
+    "leftRunId": {
+      "description": "Optional v2.2 preview extension identifying the left retained run.",
+      "type": "string",
+      "minLength": 1
+    },
+    "rightRunId": {
+      "description": "Optional v2.2 preview extension identifying the right retained run.",
+      "type": "string",
+      "minLength": 1
+    },
+    "leftManifestPath": {
+      "description": "Optional v2.2 preview extension recording the left retained manifest path.",
+      "type": "string",
+      "minLength": 1
+    },
+    "rightManifestPath": {
+      "description": "Optional v2.2 preview extension recording the right retained manifest path.",
+      "type": "string",
+      "minLength": 1
+    },
+    "leftSnapshot": {
+      "$ref": "#/$defs/snapshot"
+    },
+    "rightSnapshot": {
+      "$ref": "#/$defs/snapshot"
+    },
+    "leftChannel": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rightChannel": {
+      "type": "string",
+      "minLength": 1
+    },
+    "leftRepresentation": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rightRepresentation": {
+      "type": "string",
+      "minLength": 1
+    },
+    "observerBasis": {
+      "type": "string",
+      "minLength": 1
+    },
+    "comparisonBasis": {
+      "type": "string",
+      "minLength": 1
+    },
+    "compatibilityRuleId": {
+      "description": "Optional v2.1 preview extension naming the compatibility rule used to determine status.",
+      "type": "string",
+      "minLength": 1
+    },
+    "channelRegistryVersion": {
+      "description": "Optional v2.1 preview extension naming the channel registry version.",
+      "type": "string",
+      "minLength": 1
+    },
+    "compatibilityMatrixVersion": {
+      "description": "Optional v2.1 preview extension naming the compatibility matrix version.",
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Comparable",
+        "NotComparable",
+        "RequiresTransform",
+        "Unknown"
+      ]
+    },
+    "comparable": {
+      "type": "boolean"
+    },
+    "transformRequired": {
+      "type": "boolean"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "countCompared",
+        "maxAbsDifference",
+        "meanAbsDifference",
+        "nonZeroCount"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "countCompared": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maxAbsDifference": {
+          "type": "number",
+          "minimum": 0
+        },
+        "meanAbsDifference": {
+          "type": "number",
+          "minimum": 0
+        },
+        "nonZeroCount": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "claimBoundary": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 4,
+      "contains": {
+        "const": "This is not a Godot comparison."
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "Comparable"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "comparable": {
+            "const": true
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "RequiresTransform"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "transformRequired": {
+            "const": true
+          }
+        }
+      }
+    }
+  ]
+}

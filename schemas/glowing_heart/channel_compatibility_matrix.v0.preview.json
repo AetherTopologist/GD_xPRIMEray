@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://xprimeray.dev/schemas/glowing-heart/channel-compatibility-matrix/v0.preview.json",
+  "title": "Project Glowing Heart Channel Compatibility Matrix Preview",
+  "description": "Structural contract for named channel compatibility rules, including retained Core fixture, observer, and coordinate-grid conditions. The C# ChannelCompatibilityMatrix is the runtime authority. A compatibility status describes whether a numerical comparison is declared, not whether either channel is physically correct.",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "registryVersion",
+    "statuses",
+    "rules",
+    "defaultStatus",
+    "claimBoundary"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "Comparable",
+        "NotComparable",
+        "RequiresTransform",
+        "Unknown"
+      ]
+    },
+    "conditionToken": {
+      "oneOf": [
+        {
+          "const": "same_observer_basis",
+          "description": "Observer pose, direction, projection, sampling, and resolution are declared compatible."
+        },
+        {
+          "const": "same_fixture_identity",
+          "description": "Both snapshots declare the same fixture comparison identity; concrete fixture names may differ for an explicitly related Core sensitivity case."
+        },
+        {
+          "const": "declared_transform",
+          "description": "A documented transform exists and is cited before comparison."
+        },
+        {
+          "const": "same_channel_type",
+          "description": "Both sides declare the same channel identifier."
+        },
+        {
+          "const": "same_coordinate_grid",
+          "description": "Retained sample coordinates align between the two snapshots; bend magnitude and hit/miss rules require this together with matching fixture identity and observer basis."
+        }
+      ]
+    },
+    "selectorAtom": {
+      "description": "A structured selector. Multiple fields in one object are conjunctive.",
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "channelId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "producer": {
+          "type": "string",
+          "enum": [
+            "core",
+            "future_godot",
+            "unknown"
+          ]
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "measurement",
+            "identity",
+            "metadata",
+            "image"
+          ]
+        },
+        "declarationState": {
+          "type": "string",
+          "enum": [
+            "present",
+            "missing",
+            "any"
+          ]
+        }
+      }
+    },
+    "selector": {
+      "description": "Matches one selector atom, or any atom listed in anyOf. The C# matrix is authoritative for evaluation.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/selectorAtom"
+        },
+        {
+          "type": "object",
+          "required": [
+            "anyOf"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "anyOf": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/selectorAtom"
+              },
+              "minItems": 1
+            }
+          }
+        }
+      ]
+    },
+    "rule": {
+      "type": "object",
+      "required": [
+        "id",
+        "leftSelector",
+        "rightSelector",
+        "status",
+        "symmetric",
+        "requiredConditions",
+        "transformRequired",
+        "reason"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "leftSelector": {
+          "$ref": "#/$defs/selector"
+        },
+        "rightSelector": {
+          "$ref": "#/$defs/selector"
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "symmetric": {
+          "type": "boolean"
+        },
+        "requiredConditions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/conditionToken"
+          },
+          "uniqueItems": true
+        },
+        "transformRequired": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  },
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "xprimeray.glowing_heart.channel_compatibility_matrix.v0.preview"
+    },
+    "version": {
+      "type": "string",
+      "const": "v0.preview"
+    },
+    "registryVersion": {
+      "type": "string",
+      "const": "v0.preview"
+    },
+    "statuses": {
+      "type": "array",
+      "prefixItems": [
+        { "const": "Comparable" },
+        { "const": "NotComparable" },
+        { "const": "RequiresTransform" },
+        { "const": "Unknown" }
+      ],
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/rule"
+      },
+      "minItems": 1
+    },
+    "defaultStatus": {
+      "const": "Unknown"
+    },
+    "claimBoundary": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    }
+  }
+}

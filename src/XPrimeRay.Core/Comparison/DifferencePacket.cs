@@ -1,116 +1,44 @@
-using System.Globalization;
-using XPrimeRay.Core.Fixtures;
+using System.Text.Json.Serialization;
 
 namespace XPrimeRay.Core.Comparison;
-
-public static class ComparisonStatuses
-{
-    public const string Comparable = "COMPARABLE";
-    public const string NotComparable = "NOT_COMPARABLE";
-    public const string Unknown = "UNKNOWN";
-
-    public static bool IsSupported(string value)
-    {
-        return value is Comparable or NotComparable or Unknown;
-    }
-}
 
 public sealed record DifferencePacket
 {
     public string Schema { get; init; } = "xprimeray.glowing_heart.difference_packet.v2.0";
-    public string Version { get; init; } = "v2.0";
     public string GeneratedUtc { get; init; } = "";
     public bool RuntimeExecuted { get; init; }
     public string ParityClaim { get; init; } = "NONE";
-    public string Status { get; init; } = ComparisonStatuses.Unknown;
-    public DifferenceObservation Left { get; init; } = new();
-    public DifferenceObservation Right { get; init; } = new();
-    public DifferenceComparison Comparison { get; init; } = new();
-    public string[] Limitations { get; init; } = Array.Empty<string>();
-
-    public static DifferencePacket CreateCoreIdentityPacket(
-        FixtureDefinition fixture,
-        string fixturePath,
-        string runId,
-        DateTimeOffset generatedUtc)
-    {
-        ArgumentNullException.ThrowIfNull(fixture);
-        if (fixture.Observer is null)
-        {
-            throw new ArgumentException("A difference packet requires fixture observer metadata.", nameof(fixture));
-        }
-
-        var observation = new DifferenceObservation
-        {
-            ObserverIdentity = new ObserverIdentity
-            {
-                Id = $"{fixture.Name}.observer",
-                Producer = "core",
-                Description = DescribeObserver(fixture.Observer),
-            },
-            FixtureIdentity = new FixtureIdentity
-            {
-                Id = fixture.Name,
-                SourcePath = fixturePath,
-            },
-            SnapshotIdentity = new SnapshotIdentity
-            {
-                Id = $"{runId}:snapshot_heatmap.csv",
-                ArtifactPath = "snapshot_heatmap.csv",
-            },
-            MeasurementChannel = "bend_magnitude_metric",
-            RepresentationType = "scalar_grid",
-        };
-
-        return new DifferencePacket
-        {
-            GeneratedUtc = generatedUtc.UtcDateTime.ToString(
-                "yyyy-MM-dd'T'HH:mm:ss'Z'",
-                CultureInfo.InvariantCulture),
-            Status = ComparisonStatuses.Comparable,
-            Left = observation with { Role = "core_reference" },
-            Right = observation with { Role = "core_candidate" },
-            Comparison = new DifferenceComparison
-            {
-                Basis = "identity_metadata_only",
-                TransformRequired = false,
-                Comparable = true,
-                ImageComparisonPerformed = false,
-                Reason = "Both observations identify the same Core fixture, observer, bend-magnitude measurement channel, and scalar-grid representation. This packet declares semantic comparability only; it does not compare sample or image values.",
-            },
-            Limitations =
-            [
-                "Core versus Core identity packet only",
-                "No sample comparison was performed",
-                "No image comparison was performed",
-                "Godot runtime was not executed",
-                "No parity claim",
-            ],
-        };
-    }
+    public string ComparisonMode { get; init; } = "core_vs_core";
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? ComparisonScope { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? LeftRunId { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? RightRunId { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? LeftManifestPath { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? RightManifestPath { get; init; }
+    public DifferenceSnapshot LeftSnapshot { get; init; } = new();
+    public DifferenceSnapshot RightSnapshot { get; init; } = new();
+    public string LeftChannel { get; init; } = "unknown";
+    public string RightChannel { get; init; } = "unknown";
+    public string LeftRepresentation { get; init; } = "unknown";
+    public string RightRepresentation { get; init; } = "unknown";
+    public string ObserverBasis { get; init; } = "unknown";
+    public string ComparisonBasis { get; init; } = "unknown";
+    public string? CompatibilityRuleId { get; init; }
+    public string? ChannelRegistryVersion { get; init; }
+    public string? CompatibilityMatrixVersion { get; init; }
+    public DifferenceStatus Status { get; init; } = DifferenceStatus.Unknown;
+    public bool Comparable { get; init; }
+    public bool TransformRequired { get; init; }
+    public string Reason { get; init; } = "";
+    public DifferenceSummary Summary { get; init; } = new();
+    public string[] ClaimBoundary { get; init; } = Array.Empty<string>();
 
     public void Validate()
     {
-        if (!ComparisonStatuses.IsSupported(Status))
-        {
-            throw new InvalidDataException($"Unsupported comparison status '{Status}'.");
-        }
-
-        if (Status == ComparisonStatuses.Comparable && !Comparison.Comparable)
-        {
-            throw new InvalidDataException("COMPARABLE status requires comparable=true.");
-        }
-
-        if (Status == ComparisonStatuses.NotComparable && Comparison.Comparable)
-        {
-            throw new InvalidDataException("NOT_COMPARABLE status requires comparable=false.");
-        }
-
-        if (Comparison.TransformRequired && string.IsNullOrWhiteSpace(Comparison.TransformReference))
-        {
-            throw new InvalidDataException("A required transform must include a transform reference.");
-        }
-
         if (ParityClaim != "NONE")
         {
             throw new InvalidDataException("Difference packets must preserve parityClaim=NONE.");
@@ -118,58 +46,52 @@ public sealed record DifferencePacket
 
         if (RuntimeExecuted)
         {
-            throw new InvalidDataException("This Difference Packet version requires runtimeExecuted=false.");
+            throw new InvalidDataException("Difference Packet v2.0 requires runtimeExecuted=false.");
+        }
+
+        if (ComparisonMode != "core_vs_core")
+        {
+            throw new InvalidDataException("Difference Packet v2.0 supports core_vs_core only.");
+        }
+
+        if (Status == DifferenceStatus.Comparable && !Comparable)
+        {
+            throw new InvalidDataException("Comparable status requires comparable=true.");
+        }
+
+        if (Status != DifferenceStatus.Comparable && Comparable)
+        {
+            throw new InvalidDataException("Only Comparable status may set comparable=true.");
+        }
+
+        if (Status == DifferenceStatus.RequiresTransform && !TransformRequired)
+        {
+            throw new InvalidDataException("RequiresTransform status requires transformRequired=true.");
+        }
+
+        if (Summary.CountCompared < 0 || Summary.NonZeroCount < 0)
+        {
+            throw new InvalidDataException("Difference counts cannot be negative.");
+        }
+
+        if (Summary.NonZeroCount > Summary.CountCompared)
+        {
+            throw new InvalidDataException("nonZeroCount cannot exceed countCompared.");
+        }
+
+        if (ClaimBoundary.Length == 0 || ClaimBoundary.Any(string.IsNullOrWhiteSpace))
+        {
+            throw new InvalidDataException("Difference packets require non-empty claim boundary statements.");
         }
     }
-
-    private static string DescribeObserver(ObserverDefinition observer)
-    {
-        return string.Create(
-            CultureInfo.InvariantCulture,
-            $"origin={FormatVector(observer.Origin)};forward={FormatVector(observer.Forward)};up={FormatVector(observer.Up)};fovDegrees={observer.FovDegrees:G9}");
-    }
-
-    private static string FormatVector(IReadOnlyList<float> values)
-    {
-        return "[" + string.Join(",", values.Select(value => value.ToString("G9", CultureInfo.InvariantCulture))) + "]";
-    }
 }
 
-public sealed record DifferenceObservation
-{
-    public string Role { get; init; } = "";
-    public ObserverIdentity ObserverIdentity { get; init; } = new();
-    public FixtureIdentity FixtureIdentity { get; init; } = new();
-    public SnapshotIdentity SnapshotIdentity { get; init; } = new();
-    public string MeasurementChannel { get; init; } = "unknown";
-    public string RepresentationType { get; init; } = "unknown";
-}
-
-public sealed record ObserverIdentity
+public sealed record DifferenceSnapshot
 {
     public string Id { get; init; } = "";
-    public string Producer { get; init; } = "unknown";
-    public string Description { get; init; } = "";
-}
-
-public sealed record FixtureIdentity
-{
-    public string Id { get; init; } = "";
-    public string SourcePath { get; init; } = "";
-}
-
-public sealed record SnapshotIdentity
-{
-    public string Id { get; init; } = "";
+    public string FixtureId { get; init; } = "";
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? FixtureComparisonIdentity { get; init; }
+    public string FixturePath { get; init; } = "";
     public string ArtifactPath { get; init; } = "";
-}
-
-public sealed record DifferenceComparison
-{
-    public string Basis { get; init; } = "unknown";
-    public bool TransformRequired { get; init; }
-    public string? TransformReference { get; init; }
-    public bool Comparable { get; init; }
-    public bool ImageComparisonPerformed { get; init; }
-    public string Reason { get; init; } = "";
 }

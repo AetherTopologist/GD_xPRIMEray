@@ -1,0 +1,67 @@
+{
+  "schema": "xprimeray.glowing_heart.channel_registry.v0.preview",
+  "version": "v0.preview",
+  "channels": [
+    {
+      "id": "bend_magnitude_metric",
+      "producer": "core",
+      "kind": "measurement",
+      "dataType": "float64",
+      "units": "unitless_metric",
+      "representation": "scalar_grid",
+      "description": "Mean ray-direction bend magnitude recorded for each Core sample coordinate."
+    },
+    {
+      "id": "ray_hit_flag",
+      "producer": "core",
+      "kind": "measurement",
+      "dataType": "boolean",
+      "units": "categorical",
+      "representation": "binary_grid",
+      "description": "Per-ray hit or miss classification under a declared fixture and observer."
+    },
+    {
+      "id": "traversal_step_count",
+      "producer": "core",
+      "kind": "measurement",
+      "dataType": "integer",
+      "units": "steps",
+      "representation": "scalar_grid",
+      "description": "Number of transport steps recorded for each sample."
+    },
+    {
+      "id": "observer_basis",
+      "producer": "core",
+      "kind": "identity",
+      "dataType": "object",
+      "units": "not_applicable",
+      "representation": "metadata",
+      "description": "Declared observer pose, orientation, projection, and sampling basis."
+    },
+    {
+      "id": "fixture_identity",
+      "producer": "core",
+      "kind": "identity",
+      "dataType": "string",
+      "units": "not_applicable",
+      "representation": "metadata",
+      "description": "Stable identity and source reference for a fixture declaration."
+    },
+    {
+      "id": "runtime_metadata",
+      "producer": "core",
+      "kind": "metadata",
+      "dataType": "object",
+      "units": "not_applicable",
+      "representation": "metadata",
+      "description": "Execution and provenance metadata associated with an artifact packet."
+    }
+  ],
+  "claimBoundary": [
+    "The registry declares channel identities and representations.",
+    "Registry membership does not declare two channels comparable.",
+    "The registry does not validate scientific correctness.",
+    "The registry does not establish renderer equivalence.",
+    "The registry does not compare Core to Godot or prove physical truth."
+  ]
+}

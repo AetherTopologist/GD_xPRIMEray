@@ -36,6 +36,12 @@ public static class FixtureLoader
             throw new InvalidDataException("Fixture name is required.");
         }
 
+        if (fixture.ComparisonIdentity is not null
+            && string.IsNullOrWhiteSpace(fixture.ComparisonIdentity))
+        {
+            throw new InvalidDataException("Fixture comparisonIdentity cannot be empty when declared.");
+        }
+
         if (fixture.RayGrid.Width <= 0 || fixture.RayGrid.Height <= 0)
         {
             throw new InvalidDataException("Fixture rayGrid width and height must be positive.");

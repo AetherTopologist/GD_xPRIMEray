@@ -1,4 +1,7 @@
 using System.Globalization;
+using System.Text.Json.Serialization;
+using XPrimeRay.Core.Comparison;
+using XPrimeRay.Core.Fixtures;
 using XPrimeRay.Core.Transport;
 using XPrimeRay.Core.Validation;
 
@@ -20,8 +23,10 @@ public sealed record RunManifest
         string runId,
         DateTimeOffset timestampUtc,
         string fixturePath,
+        FixtureDefinition fixture,
         TransportResult result,
-        ValidationReport report)
+        ValidationReport report,
+        bool emitDifference)
     {
         return new RunManifest
         {
@@ -30,8 +35,12 @@ public sealed record RunManifest
             Fixture = new FixtureManifest
             {
                 Name = result.FixtureName,
+                ComparisonIdentity = fixture.ComparisonIdentity ?? result.FixtureName,
                 Path = fixturePath,
                 Mode = result.Mode,
+                ObserverBasis = fixture.Observer is null
+                    ? "unknown"
+                    : DifferencePacketBuilder.FormatObserverBasis(fixture.Observer),
             },
             Result = new ResultManifest
             {
@@ -44,7 +53,7 @@ public sealed record RunManifest
                 MeanBend = ToStableDouble(result.MeanBendMagnitude),
                 MaxBend = ToStableDouble(result.MaxBendMagnitude),
             },
-            Artifacts = new ArtifactManifest(),
+            Artifacts = ArtifactManifest.Create(emitDifference),
             Limitations =
             [
                 "Core smoke transport only",
@@ -66,8 +75,10 @@ public sealed record RunManifest
 public sealed record FixtureManifest
 {
     public string Name { get; init; } = "";
+    public string ComparisonIdentity { get; init; } = "";
     public string Path { get; init; } = "";
     public string Mode { get; init; } = "";
+    public string ObserverBasis { get; init; } = "unknown";
 }
 
 public sealed record ResultManifest
@@ -90,6 +101,20 @@ public sealed record ArtifactManifest
     public string SnapshotPpm { get; init; } = "snapshot.ppm";
     public string SnapshotHeatmapCsv { get; init; } = "snapshot_heatmap.csv";
     public string SnapshotAsciiTxt { get; init; } = "snapshot_ascii.txt";
-    public string DifferencePacketJson { get; init; } = "difference_packet.json";
-    public string DifferenceSummaryMd { get; init; } = "difference_summary.md";
+    public string SnapshotChannel { get; init; } = "bend_magnitude_metric";
+    public string SnapshotRepresentation { get; init; } = "scalar_grid";
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? DifferencePacketJson { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? DifferenceSummaryMarkdown { get; init; }
+
+    public static ArtifactManifest Create(bool emitDifference)
+    {
+        return new ArtifactManifest
+        {
+            DifferencePacketJson = emitDifference ? "difference_packet.json" : null,
+            DifferenceSummaryMarkdown = emitDifference ? "difference_summary.md" : null,
+        };
+    }
 }

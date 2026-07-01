@@ -3,6 +3,7 @@ namespace XPrimeRay.Core.Fixtures;
 public sealed record FixtureDefinition
 {
     public string Name { get; init; } = "";
+    public string? ComparisonIdentity { get; init; }
     public string Description { get; init; } = "";
     public RayGridDefinition RayGrid { get; init; } = new();
     public TransportDefinition Transport { get; init; } = new();
