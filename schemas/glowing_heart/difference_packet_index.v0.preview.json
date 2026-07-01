@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://xprimeray.dev/schemas/glowing-heart/difference-packet-index/v0.preview.json",
+  "title": "Project Glowing Heart Difference Packet Index v0 Preview",
+  "description": "Structural index for verified Core-vs-Core Difference Packet exhibits. Index validity does not establish scientific correctness, parity, or renderer equivalence.",
+  "type": "object",
+  "required": ["indexId", "title", "version", "generatedUtc", "entries", "claimBoundary"],
+  "additionalProperties": false,
+  "$defs": {
+    "status": {
+      "type": "string",
+      "enum": ["Comparable", "NotComparable", "RequiresTransform", "Unknown"]
+    },
+    "metrics": {
+      "type": "object",
+      "required": ["countCompared", "maxAbsDifference", "meanAbsDifference", "nonZeroCount"],
+      "additionalProperties": false,
+      "properties": {
+        "countCompared": { "type": "integer", "minimum": 0 },
+        "maxAbsDifference": { "type": "number", "minimum": 0 },
+        "meanAbsDifference": { "type": "number", "minimum": 0 },
+        "nonZeroCount": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "claimBoundary": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 4,
+      "uniqueItems": true
+    },
+    "entry": {
+      "type": "object",
+      "required": [
+        "id", "title", "sourceCase", "status", "rule", "reason",
+        "leftFixture", "rightFixture", "leftChannel", "rightChannel",
+        "comparisonMode", "parityClaim", "runtimeExecuted", "packetSchema",
+        "metrics", "claimBoundary", "galleryDocPath", "sourceReportPath",
+        "recommendedRenderer"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "title": { "type": "string", "minLength": 1 },
+        "sourceCase": { "type": "string", "pattern": "^Case [A-E]$" },
+        "status": { "$ref": "#/$defs/status" },
+        "rule": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 },
+        "leftFixture": { "type": "string", "pattern": "^Fixtures/" },
+        "rightFixture": { "type": "string", "pattern": "^Fixtures/" },
+        "leftChannel": { "type": "string", "minLength": 1 },
+        "rightChannel": { "type": "string", "minLength": 1 },
+        "comparisonMode": { "const": "core_vs_core" },
+        "parityClaim": { "const": "NONE" },
+        "runtimeExecuted": { "const": false },
+        "packetSchema": { "const": "xprimeray.glowing_heart.difference_packet.v2.0" },
+        "metrics": { "$ref": "#/$defs/metrics" },
+        "claimBoundary": { "$ref": "#/$defs/claimBoundary" },
+        "galleryDocPath": { "type": "string", "pattern": "^Docs/" },
+        "sourceReportPath": { "type": "string", "pattern": "^reports/" },
+        "lastVerifiedOutputPath": {
+          "description": "Optional non-durable path to the most recent verification output.",
+          "type": "string",
+          "minLength": 1
+        },
+        "recommendedRenderer": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["table", "card", "matrix", "atlas_graph_node"]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    }
+  },
+  "properties": {
+    "indexId": { "const": "xprimeray.glowing_heart.difference_packet_index.v0.preview" },
+    "title": { "type": "string", "minLength": 1 },
+    "version": { "const": "v0.preview" },
+    "generatedUtc": { "type": "string", "format": "date-time" },
+    "entries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/entry" },
+      "minItems": 5,
+      "uniqueItems": true
+    },
+    "claimBoundary": { "$ref": "#/$defs/claimBoundary" }
+  }
+}
