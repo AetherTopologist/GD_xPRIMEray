@@ -1,0 +1,377 @@
+{
+  "graphId": "glowing_heart.difference_packet_exhibits.v2_8",
+  "title": "Glowing Heart Difference Packet Exhibits",
+  "description": "Atlas Graph representation of the five structured Difference Packet Gallery exhibits.",
+  "version": "v0.1",
+  "notes": [
+    "Node maturity describes documentation evidence depth, not exhibit quality.",
+    "Difference Packet runtimeExecuted=false describes the comparison stage, not Core artifact generation."
+  ],
+  "plainTerms": "Read this graph as an evidence map of comparison decisions, not as a ranking or correctness ladder.",
+  "nodes": [
+    {
+      "id": "glowing_heart_difference_packet_gallery",
+      "label": "Project Glowing Heart Difference Packet Gallery",
+      "type": "project",
+      "category": "Glowing Heart",
+      "maturity": "Experimental",
+      "description": "Structured gallery of retained Core Difference Packet decision exhibits.",
+      "claimBoundary": "Core-vs-Core artifact gallery only; not parity, validation, physical correctness, or renderer equivalence.",
+      "links": [
+        {
+          "label": "Difference Packet Gallery",
+          "href": "Docs/xPRIMEray/project_glowing_heart_v2_4_difference_packet_gallery.md"
+        }
+      ],
+      "tags": [
+        "glowing_heart",
+        "difference_packet",
+        "gallery"
+      ],
+      "metadata": {
+        "sourceIndex": "xprimeray.glowing_heart.difference_packet_index.v0.preview",
+        "exhibitCount": 5,
+        "claimBoundary": [
+          "Core-vs-Core only.",
+          "Not a Godot comparison.",
+          "Not image or pixel comparison.",
+          "Not parity.",
+          "Not physical validation.",
+          "Not renderer equivalence.",
+          "Index validity describes exhibit structure, not scientific correctness."
+        ]
+      }
+    },
+    {
+      "id": "comparable_zero",
+      "label": "Comparable Zero",
+      "type": "artifact",
+      "category": "Difference Packet Exhibit",
+      "maturity": "Experimental",
+      "description": "Matching retained Core fixture comparison identity, observer basis, channel, and coordinate grid produced zero numeric difference.",
+      "claimBoundary": "Core-vs-Core only. Not a Godot comparison. Not image or pixel comparison. Not parity. Zero difference does not establish equivalence with another runtime or measurement system.",
+      "links": [
+        {
+          "label": "Gallery",
+          "href": "Docs/xPRIMEray/project_glowing_heart_v2_4_difference_packet_gallery.md"
+        },
+        {
+          "label": "Source report",
+          "href": "reports/glowing_heart_v2_3_difference_fixture_cases.preview.md"
+        }
+      ],
+      "tags": [
+        "status:Comparable",
+        "rule:bend_magnitude_same_observer",
+        "leftChannel:bend_magnitude_metric",
+        "rightChannel:bend_magnitude_metric"
+      ],
+      "metadata": {
+        "status": "Comparable",
+        "rule": "bend_magnitude_same_observer",
+        "sourceCase": "Case A",
+        "leftFixture": "Fixtures/grin_radial_smoke.json",
+        "rightFixture": "Fixtures/grin_radial_smoke.json",
+        "leftChannel": "bend_magnitude_metric",
+        "rightChannel": "bend_magnitude_metric",
+        "countCompared": 880,
+        "maxAbsDifference": 0,
+        "meanAbsDifference": 0,
+        "nonZeroCount": 0,
+        "parityClaim": "NONE",
+        "runtimeExecuted": false,
+        "comparisonMode": "core_vs_core",
+        "claimBoundary": [
+          "Core-vs-Core only.",
+          "Not a Godot comparison.",
+          "Not image or pixel comparison.",
+          "Not parity.",
+          "Zero difference does not establish equivalence with another runtime or measurement system."
+        ]
+      }
+    },
+    {
+      "id": "comparable_nonzero",
+      "label": "Comparable Non-Zero",
+      "type": "artifact",
+      "category": "Difference Packet Exhibit",
+      "maturity": "Experimental",
+      "description": "The declared-compatible amplitude variant produced non-zero numeric differences in retained Core bend values.",
+      "claimBoundary": "Core-vs-Core only. Not a Godot comparison. Not image or pixel comparison. Not parity. Non-zero difference demonstrates numeric distinction between retained Core artifacts only.",
+      "links": [
+        {
+          "label": "Gallery",
+          "href": "Docs/xPRIMEray/project_glowing_heart_v2_4_difference_packet_gallery.md"
+        },
+        {
+          "label": "Source report",
+          "href": "reports/glowing_heart_v2_3_difference_fixture_cases.preview.md"
+        }
+      ],
+      "tags": [
+        "status:Comparable",
+        "rule:bend_magnitude_same_observer",
+        "leftChannel:bend_magnitude_metric",
+        "rightChannel:bend_magnitude_metric"
+      ],
+      "metadata": {
+        "status": "Comparable",
+        "rule": "bend_magnitude_same_observer",
+        "sourceCase": "Case B",
+        "leftFixture": "Fixtures/grin_radial_smoke.json",
+        "rightFixture": "Fixtures/grin_radial_smoke_variant.json",
+        "leftChannel": "bend_magnitude_metric",
+        "rightChannel": "bend_magnitude_metric",
+        "countCompared": 880,
+        "maxAbsDifference": 0.00031490779,
+        "meanAbsDifference": 0.00019547191841352225,
+        "nonZeroCount": 872,
+        "parityClaim": "NONE",
+        "runtimeExecuted": false,
+        "comparisonMode": "core_vs_core",
+        "claimBoundary": [
+          "Core-vs-Core only.",
+          "Not a Godot comparison.",
+          "Not image or pixel comparison.",
+          "Not parity.",
+          "Non-zero difference demonstrates numeric distinction between retained Core artifacts only."
+        ]
+      }
+    },
+    {
+      "id": "unknown_observer_mismatch",
+      "label": "Unknown Observer Mismatch",
+      "type": "artifact",
+      "category": "Difference Packet Exhibit",
+      "maturity": "Experimental",
+      "description": "The retained observer basis mismatch made comparison eligibility unknown, so values were not compared.",
+      "claimBoundary": "Core-vs-Core only. Not a Godot comparison. Not image or pixel comparison. Not parity. Unknown means eligibility was not established.",
+      "links": [
+        {
+          "label": "Gallery",
+          "href": "Docs/xPRIMEray/project_glowing_heart_v2_4_difference_packet_gallery.md"
+        },
+        {
+          "label": "Source report",
+          "href": "reports/glowing_heart_v2_3_difference_fixture_cases.preview.md"
+        }
+      ],
+      "tags": [
+        "status:Unknown",
+        "rule:bend_magnitude_context_mismatch",
+        "leftChannel:bend_magnitude_metric",
+        "rightChannel:bend_magnitude_metric"
+      ],
+      "metadata": {
+        "status": "Unknown",
+        "rule": "bend_magnitude_context_mismatch",
+        "sourceCase": "Case C",
+        "leftFixture": "Fixtures/grin_radial_smoke.json",
+        "rightFixture": "Fixtures/grin_radial_smoke_observer_variant.json",
+        "leftChannel": "bend_magnitude_metric",
+        "rightChannel": "bend_magnitude_metric",
+        "countCompared": 0,
+        "maxAbsDifference": 0,
+        "meanAbsDifference": 0,
+        "nonZeroCount": 0,
+        "parityClaim": "NONE",
+        "runtimeExecuted": false,
+        "comparisonMode": "core_vs_core",
+        "claimBoundary": [
+          "Core-vs-Core only.",
+          "Not a Godot comparison.",
+          "Not image or pixel comparison.",
+          "Not parity.",
+          "Unknown means eligibility was not established."
+        ]
+      }
+    },
+    {
+      "id": "unknown_coordinate_grid_mismatch",
+      "label": "Unknown Coordinate-Grid Mismatch",
+      "type": "artifact",
+      "category": "Difference Packet Exhibit",
+      "maturity": "Experimental",
+      "description": "The retained coordinate-grid mismatch made comparison eligibility unknown, so values were not compared.",
+      "claimBoundary": "Core-vs-Core only. Not a Godot comparison. Not image or pixel comparison. Not parity. Unknown means eligibility was not established.",
+      "links": [
+        {
+          "label": "Gallery",
+          "href": "Docs/xPRIMEray/project_glowing_heart_v2_4_difference_packet_gallery.md"
+        },
+        {
+          "label": "Source report",
+          "href": "reports/glowing_heart_v2_3_difference_fixture_cases.preview.md"
+        }
+      ],
+      "tags": [
+        "status:Unknown",
+        "rule:bend_magnitude_context_mismatch",
+        "leftChannel:bend_magnitude_metric",
+        "rightChannel:bend_magnitude_metric"
+      ],
+      "metadata": {
+        "status": "Unknown",
+        "rule": "bend_magnitude_context_mismatch",
+        "sourceCase": "Case D",
+        "leftFixture": "Fixtures/grin_radial_smoke.json",
+        "rightFixture": "Fixtures/grin_radial_smoke_resolution_variant.json",
+        "leftChannel": "bend_magnitude_metric",
+        "rightChannel": "bend_magnitude_metric",
+        "countCompared": 0,
+        "maxAbsDifference": 0,
+        "meanAbsDifference": 0,
+        "nonZeroCount": 0,
+        "parityClaim": "NONE",
+        "runtimeExecuted": false,
+        "comparisonMode": "core_vs_core",
+        "claimBoundary": [
+          "Core-vs-Core only.",
+          "Not a Godot comparison.",
+          "Not image or pixel comparison.",
+          "Not parity.",
+          "Unknown means eligibility was not established."
+        ]
+      }
+    },
+    {
+      "id": "not_comparable_channel",
+      "label": "NotComparable Channel",
+      "type": "artifact",
+      "category": "Difference Packet Exhibit",
+      "maturity": "Experimental",
+      "description": "Bend magnitude and traversal step count are incompatible retained Core channels without a declared transform, so values were not compared.",
+      "claimBoundary": "Core-vs-Core only. Not a Godot comparison. Not image or pixel comparison. Not parity. No bend data was relabeled as traversal steps.",
+      "links": [
+        {
+          "label": "Gallery",
+          "href": "Docs/xPRIMEray/project_glowing_heart_v2_4_difference_packet_gallery.md"
+        },
+        {
+          "label": "Source report",
+          "href": "reports/glowing_heart_v2_5_not_comparable_channel_artifact.preview.md"
+        }
+      ],
+      "tags": [
+        "status:NotComparable",
+        "rule:traversal_steps_vs_bend_not_comparable",
+        "leftChannel:bend_magnitude_metric",
+        "rightChannel:traversal_step_count"
+      ],
+      "metadata": {
+        "status": "NotComparable",
+        "rule": "traversal_steps_vs_bend_not_comparable",
+        "sourceCase": "Case E",
+        "leftFixture": "Fixtures/grin_radial_smoke.json",
+        "rightFixture": "Fixtures/grin_radial_smoke.json",
+        "leftChannel": "bend_magnitude_metric",
+        "rightChannel": "traversal_step_count",
+        "countCompared": 0,
+        "maxAbsDifference": 0,
+        "meanAbsDifference": 0,
+        "nonZeroCount": 0,
+        "parityClaim": "NONE",
+        "runtimeExecuted": false,
+        "comparisonMode": "core_vs_core",
+        "claimBoundary": [
+          "Core-vs-Core only.",
+          "Not a Godot comparison.",
+          "Not image or pixel comparison.",
+          "Not parity.",
+          "No bend data was relabeled as traversal steps."
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "gallery_produces_comparable_zero",
+      "from": "glowing_heart_difference_packet_gallery",
+      "to": "comparable_zero",
+      "relationship": "produces",
+      "label": "produces exhibit",
+      "claimBoundary": "Artifact relationship only; it does not imply ranking, correctness, or comparison eligibility beyond the recorded matrix decision."
+    },
+    {
+      "id": "gallery_produces_comparable_nonzero",
+      "from": "glowing_heart_difference_packet_gallery",
+      "to": "comparable_nonzero",
+      "relationship": "produces",
+      "label": "produces exhibit",
+      "claimBoundary": "Artifact relationship only; it does not imply ranking, correctness, or comparison eligibility beyond the recorded matrix decision."
+    },
+    {
+      "id": "gallery_produces_unknown_observer_mismatch",
+      "from": "glowing_heart_difference_packet_gallery",
+      "to": "unknown_observer_mismatch",
+      "relationship": "produces",
+      "label": "produces exhibit",
+      "claimBoundary": "Artifact relationship only; it does not imply ranking, correctness, or comparison eligibility beyond the recorded matrix decision."
+    },
+    {
+      "id": "gallery_produces_unknown_coordinate_grid_mismatch",
+      "from": "glowing_heart_difference_packet_gallery",
+      "to": "unknown_coordinate_grid_mismatch",
+      "relationship": "produces",
+      "label": "produces exhibit",
+      "claimBoundary": "Artifact relationship only; it does not imply ranking, correctness, or comparison eligibility beyond the recorded matrix decision."
+    },
+    {
+      "id": "gallery_produces_not_comparable_channel",
+      "from": "glowing_heart_difference_packet_gallery",
+      "to": "not_comparable_channel",
+      "relationship": "produces",
+      "label": "produces exhibit",
+      "claimBoundary": "Artifact relationship only; it does not imply ranking, correctness, or comparison eligibility beyond the recorded matrix decision."
+    }
+  ],
+  "groups": [
+    {
+      "id": "difference_packet_exhibits",
+      "label": "Difference Packet Exhibits",
+      "description": "Five retained Core comparison-decision exhibits generated from the v2.6 index.",
+      "nodeIds": [
+        "comparable_zero",
+        "comparable_nonzero",
+        "unknown_observer_mismatch",
+        "unknown_coordinate_grid_mismatch",
+        "not_comparable_channel"
+      ]
+    }
+  ],
+  "claimBoundary": "Core-vs-Core only. Not a Godot comparison. Not image or pixel comparison. Not parity. Not physical validation. Not renderer equivalence. Index validity describes exhibit structure, not scientific correctness.",
+  "evidence": [
+    {
+      "label": "Difference Packet Index",
+      "reference": "reports/glowing_heart_v2_6_difference_packet_index.preview.json",
+      "kind": "report"
+    },
+    {
+      "label": "Difference Packet Index Schema",
+      "reference": "schemas/glowing_heart/difference_packet_index.v0.preview.json",
+      "kind": "schema"
+    },
+    {
+      "label": "Channel Registry",
+      "reference": "Docs/xPRIMEray/glowing_heart/channel_registry.preview.json",
+      "kind": "artifact"
+    },
+    {
+      "label": "Compatibility Matrix",
+      "reference": "Docs/xPRIMEray/glowing_heart/channel_compatibility_matrix.preview.json",
+      "kind": "artifact"
+    }
+  ],
+  "renderHints": {
+    "direction": "LR",
+    "layout": "layered",
+    "showGroups": true,
+    "nodeShapes": {
+      "project": "rounded",
+      "artifact": "rectangle"
+    },
+    "edgeStyles": {
+      "produces": "solid"
+    }
+  }
+}

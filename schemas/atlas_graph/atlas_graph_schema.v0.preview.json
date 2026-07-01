@@ -132,6 +132,11 @@
             "minLength": 1
           },
           "uniqueItems": true
+        },
+        "metadata": {
+          "description": "Optional structured node data for domain-specific renderers. Metadata does not change graph relationships or claim eligibility.",
+          "type": "object",
+          "additionalProperties": true
         }
       }
     },
