@@ -16,9 +16,9 @@ from typing import Any
 CONTRACT = Path("schemas/glowing_heart/shared_observer_contract.v0.preview.json")
 OBSERVER_INSTANCES = Path("reports/glowing_heart_observer_instances.preview.json")
 RECONCILIATION = Path("reports/glowing_heart_observer_reconciliation.preview.json")
-CORE_FIXTURE = Path("fixtures/grin_radial_smoke.json")
-BRIDGE = Path("fixtures/shared/glowing_heart_grin_bridge.v0.preview.json")
-OUTPUT_JSON = Path("fixtures/shared/glowing_heart_observer_target.v0.preview.json")
+CORE_FIXTURE = Path("Fixtures/grin_radial_smoke.json")
+BRIDGE = Path("Fixtures/shared/glowing_heart_grin_bridge.v0.preview.json")
+OUTPUT_JSON = Path("Fixtures/shared/glowing_heart_observer_target.v0.preview.json")
 OUTPUT_MD = Path("reports/glowing_heart_shared_observer_target.preview.md")
 
 

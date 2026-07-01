@@ -3,13 +3,13 @@
   "generatedUtc": "2026-06-22T01:00:40Z",
   "runtimeExecuted": false,
   "parityClaim": "NONE",
-  "coreFixture": "fixtures/grin_radial_smoke.json",
+  "coreFixture": "Fixtures/grin_radial_smoke.json",
   "godotFixture": "Fixtures/fixture_hermetic_observatory_grin.tscn",
   "rows": [
     {
       "category": "Fixture Identity",
       "status": "MATCH",
-      "reason": "Core fixture exists at fixtures/grin_radial_smoke.json; Godot fixture export exists at Fixtures/fixture_hermetic_observatory_grin.tscn."
+      "reason": "Core fixture exists at Fixtures/grin_radial_smoke.json; Godot fixture export exists at Fixtures/fixture_hermetic_observatory_grin.tscn."
     },
     {
       "category": "Observer / Camera",

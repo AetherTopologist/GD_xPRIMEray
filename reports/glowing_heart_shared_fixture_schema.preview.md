@@ -64,7 +64,7 @@ This remains a preview vocabulary and does not imply parity.
     "runtimeExecuted": false
   },
   "sourceLinks": {
-    "coreFixturePath": "fixtures/grin_radial_smoke.json",
+    "coreFixturePath": "Fixtures/grin_radial_smoke.json",
     "godotFixturePath": "Fixtures/fixture_hermetic_observatory_grin.tscn",
     "godotExportPath": "reports/glowing_heart_godot_fixture_export.preview.json",
     "gapMatrixPath": "reports/glowing_heart_gap_matrix.preview.json",

@@ -13,7 +13,7 @@ from typing import Any
 
 
 CATALOG_PATH = Path("reports/observatory_catalog.json")
-OBSERVER_STORYBOARD_ROOT = Path("docs/observer_storyboard")
+OBSERVER_STORYBOARD_ROOT = Path("Docs/observer_storyboard")
 GALLERY_ROOT = Path("Docs/Observatory_Gallery")
 OUTPUT_PATH = Path("reports/observatory_graph.json")
 
@@ -134,8 +134,8 @@ DOC_CITATIONS = {
     "Docs/Observatory_Gallery/canonical_fixtures.md": "docs_page:canonical_fixtures",
     "Docs/Observatory_Gallery/closure_diagnostics.md": "docs_page:closure_diagnostics",
     "Docs/Observatory_Gallery/curvature_benchmark.md": "docs_page:curvature_benchmark",
-    "docs/observer_storyboard/observer_storyboard_v1.md": "storyboard_spec:observer_storyboard_v1",
-    "docs/observer_storyboard/observer_storyboard_v1.schema.json": "schema:observer_storyboard_v1",
+    "Docs/observer_storyboard/observer_storyboard_v1.md": "storyboard_spec:observer_storyboard_v1",
+    "Docs/observer_storyboard/observer_storyboard_v1.schema.json": "schema:observer_storyboard_v1",
 }
 
 

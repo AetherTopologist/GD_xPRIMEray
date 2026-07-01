@@ -14,9 +14,9 @@ The worktree already contained unrelated documentation path changes before this 
  D Docs/basin_taxonomy_v1.md
  D Docs/observer_storyboard/observer_storyboard_v1.md
  D Docs/observer_storyboard/observer_storyboard_v1.schema.json
-?? docs/basin_atlas_v1.md
-?? docs/observatory/canonical_fixtures.md
-?? docs/xeno_zeno_citation_atlas.md
+?? Docs/basin_atlas_v1.md
+?? Docs/Observatory/canonical_fixtures.md
+?? Docs/xeno_zeno_citation_atlas.md
 ```
 
 These existing changes are recorded as baseline context and are intentionally not touched by v0.1.
@@ -26,7 +26,7 @@ These existing changes are recorded as baseline context and are intentionally no
 ```txt
 src/XPrimeRay.Core/
 src/XPrimeRay.Testbench.Cli/
-fixtures/glowing_heart_minimal.json
+Fixtures/glowing_heart_minimal.json
 Docs/xPRIMEray/project_glowing_heart_v0_1_baseline.md
 Docs/xPRIMEray/project_glowing_heart_v0_1_artifact.md
 ```

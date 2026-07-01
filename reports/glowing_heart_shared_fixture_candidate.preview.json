@@ -5,7 +5,7 @@
   "runtimeExecuted": false,
   "coreFixture": {
     "name": "grin_radial_smoke",
-    "path": "fixtures/grin_radial_smoke.json",
+    "path": "Fixtures/grin_radial_smoke.json",
     "mode": "radial_grin_smoke",
     "rayGrid": {
       "width": 40,

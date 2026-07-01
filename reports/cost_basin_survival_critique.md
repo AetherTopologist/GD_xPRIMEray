@@ -58,7 +58,7 @@ The hermetic fixture is designed to have six ownership domains at all curvature 
 
 **A5. Proxy mismatch (step ridges ≠ query basin)**
 
-[renderer_observatory.md](renderer_observatory.md) identifies `pass2_query_ms` as the bottleneck. Cost Basin v1 spatial field is step-weighted. Seam sensitivity in [xeno_zeno_citation_atlas.md](../docs/xeno_zeno_citation_atlas.md) (X-S Seam Xeno) is an **ownership-classification** phenomenon. Aligning step ridges with seams does not validate the story that query effort forms coherent spatial basins.
+[renderer_observatory.md](renderer_observatory.md) identifies `pass2_query_ms` as the bottleneck. Cost Basin v1 spatial field is step-weighted. Seam sensitivity in [xeno_zeno_citation_atlas.md](../Docs/xeno_zeno_citation_atlas.md) (X-S Seam Xeno) is an **ownership-classification** phenomenon. Aligning step ridges with seams does not validate the story that query effort forms coherent spatial basins.
 
 **A6. PNG rescaling bleed**
 
@@ -80,7 +80,7 @@ Mini full-coverage run: `miss_count = 0`, hit map uniformly green ([weekend_fps_
 
 **B2. Wrong layer for this fixture**
 
-[basin_atlas_v1.md](../docs/basin_atlas_v1.md) separates closure basin (binary in/out) from cost basin (scalar depth): *"The cost basin boundary is not the closure basin boundary."* Testing ridge↔closure-edge alignment on a **fully closed interior** tests a relationship the concept architecture says should not hold at the margin.
+[basin_atlas_v1.md](../Docs/basin_atlas_v1.md) separates closure basin (binary in/out) from cost basin (scalar depth): *"The cost basin boundary is not the closure basin boundary."* Testing ridge↔closure-edge alignment on a **fully closed interior** tests a relationship the concept architecture says should not hold at the margin.
 
 **B3. Closure edges exist only in failure regimes**
 
@@ -116,7 +116,7 @@ Publishing 463 beside three zeros invites reading "seams matter; closure and cov
 
 **D2. Wrong instrument for sealed fixture**
 
-Disagreement zones belong to **coherence/oracle instability**. [canonical_fixtures.md](../docs/observatory/canonical_fixtures.md) positions `object_island` (~49% hit, budget exhaustion) for ambiguity. Hermetic_curved_room at full closure is the wrong place to expect disagreement signal.
+Disagreement zones belong to **coherence/oracle instability**. [canonical_fixtures.md](../Docs/Observatory/canonical_fixtures.md) positions `object_island` (~49% hit, budget exhaustion) for ambiguity. Hermetic_curved_room at full closure is the wrong place to expect disagreement signal.
 
 **D3. False hierarchy from fixture selection**
 

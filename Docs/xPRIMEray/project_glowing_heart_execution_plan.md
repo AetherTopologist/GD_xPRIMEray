@@ -236,11 +236,11 @@ Files are copied into Core, not deleted from RendererCore until Godot build is v
 
 | JSON file | Source fixture | Notes |
 |---|---|---|
-| `fixtures/hermetic_curved_room.json` | `fixture_hermetic_curved_room.tscn` | Amp=0.006, Power, ROuter=4.75 |
-| `fixtures/hermetic_curved_room_strong.json` | Strong-field variant | Amp=0.02 |
-| `fixtures/blackhole_minimal.json` | `fixture_blackhole_minimal.tscn` | Schwarzschild proxy |
-| `fixtures/curved_minimal.json` | `fixture_curved_minimal.tscn` | Beta/gamma params |
-| `fixtures/boundary_shell_crossing.json` | Boundary stress fixtures | EntryAndExit policy |
+| `Fixtures/hermetic_curved_room.json` | `fixture_hermetic_curved_room.tscn` | Amp=0.006, Power, ROuter=4.75 |
+| `Fixtures/hermetic_curved_room_strong.json` | Strong-field variant | Amp=0.02 |
+| `Fixtures/blackhole_minimal.json` | `fixture_blackhole_minimal.tscn` | Schwarzschild proxy |
+| `Fixtures/curved_minimal.json` | `fixture_curved_minimal.tscn` | Beta/gamma params |
+| `Fixtures/boundary_shell_crossing.json` | Boundary stress fixtures | EntryAndExit policy |
 
 ### Fixture-sync CI step
 
@@ -249,7 +249,7 @@ To prevent `.tscn` / JSON drift, add a build target that reads each fixture cont
 ```bash
 dotnet run --project tools/fixture_sync -- \
   --tscn Fixtures/fixture_hermetic_curved_room.tscn \
-  --json fixtures/hermetic_curved_room.json \
+  --json Fixtures/hermetic_curved_room.json \
   --fail-on-mismatch
 ```
 
@@ -257,7 +257,7 @@ This runs in CI as a pre-merge gate. It does not modify either file; it only rep
 
 ### Files affected
 
-- **New:** `fixtures/` directory with 5 JSON files
+- **New:** `Fixtures/` directory with 5 JSON files
 - **New:** `src/XPrimeRay.Core/Fixtures/FixtureDefinition.cs`
 - **New:** `src/XPrimeRay.Core/Fixtures/FixtureLoader.cs`
 - **New:** `src/XPrimeRay.Core/Fixtures/FixtureRegistry.cs`
@@ -268,11 +268,11 @@ This runs in CI as a pre-merge gate. It does not modify either file; it only rep
 - [ ] 5 JSON fixtures load without error via `FixtureLoader.Load(path)`
 - [ ] `TransportRunner.Run()` produces closure PASS for `hermetic_curved_room.json`
 - [ ] CI fixture-sync step runs and passes for all 5 converted fixtures
-- [ ] JSON schema file exists at `fixtures/schema/fixture-v1.json`
+- [ ] JSON schema file exists at `Fixtures/schema/fixture-v1.json`
 
 ### Rollback strategy
 
-JSON fixtures are additive. `.tscn` scenes are unchanged. If FixtureLoader has bugs, delete the `fixtures/` directory and Core fixture files.
+JSON fixtures are additive. `.tscn` scenes are unchanged. If FixtureLoader has bugs, delete the `Fixtures/` directory and Core fixture files.
 
 ---
 
@@ -284,13 +284,13 @@ JSON fixtures are additive. `.tscn` scenes are unchanged. If FixtureLoader has b
 
 ```bash
 # Run a single fixture; exit 0 on PASS, 2 on FAIL
-xpr run-fixture fixtures/hermetic_curved_room.json
+xpr run-fixture Fixtures/hermetic_curved_room.json
 
 # Sweep a parameter range; emit manifest per value
-xpr sweep fixtures/hermetic_curved_room.json --param field.amplitude=0,0.25,0.5,0.75,1.0
+xpr sweep Fixtures/hermetic_curved_room.json --param field.amplitude=0,0.25,0.5,0.75,1.0
 
 # Batch render (emit raw buffer + PNG via System.Drawing or SixLabors.ImageSharp)
-xpr render fixtures/hermetic_curved_room.json --width 320 --height 180 --output output/
+xpr render Fixtures/hermetic_curved_room.json --width 320 --height 180 --output output/
 
 # Validate a manifest against observatory schema
 xpr validate output/latest/manifest.json
@@ -323,7 +323,7 @@ This entry format is **identical** to existing `reports/observatory_catalog.json
 
 ### Acceptance criteria
 
-- [ ] `dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture fixtures/hermetic_curved_room.json` exits 0
+- [ ] `dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture Fixtures/hermetic_curved_room.json` exits 0
 - [ ] Manifest JSON appended to observatory catalog passes Python observatory indexer without modification
 - [ ] `sweep` command runs 5 amplitude values and emits 5 manifest entries
 - [ ] CLI installs as a dotnet tool: `dotnet tool install --global xprimeray-testbench` (local feed OK for this milestone)
@@ -410,7 +410,7 @@ dotnet test src/XPrimeRay.Core.Tests/ -c Release --no-build
 
 echo "[Core CI] Running hermetic_curved_room fixture..."
 dotnet run --project src/XPrimeRay.Testbench.Cli -c Release -- \
-  run-fixture fixtures/hermetic_curved_room.json
+  run-fixture Fixtures/hermetic_curved_room.json
 
 echo "[Core CI] All checks passed."
 ```
@@ -457,8 +457,8 @@ xprimeray-core/
   src/XPrimeRay.Core/          ← moved from GD_xPRIMEray
   src/XPrimeRay.Testbench.Cli/ ← moved from GD_xPRIMEray
   tests/XPrimeRay.Core.Tests/  ← moved from GD_xPRIMEray
-  fixtures/                    ← 5 READY fixtures in JSON
-  docs/                        ← architecture.md, adapter-contract.md, etc.
+  Fixtures/                    ← 5 READY fixtures in JSON
+  Docs/                        ← architecture.md, adapter-contract.md, etc.
   assets/sigils/bee-sigil.svg  ← identity
   README.md
   xprimeray-core.sln

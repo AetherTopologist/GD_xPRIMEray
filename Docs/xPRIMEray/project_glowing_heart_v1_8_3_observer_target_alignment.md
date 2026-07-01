@@ -44,7 +44,7 @@ Docs/xPRIMEray/project_glowing_heart_v1_8_milestone.md
 
 ```txt
 [glowing-heart-observer-target-alignment]
-target=fixtures/shared/glowing_heart_observer_target.v0.preview.json
+target=Fixtures/shared/glowing_heart_observer_target.v0.preview.json
 core_pixel_comparison_ready=false
 godot_pixel_comparison_ready=false
 pixel_comparison_ready=false

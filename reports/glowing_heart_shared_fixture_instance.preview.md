@@ -12,7 +12,7 @@ Parity claim: NONE
 |---|---|
 | Name | glowing_heart_grin_bridge |
 | Version | v0.preview |
-| Core Fixture | fixtures/grin_radial_smoke.json |
+| Core Fixture | Fixtures/grin_radial_smoke.json |
 | Godot Fixture | Fixtures/fixture_hermetic_observatory_grin.tscn |
 
 ## What This Instance Represents

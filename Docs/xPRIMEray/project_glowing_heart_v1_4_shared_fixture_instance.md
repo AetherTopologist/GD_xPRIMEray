@@ -26,7 +26,7 @@ python3 tools/glowing_heart_shared_fixture_instance.py
 ## Outputs
 
 ```txt
-fixtures/shared/glowing_heart_grin_bridge.v0.preview.json
+Fixtures/shared/glowing_heart_grin_bridge.v0.preview.json
 reports/glowing_heart_shared_fixture_instance.preview.md
 ```
 

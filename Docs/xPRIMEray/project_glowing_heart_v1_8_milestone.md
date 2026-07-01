@@ -67,7 +67,7 @@ All steps produced preview artifacts only. No Godot runtime was executed for the
 
 ### v1.8 — Observer instances
 
-Created side-by-side observer instances for Core and Godot. Core used an explicit smoke observer from `fixtures/grin_radial_smoke.json`; Godot used a static `Camera3D` candidate inferred from the selected fixture.
+Created side-by-side observer instances for Core and Godot. Core used an explicit smoke observer from `Fixtures/grin_radial_smoke.json`; Godot used a static `Camera3D` candidate inferred from the selected fixture.
 
 Outputs:
 
@@ -94,7 +94,7 @@ Created a shared observer target. The target uses the explicit Core smoke observ
 Outputs:
 
 ```txt
-fixtures/shared/glowing_heart_observer_target.v0.preview.json
+Fixtures/shared/glowing_heart_observer_target.v0.preview.json
 reports/glowing_heart_shared_observer_target.preview.md
 ```
 

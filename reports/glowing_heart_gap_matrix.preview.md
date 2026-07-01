@@ -20,7 +20,7 @@ Parity claim: NONE
 
 | Category | Status | Reason |
 |---|---|---|
-| Fixture Identity | MATCH | Core fixture exists at fixtures/grin_radial_smoke.json; Godot fixture export exists at Fixtures/fixture_hermetic_observatory_grin.tscn. |
+| Fixture Identity | MATCH | Core fixture exists at Fixtures/grin_radial_smoke.json; Godot fixture export exists at Fixtures/fixture_hermetic_observatory_grin.tscn. |
 | Observer / Camera | PARTIAL | Core observer exists; Godot Camera3D detected, but no shared observer/camera schema exists. |
 | Field Definition | PARTIAL | Core has a grin_radial field; Godot export has GRIN/FieldSource signals, but field parameters are not normalized. |
 | Transport Concept | PARTIAL | Core has radial_grin_smoke transport settings; Godot export has Ray/Renderer/Transport references, but no shared transport baseline. |

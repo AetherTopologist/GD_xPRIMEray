@@ -3,7 +3,7 @@
   "generatedUtc": "2026-06-26T15:50:33Z",
   "runtimeExecuted": false,
   "parityClaim": "NONE",
-  "target": "fixtures/shared/glowing_heart_observer_target.v0.preview.json",
+  "target": "Fixtures/shared/glowing_heart_observer_target.v0.preview.json",
   "pixelComparisonReady": false,
   "coreVsTarget": {
     "summary": {

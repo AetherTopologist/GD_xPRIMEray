@@ -2607,6 +2607,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -2726,6 +2730,62 @@
     
   
     v1.9 Snapshot Contract
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../project_glowing_heart_v2_3_deliberate_core_difference_fixtures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v2.3 Deliberate Core Differences
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../project_glowing_heart_v2_4_difference_packet_gallery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v2.4 Difference Packet Gallery
   
 
     
@@ -8499,27 +8559,27 @@
 </thead>
 <tbody>
 <tr>
-<td><code>fixtures/hermetic_curved_room.json</code></td>
+<td><code>Fixtures/hermetic_curved_room.json</code></td>
 <td><code>fixture_hermetic_curved_room.tscn</code></td>
 <td>Amp=0.006, Power, ROuter=4.75</td>
 </tr>
 <tr>
-<td><code>fixtures/hermetic_curved_room_strong.json</code></td>
+<td><code>Fixtures/hermetic_curved_room_strong.json</code></td>
 <td>Strong-field variant</td>
 <td>Amp=0.02</td>
 </tr>
 <tr>
-<td><code>fixtures/blackhole_minimal.json</code></td>
+<td><code>Fixtures/blackhole_minimal.json</code></td>
 <td><code>fixture_blackhole_minimal.tscn</code></td>
 <td>Schwarzschild proxy</td>
 </tr>
 <tr>
-<td><code>fixtures/curved_minimal.json</code></td>
+<td><code>Fixtures/curved_minimal.json</code></td>
 <td><code>fixture_curved_minimal.tscn</code></td>
 <td>Beta/gamma params</td>
 </tr>
 <tr>
-<td><code>fixtures/boundary_shell_crossing.json</code></td>
+<td><code>Fixtures/boundary_shell_crossing.json</code></td>
 <td>Boundary stress fixtures</td>
 <td>EntryAndExit policy</td>
 </tr>
@@ -8529,13 +8589,13 @@
 <p>To prevent <code>.tscn</code> / JSON drift, add a build target that reads each fixture controller's <code>[Export]</code> defaults via reflection and compares them to the JSON:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>dotnet<span class="w"> </span>run<span class="w"> </span>--project<span class="w"> </span>tools/fixture_sync<span class="w"> </span>--<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span>--tscn<span class="w"> </span>Fixtures/fixture_hermetic_curved_room.tscn<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span>--json<span class="w"> </span>fixtures/hermetic_curved_room.json<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span>--json<span class="w"> </span>Fixtures/hermetic_curved_room.json<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span>--fail-on-mismatch
 </span></code></pre></div>
 <p>This runs in CI as a pre-merge gate. It does not modify either file; it only reports divergence.</p>
 <h3 id="files-affected_3">Files affected<a class="headerlink" href="#files-affected_3" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>New:</strong> <code>fixtures/</code> directory with 5 JSON files</li>
+<li><strong>New:</strong> <code>Fixtures/</code> directory with 5 JSON files</li>
 <li><strong>New:</strong> <code>src/XPrimeRay.Core/Fixtures/FixtureDefinition.cs</code></li>
 <li><strong>New:</strong> <code>src/XPrimeRay.Core/Fixtures/FixtureLoader.cs</code></li>
 <li><strong>New:</strong> <code>src/XPrimeRay.Core/Fixtures/FixtureRegistry.cs</code></li>
@@ -8546,22 +8606,22 @@
 <li>[ ] 5 JSON fixtures load without error via <code>FixtureLoader.Load(path)</code></li>
 <li>[ ] <code>TransportRunner.Run()</code> produces closure PASS for <code>hermetic_curved_room.json</code></li>
 <li>[ ] CI fixture-sync step runs and passes for all 5 converted fixtures</li>
-<li>[ ] JSON schema file exists at <code>fixtures/schema/fixture-v1.json</code></li>
+<li>[ ] JSON schema file exists at <code>Fixtures/schema/fixture-v1.json</code></li>
 </ul>
 <h3 id="rollback-strategy_3">Rollback strategy<a class="headerlink" href="#rollback-strategy_3" title="Permanent link">&para;</a></h3>
-<p>JSON fixtures are additive. <code>.tscn</code> scenes are unchanged. If FixtureLoader has bugs, delete the <code>fixtures/</code> directory and Core fixture files.</p>
+<p>JSON fixtures are additive. <code>.tscn</code> scenes are unchanged. If FixtureLoader has bugs, delete the <code>Fixtures/</code> directory and Core fixture files.</p>
 <hr />
 <h2 id="phase-4-cli-testbench">Phase 4: CLI Testbench<a class="headerlink" href="#phase-4-cli-testbench" title="Permanent link">&para;</a></h2>
 <p><strong>Goal:</strong> Build <code>XPrimeRay.Testbench.Cli</code> as the first official non-Godot consumer of Core. Emit observatory-compatible manifest output.</p>
 <h3 id="cli-commands">CLI commands<a class="headerlink" href="#cli-commands" title="Permanent link">&para;</a></h3>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Run a single fixture; exit 0 on PASS, 2 on FAIL</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>xpr<span class="w"> </span>run-fixture<span class="w"> </span>fixtures/hermetic_curved_room.json
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>xpr<span class="w"> </span>run-fixture<span class="w"> </span>Fixtures/hermetic_curved_room.json
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
 </span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="c1"># Sweep a parameter range; emit manifest per value</span>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>xpr<span class="w"> </span>sweep<span class="w"> </span>fixtures/hermetic_curved_room.json<span class="w"> </span>--param<span class="w"> </span>field.amplitude<span class="o">=</span><span class="m">0</span>,0.25,0.5,0.75,1.0
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>xpr<span class="w"> </span>sweep<span class="w"> </span>Fixtures/hermetic_curved_room.json<span class="w"> </span>--param<span class="w"> </span>field.amplitude<span class="o">=</span><span class="m">0</span>,0.25,0.5,0.75,1.0
 </span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
 </span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="c1"># Batch render (emit raw buffer + PNG via System.Drawing or SixLabors.ImageSharp)</span>
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>xpr<span class="w"> </span>render<span class="w"> </span>fixtures/hermetic_curved_room.json<span class="w"> </span>--width<span class="w"> </span><span class="m">320</span><span class="w"> </span>--height<span class="w"> </span><span class="m">180</span><span class="w"> </span>--output<span class="w"> </span>output/
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>xpr<span class="w"> </span>render<span class="w"> </span>Fixtures/hermetic_curved_room.json<span class="w"> </span>--width<span class="w"> </span><span class="m">320</span><span class="w"> </span>--height<span class="w"> </span><span class="m">180</span><span class="w"> </span>--output<span class="w"> </span>output/
 </span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>
 </span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="c1"># Validate a manifest against observatory schema</span>
 </span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>xpr<span class="w"> </span>validate<span class="w"> </span>output/latest/manifest.json
@@ -8589,7 +8649,7 @@
 </ul>
 <h3 id="acceptance-criteria_4">Acceptance criteria<a class="headerlink" href="#acceptance-criteria_4" title="Permanent link">&para;</a></h3>
 <ul>
-<li>[ ] <code>dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture fixtures/hermetic_curved_room.json</code> exits 0</li>
+<li>[ ] <code>dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture Fixtures/hermetic_curved_room.json</code> exits 0</li>
 <li>[ ] Manifest JSON appended to observatory catalog passes Python observatory indexer without modification</li>
 <li>[ ] <code>sweep</code> command runs 5 amplitude values and emits 5 manifest entries</li>
 <li>[ ] CLI installs as a dotnet tool: <code>dotnet tool install --global xprimeray-testbench</code> (local feed OK for this milestone)</li>
@@ -8661,7 +8721,7 @@
 </span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>
 </span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;[Core CI] Running hermetic_curved_room fixture...&quot;</span>
 </span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>dotnet<span class="w"> </span>run<span class="w"> </span>--project<span class="w"> </span>src/XPrimeRay.Testbench.Cli<span class="w"> </span>-c<span class="w"> </span>Release<span class="w"> </span>--<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="w">  </span>run-fixture<span class="w"> </span>fixtures/hermetic_curved_room.json
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="w">  </span>run-fixture<span class="w"> </span>Fixtures/hermetic_curved_room.json
 </span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>
 </span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;[Core CI] All checks passed.&quot;</span>
 </span></code></pre></div>
@@ -8714,8 +8774,8 @@
 </span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>  src/XPrimeRay.Core/          ← moved from GD_xPRIMEray
 </span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>  src/XPrimeRay.Testbench.Cli/ ← moved from GD_xPRIMEray
 </span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>  tests/XPrimeRay.Core.Tests/  ← moved from GD_xPRIMEray
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>  fixtures/                    ← 5 READY fixtures in JSON
-</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>  docs/                        ← architecture.md, adapter-contract.md, etc.
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>  Fixtures/                    ← 5 READY fixtures in JSON
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>  Docs/                        ← architecture.md, adapter-contract.md, etc.
 </span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>  assets/sigils/bee-sigil.svg  ← identity
 </span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>  README.md
 </span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>  xprimeray-core.sln

@@ -24,7 +24,7 @@ No transport equivalence.
 ```bash
 python3 tools/glowing_heart_shared_observer_target.py
 python3 -m py_compile tools/glowing_heart_shared_observer_target.py
-python3 -m json.tool fixtures/shared/glowing_heart_observer_target.v0.preview.json > /tmp/glowing_heart_observer_target.pretty.json
+python3 -m json.tool Fixtures/shared/glowing_heart_observer_target.v0.preview.json > /tmp/glowing_heart_observer_target.pretty.json
 head -220 /tmp/glowing_heart_observer_target.pretty.json
 head -180 reports/glowing_heart_shared_observer_target.preview.md
 git status --short -- reports/observatory_catalog.json GrinFilmCamera.cs RendererCore/Testing/RenderTestRunner.cs GodotAdapter/SnapshotBuilder.cs
@@ -33,7 +33,7 @@ git status --short -- reports/observatory_catalog.json GrinFilmCamera.cs Rendere
 ## Outputs
 
 ```txt
-fixtures/shared/glowing_heart_observer_target.v0.preview.json
+Fixtures/shared/glowing_heart_observer_target.v0.preview.json
 reports/glowing_heart_shared_observer_target.preview.md
 Docs/xPRIMEray/project_glowing_heart_v1_8_2_shared_observer_target.md
 ```
@@ -42,13 +42,13 @@ Docs/xPRIMEray/project_glowing_heart_v1_8_2_shared_observer_target.md
 
 ```txt
 [glowing-heart-shared-observer-target]
-target=fixtures/shared/glowing_heart_observer_target.v0.preview.json
+target=Fixtures/shared/glowing_heart_observer_target.v0.preview.json
 basis=core_observer_with_godot_far_clip
 runtime_executed=false
 parity_claim=NONE
 pixel_comparison_ready=false
 
-wrote=fixtures/shared/glowing_heart_observer_target.v0.preview.json
+wrote=Fixtures/shared/glowing_heart_observer_target.v0.preview.json
 wrote=reports/glowing_heart_shared_observer_target.preview.md
 ```
 

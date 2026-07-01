@@ -11,7 +11,7 @@ Runtime executed: false
 | Field | Value |
 |---|---|
 | Name | grin_radial_smoke |
-| Path | fixtures/grin_radial_smoke.json |
+| Path | Fixtures/grin_radial_smoke.json |
 | Mode | radial_grin_smoke |
 | Ray Grid | 40x22 |
 | Steps per Ray | 32 |

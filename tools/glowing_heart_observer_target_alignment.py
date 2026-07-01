@@ -17,7 +17,7 @@ from typing import Any
 
 OBSERVER_INSTANCES = Path("reports/glowing_heart_observer_instances.preview.json")
 RECONCILIATION = Path("reports/glowing_heart_observer_reconciliation.preview.json")
-TARGET = Path("fixtures/shared/glowing_heart_observer_target.v0.preview.json")
+TARGET = Path("Fixtures/shared/glowing_heart_observer_target.v0.preview.json")
 CONTRACT = Path("schemas/glowing_heart/shared_observer_contract.v0.preview.json")
 OUTPUT_JSON = Path("reports/glowing_heart_observer_target_alignment.preview.json")
 OUTPUT_MD = Path("reports/glowing_heart_observer_target_alignment.preview.md")

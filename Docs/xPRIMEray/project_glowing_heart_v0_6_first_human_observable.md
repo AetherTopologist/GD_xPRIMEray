@@ -21,7 +21,7 @@ This is not a rendered scene. This is not Godot parity. This is not hermetic clo
 Run:
 
 ```bash
-dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture fixtures/grin_radial_smoke.json
+dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture Fixtures/grin_radial_smoke.json
 ```
 
 Then open:

@@ -18,7 +18,7 @@ from typing import Any
 
 DEFAULT_SHARED = Path("reports/glowing_heart_shared_fixture_candidate.preview.json")
 DEFAULT_GODOT_EXPORT = Path("reports/glowing_heart_godot_fixture_export.preview.json")
-DEFAULT_CORE_FIXTURE = Path("fixtures/grin_radial_smoke.json")
+DEFAULT_CORE_FIXTURE = Path("Fixtures/grin_radial_smoke.json")
 DEFAULT_OUTPUT_JSON = Path("reports/glowing_heart_gap_matrix.preview.json")
 DEFAULT_OUTPUT_MD = Path("reports/glowing_heart_gap_matrix.preview.md")
 STATUSES = ("MATCH", "PARTIAL", "MISSING_IN_CORE", "MISSING_IN_GODOT_EXPORT", "UNKNOWN")

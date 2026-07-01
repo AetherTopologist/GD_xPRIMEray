@@ -639,7 +639,7 @@
     },
     {
       "metadata": {
-        "source_path": "docs/observer_storyboard/observer_storyboard_v1.schema.json"
+        "source_path": "Docs/observer_storyboard/observer_storyboard_v1.schema.json"
       },
       "source": "term:coverage",
       "target": "schema:observer_storyboard_v1",
@@ -647,7 +647,7 @@
     },
     {
       "metadata": {
-        "source_path": "docs/observer_storyboard/observer_storyboard_v1.md"
+        "source_path": "Docs/observer_storyboard/observer_storyboard_v1.md"
       },
       "source": "term:coverage",
       "target": "storyboard_spec:observer_storyboard_v1",
@@ -1056,7 +1056,7 @@
     },
     {
       "metadata": {
-        "source_path": "docs/observer_storyboard/observer_storyboard_v1.schema.json"
+        "source_path": "Docs/observer_storyboard/observer_storyboard_v1.schema.json"
       },
       "source": "term:verdict",
       "target": "schema:observer_storyboard_v1",
@@ -1064,7 +1064,7 @@
     },
     {
       "metadata": {
-        "source_path": "docs/observer_storyboard/observer_storyboard_v1.md"
+        "source_path": "Docs/observer_storyboard/observer_storyboard_v1.md"
       },
       "source": "term:verdict",
       "target": "storyboard_spec:observer_storyboard_v1",
@@ -1075,7 +1075,7 @@
   "generated_from": {
     "catalog": "reports/observatory_catalog.json",
     "gallery": "Docs/Observatory_Gallery",
-    "observer_storyboard": "docs/observer_storyboard"
+    "observer_storyboard": "Docs/observer_storyboard"
   },
   "node_types": [
     "Artifact",
@@ -1508,7 +1508,7 @@
       "label": "Observer Storyboard V1.Schema",
       "metadata": {
         "citation_kind": "schema",
-        "source_path": "docs/observer_storyboard/observer_storyboard_v1.schema.json"
+        "source_path": "Docs/observer_storyboard/observer_storyboard_v1.schema.json"
       },
       "type": "Citation Type"
     },
@@ -1542,7 +1542,7 @@
       "label": "Observer Storyboard V1",
       "metadata": {
         "citation_kind": "storyboard_spec",
-        "source_path": "docs/observer_storyboard/observer_storyboard_v1.md"
+        "source_path": "Docs/observer_storyboard/observer_storyboard_v1.md"
       },
       "type": "Citation Type"
     },

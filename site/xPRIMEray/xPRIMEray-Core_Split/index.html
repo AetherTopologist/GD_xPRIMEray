@@ -2607,6 +2607,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -2726,6 +2730,62 @@
     
   
     v1.9 Snapshot Contract
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../project_glowing_heart_v2_3_deliberate_core_difference_fixtures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v2.3 Deliberate Core Differences
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../project_glowing_heart_v2_4_difference_packet_gallery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v2.4 Difference Packet Gallery
   
 
     
@@ -7833,7 +7893,7 @@
 </span><span id="__span-0-58"><a id="__codelineno-0-58" name="__codelineno-0-58" href="#__codelineno-0-58"></a>│     │  └─ ManifestWriter.cs
 </span><span id="__span-0-59"><a id="__codelineno-0-59" name="__codelineno-0-59" href="#__codelineno-0-59"></a>│     └─ XPrimeRay.Testbench.Cli.csproj
 </span><span id="__span-0-60"><a id="__codelineno-0-60" name="__codelineno-0-60" href="#__codelineno-0-60"></a>│
-</span><span id="__span-0-61"><a id="__codelineno-0-61" name="__codelineno-0-61" href="#__codelineno-0-61"></a>├─ fixtures/
+</span><span id="__span-0-61"><a id="__codelineno-0-61" name="__codelineno-0-61" href="#__codelineno-0-61"></a>├─ Fixtures/
 </span><span id="__span-0-62"><a id="__codelineno-0-62" name="__codelineno-0-62" href="#__codelineno-0-62"></a>│  ├─ hermetic_curved_room.json
 </span><span id="__span-0-63"><a id="__codelineno-0-63" name="__codelineno-0-63" href="#__codelineno-0-63"></a>│  ├─ curved_minimal.json
 </span><span id="__span-0-64"><a id="__codelineno-0-64" name="__codelineno-0-64" href="#__codelineno-0-64"></a>│  ├─ object_island.json
@@ -7848,7 +7908,7 @@
 </span><span id="__span-0-73"><a id="__codelineno-0-73" name="__codelineno-0-73" href="#__codelineno-0-73"></a>│  │  └─ XPrimeRay.Core.Tests.csproj
 </span><span id="__span-0-74"><a id="__codelineno-0-74" name="__codelineno-0-74" href="#__codelineno-0-74"></a>│  └─ XPrimeRay.Testbench.Tests/
 </span><span id="__span-0-75"><a id="__codelineno-0-75" name="__codelineno-0-75" href="#__codelineno-0-75"></a>│
-</span><span id="__span-0-76"><a id="__codelineno-0-76" name="__codelineno-0-76" href="#__codelineno-0-76"></a>├─ docs/
+</span><span id="__span-0-76"><a id="__codelineno-0-76" name="__codelineno-0-76" href="#__codelineno-0-76"></a>├─ Docs/
 </span><span id="__span-0-77"><a id="__codelineno-0-77" name="__codelineno-0-77" href="#__codelineno-0-77"></a>│  ├─ architecture.md
 </span><span id="__span-0-78"><a id="__codelineno-0-78" name="__codelineno-0-78" href="#__codelineno-0-78"></a>│  ├─ migration-plan.md
 </span><span id="__span-0-79"><a id="__codelineno-0-79" name="__codelineno-0-79" href="#__codelineno-0-79"></a>│  ├─ adapter-contract.md
@@ -7941,8 +8001,8 @@
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>dotnet<span class="w"> </span>build
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>dotnet<span class="w"> </span><span class="nb">test</span>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>dotnet<span class="w"> </span>run<span class="w"> </span>--project<span class="w"> </span>src/XPrimeRay.Testbench.Cli<span class="w"> </span>--<span class="w"> </span>run-fixture<span class="w"> </span>fixtures/hermetic_curved_room.json
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>dotnet<span class="w"> </span>run<span class="w"> </span>--project<span class="w"> </span>src/XPrimeRay.Testbench.Cli<span class="w"> </span>--<span class="w"> </span>sweep<span class="w"> </span>fixtures/hermetic_curved_room.json<span class="w"> </span>--param<span class="w"> </span><span class="nv">curvatureAmp</span><span class="o">=</span><span class="m">0</span>,0.25,0.5,0.75,1.0
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>dotnet<span class="w"> </span>run<span class="w"> </span>--project<span class="w"> </span>src/XPrimeRay.Testbench.Cli<span class="w"> </span>--<span class="w"> </span>run-fixture<span class="w"> </span>Fixtures/hermetic_curved_room.json
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>dotnet<span class="w"> </span>run<span class="w"> </span>--project<span class="w"> </span>src/XPrimeRay.Testbench.Cli<span class="w"> </span>--<span class="w"> </span>sweep<span class="w"> </span>Fixtures/hermetic_curved_room.json<span class="w"> </span>--param<span class="w"> </span><span class="nv">curvatureAmp</span><span class="o">=</span><span class="m">0</span>,0.25,0.5,0.75,1.0
 </span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>dotnet<span class="w"> </span>run<span class="w"> </span>--project<span class="w"> </span>src/XPrimeRay.Testbench.Cli<span class="w"> </span>--<span class="w"> </span>validate<span class="w"> </span>output/latest/manifest.json
 </span></code></pre></div>
 <h2 id="core-rule">Core Rule<a class="headerlink" href="#core-rule" title="Permanent link">&para;</a></h2>
@@ -8024,9 +8084,9 @@
 <h2 id="phase-4-build-testbench-cli">Phase 4: Build Testbench CLI<a class="headerlink" href="#phase-4-build-testbench-cli" title="Permanent link">&para;</a></h2>
 <p>CLI becomes the first official non-Godot consumer.</p>
 <p>Minimum commands:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>xpr<span class="w"> </span>run-fixture<span class="w"> </span>fixtures/hermetic_curved_room.json
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>xpr<span class="w"> </span>sweep<span class="w"> </span>fixtures/hermetic_curved_room.json<span class="w"> </span>--param<span class="w"> </span><span class="nv">curvatureAmp</span><span class="o">=</span><span class="m">0</span>,0.25,0.5,0.75,1
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>xpr<span class="w"> </span>render<span class="w"> </span>fixtures/hermetic_curved_room.json<span class="w"> </span>--width<span class="w"> </span><span class="m">320</span><span class="w"> </span>--height<span class="w"> </span><span class="m">180</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>xpr<span class="w"> </span>run-fixture<span class="w"> </span>Fixtures/hermetic_curved_room.json
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>xpr<span class="w"> </span>sweep<span class="w"> </span>Fixtures/hermetic_curved_room.json<span class="w"> </span>--param<span class="w"> </span><span class="nv">curvatureAmp</span><span class="o">=</span><span class="m">0</span>,0.25,0.5,0.75,1
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>xpr<span class="w"> </span>render<span class="w"> </span>Fixtures/hermetic_curved_room.json<span class="w"> </span>--width<span class="w"> </span><span class="m">320</span><span class="w"> </span>--height<span class="w"> </span><span class="m">180</span>
 </span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>xpr<span class="w"> </span>validate<span class="w"> </span>output/latest/manifest.json
 </span></code></pre></div>
 <h2 id="phase-5-replace-godot-internals-with-adapter-calls">Phase 5: Replace Godot internals with adapter calls<a class="headerlink" href="#phase-5-replace-godot-internals-with-adapter-calls" title="Permanent link">&para;</a></h2>
@@ -8262,7 +8322,7 @@
 </span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>
 </span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="k">public</span><span class="w"> </span><span class="k">partial</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">XPrimeRayGodotRunner</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">Node</span>
 </span><span id="__span-14-9"><a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="p">{</span>
-</span><span id="__span-14-10"><a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="w">    </span><span class="na">[Export]</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">FixturePath</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;res://fixtures/hermetic_curved_room.json&quot;</span><span class="p">;</span>
+</span><span id="__span-14-10"><a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="w">    </span><span class="na">[Export]</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">FixturePath</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;res://Fixtures/hermetic_curved_room.json&quot;</span><span class="p">;</span>
 </span><span id="__span-14-11"><a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>
 </span><span id="__span-14-12"><a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="k">void</span><span class="w"> </span><span class="nf">_Ready</span><span class="p">()</span>
 </span><span id="__span-14-13"><a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="w">    </span><span class="p">{</span>
@@ -8306,14 +8366,14 @@
 </span><span id="__span-15-17"><a id="__codelineno-15-17" name="__codelineno-15-17" href="#__codelineno-15-17"></a><span class="k">3.</span> Add XPrimeRay.Core project.
 </span><span id="__span-15-18"><a id="__codelineno-15-18" name="__codelineno-15-18" href="#__codelineno-15-18"></a><span class="k">4.</span> Add Vec3, RayState, IScalarField, ITransportIntegrator, TransportRunner skeletons.
 </span><span id="__span-15-19"><a id="__codelineno-15-19" name="__codelineno-15-19" href="#__codelineno-15-19"></a><span class="k">5.</span> Add XPrimeRay.Testbench.Cli project with run-fixture command.
-</span><span id="__span-15-20"><a id="__codelineno-15-20" name="__codelineno-15-20" href="#__codelineno-15-20"></a><span class="k">6.</span> Add fixtures/hermetic_curved_room.json.
-</span><span id="__span-15-21"><a id="__codelineno-15-21" name="__codelineno-15-21" href="#__codelineno-15-21"></a><span class="k">7.</span> Add docs/migration-plan.md and docs/adapter-contract.md.
+</span><span id="__span-15-20"><a id="__codelineno-15-20" name="__codelineno-15-20" href="#__codelineno-15-20"></a><span class="k">6.</span> Add Fixtures/hermetic_curved_room.json.
+</span><span id="__span-15-21"><a id="__codelineno-15-21" name="__codelineno-15-21" href="#__codelineno-15-21"></a><span class="k">7.</span> Add Docs/migration-plan.md and Docs/adapter-contract.md.
 </span><span id="__span-15-22"><a id="__codelineno-15-22" name="__codelineno-15-22" href="#__codelineno-15-22"></a><span class="k">8.</span> Add tests for Vec3 and fixture loading.
 </span><span id="__span-15-23"><a id="__codelineno-15-23" name="__codelineno-15-23" href="#__codelineno-15-23"></a>
 </span><span id="__span-15-24"><a id="__codelineno-15-24" name="__codelineno-15-24" href="#__codelineno-15-24"></a>Definition of done:
 </span><span id="__span-15-25"><a id="__codelineno-15-25" name="__codelineno-15-25" href="#__codelineno-15-25"></a><span class="k">-</span><span class="w"> </span><span class="sb">`dotnet build`</span> passes.
 </span><span id="__span-15-26"><a id="__codelineno-15-26" name="__codelineno-15-26" href="#__codelineno-15-26"></a><span class="k">-</span><span class="w"> </span><span class="sb">`dotnet test`</span> passes.
-</span><span id="__span-15-27"><a id="__codelineno-15-27" name="__codelineno-15-27" href="#__codelineno-15-27"></a><span class="k">-</span><span class="w"> </span>CLI accepts <span class="sb">`run-fixture fixtures/hermetic_curved_room.json`</span>.
+</span><span id="__span-15-27"><a id="__codelineno-15-27" name="__codelineno-15-27" href="#__codelineno-15-27"></a><span class="k">-</span><span class="w"> </span>CLI accepts <span class="sb">`run-fixture Fixtures/hermetic_curved_room.json`</span>.
 </span><span id="__span-15-28"><a id="__codelineno-15-28" name="__codelineno-15-28" href="#__codelineno-15-28"></a><span class="k">-</span><span class="w"> </span>Core project contains zero Godot references.
 </span></code></pre></div>
 <p>This split is exactly right: <strong>Core becomes the instrument</strong>, Godot becomes the first telescope, and MisterY Labs becomes the star map 🐝🔭</p>

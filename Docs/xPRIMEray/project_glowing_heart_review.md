@@ -56,7 +56,7 @@ The proposal in `xPRIMEray-Core_Split.md` describes what the architecture is alr
 - `ObjectSeededTileScheduler` taking `Camera3D` as a parameter is resolved by interface injection
 
 **Technical debt created:**
-- Dual fixture format during migration (`fixtures/*.json` + `.tscn` scenes must stay in sync)
+- Dual fixture format during migration (`Fixtures/*.json` + `.tscn` scenes must stay in sync)
 - NuGet packaging infrastructure if Core ships as a package rather than a submodule
 - Adapter maintenance overhead when Godot APIs change (currently absorbed inside the monolith)
 
@@ -370,7 +370,7 @@ The CLI testbench's `validate` command should append to the same catalog, or emi
 | 1 | **SceneSnapshot ownership conflict** — Both Core transport and Godot adapter depend on `SceneSnapshot`; moving it requires updating all references simultaneously | HIGH | HIGH | Move early (Phase 1); create a compatibility `using` alias in RendererCore during transition |
 | 2 | **RaySeg struct migration** — `MetricSegmentCompatibility.cs` references `RayBeamRenderer.RaySeg`; moving the struct is a breaking change to RayBeamRenderer | MEDIUM | MEDIUM | Define `RaySegment` in Core first; add `ToRaySeg()` adapter; migrate RayBeamRenderer to consume `RaySegment[]` |
 | 3 | **RenderTestRunner decomposition risk** — 305KB Godot Node contains closure logic, CLI parsing, frame lifecycle, and capture scheduling; any extraction risks regression | HIGH | HIGH | Wrap first (thin Core adapter in Phase 5); decompose in Phase 6 with full fixture baseline as regression guard |
-| 4 | **Dual fixture source drift (.tscn + JSON)** — `fixtures/*.json` and `.tscn` scene defaults can silently diverge, creating two sources of truth for field parameters | HIGH | MEDIUM | CI `fixture-sync` step: auto-reads `[Export]` defaults from fixture controllers and validates against JSON; fail on mismatch |
+| 4 | **Dual fixture source drift (.tscn + JSON)** — `Fixtures/*.json` and `.tscn` scene defaults can silently diverge, creating two sources of truth for field parameters | HIGH | MEDIUM | CI `fixture-sync` step: auto-reads `[Export]` defaults from fixture controllers and validates against JSON; fail on mismatch |
 | 5 | **ObjectProbeOracle gap in CLI** — CLI testbench has no Godot physics engine; depth-sorted probe acquisition cannot run; tile scheduling degrades silently | MEDIUM | MEDIUM | Phase 2: implement `BvhGeometryProvider` stub using `GeometryEntitySOA`; log explicit warning if Godot provider is unavailable |
 | 6 | **float vs. double precision mismatch** — Proposal specifies double-precision `Vec3`; RendererCore uses float (`System.Numerics.Vector3`); mixing precisions risks subtle geodesic drift in long paths | MEDIUM | HIGH | Decision gate (see Decisions Needed #1); do not mix; pick one and enforce in `Directory.Build.props` |
 | 7 | **Godot version lock in SnapshotBuilder** — `SnapshotBuilder.cs` uses Godot 4 C# API; a Godot 5 migration would require rewrite of the adapter | LOW | MEDIUM | By design: Core is version-agnostic; adapter absorbs engine churn. Document this explicitly in adapter README |

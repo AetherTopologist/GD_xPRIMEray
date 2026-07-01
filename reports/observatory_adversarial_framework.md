@@ -50,7 +50,7 @@ Copy this block for every new Observatory concept before any maturity promotion.
 - Any artifact moves from Observed (2) → Confirmed (3)
 - Any artifact moves from Confirmed (3) → Characterized (4)
 - Any artifact moves from Characterized (4) → Canonical (5)
-- A new basin is named in [basin_taxonomy_v1.md](../docs/basin_taxonomy_v1.md)
+- A new basin is named in [basin_taxonomy_v1.md](../Docs/basin_taxonomy_v1.md)
 - A storyboard or ladder headline number is used as evidence (e.g., alignment counts, disagreement %)
 
 **Outputs of each review:**
@@ -84,7 +84,7 @@ These apply to **all** basin concepts.
 
 ## 4. Concept Dossiers
 
-Maturity scores follow [observatory_maturity_ladder.md](observatory_maturity_ladder.md) and [basin_taxonomy_v1.md](../docs/basin_taxonomy_v1.md) where concept vs. artifact maturity diverge.
+Maturity scores follow [observatory_maturity_ladder.md](observatory_maturity_ladder.md) and [basin_taxonomy_v1.md](../Docs/basin_taxonomy_v1.md) where concept vs. artifact maturity diverge.
 
 ---
 
@@ -310,7 +310,7 @@ When a new Observatory concept is proposed:
 1. Classify: FOUNDATIONAL / DERIVED / CROSS-CUTTING / PRESENTATION ([observatory_dependency_graph.md](observatory_dependency_graph.md))
 2. Complete standard review template (Section 2)
 3. Assign **Proposed (0)** until at least one falsification experiment is defined
-4. Register in [basin_taxonomy_v1.md](../docs/basin_taxonomy_v1.md) or dependency graph — not both with conflicting edges
+4. Register in [basin_taxonomy_v1.md](../Docs/basin_taxonomy_v1.md) or dependency graph — not both with conflicting edges
 5. Block catalog PASS if adversarial review path is missing (TM-K3)
 6. Do not cite alignment counts, disagreement %, or ladder scalars without null model
 
@@ -326,8 +326,8 @@ When a new Observatory concept is proposed:
 
 | Document | Role |
 |---|---|
-| [basin_taxonomy_v1.md](../docs/basin_taxonomy_v1.md) | Basin ontology and concept vs artifact maturity |
-| [basin_atlas_v1.md](../docs/basin_atlas_v1.md) | Closure/Cost/Coherence/Sensitivity/Risk relationships |
+| [basin_taxonomy_v1.md](../Docs/basin_taxonomy_v1.md) | Basin ontology and concept vs artifact maturity |
+| [basin_atlas_v1.md](../Docs/basin_atlas_v1.md) | Closure/Cost/Coherence/Sensitivity/Risk relationships |
 | [observatory_trust_model.md](observatory_trust_model.md) | Evidence-strength axis |
 | [observatory_maturity_ladder.md](observatory_maturity_ladder.md) | Current anchor scores |
 | [observatory_dependency_graph.md](observatory_dependency_graph.md) | Concept classification and duplication risk |

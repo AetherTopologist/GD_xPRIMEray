@@ -6,7 +6,7 @@
   "contract": "schemas/glowing_heart/shared_observer_contract.v0.preview.json",
   "coreObserver": {
     "source": "core_fixture",
-    "fixturePath": "fixtures/grin_radial_smoke.json",
+    "fixturePath": "Fixtures/grin_radial_smoke.json",
     "position": [
       0,
       0,

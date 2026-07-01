@@ -6,7 +6,7 @@ Square 3×3 Observatory Story sheets generated from existing xPRIMEray outputs. 
 
 **Minimum for GitHub Pages showcase:** 7/9 panels + `hit_diagnostics.csv` present + exit code 0. `corner_probe_reference` and `oracle_closure` do not currently meet this threshold and are excluded from public showcase.
 
-See [docs/observatory/canonical_fixtures.md](../docs/observatory/canonical_fixtures.md) for the full fixture taxonomy: purpose, what each proves, what it does not prove, and risk of misinterpretation.
+See [Docs/Observatory/canonical_fixtures.md](../Docs/Observatory/canonical_fixtures.md) for the full fixture taxonomy: purpose, what each proves, what it does not prove, and risk of misinterpretation.
 
 | fixture | category | what it proves | panels | hit rate | contact sheet | report |
 |---|---|---|---:|---:|---|---|

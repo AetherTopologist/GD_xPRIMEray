@@ -6,7 +6,7 @@ Runtime executed: false
 
 Parity claim: NONE
 
-Shared target: fixtures/shared/glowing_heart_observer_target.v0.preview.json
+Shared target: Fixtures/shared/glowing_heart_observer_target.v0.preview.json
 
 Pixel comparison ready: false
 

@@ -6,6 +6,10 @@ Three Core fixture variants now exercise deliberate Difference Packet decisions:
 
 The shared identity lets distinct, explicitly related Core fixtures reach the compatibility matrix without disguising them as the same fixture. It does not bypass the matrix: observer and coordinate-grid requirements still apply before value comparison.
 
+## v2.3.1 reproducibility repair
+
+The tracked base and variant fixtures under `Fixtures/` now explicitly share `comparisonIdentity=grin_radial_smoke_family_v1`. The variant files are repository-resident and reproducible from their canonical case-sensitive paths. Case B demonstrates a non-zero numeric difference between retained Core artifacts only; Cases C and D isolate observer and coordinate-grid mismatches without also failing fixture-family identity.
+
 ## What this demonstrates
 
 The retained comparison path distinguishes four outcomes: deterministic zero difference, eligible non-zero difference, observer mismatch, and coordinate-grid mismatch. The non-zero case shows only that two declared-compatible retained Core scalar grids contain numerically distinct values after a fixture field parameter changes.
@@ -38,10 +42,10 @@ Case E is deferred because the current retained packet contains `bend_magnitude_
 Generate each input with the Core CLI:
 
 ```bash
-dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture fixtures/grin_radial_smoke.json --output /tmp/glowing_heart_v2_3/base_left
-dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture fixtures/grin_radial_smoke_variant.json --output /tmp/glowing_heart_v2_3/field_variant
-dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture fixtures/grin_radial_smoke_observer_variant.json --output /tmp/glowing_heart_v2_3/observer_variant
-dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture fixtures/grin_radial_smoke_resolution_variant.json --output /tmp/glowing_heart_v2_3/grid_variant
+dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture Fixtures/grin_radial_smoke.json --output /tmp/glowing_heart_v2_3/base_left
+dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture Fixtures/grin_radial_smoke_variant.json --output /tmp/glowing_heart_v2_3/field_variant
+dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture Fixtures/grin_radial_smoke_observer_variant.json --output /tmp/glowing_heart_v2_3/observer_variant
+dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture Fixtures/grin_radial_smoke_resolution_variant.json --output /tmp/glowing_heart_v2_3/grid_variant
 ```
 
 Compare a retained pair:
@@ -68,4 +72,3 @@ dotnet run --project src/XPrimeRay.Testbench.Cli -- compare-packets \
 ## Next milestone
 
 Glowing Heart v2.4 can create a Difference Packet Gallery for the zero, non-zero, observer-mismatch, and coordinate-grid-mismatch cases. An incompatible-channel gallery entry should wait for an authentic second retained Core channel. The gallery remains Core-vs-Core only.
-

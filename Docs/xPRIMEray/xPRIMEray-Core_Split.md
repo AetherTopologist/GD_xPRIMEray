@@ -61,7 +61,7 @@ xPRIMEray-Core/
 │     │  └─ ManifestWriter.cs
 │     └─ XPrimeRay.Testbench.Cli.csproj
 │
-├─ fixtures/
+├─ Fixtures/
 │  ├─ hermetic_curved_room.json
 │  ├─ curved_minimal.json
 │  ├─ object_island.json
@@ -76,7 +76,7 @@ xPRIMEray-Core/
 │  │  └─ XPrimeRay.Core.Tests.csproj
 │  └─ XPrimeRay.Testbench.Tests/
 │
-├─ docs/
+├─ Docs/
 │  ├─ architecture.md
 │  ├─ migration-plan.md
 │  ├─ adapter-contract.md
@@ -178,8 +178,8 @@ MisterY Labs        = public mythos, gallery, story, interface
 dotnet build
 dotnet test
 
-dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture fixtures/hermetic_curved_room.json
-dotnet run --project src/XPrimeRay.Testbench.Cli -- sweep fixtures/hermetic_curved_room.json --param curvatureAmp=0,0.25,0.5,0.75,1.0
+dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture Fixtures/hermetic_curved_room.json
+dotnet run --project src/XPrimeRay.Testbench.Cli -- sweep Fixtures/hermetic_curved_room.json --param curvatureAmp=0,0.25,0.5,0.75,1.0
 dotnet run --project src/XPrimeRay.Testbench.Cli -- validate output/latest/manifest.json
 ```
 
@@ -278,9 +278,9 @@ CLI becomes the first official non-Godot consumer.
 Minimum commands:
 
 ```bash
-xpr run-fixture fixtures/hermetic_curved_room.json
-xpr sweep fixtures/hermetic_curved_room.json --param curvatureAmp=0,0.25,0.5,0.75,1
-xpr render fixtures/hermetic_curved_room.json --width 320 --height 180
+xpr run-fixture Fixtures/hermetic_curved_room.json
+xpr sweep Fixtures/hermetic_curved_room.json --param curvatureAmp=0,0.25,0.5,0.75,1
+xpr render Fixtures/hermetic_curved_room.json --width 320 --height 180
 xpr validate output/latest/manifest.json
 ```
 
@@ -538,7 +538,7 @@ using XPrimeRay.Core.Fixtures;
 
 public partial class XPrimeRayGodotRunner : Node
 {
-    [Export] public string FixturePath = "res://fixtures/hermetic_curved_room.json";
+    [Export] public string FixturePath = "res://Fixtures/hermetic_curved_room.json";
 
     public override void _Ready()
     {
@@ -585,14 +585,14 @@ Immediate tasks:
 3. Add XPrimeRay.Core project.
 4. Add Vec3, RayState, IScalarField, ITransportIntegrator, TransportRunner skeletons.
 5. Add XPrimeRay.Testbench.Cli project with run-fixture command.
-6. Add fixtures/hermetic_curved_room.json.
-7. Add docs/migration-plan.md and docs/adapter-contract.md.
+6. Add Fixtures/hermetic_curved_room.json.
+7. Add Docs/migration-plan.md and Docs/adapter-contract.md.
 8. Add tests for Vec3 and fixture loading.
 
 Definition of done:
 - `dotnet build` passes.
 - `dotnet test` passes.
-- CLI accepts `run-fixture fixtures/hermetic_curved_room.json`.
+- CLI accepts `run-fixture Fixtures/hermetic_curved_room.json`.
 - Core project contains zero Godot references.
 ```
 

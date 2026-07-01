@@ -19,9 +19,9 @@ No Godot parity, hermetic closure, collision behavior, portal behavior, or physi
 ## Commands
 
 ```bash
-dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture fixtures/grin_radial_smoke.json
-dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture fixtures/grin_radial_smoke.json --no-output
-dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture fixtures/grin_radial_smoke.json --output output/glowing_heart
+dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture Fixtures/grin_radial_smoke.json
+dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture Fixtures/grin_radial_smoke.json --no-output
+dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture Fixtures/grin_radial_smoke.json --output output/glowing_heart
 ```
 
 ## Next minimal milestone

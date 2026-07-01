@@ -213,7 +213,7 @@ def build_payload(catalog_path: Path) -> dict[str, Any]:
         "generated_from": {
             "catalog": catalog_path.as_posix(),
             "curated_sources": [
-                "docs/observer_storyboard/observer_storyboard_v1.md",
+                "Docs/observer_storyboard/observer_storyboard_v1.md",
                 "reports/query_storyboard_v1.png",
                 "reports/cost_basin_artifact_v1.md",
                 "Docs/assets/observatory/hermetic_storyboard_v2.png",

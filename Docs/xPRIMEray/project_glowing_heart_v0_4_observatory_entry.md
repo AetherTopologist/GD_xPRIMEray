@@ -21,7 +21,7 @@ No Godot parity, hermetic closure, collision behavior, portal behavior, image re
 ## Acceptance command
 
 ```bash
-dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture fixtures/grin_radial_smoke.json
+dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture Fixtures/grin_radial_smoke.json
 ```
 
 Expected packet shape:

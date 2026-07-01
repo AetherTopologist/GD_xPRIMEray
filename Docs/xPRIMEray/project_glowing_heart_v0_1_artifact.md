@@ -4,7 +4,7 @@
 
 - `XPrimeRay.Core`
 - `XPrimeRay.Testbench.Cli`
-- `fixtures/glowing_heart_minimal.json`
+- `Fixtures/glowing_heart_minimal.json`
 
 ## What this proves
 

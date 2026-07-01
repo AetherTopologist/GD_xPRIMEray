@@ -26,8 +26,8 @@ The v2.0 packet compares one Core `bend_magnitude_metric` sample grid with itsel
 ```bash
 dotnet build src/XPrimeRay.Core/XPrimeRay.Core.csproj
 dotnet build src/XPrimeRay.Testbench.Cli/XPrimeRay.Testbench.Cli.csproj
-dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture fixtures/grin_radial_smoke.json --emit-difference
-dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture fixtures/grin_radial_smoke.json --emit-difference --no-output
+dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture Fixtures/grin_radial_smoke.json --emit-difference
+dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture Fixtures/grin_radial_smoke.json --emit-difference --no-output
 ```
 
 ## Outputs

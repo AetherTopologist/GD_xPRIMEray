@@ -15,9 +15,9 @@ from typing import Any
 
 
 CONTRACT = Path("schemas/glowing_heart/shared_observer_contract.v0.preview.json")
-CORE_FIXTURE = Path("fixtures/grin_radial_smoke.json")
+CORE_FIXTURE = Path("Fixtures/grin_radial_smoke.json")
 SHARED_INSTANCE_CANDIDATES = [
-    Path("fixtures/shared/glowing_heart_grin_bridge.v0.preview.json"),
+    Path("Fixtures/shared/glowing_heart_grin_bridge.v0.preview.json"),
     Path("Fixtures/shared/glowing_heart_grin_bridge.v0.preview.json"),
 ]
 GODOT_EXPORT = Path("reports/glowing_heart_godot_fixture_export.preview.json")

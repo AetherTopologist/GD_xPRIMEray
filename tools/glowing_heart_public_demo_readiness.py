@@ -23,7 +23,7 @@ INPUTS = [
 ]
 GODOT_CANDIDATES = Path("reports/glowing_heart_godot_fixture_candidates.preview.json")
 SHARED_INSTANCE_CANDIDATES = [
-    Path("fixtures/shared/glowing_heart_grin_bridge.v0.preview.json"),
+    Path("Fixtures/shared/glowing_heart_grin_bridge.v0.preview.json"),
     Path("Fixtures/shared/glowing_heart_grin_bridge.v0.preview.json"),
 ]
 OUTPUT_JSON = Path("reports/glowing_heart_public_demo_readiness.preview.json")

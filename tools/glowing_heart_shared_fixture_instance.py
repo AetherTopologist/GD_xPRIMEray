@@ -16,12 +16,12 @@ from typing import Any
 
 
 DEFAULT_SCHEMA = Path("schemas/glowing_heart/shared_fixture_schema.v0.preview.json")
-DEFAULT_CORE_FIXTURE = Path("fixtures/grin_radial_smoke.json")
+DEFAULT_CORE_FIXTURE = Path("Fixtures/grin_radial_smoke.json")
 DEFAULT_CANDIDATE_PACKET = Path("reports/glowing_heart_shared_fixture_candidate.preview.json")
 DEFAULT_GODOT_EXPORT = Path("reports/glowing_heart_godot_fixture_export.preview.json")
 DEFAULT_GAP_MATRIX = Path("reports/glowing_heart_gap_matrix.preview.json")
 DEFAULT_SCHEMA_REPORT = Path("reports/glowing_heart_shared_fixture_schema.preview.md")
-DEFAULT_INSTANCE = Path("fixtures/shared/glowing_heart_grin_bridge.v0.preview.json")
+DEFAULT_INSTANCE = Path("Fixtures/shared/glowing_heart_grin_bridge.v0.preview.json")
 DEFAULT_REPORT = Path("reports/glowing_heart_shared_fixture_instance.preview.md")
 
 TOP_LEVEL_SECTIONS = [
@@ -115,11 +115,11 @@ def build_instance(
     godot_export: dict[str, Any],
     gap_matrix: dict[str, Any],
 ) -> dict[str, Any]:
-    observer = require_dict(core_fixture.get("observer"), "fixtures/grin_radial_smoke.json:observer")
-    ray_grid = require_dict(core_fixture.get("rayGrid"), "fixtures/grin_radial_smoke.json:rayGrid")
-    transport = require_dict(core_fixture.get("transport"), "fixtures/grin_radial_smoke.json:transport")
-    fields = require_list(core_fixture.get("fields"), "fixtures/grin_radial_smoke.json:fields")
-    validation = require_dict(core_fixture.get("validation"), "fixtures/grin_radial_smoke.json:validation")
+    observer = require_dict(core_fixture.get("observer"), "Fixtures/grin_radial_smoke.json:observer")
+    ray_grid = require_dict(core_fixture.get("rayGrid"), "Fixtures/grin_radial_smoke.json:rayGrid")
+    transport = require_dict(core_fixture.get("transport"), "Fixtures/grin_radial_smoke.json:transport")
+    fields = require_list(core_fixture.get("fields"), "Fixtures/grin_radial_smoke.json:fields")
+    validation = require_dict(core_fixture.get("validation"), "Fixtures/grin_radial_smoke.json:validation")
 
     godot_fixture_path = selected_godot_path(
         candidate,
@@ -130,7 +130,7 @@ def build_instance(
 
     instance_fields: list[dict[str, Any]] = []
     for index, field in enumerate(fields):
-        field_obj = require_dict(field, f"fixtures/grin_radial_smoke.json:fields[{index}]")
+        field_obj = require_dict(field, f"Fixtures/grin_radial_smoke.json:fields[{index}]")
         instance_fields.append(
             {
                 "source": "core",
@@ -154,7 +154,7 @@ def build_instance(
             "runtimeExecuted": False,
         },
         "sourceLinks": {
-            "coreFixturePath": "fixtures/grin_radial_smoke.json",
+            "coreFixturePath": "Fixtures/grin_radial_smoke.json",
             "godotFixturePath": godot_fixture_path,
             "godotExportPath": "reports/glowing_heart_godot_fixture_export.preview.json",
             "gapMatrixPath": "reports/glowing_heart_gap_matrix.preview.json",

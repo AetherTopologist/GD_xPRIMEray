@@ -2,7 +2,7 @@
 
 ## What changed since v0.1
 
-- Added `fixtures/grin_radial_smoke.json`.
+- Added `Fixtures/grin_radial_smoke.json`.
 - Added Core DTO support for observer data and radial GRIN field parameters.
 - Replaced the CLI-only placeholder path for `radial_grin_smoke` with a deterministic Core ray stepper.
 - Added validation for field sample counts, nonzero mean bend, and finite numeric output.
@@ -20,8 +20,8 @@ This does not prove Godot visual parity, hermetic closure, physical optical corr
 ```bash
 dotnet build src/XPrimeRay.Core/XPrimeRay.Core.csproj
 dotnet build src/XPrimeRay.Testbench.Cli/XPrimeRay.Testbench.Cli.csproj
-dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture fixtures/glowing_heart_minimal.json
-dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture fixtures/grin_radial_smoke.json
+dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture Fixtures/glowing_heart_minimal.json
+dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture Fixtures/grin_radial_smoke.json
 dotnet build "Physical Light and Camera Units.csproj" --no-restore
 rg -n "using Godot|Godot.NET.Sdk|GodotSharp" src/XPrimeRay.Core
 ```

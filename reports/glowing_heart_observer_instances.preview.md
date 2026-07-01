@@ -10,7 +10,7 @@ Parity claim: NONE
 
 | Field | Value |
 |---|---|
-| Fixture | fixtures/grin_radial_smoke.json |
+| Fixture | Fixtures/grin_radial_smoke.json |
 | Position | [0, 0, -2] |
 | Forward | [0, 0, 1] |
 | Up | [0, 1, 0] |

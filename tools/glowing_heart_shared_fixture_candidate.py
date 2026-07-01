@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any
 
 
-DEFAULT_CORE_FIXTURE = Path("fixtures/grin_radial_smoke.json")
+DEFAULT_CORE_FIXTURE = Path("Fixtures/grin_radial_smoke.json")
 DEFAULT_GODOT_INDEX = Path("reports/glowing_heart_godot_fixture_candidates.preview.json")
 DEFAULT_BRIDGE = Path("reports/glowing_heart_bridge.preview.md")
 DEFAULT_GALLERY = Path("reports/glowing_heart_gallery.preview.md")

@@ -1,5 +1,6 @@
 {
   "name": "grin_radial_smoke",
+  "comparisonIdentity": "grin_radial_smoke_family_v1",
   "description": "First real xPRIMEray-Core radial GRIN smoke fixture.",
   "rayGrid": {
     "width": 40,

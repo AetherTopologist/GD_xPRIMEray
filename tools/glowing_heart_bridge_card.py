@@ -25,7 +25,7 @@ REFERENCE_ROOTS = (
     Path("fixtures"),
     Path("Docs/Observatory"),
     Path("Docs/xPRIMEray"),
-    Path("docs/observatory"),
+    Path("Docs/observatory"),
 )
 
 
