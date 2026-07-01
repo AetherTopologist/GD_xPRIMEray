@@ -1,5 +1,5 @@
 {
-  "graphId": "glowing_heart.difference_packet_exhibits.v2_8",
+  "graphId": "glowing_heart.difference_packet_exhibits",
   "title": "Glowing Heart Difference Packet Exhibits",
   "description": "Atlas Graph representation of the five structured Difference Packet Gallery exhibits.",
   "version": "v0.1",
@@ -8,6 +8,11 @@
     "Difference Packet runtimeExecuted=false describes the comparison stage, not Core artifact generation."
   ],
   "plainTerms": "Read this graph as an evidence map of comparison decisions, not as a ranking or correctness ladder.",
+  "metadata": {
+    "bridgeVersion": "v2.8.1",
+    "sourceMilestone": "Glowing Heart v2.8",
+    "sourceIndex": "xprimeray.glowing_heart.difference_packet_index.v0.preview"
+  },
   "nodes": [
     {
       "id": "glowing_heart_difference_packet_gallery",

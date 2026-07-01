@@ -4,7 +4,7 @@
 
 Atlas Graph representation of the five structured Difference Packet Gallery exhibits.
 
-Graph ID: `glowing_heart.difference_packet_exhibits.v2_8`
+Graph ID: `glowing_heart.difference_packet_exhibits`
 
 Version: `v0.1`
 

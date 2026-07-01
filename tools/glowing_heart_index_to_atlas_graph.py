@@ -10,6 +10,8 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+from atlas_graph_validate import validate_graph
+
 
 REQUIRED_TOP = ("indexId", "title", "version", "entries", "claimBoundary")
 REQUIRED_ENTRY = (
@@ -167,7 +169,7 @@ def build_graph(index: dict[str, Any]) -> dict[str, Any]:
         for entry in index["entries"]
     ]
     return {
-        "graphId": "glowing_heart.difference_packet_exhibits.v2_8",
+        "graphId": "glowing_heart.difference_packet_exhibits",
         "title": "Glowing Heart Difference Packet Exhibits",
         "description": "Atlas Graph representation of the five structured Difference Packet Gallery exhibits.",
         "version": "v0.1",
@@ -176,6 +178,11 @@ def build_graph(index: dict[str, Any]) -> dict[str, Any]:
             "Difference Packet runtimeExecuted=false describes the comparison stage, not Core artifact generation.",
         ],
         "plainTerms": "Read this graph as an evidence map of comparison decisions, not as a ranking or correctness ladder.",
+        "metadata": {
+            "bridgeVersion": "v2.8.1",
+            "sourceMilestone": "Glowing Heart v2.8",
+            "sourceIndex": index["indexId"],
+        },
         "nodes": nodes,
         "edges": edges,
         "groups": [
@@ -219,6 +226,12 @@ def build_graph(index: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def validate_generated_graph(graph: dict[str, Any]) -> None:
+    errors = validate_graph(graph)
+    if errors:
+        raise ValueError("generated graph is invalid: " + "; ".join(errors))
+
+
 def write_atomic(path: Path, value: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     descriptor, temporary = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent, text=True)
@@ -244,7 +257,9 @@ def main(argv: list[str]) -> int:
         print("FAIL: input and output paths must be distinct", file=sys.stderr)
         return 2
     try:
-        write_atomic(output, build_graph(load_index(source)))
+        graph = build_graph(load_index(source))
+        validate_generated_graph(graph)
+        write_atomic(output, graph)
     except (OSError, TypeError, ValueError) as exc:
         print(f"FAIL: {exc}", file=sys.stderr)
         return 1

@@ -6,6 +6,12 @@
 
 The Atlas Graph schema now permits optional `node.metadata`. Existing graphs do not require metadata, so the extension is backward-compatible.
 
+## v2.8.1 Hardening
+
+The bridge now self-validates the generated Atlas Graph in memory before writing. Its stable graph ID is `glowing_heart.difference_packet_exhibits`; bridge version `v2.8.1` and source milestone `Glowing Heart v2.8` are stored separately in optional graph metadata.
+
+Claim boundaries, statuses, rules, fixtures, channels, and metrics remain sourced from the v2.6 index. The schema now permits optional graph-level metadata as a backward-compatible provenance extension.
+
 ## What This Demonstrates
 
 Structured Difference Packet exhibits can become Atlas Graph nodes without parsing gallery prose. Each exhibit node preserves its status, rule, source case, fixtures, channels, metrics, fixed comparison claims, and original claim-boundary array.
@@ -55,4 +61,3 @@ Atlas tooling can use metadata for status colors, metric summaries, channel labe
 ## Next Milestone
 
 Glowing Heart v2.9 can render a compact visual evidence map from the generated graph, showing the gallery root, five exhibits, status colors, and claim-boundary indicators without implying parity, validation, or proof.
-

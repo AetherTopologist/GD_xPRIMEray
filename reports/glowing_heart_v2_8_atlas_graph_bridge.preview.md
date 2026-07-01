@@ -10,6 +10,14 @@
 - edges: 5
 - groups: 1
 - Atlas validator warnings: 0
+- stable graph ID: `glowing_heart.difference_packet_exhibits`
+- bridge version: `v2.8.1`
+- source milestone: `Glowing Heart v2.8`
+- bridge self-validation: pass before atomic write
+
+## v2.8.1 Hardening
+
+The generator now invokes the shared Atlas Graph validator on the in-memory result. Invalid node types, edge references, or other structural fields fail before output replacement. Milestone provenance moved out of `graphId` and into optional graph metadata; exhibit claims and metrics remain index-derived.
 
 ## Graph Shape
 
@@ -40,4 +48,3 @@ Atlas Graph `node.metadata` is optional and accepts domain-specific structured d
 - Not physical validation.
 - Not renderer equivalence.
 - The bridge maps evidence structure only; it does not validate scientific correctness.
-

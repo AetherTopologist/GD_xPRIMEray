@@ -270,6 +270,11 @@
       "type": "string",
       "minLength": 1
     },
+    "metadata": {
+      "description": "Optional graph-level provenance or renderer metadata. Metadata does not change graph relationships or claim eligibility.",
+      "type": "object",
+      "additionalProperties": true
+    },
     "nodes": {
       "type": "array",
       "items": {
