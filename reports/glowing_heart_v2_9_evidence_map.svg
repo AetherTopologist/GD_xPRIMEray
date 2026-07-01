@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-labelledby="map-title map-desc">
+<title id="map-title">Glowing Heart Difference Packet Evidence Map</title>
+<desc id="map-desc">One gallery root connected to five retained Core comparison-decision exhibits.</desc>
+<rect width="1400" height="900" fill="#f8fafc"/>
+<text x="48" y="34" font-family="system-ui, sans-serif" font-size="14" fill="#475569">ATLAS GRAPH · RECORDED COMPARISON DECISIONS</text>
+<path d="M 700 195 C 700 255, 150 255, 150 330" fill="none" stroke="#94a3b8" stroke-width="2"/>
+<path d="M 700 195 C 700 255, 425 255, 425 330" fill="none" stroke="#94a3b8" stroke-width="2"/>
+<path d="M 700 195 C 700 255, 700 255, 700 330" fill="none" stroke="#94a3b8" stroke-width="2"/>
+<path d="M 700 195 C 700 255, 975 255, 975 330" fill="none" stroke="#94a3b8" stroke-width="2"/>
+<path d="M 700 195 C 700 255, 1250 255, 1250 330" fill="none" stroke="#94a3b8" stroke-width="2"/>
+<g id="glowing_heart_difference_packet_gallery" data-node-kind="root">
+<rect x="400" y="45" width="600" height="150" rx="8" fill="#ffffff" stroke="#334155" stroke-width="2"/>
+<text x="700" y="92" text-anchor="middle" font-family="system-ui, sans-serif" font-size="24" font-weight="700" fill="#0f172a">Project Glowing Heart Difference Packet Gallery</text>
+<text x="700" y="124" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#475569">Atlas Graph evidence root · five exhibit artifacts</text>
+<rect x="563" y="145" width="274" height="30" rx="4" fill="#f1f5f9" stroke="#cbd5e1"/>
+<text x="700" y="165" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#334155">CLAIM-BOUNDED ARTIFACT MAP</text>
+</g>
+<g id="comparable_zero" data-node-kind="exhibit" data-status="Comparable">
+<rect x="25" y="330" width="250" height="410" rx="7" fill="#ffffff" stroke="#86efac" stroke-width="2"/>
+<rect x="41" y="348" width="218" height="32" rx="4" fill="#dcfce7"/>
+<text x="150" y="370" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#166534">Comparable</text>
+<text x="41" y="412" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#0f172a">Comparable Zero</text>
+<text x="41" y="466" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#64748b">RULE</text>
+<text x="41" y="485" font-family="ui-monospace, monospace" font-size="11" fill="#334155">bend_magnitude_same_observer</text>
+<line x1="41" y1="550" x2="259" y2="550" stroke="#e2e8f0"/>
+<text x="41" y="578" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#64748b">KEY METRIC</text>
+<text x="41" y="606" font-family="system-ui, sans-serif" font-size="15" font-weight="650" fill="#0f172a">880 compared · all zero</text>
+<rect x="41" y="636" width="218" height="34" rx="4" fill="#f1f5f9" stroke="#cbd5e1"/>
+<text x="150" y="658" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#334155">▣ CLAIM BOUNDARY</text>
+<text x="41" y="700" font-family="system-ui, sans-serif" font-size="11" fill="#64748b">176 chars recorded</text>
+</g>
+<g id="comparable_nonzero" data-node-kind="exhibit" data-status="Comparable">
+<rect x="300" y="330" width="250" height="410" rx="7" fill="#ffffff" stroke="#86efac" stroke-width="2"/>
+<rect x="316" y="348" width="218" height="32" rx="4" fill="#dcfce7"/>
+<text x="425" y="370" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#166534">Comparable</text>
+<text x="316" y="412" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#0f172a">Comparable Non-Zero</text>
+<text x="316" y="466" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#64748b">RULE</text>
+<text x="316" y="485" font-family="ui-monospace, monospace" font-size="11" fill="#334155">bend_magnitude_same_observer</text>
+<line x1="316" y1="550" x2="534" y2="550" stroke="#e2e8f0"/>
+<text x="316" y="578" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#64748b">KEY METRIC</text>
+<text x="316" y="606" font-family="system-ui, sans-serif" font-size="15" font-weight="650" fill="#0f172a">872 non-zero · max 0.00031490779</text>
+<rect x="316" y="636" width="218" height="34" rx="4" fill="#f1f5f9" stroke="#cbd5e1"/>
+<text x="425" y="658" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#334155">▣ CLAIM BOUNDARY</text>
+<text x="316" y="700" font-family="system-ui, sans-serif" font-size="11" fill="#64748b">176 chars recorded</text>
+</g>
+<g id="unknown_observer_mismatch" data-node-kind="exhibit" data-status="Unknown">
+<rect x="575" y="330" width="250" height="410" rx="7" fill="#ffffff" stroke="#fcd34d" stroke-width="2"/>
+<rect x="591" y="348" width="218" height="32" rx="4" fill="#fef3c7"/>
+<text x="700" y="370" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#92400e">Unknown</text>
+<text x="591" y="412" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#0f172a">Unknown Observer</text>
+<text x="591" y="435" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#0f172a">Mismatch</text>
+<text x="591" y="466" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#64748b">RULE</text>
+<text x="591" y="485" font-family="ui-monospace, monospace" font-size="11" fill="#334155">bend_magnitude_context_mismatch</text>
+<line x1="591" y1="550" x2="809" y2="550" stroke="#e2e8f0"/>
+<text x="591" y="578" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#64748b">KEY METRIC</text>
+<text x="591" y="606" font-family="system-ui, sans-serif" font-size="15" font-weight="650" fill="#0f172a">0 compared</text>
+<rect x="591" y="636" width="218" height="34" rx="4" fill="#f1f5f9" stroke="#cbd5e1"/>
+<text x="700" y="658" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#334155">▣ CLAIM BOUNDARY</text>
+<text x="591" y="700" font-family="system-ui, sans-serif" font-size="11" fill="#64748b">132 chars recorded</text>
+</g>
+<g id="unknown_coordinate_grid_mismatch" data-node-kind="exhibit" data-status="Unknown">
+<rect x="850" y="330" width="250" height="410" rx="7" fill="#ffffff" stroke="#fcd34d" stroke-width="2"/>
+<rect x="866" y="348" width="218" height="32" rx="4" fill="#fef3c7"/>
+<text x="975" y="370" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#92400e">Unknown</text>
+<text x="866" y="412" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#0f172a">Unknown Coordinate-Grid</text>
+<text x="866" y="435" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#0f172a">Mismatch</text>
+<text x="866" y="466" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#64748b">RULE</text>
+<text x="866" y="485" font-family="ui-monospace, monospace" font-size="11" fill="#334155">bend_magnitude_context_mismatch</text>
+<line x1="866" y1="550" x2="1084" y2="550" stroke="#e2e8f0"/>
+<text x="866" y="578" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#64748b">KEY METRIC</text>
+<text x="866" y="606" font-family="system-ui, sans-serif" font-size="15" font-weight="650" fill="#0f172a">0 compared</text>
+<rect x="866" y="636" width="218" height="34" rx="4" fill="#f1f5f9" stroke="#cbd5e1"/>
+<text x="975" y="658" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#334155">▣ CLAIM BOUNDARY</text>
+<text x="866" y="700" font-family="system-ui, sans-serif" font-size="11" fill="#64748b">132 chars recorded</text>
+</g>
+<g id="not_comparable_channel" data-node-kind="exhibit" data-status="NotComparable">
+<rect x="1125" y="330" width="250" height="410" rx="7" fill="#ffffff" stroke="#fca5a5" stroke-width="2"/>
+<rect x="1141" y="348" width="218" height="32" rx="4" fill="#fee2e2"/>
+<text x="1250" y="370" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#7f1d1d">NotComparable</text>
+<text x="1141" y="412" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#0f172a">NotComparable Channel</text>
+<text x="1141" y="466" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#64748b">RULE</text>
+<text x="1141" y="485" font-family="ui-monospace, monospace" font-size="11" fill="#334155">traversal_steps_vs_bend_not_comparable</text>
+<line x1="1141" y1="550" x2="1359" y2="550" stroke="#e2e8f0"/>
+<text x="1141" y="578" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#64748b">KEY METRIC</text>
+<text x="1141" y="606" font-family="system-ui, sans-serif" font-size="15" font-weight="650" fill="#0f172a">0 compared</text>
+<rect x="1141" y="636" width="218" height="34" rx="4" fill="#f1f5f9" stroke="#cbd5e1"/>
+<text x="1250" y="658" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#334155">▣ CLAIM BOUNDARY</text>
+<text x="1141" y="700" font-family="system-ui, sans-serif" font-size="11" fill="#64748b">132 chars recorded</text>
+</g>
+<g aria-label="Status legend">
+<text x="38" y="798" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#475569">STATUS LEGEND</text>
+<rect x="160" y="778" width="150" height="30" rx="4" fill="#dcfce7" stroke="#86efac"/>
+<text x="235" y="798" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#166534">Comparable</text>
+<rect x="330" y="778" width="150" height="30" rx="4" fill="#fef3c7" stroke="#fcd34d"/>
+<text x="405" y="798" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#92400e">Unknown</text>
+<rect x="500" y="778" width="150" height="30" rx="4" fill="#fee2e2" stroke="#fca5a5"/>
+<text x="575" y="798" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#7f1d1d">NotComparable</text>
+</g>
+<text x="38" y="854" font-family="system-ui, sans-serif" font-size="12" fill="#475569">Source graph: glowing_heart.difference_packet_exhibits</text>
+<text x="1362" y="854" text-anchor="end" font-family="system-ui, sans-serif" font-size="12" fill="#475569">Evidence structure only · no ranking or correctness inference</text>
+</svg>
