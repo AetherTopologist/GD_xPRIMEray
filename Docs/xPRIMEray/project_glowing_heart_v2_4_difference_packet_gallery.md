@@ -5,7 +5,7 @@
 - `Comparable` means the declared channel, fixture comparison identity, observer basis, and coordinate grid passed the named rule checks.
 - `Unknown` means the system refused to compare values because eligibility was not established.
 - `NotComparable` is reserved for channel pairs declared incompatible by the compatibility matrix.
-- `Deferred` means the correct retained artifact does not exist yet.
+- `Deferred` means the correct retained artifact does not exist yet; no current gallery entry is deferred after v2.5.
 
 These statuses describe comparison eligibility. They do not assess scientific correctness.
 
@@ -85,24 +85,24 @@ These statuses describe comparison eligibility. They do not assess scientific co
 
 **What this does not show:** The packet does not resample, transform, or compare values across grids.
 
-## Deferred Incompatible Channel
+## NotComparable Incompatible Channel
 
 | Field | Value |
 |---|---|
 | Case | E |
 | Left fixture | `Fixtures/grin_radial_smoke.json` |
-| Right fixture | Not available |
-| Requested channel | Not available |
-| Status | `Deferred` |
-| Rule | Not evaluated |
+| Right fixture | `Fixtures/grin_radial_smoke.json` |
+| Requested channel | left `bend_magnitude_metric`; right `traversal_step_count` |
+| Status | `NotComparable` |
+| Rule | `traversal_steps_vs_bend_not_comparable` |
 | Compared | 0 |
 | Maximum difference | 0 |
 | Mean difference | 0 |
 | Non-zero count | 0 |
 
-**What this shows:** No authentic retained incompatible-channel artifact exists yet.
+**What this shows:** The matrix rejects two authentic retained Core quantities that are declared incompatible without a transform.
 
-**What this does not show:** Bend data was not relabeled to manufacture a `NotComparable` result.
+**What this does not show:** No values were compared, and bend data was not relabeled as traversal steps.
 
 ## Claim Boundary
 
@@ -119,4 +119,4 @@ The source measurements and verification paths are recorded in `reports/glowing_
 
 ## Next Milestone
 
-Glowing Heart v2.5 can add an authentic retained Core artifact for an incompatible channel so Case E can become `NotComparable` without relabeling bend data.
+Glowing Heart v2.6 can create a machine-readable index of the v2.3-v2.5 packet exhibits for future Gallery and Atlas tooling.

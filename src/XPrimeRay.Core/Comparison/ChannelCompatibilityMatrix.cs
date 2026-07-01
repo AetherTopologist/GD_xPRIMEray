@@ -83,7 +83,7 @@ public sealed class ChannelCompatibilityMatrix
                 "traversal_steps_vs_bend_not_comparable",
                 DifferenceStatus.NotComparable,
                 false,
-                "Traversal step count and bend magnitude describe different measurement channels.");
+                "Bend magnitude and traversal step count represent different retained Core quantities and are not directly comparable without a declared transform.");
         }
 
         return Result(

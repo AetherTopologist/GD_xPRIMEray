@@ -34,6 +34,7 @@ public static class MarkdownSummaryWriter
         markdown.AppendLine();
         markdown.AppendLine("- `snapshot.ppm` - grayscale PPM visualization of per-pixel bend magnitude");
         markdown.AppendLine("- `snapshot_heatmap.csv` - per-ray bend magnitude table");
+        markdown.AppendLine("- `traversal_step_count.csv` - executed integration-step count per ray");
         markdown.AppendLine("- `snapshot_ascii.txt` - terminal-viewable bend magnitude map");
         markdown.AppendLine();
         markdown.AppendLine("## Interpretation");

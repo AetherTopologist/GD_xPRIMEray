@@ -77,12 +77,13 @@ static int RunComparePackets(string[] args)
 
     try
     {
-        var left = RetainedPacketLoader.Load(options.LeftPacketDirectory);
-        var right = RetainedPacketLoader.Load(options.RightPacketDirectory);
+        var left = RetainedPacketLoader.Load(options.LeftPacketDirectory, options.LeftChannel);
+        var right = RetainedPacketLoader.Load(options.RightPacketDirectory, options.RightChannel);
         var packet = RetainedSnapshotComparison.Build(
             left,
             right,
-            options.Channel,
+            options.LeftChannel,
+            options.RightChannel,
             DateTimeOffset.UtcNow);
         var output = RetainedComparisonWriter.Write(
             options.OutputDirectory,
@@ -112,6 +113,7 @@ static void PrintHelp()
     Console.WriteLine("Usage:");
     Console.WriteLine("  dotnet run --project src/XPrimeRay.Testbench.Cli -- run-fixture <fixture.json> [--emit-difference] [--output <path>] [--no-output]");
     Console.WriteLine("  dotnet run --project src/XPrimeRay.Testbench.Cli -- compare-packets <left_packet_dir> <right_packet_dir> --channel <channel_id> --output <path>");
+    Console.WriteLine("  dotnet run --project src/XPrimeRay.Testbench.Cli -- compare-packets <left_packet_dir> <right_packet_dir> --left-channel <channel_id> --right-channel <channel_id> --output <path>");
 }
 
 static void PrintSummary(TransportResult result, ValidationReport report)
@@ -237,6 +239,8 @@ static bool TryParseCompareArgs(string[] args, out ComparePacketOptions options,
         RightPacketDirectory = args[2],
     };
     var sawChannel = false;
+    var sawLeftChannel = false;
+    var sawRightChannel = false;
     var sawOutput = false;
     for (var index = 3; index < args.Length; index++)
     {
@@ -250,7 +254,30 @@ static bool TryParseCompareArgs(string[] args, out ComparePacketOptions options,
                 }
 
                 sawChannel = true;
-                options = options with { Channel = args[++index] };
+                var channel = args[++index];
+                options = options with { LeftChannel = channel, RightChannel = channel };
+                break;
+
+            case "--left-channel":
+                if (sawLeftChannel || index + 1 >= args.Length || string.IsNullOrWhiteSpace(args[index + 1]))
+                {
+                    error = "Invalid arguments: --left-channel requires one value.";
+                    return false;
+                }
+
+                sawLeftChannel = true;
+                options = options with { LeftChannel = args[++index] };
+                break;
+
+            case "--right-channel":
+                if (sawRightChannel || index + 1 >= args.Length || string.IsNullOrWhiteSpace(args[index + 1]))
+                {
+                    error = "Invalid arguments: --right-channel requires one value.";
+                    return false;
+                }
+
+                sawRightChannel = true;
+                options = options with { RightChannel = args[++index] };
                 break;
 
             case "--output":
@@ -270,9 +297,15 @@ static bool TryParseCompareArgs(string[] args, out ComparePacketOptions options,
         }
     }
 
-    if (!sawChannel || !sawOutput)
+    if (sawChannel && (sawLeftChannel || sawRightChannel))
     {
-        error = "Invalid arguments: compare-packets requires --channel and --output.";
+        error = "Invalid arguments: --channel cannot be combined with --left-channel or --right-channel.";
+        return false;
+    }
+
+    if ((!sawChannel && !(sawLeftChannel && sawRightChannel)) || !sawOutput)
+    {
+        error = "Invalid arguments: compare-packets requires --channel, or both --left-channel and --right-channel, plus --output.";
         return false;
     }
 
@@ -308,6 +341,7 @@ static ArtifactWriteResult WriteArtifacts(
     ObservatoryEntryWriter.Write(outputDirectory, manifest);
     PpmSnapshotWriter.Write(outputDirectory, result);
     HeatmapCsvWriter.Write(outputDirectory, result);
+    TraversalStepCountWriter.Write(outputDirectory, result);
     AsciiSnapshotWriter.Write(outputDirectory, result);
     DifferencePacket? differencePacket = null;
     if (options.EmitDifference)
@@ -364,6 +398,7 @@ internal sealed record ComparePacketOptions
 {
     public string LeftPacketDirectory { get; init; } = "";
     public string RightPacketDirectory { get; init; } = "";
-    public string Channel { get; init; } = "";
+    public string LeftChannel { get; init; } = "";
+    public string RightChannel { get; init; } = "";
     public string OutputDirectory { get; init; } = "";
 }

@@ -53,7 +53,7 @@ public sealed record RunManifest
                 MeanBend = ToStableDouble(result.MeanBendMagnitude),
                 MaxBend = ToStableDouble(result.MaxBendMagnitude),
             },
-            Artifacts = ArtifactManifest.Create(emitDifference),
+            Artifacts = ArtifactManifest.Create(emitDifference, fixture, result),
             Limitations =
             [
                 "Core smoke transport only",
@@ -103,18 +103,72 @@ public sealed record ArtifactManifest
     public string SnapshotAsciiTxt { get; init; } = "snapshot_ascii.txt";
     public string SnapshotChannel { get; init; } = "bend_magnitude_metric";
     public string SnapshotRepresentation { get; init; } = "scalar_grid";
+    public string TraversalStepCountCsv { get; init; } = "traversal_step_count.csv";
+    public RetainedChannelManifest[] RetainedChannels { get; init; } = Array.Empty<RetainedChannelManifest>();
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? DifferencePacketJson { get; init; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? DifferenceSummaryMarkdown { get; init; }
 
-    public static ArtifactManifest Create(bool emitDifference)
+    public static ArtifactManifest Create(
+        bool emitDifference,
+        FixtureDefinition fixture,
+        TransportResult result)
     {
+        var observerBasis = fixture.Observer is null
+            ? "unknown"
+            : DifferencePacketBuilder.FormatObserverBasis(fixture.Observer);
         return new ArtifactManifest
         {
             DifferencePacketJson = emitDifference ? "difference_packet.json" : null,
             DifferenceSummaryMarkdown = emitDifference ? "difference_summary.md" : null,
+            RetainedChannels =
+            [
+                new RetainedChannelManifest
+                {
+                    ChannelId = "bend_magnitude_metric",
+                    Kind = "measurement",
+                    Producer = "core",
+                    Source = "RayMetric.BendMagnitude",
+                    FixtureIdentity = result.FixtureName,
+                    FixtureComparisonIdentity = fixture.ComparisonIdentity ?? result.FixtureName,
+                    ObserverBasis = observerBasis,
+                    Representation = "scalar_grid",
+                    ArtifactPath = "snapshot_heatmap.csv",
+                    GridWidth = result.Width,
+                    GridHeight = result.Height,
+                },
+                new RetainedChannelManifest
+                {
+                    ChannelId = "traversal_step_count",
+                    Kind = "measurement",
+                    Producer = "core",
+                    Source = "MetricRayState.IntegrationSteps",
+                    FixtureIdentity = result.FixtureName,
+                    FixtureComparisonIdentity = fixture.ComparisonIdentity ?? result.FixtureName,
+                    ObserverBasis = observerBasis,
+                    Representation = "scalar_grid",
+                    ArtifactPath = "traversal_step_count.csv",
+                    GridWidth = result.Width,
+                    GridHeight = result.Height,
+                },
+            ],
         };
     }
+}
+
+public sealed record RetainedChannelManifest
+{
+    public string ChannelId { get; init; } = "unknown";
+    public string Kind { get; init; } = "measurement";
+    public string Producer { get; init; } = "core";
+    public string Source { get; init; } = "";
+    public string FixtureIdentity { get; init; } = "";
+    public string FixtureComparisonIdentity { get; init; } = "";
+    public string ObserverBasis { get; init; } = "unknown";
+    public string Representation { get; init; } = "unknown";
+    public string ArtifactPath { get; init; } = "";
+    public int GridWidth { get; init; }
+    public int GridHeight { get; init; }
 }

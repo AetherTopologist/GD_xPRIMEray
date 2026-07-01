@@ -59,7 +59,7 @@
       "symmetric": true,
       "requiredConditions": [],
       "transformRequired": false,
-      "reason": "Traversal step count and bend magnitude describe different measurement channels."
+      "reason": "Bend magnitude and traversal step count represent different retained Core quantities and are not directly comparable without a declared transform."
     },
     {
       "id": "core_to_future_image_requires_transform",

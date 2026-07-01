@@ -102,7 +102,7 @@ public sealed class TransportRunner
                     rayMeanBend = 0.0;
                 }
 
-                rayMetrics.Add(new RayMetric(x, y, rayMeanBend));
+                rayMetrics.Add(new RayMetric(x, y, rayMeanBend, state.IntegrationSteps));
             }
         }
 

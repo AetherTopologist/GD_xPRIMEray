@@ -112,32 +112,42 @@ public static class DifferencePacketBuilder
         string requestedChannel,
         DateTimeOffset generatedUtc)
     {
+        return BuildRetainedComparison(left, right, requestedChannel, requestedChannel, generatedUtc);
+    }
+
+    public static DifferencePacket BuildRetainedComparison(
+        RetainedSnapshotDescriptor left,
+        RetainedSnapshotDescriptor right,
+        string leftRequestedChannel,
+        string rightRequestedChannel,
+        DateTimeOffset generatedUtc)
+    {
         ArgumentNullException.ThrowIfNull(left);
         ArgumentNullException.ThrowIfNull(right);
 
-        var requestedChannelDeclaration = ChannelRegistry.Default.Find(requestedChannel);
+        var leftRequestedDeclaration = ChannelRegistry.Default.Find(leftRequestedChannel);
+        var rightRequestedDeclaration = ChannelRegistry.Default.Find(rightRequestedChannel);
         var sameFixture = left.FixtureComparisonIdentity == right.FixtureComparisonIdentity;
         var sameObserver = left.ObserverBasis == right.ObserverBasis;
         ChannelCompatibility compatibility;
         var sameGrid = false;
 
-        if (requestedChannelDeclaration is null)
+        if (leftRequestedDeclaration is null || rightRequestedDeclaration is null)
         {
             compatibility = new ChannelCompatibility
             {
                 RuleId = "missing_channel_declaration",
                 Status = DifferenceStatus.Unknown,
-                Reason = $"The requested channel '{requestedChannel}' is not declared in the channel registry.",
+                Reason = $"One or both requested channels are not declared in the channel registry (left='{leftRequestedChannel}', right='{rightRequestedChannel}').",
             };
         }
-        else if (left.ChannelId != requestedChannel || right.ChannelId != requestedChannel)
+        else if (left.ChannelId != leftRequestedChannel || right.ChannelId != rightRequestedChannel)
         {
             compatibility = new ChannelCompatibility
             {
                 RuleId = "requested_channel_mismatch",
                 Status = DifferenceStatus.Unknown,
-                Reason = $"The requested channel '{requestedChannel}' does not match both retained packet channel declarations (left='{left.ChannelId}', right='{right.ChannelId}').",
-                RequiredConditions = ["same_channel_type"],
+                Reason = $"The requested channels do not match the retained packet channel declarations (requested left='{leftRequestedChannel}', actual left='{left.ChannelId}', requested right='{rightRequestedChannel}', actual right='{right.ChannelId}').",
             };
         }
         else
@@ -179,7 +189,9 @@ public static class DifferencePacketBuilder
             LeftRepresentation = left.Representation,
             RightRepresentation = right.Representation,
             ObserverBasis = sameObserver ? left.ObserverBasis : "retained_observer_basis_mismatch",
-            ComparisonBasis = "retained_core_snapshots_same_channel_same_fixture_same_observer_same_coordinate_grid",
+            ComparisonBasis = left.ChannelId == right.ChannelId
+                ? "retained_core_snapshots_same_channel_same_fixture_same_observer_same_coordinate_grid"
+                : "retained_core_channels_declared_compatibility",
             CompatibilityRuleId = compatibility.RuleId,
             ChannelRegistryVersion = ChannelRegistry.CurrentVersion,
             CompatibilityMatrixVersion = ChannelCompatibilityMatrix.CurrentVersion,
