@@ -134,22 +134,8 @@ nav:
 
   - Start Here: start_here.md
 
-  - Overview:
-      - Transport Observatory: Overview/TRANSPORT_OBSERVATORY_OVERVIEW.md
-      - Feature Index: FEATURE_INDEX.md
-
-  - Observatory Gallery:
-      - Home: Observatory_Gallery/index.md
-      - Read This First: Observatory_Gallery/what_the_observatory_measures.md
-      - Trust Model: Observatory_Gallery/observatory_trust_model.md
-      - Maturity Ladder: Observatory_Gallery/observatory_maturity_ladder.md
-      - Basin Atlas: Observatory_Gallery/basin_atlas.md
-      - Canonical Fixtures: Observatory_Gallery/canonical_fixtures.md
-      - Curvature Benchmark: Observatory_Gallery/curvature_benchmark.md
-      - Full-Coverage Mini Benchmark: Observatory_Gallery/curvature_full_coverage_experiment.md
-      - Closure Diagnostics: Observatory_Gallery/closure_diagnostics.md
-      - Research Fixtures: Observatory_Gallery/research_fixtures.md
-      - Experimental Archive: Observatory_Gallery/experimental_archive.md
+  - MisterY Labs:
+      - Inspiration Cards: MisterYLabs/INSPIRATION_CARD_FEATURE_LINKS.md
 
   - Observatory:
       - Observatory Atlas — Chapter Tour: Observatory/observatory_atlas.md
@@ -169,6 +155,9 @@ nav:
           - Rendering Ecosystem: Observatory/Observation_Atlas/50_rendering_ecosystem.md
           - Educational Visualizations: Observatory/Observation_Atlas/60_educational_visualizations.md
           - Future Observatory: Observatory/Observation_Atlas/70_future_observatory.md
+          - Atlas Graph:
+              - Overview: Observatory/Observation_Atlas/Atlas_Graph/README.md
+              - Data Layer: Observatory/Observation_Atlas/Atlas_Graph/atlas_graph_v0_1.md
           - Revision History: Observatory/Observation_Atlas/revision_history.md
       - Chapters:
           - Ch 1 — Dual Reality: Observatory/chapters/chapter_01.md
@@ -178,59 +167,89 @@ nav:
           - Ch 5 — Cathedral Probe: Observatory/chapters/chapter_05.md
       - Sample Worlds: Observatory/sample_worlds.md
       - Artifact Gallery: Observatory/artifacts.md
-      - Validation Philosophy: Observatory/validation_philosophy.md
       - Overlay Master List: Observatory/OVERLAY_MASTER_LIST.md
-      - Atomic Visual Observatory: Research/atomic_orbital_visual_observatory_fixture.md
-      - Wormhole Structure Observatory: Research/wormhole_dual_reality_transport_workflow.md
-      - Domain Audit Visuals: diagnostics/domain_ownership.md
-      - Diagnostics:
-          - Overview: diagnostics/README.md
-          - Curvature Heatmaps: diagnostics/heatmaps.md
-          - Domain Ownership: diagnostics/domain_ownership.md
-          - Phase Coherence: diagnostics/phase_coherence.md
-          - Tile Coherence: diagnostics/tile_coherence.md
+
+  - Observatory Gallery:
+      - Home: Observatory_Gallery/index.md
+      - Read This First: Observatory_Gallery/what_the_observatory_measures.md
+      - Trust Model: Observatory_Gallery/observatory_trust_model.md
+      - Maturity Ladder: Observatory_Gallery/observatory_maturity_ladder.md
+      - Basin Atlas: Observatory_Gallery/basin_atlas.md
+      - Canonical Fixtures: Observatory_Gallery/canonical_fixtures.md
+      - Curvature Benchmark: Observatory_Gallery/curvature_benchmark.md
+      - Full-Coverage Mini Benchmark: Observatory_Gallery/curvature_full_coverage_experiment.md
+      - Closure Diagnostics: Observatory_Gallery/closure_diagnostics.md
+      - Research Fixtures: Observatory_Gallery/research_fixtures.md
+      - Experimental Archive: Observatory_Gallery/experimental_archive.md
 
   - Project Glowing Heart:
-      - Atlas Link: xPRIMEray/project_glowing_heart_atlas_link.md
-      - v1.8 Observer Milestone: xPRIMEray/project_glowing_heart_v1_8_milestone.md
-      - v1.9 Snapshot Contract: xPRIMEray/project_glowing_heart_v1_9_shared_snapshot_measurement_contract.md
-      - v2.3 Deliberate Core Differences: xPRIMEray/project_glowing_heart_v2_3_deliberate_core_difference_fixtures.md
-      - v2.4 Difference Packet Gallery: xPRIMEray/project_glowing_heart_v2_4_difference_packet_gallery.md
-      - v2.5 NotComparable Channel: xPRIMEray/project_glowing_heart_v2_5_not_comparable_channel_artifact.md
-      - v2.6 Difference Packet Index: xPRIMEray/project_glowing_heart_v2_6_difference_packet_index.md
-      - v2.7 Gallery Renderer: xPRIMEray/project_glowing_heart_v2_7_gallery_renderer.md
-      - v2.8 Atlas Graph Bridge: xPRIMEray/project_glowing_heart_v2_8_atlas_graph_bridge.md
-      - v2.9 Evidence Map: xPRIMEray/project_glowing_heart_v2_9_evidence_map.md
-      - v2.10 Evidence Map Index: xPRIMEray/project_glowing_heart_v2_10_evidence_map_index.md
-      - v2.11 Evidence Chain Health: xPRIMEray/project_glowing_heart_v2_11_evidence_chain_health.md
-      - v2.12 Evidence Chain Preflight: xPRIMEray/project_glowing_heart_v2_12_preflight.md
-      - v2.13 Evidence Chain RC: xPRIMEray/project_glowing_heart_v2_13_release_candidate.md
-      - v3.0 Dashboard Seed: xPRIMEray/project_glowing_heart_v3_0_dashboard_seed.md
-      - v3.1 Dashboard Renderer: xPRIMEray/project_glowing_heart_v3_1_dashboard_renderer.md
-      - Public Demo Readiness: xPRIMEray/project_glowing_heart_v1_5_public_demo_readiness.md
-      - Public Proposal: xPRIMEray/project_glowing_heart_public_proposal.md
-      - Engineering Review: xPRIMEray/project_glowing_heart_review.md
-      - Execution Plan: xPRIMEray/project_glowing_heart_execution_plan.md
-      - Core Split Proposal: xPRIMEray/xPRIMEray-Core_Split.md
-      - v0.1 Baseline: xPRIMEray/project_glowing_heart_v0_1_baseline.md
-      - v0.1 Artifact: xPRIMEray/project_glowing_heart_v0_1_artifact.md
-      - v0.2 First Pulse: xPRIMEray/project_glowing_heart_v0_2_first_pulse.md
-      - v0.3 Observable Output: xPRIMEray/project_glowing_heart_v0_3_observable_output.md
-      - v0.4 Observatory Entry: xPRIMEray/project_glowing_heart_v0_4_observatory_entry.md
-      - v0.6 Human Observable: xPRIMEray/project_glowing_heart_v0_6_first_human_observable.md
-      - v0.7 Preview Gallery: xPRIMEray/project_glowing_heart_v0_7_preview_gallery.md
-      - v0.8 Bridge Card: xPRIMEray/project_glowing_heart_v0_8_bridge_card.md
-      - v0.9 Godot Fixture Metadata: xPRIMEray/project_glowing_heart_v0_9_godot_fixture_metadata.md
-      - v1.0 Shared Fixture Candidate: xPRIMEray/project_glowing_heart_v1_0_shared_fixture_candidate.md
-      - v1.1 Godot Fixture Export: xPRIMEray/project_glowing_heart_v1_1_godot_fixture_export.md
-      - v1.2 Gap Matrix: xPRIMEray/project_glowing_heart_v1_2_gap_matrix.md
-      - v1.3 Shared Fixture Schema: xPRIMEray/project_glowing_heart_v1_3_shared_fixture_schema.md
-      - v1.4 Shared Fixture Instance: xPRIMEray/project_glowing_heart_v1_4_shared_fixture_instance.md
-      - v1.4.1 Schema Alignment: xPRIMEray/project_glowing_heart_v1_4_1_schema_alignment.md
-      - v1.6 Grok Handoff: xPRIMEray/project_glowing_heart_v1_6_grok_handoff.md
-      - v1.7 Shared Observer Contract: xPRIMEray/project_glowing_heart_v1_7_shared_observer_contract.md
-      - v1.8 Observer Instances: xPRIMEray/project_glowing_heart_v1_8_observer_instances.md
-      - v1.8.1 Observer Reconciliation: xPRIMEray/project_glowing_heart_v1_8_1_observer_reconciliation.md
+      - Overview:
+          - Atlas Link: xPRIMEray/project_glowing_heart_atlas_link.md
+          - Public Proposal: xPRIMEray/project_glowing_heart_public_proposal.md
+          - Architecture Vision: xPRIMEray/project_glowing_heart_architecture_vision.md
+      - Evidence Gallery:
+          - v2.4 Difference Packet Gallery: xPRIMEray/project_glowing_heart_v2_4_difference_packet_gallery.md
+          - v2.9 Evidence Map: xPRIMEray/project_glowing_heart_v2_9_evidence_map.md
+          - v3.1 Dashboard Renderer: xPRIMEray/project_glowing_heart_v3_1_dashboard_renderer.md
+      - Dashboard:
+          - v3.0 Dashboard Seed: xPRIMEray/project_glowing_heart_v3_0_dashboard_seed.md
+          - v3.1 Dashboard Renderer: xPRIMEray/project_glowing_heart_v3_1_dashboard_renderer.md
+      - Health / Preflight:
+          - v2.10 Evidence Map Index: xPRIMEray/project_glowing_heart_v2_10_evidence_map_index.md
+          - v2.11 Evidence Chain Health: xPRIMEray/project_glowing_heart_v2_11_evidence_chain_health.md
+          - v2.12 Preflight: xPRIMEray/project_glowing_heart_v2_12_preflight.md
+          - v2.13 Release Candidate: xPRIMEray/project_glowing_heart_v2_13_release_candidate.md
+      - Architecture:
+          - Engineering Review: xPRIMEray/project_glowing_heart_review.md
+          - Execution Plan: xPRIMEray/project_glowing_heart_execution_plan.md
+          - Core Split Proposal: xPRIMEray/xPRIMEray-Core_Split.md
+      - Milestone Archive:
+          - v0.x:
+              - v0.1 Baseline: xPRIMEray/project_glowing_heart_v0_1_baseline.md
+              - v0.1 Artifact: xPRIMEray/project_glowing_heart_v0_1_artifact.md
+              - v0.2 First Pulse: xPRIMEray/project_glowing_heart_v0_2_first_pulse.md
+              - v0.3 Observable Output: xPRIMEray/project_glowing_heart_v0_3_observable_output.md
+              - v0.4 Observatory Entry: xPRIMEray/project_glowing_heart_v0_4_observatory_entry.md
+              - v0.6 Human Observable: xPRIMEray/project_glowing_heart_v0_6_first_human_observable.md
+              - v0.7 Preview Gallery: xPRIMEray/project_glowing_heart_v0_7_preview_gallery.md
+              - v0.8 Bridge Card: xPRIMEray/project_glowing_heart_v0_8_bridge_card.md
+              - v0.9 Godot Fixture Metadata: xPRIMEray/project_glowing_heart_v0_9_godot_fixture_metadata.md
+          - v1.x:
+              - v1.0 Shared Fixture Candidate: xPRIMEray/project_glowing_heart_v1_0_shared_fixture_candidate.md
+              - v1.1 Godot Fixture Export: xPRIMEray/project_glowing_heart_v1_1_godot_fixture_export.md
+              - v1.2 Gap Matrix: xPRIMEray/project_glowing_heart_v1_2_gap_matrix.md
+              - v1.3 Shared Fixture Schema: xPRIMEray/project_glowing_heart_v1_3_shared_fixture_schema.md
+              - v1.4 Shared Fixture Instance: xPRIMEray/project_glowing_heart_v1_4_shared_fixture_instance.md
+              - v1.4.1 Schema Alignment: xPRIMEray/project_glowing_heart_v1_4_1_schema_alignment.md
+              - v1.5 Public Demo Readiness: xPRIMEray/project_glowing_heart_v1_5_public_demo_readiness.md
+              - v1.6 Grok Handoff: xPRIMEray/project_glowing_heart_v1_6_grok_handoff.md
+              - v1.7 Shared Observer Contract: xPRIMEray/project_glowing_heart_v1_7_shared_observer_contract.md
+              - v1.8 Observer Instances: xPRIMEray/project_glowing_heart_v1_8_observer_instances.md
+              - v1.8 Milestone: xPRIMEray/project_glowing_heart_v1_8_milestone.md
+              - v1.8.1 Observer Reconciliation: xPRIMEray/project_glowing_heart_v1_8_1_observer_reconciliation.md
+              - v1.8.2 Shared Observer Target: xPRIMEray/project_glowing_heart_v1_8_2_shared_observer_target.md
+              - v1.8.3 Target Alignment: xPRIMEray/project_glowing_heart_v1_8_3_observer_target_alignment.md
+              - v1.8.4 Contract Alignment: xPRIMEray/project_glowing_heart_v1_8_4_observer_contract_alignment.md
+              - v1.9 Snapshot Contract: xPRIMEray/project_glowing_heart_v1_9_shared_snapshot_measurement_contract.md
+          - v2.x:
+              - v2.0 Difference Packet: xPRIMEray/project_glowing_heart_v2_0_difference_packet.md
+              - v2.0 Implementation: xPRIMEray/project_glowing_heart_v2_0_difference_packet_implementation.md
+              - v2.1 Channel Registry: xPRIMEray/project_glowing_heart_v2_1_channel_registry.md
+              - v2.2 Retained Snapshot Pair: xPRIMEray/project_glowing_heart_v2_2_retained_core_snapshot_pair.md
+              - v2.3 Deliberate Core Differences: xPRIMEray/project_glowing_heart_v2_3_deliberate_core_difference_fixtures.md
+              - v2.4 Difference Packet Gallery: xPRIMEray/project_glowing_heart_v2_4_difference_packet_gallery.md
+              - v2.5 NotComparable Channel: xPRIMEray/project_glowing_heart_v2_5_not_comparable_channel_artifact.md
+              - v2.6 Difference Packet Index: xPRIMEray/project_glowing_heart_v2_6_difference_packet_index.md
+              - v2.7 Gallery Renderer: xPRIMEray/project_glowing_heart_v2_7_gallery_renderer.md
+              - v2.8 Atlas Graph Bridge: xPRIMEray/project_glowing_heart_v2_8_atlas_graph_bridge.md
+              - v2.9 Evidence Map: xPRIMEray/project_glowing_heart_v2_9_evidence_map.md
+              - v2.10 Evidence Map Index: xPRIMEray/project_glowing_heart_v2_10_evidence_map_index.md
+              - v2.11 Evidence Chain Health: xPRIMEray/project_glowing_heart_v2_11_evidence_chain_health.md
+              - v2.12 Preflight: xPRIMEray/project_glowing_heart_v2_12_preflight.md
+              - v2.13 Release Candidate: xPRIMEray/project_glowing_heart_v2_13_release_candidate.md
+          - v3.x:
+              - v3.0 Dashboard Seed: xPRIMEray/project_glowing_heart_v3_0_dashboard_seed.md
+              - v3.1 Dashboard Renderer: xPRIMEray/project_glowing_heart_v3_1_dashboard_renderer.md
 
   - Research:
       - Optical Transport Map: Research/OPTICAL_TRANSPORT_FEATURE_MAP.md
@@ -268,69 +287,9 @@ nav:
       - Visual Milestone Inventory: Research/xprimeray_visual_milestone_inventory.md
       - Feature Maturity Matrix: Research/xprimeray_feature_maturity_matrix.md
       - Curved Ray Transport Model Review: Research/curved_ray_transport_model_review.md
-
-  - Release:
-      - Feature Readiness Audit: Release/FEATURE_READINESS_AUDIT.md
-
-  - MisterY Labs:
-      - Inspiration Cards: MisterYLabs/INSPIRATION_CARD_FEATURE_LINKS.md
-
-  - Core Docs:
-      - System Architecture: architecture.md
-      - Architecture Overview: architecture_overview.md
-      - Architecture Subsystems: architecture/overview.md
-      - Architecture Review: architecture_review_ray_renderer.md
-      - Code Map (Big 12): code_map_big12.md
-      - Glossary: glossary.md
-      - Validation Framework: validation.md
-      - Boundary Layer Fixtures: BoundaryLayerFixtures.md
-      - Specification Index: SPEC_INDEX.md
-      - Architecture Charter: _xPRIMEray_arch_charter_v3-ChatClaudeGrokCoherencePass2.md
-
-  - Physics & Transport:
-      - Metric Parameter Map: metric_null_geodesic_param_map.md
-      - Metric Transport Roadmap: metric_transport_nextgen_roadmap.md
-      - BlackHole Fast Compare (GRIN vs Metric): blackhole_fast_compare.md
-      - Black Hole Optical Texture Reference: black_hole_optical_texture_reference.md
-      - Property Surface: PropertySurface.md
-      - RenderStep Gate Hierarchy: RenderStep_GateHierarchy.md
-      - Overspaces: overspaces.md
-
-  - Specifications — Current:
-      - SceneSnapshot Data Layout: spec_scene_snapshot_data_layout_1.md
-      - Field System (GRIN Evaluation): spec_field_system_grin_1.md
-      - FieldSource3D Canonical Params: spec_fieldsource3d_canonical_params_1.md
-      - Metric Models (GRIN vs Gordon): spec_metric_models_grin_vs_gordon_1.md
-      - Field Extraction Rules: spec_field_extraction_rules_1.md
-      - Curved Ray Segment Integration: spec_curved_ray_chunks_1.md
-      - BVH Acceleration: spec_bvh_acceleration_1.md
-      - Scheduler & Task Graph: spec_scheduler_task_graph_1.md
-      - Rendering Backends: spec_rendering_backends_1.md
-      - Telemetry / Debug / Diagnostics: spec_telemetry_debug_1.md
-      - Ray Transport Interfaces: spec_ray_transport_interfaces_1.md
-      - Research Mode: spec_research_mode_1.md
-      - Wormhole Multi-Scene System: spec_wormhole_scene_graph_1.md
-
-  - Specifications — Legacy:
-      - SceneSnapshot Data Layout (Legacy): spec_scene_snapshot_data_layout.md
-      - Field System GRIN (Legacy): spec_field_system_grin.md
-      - Metric Models (Legacy): spec_metric_models_grin_vs_gordon.md
-      - Field Extraction Rules (Legacy): spec_field_extraction_rules.md
-      - Curved Ray Chunk Integration (Legacy): spec_curved_ray_chunks.md
-      - BVH Acceleration (Legacy): spec_bvh_acceleration.md
-      - Scheduler and Task Graph (Legacy): spec_scheduler_task_graph.md
-
-  - Cathedral Probe:
-      - Architecture Paper: Research/cathedral_probe_architecture.md
-      - Transport Island Microscopy: Research/transport_island_microscopy.md
-      - Visual Milestone Inventory: Research/xprimeray_visual_milestone_inventory.md
-      - Feature Maturity Matrix: Research/xprimeray_feature_maturity_matrix.md
-      - Logo Usage Recommendations: Research/xprimeray_logo_usage_recommendation.md
-      - Scheduler Decorrelation & Local Coherence: Research/scheduler_decorrelation_and_local_coherence.md
-      - Traversal Council Review: Research/architecture_design_council_traversal_review.md
-      - Object-Seeded Null Geodesic Scheduler: Research/object_seeded_null_geodesic_tiling_scheduler.md
-      - Reference Precision Null Geodesic Probe: Research/reference_precision_null_geodesic_probe.md
-      - README & Navigation Proposal: Research/readme_and_navigation_proposal.md
+      - Site & Visual References:
+          - Logo Usage Recommendations: Research/xprimeray_logo_usage_recommendation.md
+          - README & Navigation Proposal: Research/readme_and_navigation_proposal.md
 
   - Papers:
       - Paper Index: papers/index.md
@@ -343,24 +302,74 @@ nav:
       - Paper 004 — Preprint (Markdown): papers/overspace_throat_validation_preprint_v1.md
       - Shared Related Work & Bibliography: papers/shared_related_work.md
       - Figure Captions: papers/figure_captions.md
+      - arXiv Preprint Index: Arxiv/index.md
 
-  - arXiv:
-      - Preprint Index: Arxiv/index.md
-
-  - Validation:
-      - Hermetic Fixture Rule: validation/hermetic_fixture_rule.md
-      - Wormhole Observer Ladder: validation/wormhole_observer_ladder.md
-
-  - Calibration Roadmap:
-      - C1.0 g.1 — Canonical Signature Fields: CalibRoadmap/PatchLogs/C1_0_g_1.md
-      - C1.7 g.X — AutoCal Weak-Signal Stopgap: CalibRoadmap/PatchLogs/C1_7_g_X.md
-
-  - Archive:
-      - Master Charter v0: _Archive/_arch_charter_MASTER_v0-Chat52.md
-      - Master Charter v1 — RESEARCHMODE: _Archive/_arch_charter_MASTER_v1-Alt-RESEARCHMODE.md
-      - Master Charter v1 — Alt Updated: _Archive/_arch_charter_MASTER_v1-Alt-otherUpdated.md
-      - Master Charter v1 — Gravity Baseline: _Archive/_arch_charter_MASTER_v1-Baseline-Gravity.md
-      - Master Charter v2: _Archive/_arch_charter_MASTER_v2-Chat52.md
-      - Charter v3 — Coherence Pass 1: _Archive/_xPRIMEray_arch_charter_MASTER_v3-ChatClaudeCoherencePass1.md
-      - Charter v2 — Claude 4.5: _Archive/_xPRIMEray_arch_charter_v2-Claude45.md
-      - Charter v2 — Claude 4.6: _Archive/_xPRIMEray_arch_charter_v2-Claude46.md
+  - Core Reference:
+      - Orientation:
+          - Transport Observatory: Overview/TRANSPORT_OBSERVATORY_OVERVIEW.md
+          - Feature Index: FEATURE_INDEX.md
+      - System Architecture:
+          - System Architecture: architecture.md
+          - Architecture Overview: architecture_overview.md
+          - Architecture Subsystems: architecture/overview.md
+          - Architecture Review: architecture_review_ray_renderer.md
+      - Core Docs:
+          - Code Map (Big 12): code_map_big12.md
+          - Glossary: glossary.md
+          - Boundary Layer Fixtures: BoundaryLayerFixtures.md
+          - Specification Index: SPEC_INDEX.md
+          - Architecture Charter: _xPRIMEray_arch_charter_v3-ChatClaudeGrokCoherencePass2.md
+      - Validation Framework:
+          - Framework Overview: validation.md
+          - Validation Philosophy: Observatory/validation_philosophy.md
+          - Hermetic Fixture Rule: validation/hermetic_fixture_rule.md
+          - Wormhole Observer Ladder: validation/wormhole_observer_ladder.md
+      - Physics & Transport:
+          - Metric Parameter Map: metric_null_geodesic_param_map.md
+          - Metric Transport Roadmap: metric_transport_nextgen_roadmap.md
+          - BlackHole Fast Compare (GRIN vs Metric): blackhole_fast_compare.md
+          - Black Hole Optical Texture Reference: black_hole_optical_texture_reference.md
+          - Property Surface: PropertySurface.md
+          - RenderStep Gate Hierarchy: RenderStep_GateHierarchy.md
+          - Overspaces: overspaces.md
+      - Specifications — Current:
+          - SceneSnapshot Data Layout: spec_scene_snapshot_data_layout_1.md
+          - Field System (GRIN Evaluation): spec_field_system_grin_1.md
+          - FieldSource3D Canonical Params: spec_fieldsource3d_canonical_params_1.md
+          - Metric Models (GRIN vs Gordon): spec_metric_models_grin_vs_gordon_1.md
+          - Field Extraction Rules: spec_field_extraction_rules_1.md
+          - Curved Ray Segment Integration: spec_curved_ray_chunks_1.md
+          - BVH Acceleration: spec_bvh_acceleration_1.md
+          - Scheduler & Task Graph: spec_scheduler_task_graph_1.md
+          - Rendering Backends: spec_rendering_backends_1.md
+          - Telemetry / Debug / Diagnostics: spec_telemetry_debug_1.md
+          - Ray Transport Interfaces: spec_ray_transport_interfaces_1.md
+          - Research Mode: spec_research_mode_1.md
+          - Wormhole Multi-Scene System: spec_wormhole_scene_graph_1.md
+      - Specifications — Legacy:
+          - SceneSnapshot Data Layout: spec_scene_snapshot_data_layout.md
+          - Field System GRIN: spec_field_system_grin.md
+          - Metric Models: spec_metric_models_grin_vs_gordon.md
+          - Field Extraction Rules: spec_field_extraction_rules.md
+          - Curved Ray Chunk Integration: spec_curved_ray_chunks.md
+          - BVH Acceleration: spec_bvh_acceleration.md
+          - Scheduler and Task Graph: spec_scheduler_task_graph.md
+      - Diagnostics:
+          - Overview: diagnostics/README.md
+          - Curvature Heatmaps: diagnostics/heatmaps.md
+          - Domain Ownership: diagnostics/domain_ownership.md
+          - Phase Coherence: diagnostics/phase_coherence.md
+          - Tile Coherence: diagnostics/tile_coherence.md
+      - Calibration Roadmap:
+          - C1.0 g.1 — Canonical Signature Fields: CalibRoadmap/PatchLogs/C1_0_g_1.md
+          - C1.7 g.X — AutoCal Weak-Signal Stopgap: CalibRoadmap/PatchLogs/C1_7_g_X.md
+      - Feature Readiness Audit: Release/FEATURE_READINESS_AUDIT.md
+      - Archive:
+          - Master Charter v0: _Archive/_arch_charter_MASTER_v0-Chat52.md
+          - Master Charter v1 — RESEARCHMODE: _Archive/_arch_charter_MASTER_v1-Alt-RESEARCHMODE.md
+          - Master Charter v1 — Alt Updated: _Archive/_arch_charter_MASTER_v1-Alt-otherUpdated.md
+          - Master Charter v1 — Gravity Baseline: _Archive/_arch_charter_MASTER_v1-Baseline-Gravity.md
+          - Master Charter v2: _Archive/_arch_charter_MASTER_v2-Chat52.md
+          - Charter v3 — Coherence Pass 1: _Archive/_xPRIMEray_arch_charter_MASTER_v3-ChatClaudeCoherencePass1.md
+          - Charter v2 — Claude 4.5: _Archive/_xPRIMEray_arch_charter_v2-Claude45.md
+          - Charter v2 — Claude 4.6: _Archive/_xPRIMEray_arch_charter_v2-Claude46.md
