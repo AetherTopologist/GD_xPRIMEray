@@ -152,8 +152,8 @@ nav:
           - Optical Observers: Observatory/Observation_Atlas/20_optical_observers.md
           - Scientific Instruments: Observatory/Observation_Atlas/30_scientific_instruments.md
           - Computational Observers: Observatory/Observation_Atlas/40_computational_observers.md
-          - Rendering Ecosystem: Observatory/Observation_Atlas/50_rendering_ecosystem.md
-          - Educational Visualizations: Observatory/Observation_Atlas/60_educational_visualizations.md
+          - Rendering & Engines: Observatory/Observation_Atlas/50_rendering_ecosystem.md
+          - Educational & Interpretive Views: Observatory/Observation_Atlas/60_educational_visualizations.md
           - Future Observatory: Observatory/Observation_Atlas/70_future_observatory.md
           - Atlas Graph:
               - Overview: Observatory/Observation_Atlas/Atlas_Graph/README.md
@@ -190,12 +190,12 @@ nav:
       - Evidence Gallery:
           - v2.4 Difference Packet Gallery: xPRIMEray/project_glowing_heart_v2_4_difference_packet_gallery.md
           - v2.9 Evidence Map: xPRIMEray/project_glowing_heart_v2_9_evidence_map.md
-          - v3.1 Dashboard Renderer: xPRIMEray/project_glowing_heart_v3_1_dashboard_renderer.md
-      - Dashboard:
+          - v2.10 Evidence Map Index: xPRIMEray/project_glowing_heart_v2_10_evidence_map_index.md
+          - Atlas Graph Data Layer: Observatory/Observation_Atlas/Atlas_Graph/atlas_graph_v0_1.md
           - v3.0 Dashboard Seed: xPRIMEray/project_glowing_heart_v3_0_dashboard_seed.md
           - v3.1 Dashboard Renderer: xPRIMEray/project_glowing_heart_v3_1_dashboard_renderer.md
+          - v3.2 Fixture Gallery Index: xPRIMEray/project_glowing_heart_v3_2_fixture_gallery_index.md
       - Health / Preflight:
-          - v2.10 Evidence Map Index: xPRIMEray/project_glowing_heart_v2_10_evidence_map_index.md
           - v2.11 Evidence Chain Health: xPRIMEray/project_glowing_heart_v2_11_evidence_chain_health.md
           - v2.12 Preflight: xPRIMEray/project_glowing_heart_v2_12_preflight.md
           - v2.13 Release Candidate: xPRIMEray/project_glowing_heart_v2_13_release_candidate.md
@@ -237,19 +237,10 @@ nav:
               - v2.1 Channel Registry: xPRIMEray/project_glowing_heart_v2_1_channel_registry.md
               - v2.2 Retained Snapshot Pair: xPRIMEray/project_glowing_heart_v2_2_retained_core_snapshot_pair.md
               - v2.3 Deliberate Core Differences: xPRIMEray/project_glowing_heart_v2_3_deliberate_core_difference_fixtures.md
-              - v2.4 Difference Packet Gallery: xPRIMEray/project_glowing_heart_v2_4_difference_packet_gallery.md
               - v2.5 NotComparable Channel: xPRIMEray/project_glowing_heart_v2_5_not_comparable_channel_artifact.md
               - v2.6 Difference Packet Index: xPRIMEray/project_glowing_heart_v2_6_difference_packet_index.md
               - v2.7 Gallery Renderer: xPRIMEray/project_glowing_heart_v2_7_gallery_renderer.md
               - v2.8 Atlas Graph Bridge: xPRIMEray/project_glowing_heart_v2_8_atlas_graph_bridge.md
-              - v2.9 Evidence Map: xPRIMEray/project_glowing_heart_v2_9_evidence_map.md
-              - v2.10 Evidence Map Index: xPRIMEray/project_glowing_heart_v2_10_evidence_map_index.md
-              - v2.11 Evidence Chain Health: xPRIMEray/project_glowing_heart_v2_11_evidence_chain_health.md
-              - v2.12 Preflight: xPRIMEray/project_glowing_heart_v2_12_preflight.md
-              - v2.13 Release Candidate: xPRIMEray/project_glowing_heart_v2_13_release_candidate.md
-          - v3.x:
-              - v3.0 Dashboard Seed: xPRIMEray/project_glowing_heart_v3_0_dashboard_seed.md
-              - v3.1 Dashboard Renderer: xPRIMEray/project_glowing_heart_v3_1_dashboard_renderer.md
 
   - Research:
       - Optical Transport Map: Research/OPTICAL_TRANSPORT_FEATURE_MAP.md

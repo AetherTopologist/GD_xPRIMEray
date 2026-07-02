@@ -1,0 +1,55 @@
+{
+  "indexId": "xprimeray.glowing_heart.fixture_gallery_index.v0.preview",
+  "title": "Project Glowing Heart Fixture Gallery Index",
+  "version": "v0.preview",
+  "generatedUtc": "2026-07-01T03:39:51Z",
+  "comparisonMode": "core_vs_core",
+  "parityClaim": "NONE",
+  "runtimeExecuted": false,
+  "entries": [
+    {
+      "fixtureFamily": "grin_radial_smoke_family_v1",
+      "fixturePath": "Fixtures/grin_radial_smoke.json",
+      "observerBasis": "Core smoke observer",
+      "channels": [
+        "bend_magnitude_metric",
+        "traversal_step_count"
+      ],
+      "artifactLinks": {
+        "evidenceIndex": "reports/glowing_heart_v2_10_evidence_map_index.preview.json",
+        "dashboardSeed": "reports/glowing_heart_v3_0_dashboard_seed.preview.json",
+        "dashboardMarkdown": "reports/glowing_heart_v3_1_dashboard.preview.md",
+        "healthReport": "reports/glowing_heart_v2_11_evidence_chain_health.preview.md"
+      },
+      "evidenceMap": "reports/glowing_heart_v2_9_evidence_map.svg",
+      "dashboardSvg": "reports/glowing_heart_v3_1_dashboard.svg",
+      "galleryMarkdown": "Docs/xPRIMEray/project_glowing_heart_v2_4_difference_packet_gallery.md",
+      "statusCounts": {
+        "Comparable": 2,
+        "Unknown": 2,
+        "NotComparable": 1,
+        "RequiresTransform": 0
+      },
+      "claimBoundary": [
+        "Core-vs-Core only.",
+        "Not a Godot comparison.",
+        "Not image or pixel comparison.",
+        "Not parity.",
+        "Not physical validation.",
+        "Not renderer equivalence.",
+        "Dashboard seed organizes recorded evidence only; it does not validate scientific correctness."
+      ],
+      "maturity": "Experimental",
+      "curiosityTier": "visitor"
+    }
+  ],
+  "claimBoundary": [
+    "Core-vs-Core recorded artifacts only.",
+    "Not a Godot comparison.",
+    "Not image or pixel comparison.",
+    "Not parity.",
+    "Not physical validation.",
+    "Not renderer equivalence.",
+    "Fixture gallery indexing organizes existing artifacts; it does not establish scientific correctness."
+  ]
+}

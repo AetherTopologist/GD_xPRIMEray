@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://xprimeray.dev/schemas/glowing-heart/fixture-gallery-index/v0.preview.json",
+  "title": "Project Glowing Heart Fixture Gallery Index v0 Preview",
+  "description": "A discovery index for recorded fixture-family artifacts. It does not establish comparison eligibility or scientific correctness.",
+  "type": "object",
+  "required": [
+    "indexId", "title", "version", "generatedUtc", "comparisonMode",
+    "parityClaim", "runtimeExecuted", "entries", "claimBoundary"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "claimBoundary": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "statusCounts": {
+      "type": "object",
+      "required": ["Comparable", "Unknown", "NotComparable", "RequiresTransform"],
+      "additionalProperties": false,
+      "properties": {
+        "Comparable": { "type": "integer", "minimum": 0 },
+        "Unknown": { "type": "integer", "minimum": 0 },
+        "NotComparable": { "type": "integer", "minimum": 0 },
+        "RequiresTransform": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "artifactLinks": {
+      "type": "object",
+      "required": ["evidenceIndex", "dashboardSeed", "dashboardMarkdown", "healthReport"],
+      "additionalProperties": false,
+      "properties": {
+        "evidenceIndex": { "type": "string", "pattern": "^reports/" },
+        "dashboardSeed": { "type": "string", "pattern": "^reports/" },
+        "dashboardMarkdown": { "type": "string", "pattern": "^reports/" },
+        "healthReport": { "type": "string", "pattern": "^reports/" }
+      }
+    },
+    "entry": {
+      "type": "object",
+      "required": [
+        "fixtureFamily", "fixturePath", "observerBasis", "channels", "artifactLinks",
+        "evidenceMap", "dashboardSvg", "galleryMarkdown", "statusCounts",
+        "claimBoundary", "maturity", "curiosityTier"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "fixtureFamily": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "fixturePath": { "type": "string", "pattern": "^Fixtures/" },
+        "observerBasis": { "type": "string", "minLength": 1 },
+        "channels": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "artifactLinks": { "$ref": "#/$defs/artifactLinks" },
+        "evidenceMap": { "type": "string", "pattern": "^reports/" },
+        "dashboardSvg": { "type": "string", "pattern": "^reports/" },
+        "galleryMarkdown": { "type": "string", "pattern": "^Docs/" },
+        "statusCounts": { "$ref": "#/$defs/statusCounts" },
+        "claimBoundary": { "$ref": "#/$defs/claimBoundary" },
+        "maturity": {
+          "type": "string",
+          "enum": ["Vision", "Prototype", "Experimental", "Internal Validation", "Public Demo", "Research Ready", "Production Ready"]
+        },
+        "curiosityTier": {
+          "type": "string",
+          "enum": ["visitor", "explorer", "engineer", "developer"]
+        }
+      }
+    }
+  },
+  "properties": {
+    "indexId": { "const": "xprimeray.glowing_heart.fixture_gallery_index.v0.preview" },
+    "title": { "type": "string", "minLength": 1 },
+    "version": { "const": "v0.preview" },
+    "generatedUtc": { "type": "string", "format": "date-time" },
+    "comparisonMode": { "const": "core_vs_core" },
+    "parityClaim": { "const": "NONE" },
+    "runtimeExecuted": { "const": false },
+    "entries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/entry" },
+      "minItems": 1
+    },
+    "claimBoundary": { "$ref": "#/$defs/claimBoundary" }
+  }
+}
