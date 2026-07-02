@@ -242,6 +242,14 @@ nav:
               - v2.7 Gallery Renderer: xPRIMEray/project_glowing_heart_v2_7_gallery_renderer.md
               - v2.8 Atlas Graph Bridge: xPRIMEray/project_glowing_heart_v2_8_atlas_graph_bridge.md
 
+  - Project Optical Closure:
+      - Overview: xPRIMEray/optical_closure_overview.md
+      - Architecture Safety Audit: xPRIMEray/project_oc_001_architecture_audit.md
+      - OC-001 Minimal Optical Closure: xPRIMEray/oc_001_fixture.md
+      - Epistemic Airlock: xPRIMEray/optical_closure_epistemic_airlock.md
+      - Glossary: xPRIMEray/optical_closure_glossary.md
+      - Roadmap: xPRIMEray/optical_closure_roadmap.md
+
   - Research:
       - Optical Transport Map: Research/OPTICAL_TRANSPORT_FEATURE_MAP.md
       - Cathedral Probe Architecture: Research/cathedral_probe_architecture.md
