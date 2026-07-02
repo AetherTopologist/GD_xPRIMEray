@@ -1,0 +1,396 @@
+{
+  "reportId": "xprimeray.glowing_heart.evidence_chain_health.v0.preview",
+  "title": "Project Glowing Heart Evidence Chain Health",
+  "version": "v0.preview",
+  "generatedUtc": "2026-07-01T03:39:51Z",
+  "overallStatus": "PASS",
+  "checkGroups": [
+    {
+      "id": "difference_packet_index",
+      "status": "PASS",
+      "checkCount": 10,
+      "errorCount": 0,
+      "warningCount": 0
+    },
+    {
+      "id": "atlas_graph",
+      "status": "PASS",
+      "checkCount": 12,
+      "errorCount": 0,
+      "warningCount": 0
+    },
+    {
+      "id": "evidence_map_svg",
+      "status": "PASS",
+      "checkCount": 5,
+      "errorCount": 0,
+      "warningCount": 0
+    },
+    {
+      "id": "gallery_markdown",
+      "status": "PASS",
+      "checkCount": 4,
+      "errorCount": 0,
+      "warningCount": 0
+    },
+    {
+      "id": "evidence_map_index",
+      "status": "PASS",
+      "checkCount": 12,
+      "errorCount": 0,
+      "warningCount": 0
+    },
+    {
+      "id": "cross_chain",
+      "status": "PASS",
+      "checkCount": 3,
+      "errorCount": 0,
+      "warningCount": 0
+    }
+  ],
+  "checks": [
+    {
+      "group": "difference_packet_index",
+      "severity": "info",
+      "message": "JSON parses as an object.",
+      "artifactPath": "reports/glowing_heart_v2_6_difference_packet_index.preview.json"
+    },
+    {
+      "group": "difference_packet_index",
+      "severity": "info",
+      "message": "JSON parses as an object.",
+      "artifactPath": "schemas/glowing_heart/difference_packet_index.v0.preview.json"
+    },
+    {
+      "group": "difference_packet_index",
+      "severity": "info",
+      "message": "Validates against schemas/glowing_heart/difference_packet_index.v0.preview.json.",
+      "artifactPath": "reports/glowing_heart_v2_6_difference_packet_index.preview.json"
+    },
+    {
+      "group": "difference_packet_index",
+      "severity": "info",
+      "message": "Exhibit count is 5; expected 5.",
+      "artifactPath": "reports/glowing_heart_v2_6_difference_packet_index.preview.json"
+    },
+    {
+      "group": "difference_packet_index",
+      "severity": "info",
+      "message": "Entry fields and claim guards pass.",
+      "artifactPath": "reports/glowing_heart_v2_6_difference_packet_index.preview.json",
+      "exhibitId": "comparable_zero"
+    },
+    {
+      "group": "difference_packet_index",
+      "severity": "info",
+      "message": "Entry fields and claim guards pass.",
+      "artifactPath": "reports/glowing_heart_v2_6_difference_packet_index.preview.json",
+      "exhibitId": "comparable_nonzero"
+    },
+    {
+      "group": "difference_packet_index",
+      "severity": "info",
+      "message": "Entry fields and claim guards pass.",
+      "artifactPath": "reports/glowing_heart_v2_6_difference_packet_index.preview.json",
+      "exhibitId": "unknown_observer_mismatch"
+    },
+    {
+      "group": "difference_packet_index",
+      "severity": "info",
+      "message": "Entry fields and claim guards pass.",
+      "artifactPath": "reports/glowing_heart_v2_6_difference_packet_index.preview.json",
+      "exhibitId": "unknown_coordinate_grid_mismatch"
+    },
+    {
+      "group": "difference_packet_index",
+      "severity": "info",
+      "message": "Entry fields and claim guards pass.",
+      "artifactPath": "reports/glowing_heart_v2_6_difference_packet_index.preview.json",
+      "exhibitId": "not_comparable_channel"
+    },
+    {
+      "group": "difference_packet_index",
+      "severity": "info",
+      "message": "Status counts: {'Comparable': 2, 'Unknown': 2, 'NotComparable': 1, 'RequiresTransform': 0}.",
+      "artifactPath": "reports/glowing_heart_v2_6_difference_packet_index.preview.json"
+    },
+    {
+      "group": "atlas_graph",
+      "severity": "info",
+      "message": "JSON parses as an object.",
+      "artifactPath": "Docs/Observatory/Observation_Atlas/Atlas_Graph/glowing_heart_difference_packet_exhibits.graph.json"
+    },
+    {
+      "group": "atlas_graph",
+      "severity": "info",
+      "message": "Atlas Graph shared validation passed.",
+      "artifactPath": "Docs/Observatory/Observation_Atlas/Atlas_Graph/glowing_heart_difference_packet_exhibits.graph.json"
+    },
+    {
+      "group": "atlas_graph",
+      "severity": "info",
+      "message": "graphId is 'glowing_heart.difference_packet_exhibits'.",
+      "artifactPath": "Docs/Observatory/Observation_Atlas/Atlas_Graph/glowing_heart_difference_packet_exhibits.graph.json"
+    },
+    {
+      "group": "atlas_graph",
+      "severity": "info",
+      "message": "Project/root node count is 1; expected 1.",
+      "artifactPath": "Docs/Observatory/Observation_Atlas/Atlas_Graph/glowing_heart_difference_packet_exhibits.graph.json"
+    },
+    {
+      "group": "atlas_graph",
+      "severity": "info",
+      "message": "Artifact node count is 5; expected 5.",
+      "artifactPath": "Docs/Observatory/Observation_Atlas/Atlas_Graph/glowing_heart_difference_packet_exhibits.graph.json"
+    },
+    {
+      "group": "atlas_graph",
+      "severity": "info",
+      "message": "Graph exhibit IDs match the Difference Packet Index.",
+      "artifactPath": "Docs/Observatory/Observation_Atlas/Atlas_Graph/glowing_heart_difference_packet_exhibits.graph.json"
+    },
+    {
+      "group": "atlas_graph",
+      "severity": "info",
+      "message": "Status, rule, metrics, and claim boundary match the source entry.",
+      "artifactPath": "Docs/Observatory/Observation_Atlas/Atlas_Graph/glowing_heart_difference_packet_exhibits.graph.json",
+      "exhibitId": "comparable_nonzero"
+    },
+    {
+      "group": "atlas_graph",
+      "severity": "info",
+      "message": "Status, rule, metrics, and claim boundary match the source entry.",
+      "artifactPath": "Docs/Observatory/Observation_Atlas/Atlas_Graph/glowing_heart_difference_packet_exhibits.graph.json",
+      "exhibitId": "comparable_zero"
+    },
+    {
+      "group": "atlas_graph",
+      "severity": "info",
+      "message": "Status, rule, metrics, and claim boundary match the source entry.",
+      "artifactPath": "Docs/Observatory/Observation_Atlas/Atlas_Graph/glowing_heart_difference_packet_exhibits.graph.json",
+      "exhibitId": "not_comparable_channel"
+    },
+    {
+      "group": "atlas_graph",
+      "severity": "info",
+      "message": "Status, rule, metrics, and claim boundary match the source entry.",
+      "artifactPath": "Docs/Observatory/Observation_Atlas/Atlas_Graph/glowing_heart_difference_packet_exhibits.graph.json",
+      "exhibitId": "unknown_coordinate_grid_mismatch"
+    },
+    {
+      "group": "atlas_graph",
+      "severity": "info",
+      "message": "Status, rule, metrics, and claim boundary match the source entry.",
+      "artifactPath": "Docs/Observatory/Observation_Atlas/Atlas_Graph/glowing_heart_difference_packet_exhibits.graph.json",
+      "exhibitId": "unknown_observer_mismatch"
+    },
+    {
+      "group": "atlas_graph",
+      "severity": "info",
+      "message": "Root-to-exhibit edges: 5; inter-exhibit edges: 0.",
+      "artifactPath": "Docs/Observatory/Observation_Atlas/Atlas_Graph/glowing_heart_difference_packet_exhibits.graph.json"
+    },
+    {
+      "group": "evidence_map_svg",
+      "severity": "info",
+      "message": "SVG parses as XML.",
+      "artifactPath": "reports/glowing_heart_v2_9_evidence_map.svg"
+    },
+    {
+      "group": "evidence_map_svg",
+      "severity": "info",
+      "message": "viewBox is '0 0 1400 900'.",
+      "artifactPath": "reports/glowing_heart_v2_9_evidence_map.svg"
+    },
+    {
+      "group": "evidence_map_svg",
+      "severity": "info",
+      "message": "Found 5 exhibit groups; IDs match source index.",
+      "artifactPath": "reports/glowing_heart_v2_9_evidence_map.svg"
+    },
+    {
+      "group": "evidence_map_svg",
+      "severity": "info",
+      "message": "Status, claim-boundary, and exhibit title labels are present.",
+      "artifactPath": "reports/glowing_heart_v2_9_evidence_map.svg"
+    },
+    {
+      "group": "evidence_map_svg",
+      "severity": "info",
+      "message": "Scripts: 0; external hrefs: 0.",
+      "artifactPath": "reports/glowing_heart_v2_9_evidence_map.svg"
+    },
+    {
+      "group": "gallery_markdown",
+      "severity": "info",
+      "message": "Markdown artifact exists and is readable.",
+      "artifactPath": "reports/glowing_heart_v2_4_difference_packet_gallery.preview.md"
+    },
+    {
+      "group": "gallery_markdown",
+      "severity": "info",
+      "message": "Heading, generator provenance, exhibits, status counts, and Case E state are current.",
+      "artifactPath": "reports/glowing_heart_v2_4_difference_packet_gallery.preview.md"
+    },
+    {
+      "group": "gallery_markdown",
+      "severity": "info",
+      "message": "Markdown artifact exists and is readable.",
+      "artifactPath": "Docs/xPRIMEray/project_glowing_heart_v2_4_difference_packet_gallery.md"
+    },
+    {
+      "group": "gallery_markdown",
+      "severity": "info",
+      "message": "Heading, generator provenance, exhibits, status counts, and Case E state are current.",
+      "artifactPath": "Docs/xPRIMEray/project_glowing_heart_v2_4_difference_packet_gallery.md"
+    },
+    {
+      "group": "evidence_map_index",
+      "severity": "info",
+      "message": "JSON parses as an object.",
+      "artifactPath": "reports/glowing_heart_v2_10_evidence_map_index.preview.json"
+    },
+    {
+      "group": "evidence_map_index",
+      "severity": "info",
+      "message": "JSON parses as an object.",
+      "artifactPath": "schemas/glowing_heart/evidence_map_index.v0.preview.json"
+    },
+    {
+      "group": "evidence_map_index",
+      "severity": "info",
+      "message": "Validates against schemas/glowing_heart/evidence_map_index.v0.preview.json.",
+      "artifactPath": "reports/glowing_heart_v2_10_evidence_map_index.preview.json"
+    },
+    {
+      "group": "evidence_map_index",
+      "severity": "info",
+      "message": "All recorded source and generated artifact paths are canonical.",
+      "artifactPath": "reports/glowing_heart_v2_10_evidence_map_index.preview.json"
+    },
+    {
+      "group": "evidence_map_index",
+      "severity": "info",
+      "message": "Fixed claim guards hold.",
+      "artifactPath": "reports/glowing_heart_v2_10_evidence_map_index.preview.json"
+    },
+    {
+      "group": "evidence_map_index",
+      "severity": "info",
+      "message": "Status counts: {'Comparable': 2, 'Unknown': 2, 'NotComparable': 1, 'RequiresTransform': 0}.",
+      "artifactPath": "reports/glowing_heart_v2_10_evidence_map_index.preview.json"
+    },
+    {
+      "group": "evidence_map_index",
+      "severity": "info",
+      "message": "Evidence Map Index exhibit IDs match packet and graph IDs.",
+      "artifactPath": "reports/glowing_heart_v2_10_evidence_map_index.preview.json"
+    },
+    {
+      "group": "evidence_map_index",
+      "severity": "info",
+      "message": "Status, rule, and claim boundary match source artifacts.",
+      "artifactPath": "reports/glowing_heart_v2_10_evidence_map_index.preview.json",
+      "exhibitId": "comparable_nonzero"
+    },
+    {
+      "group": "evidence_map_index",
+      "severity": "info",
+      "message": "Status, rule, and claim boundary match source artifacts.",
+      "artifactPath": "reports/glowing_heart_v2_10_evidence_map_index.preview.json",
+      "exhibitId": "comparable_zero"
+    },
+    {
+      "group": "evidence_map_index",
+      "severity": "info",
+      "message": "Status, rule, and claim boundary match source artifacts.",
+      "artifactPath": "reports/glowing_heart_v2_10_evidence_map_index.preview.json",
+      "exhibitId": "not_comparable_channel"
+    },
+    {
+      "group": "evidence_map_index",
+      "severity": "info",
+      "message": "Status, rule, and claim boundary match source artifacts.",
+      "artifactPath": "reports/glowing_heart_v2_10_evidence_map_index.preview.json",
+      "exhibitId": "unknown_coordinate_grid_mismatch"
+    },
+    {
+      "group": "evidence_map_index",
+      "severity": "info",
+      "message": "Status, rule, and claim boundary match source artifacts.",
+      "artifactPath": "reports/glowing_heart_v2_10_evidence_map_index.preview.json",
+      "exhibitId": "unknown_observer_mismatch"
+    },
+    {
+      "group": "cross_chain",
+      "severity": "info",
+      "message": "The same five exhibit IDs occur across structured indexes, graph, and SVG.",
+      "artifactPath": "reports/glowing_heart_v2_10_evidence_map_index.preview.json"
+    },
+    {
+      "group": "cross_chain",
+      "severity": "info",
+      "message": "Standalone lowercase fixture paths: none.",
+      "artifactPath": "reports/glowing_heart_v2_6_difference_packet_index.preview.json"
+    },
+    {
+      "group": "cross_chain",
+      "severity": "info",
+      "message": "Durable /tmp paths: none; lastVerifiedOutputPath is treated as a non-durable trace.",
+      "artifactPath": "reports/glowing_heart_v2_6_difference_packet_index.preview.json"
+    }
+  ],
+  "exhibitConsistency": [
+    {
+      "id": "comparable_nonzero",
+      "title": "Comparable Non-Zero",
+      "status": "Comparable",
+      "rule": "bend_magnitude_same_observer",
+      "consistent": true
+    },
+    {
+      "id": "comparable_zero",
+      "title": "Comparable Zero",
+      "status": "Comparable",
+      "rule": "bend_magnitude_same_observer",
+      "consistent": true
+    },
+    {
+      "id": "not_comparable_channel",
+      "title": "NotComparable Channel",
+      "status": "NotComparable",
+      "rule": "traversal_steps_vs_bend_not_comparable",
+      "consistent": true
+    },
+    {
+      "id": "unknown_coordinate_grid_mismatch",
+      "title": "Unknown Coordinate-Grid Mismatch",
+      "status": "Unknown",
+      "rule": "bend_magnitude_context_mismatch",
+      "consistent": true
+    },
+    {
+      "id": "unknown_observer_mismatch",
+      "title": "Unknown Observer Mismatch",
+      "status": "Unknown",
+      "rule": "bend_magnitude_context_mismatch",
+      "consistent": true
+    }
+  ],
+  "summary": {
+    "total": 46,
+    "info": 46,
+    "warning": 0,
+    "error": 0
+  },
+  "claimBoundary": [
+    "Core-vs-Core only.",
+    "Not a Godot comparison.",
+    "Not image or pixel comparison.",
+    "Not parity.",
+    "Not physical validation.",
+    "Not renderer equivalence.",
+    "Health check validates artifact synchronization, not scientific correctness."
+  ]
+}
