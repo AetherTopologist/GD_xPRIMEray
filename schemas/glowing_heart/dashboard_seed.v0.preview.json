@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://xprimeray.dev/schemas/glowing-heart/dashboard-seed/v0.preview.json",
+  "title": "Project Glowing Heart Dashboard Seed v0 Preview",
+  "description": "A grouping contract for recorded Glowing Heart evidence. It does not establish scientific correctness, parity, or renderer equivalence.",
+  "type": "object",
+  "required": [
+    "dashboardId", "title", "version", "generatedUtc", "sourceReleaseCandidate",
+    "comparisonMode", "parityClaim", "runtimeExecuted", "claimBoundary", "groups"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "status": {
+      "type": "string",
+      "enum": ["Comparable", "Unknown", "NotComparable", "RequiresTransform"]
+    },
+    "claimBoundary": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "metrics": {
+      "type": "number",
+      "minimum": 0
+    },
+    "exhibit": {
+      "type": "object",
+      "required": [
+        "exhibitId", "title", "status", "rule", "leftFixture", "rightFixture",
+        "leftChannel", "rightChannel", "countCompared", "maxAbsDifference",
+        "meanAbsDifference", "nonZeroCount", "claimBoundary"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "exhibitId": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "title": { "type": "string", "minLength": 1 },
+        "status": { "$ref": "#/$defs/status" },
+        "rule": { "type": "string", "minLength": 1 },
+        "leftFixture": { "type": "string", "pattern": "^Fixtures/" },
+        "rightFixture": { "type": "string", "pattern": "^Fixtures/" },
+        "leftChannel": { "type": "string", "minLength": 1 },
+        "rightChannel": { "type": "string", "minLength": 1 },
+        "countCompared": { "type": "integer", "minimum": 0 },
+        "maxAbsDifference": { "$ref": "#/$defs/metrics" },
+        "meanAbsDifference": { "$ref": "#/$defs/metrics" },
+        "nonZeroCount": { "type": "integer", "minimum": 0 },
+        "claimBoundary": { "$ref": "#/$defs/claimBoundary" }
+      }
+    },
+    "statusCounts": {
+      "type": "object",
+      "required": ["Comparable", "Unknown", "NotComparable", "RequiresTransform"],
+      "additionalProperties": false,
+      "properties": {
+        "Comparable": { "type": "integer", "minimum": 0 },
+        "Unknown": { "type": "integer", "minimum": 0 },
+        "NotComparable": { "type": "integer", "minimum": 0 },
+        "RequiresTransform": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "group": {
+      "type": "object",
+      "required": [
+        "groupId", "title", "observerBasis", "fixtureFamily", "fixturePaths",
+        "channelIds", "sourceIndexPath", "sourceGraphPath", "sourceEvidenceMapPath",
+        "sourceGalleryPath", "statusCounts", "exhibits"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "groupId": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "title": { "type": "string", "minLength": 1 },
+        "observerBasis": { "type": "string", "minLength": 1 },
+        "fixtureFamily": { "type": "string", "minLength": 1 },
+        "fixturePaths": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^Fixtures/" },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "channelIds": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "sourceIndexPath": { "type": "string", "pattern": "^reports/" },
+        "sourceGraphPath": { "type": "string", "pattern": "^Docs/" },
+        "sourceEvidenceMapPath": { "type": "string", "pattern": "^reports/" },
+        "sourceGalleryPath": { "type": "string", "pattern": "^Docs/" },
+        "statusCounts": { "$ref": "#/$defs/statusCounts" },
+        "exhibits": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/exhibit" },
+          "minItems": 1
+        }
+      }
+    }
+  },
+  "properties": {
+    "dashboardId": { "const": "xprimeray.glowing_heart.observer_fixture_dashboard_seed.v0.preview" },
+    "title": { "type": "string", "minLength": 1 },
+    "version": { "const": "v0.preview" },
+    "generatedUtc": { "type": "string", "format": "date-time" },
+    "sourceReleaseCandidate": { "type": "string", "pattern": "^Docs/" },
+    "comparisonMode": { "const": "core_vs_core" },
+    "parityClaim": { "const": "NONE" },
+    "runtimeExecuted": { "const": false },
+    "claimBoundary": { "$ref": "#/$defs/claimBoundary" },
+    "groups": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/group" },
+      "minItems": 1
+    }
+  }
+}

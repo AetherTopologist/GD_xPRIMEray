@@ -1,0 +1,154 @@
+{
+  "dashboardId": "xprimeray.glowing_heart.observer_fixture_dashboard_seed.v0.preview",
+  "title": "Project Glowing Heart Observer Fixture Dashboard Seed",
+  "version": "v0.preview",
+  "generatedUtc": "2026-07-01T03:39:51Z",
+  "sourceReleaseCandidate": "Docs/xPRIMEray/project_glowing_heart_v2_13_release_candidate.md",
+  "comparisonMode": "core_vs_core",
+  "parityClaim": "NONE",
+  "runtimeExecuted": false,
+  "claimBoundary": [
+    "Core-vs-Core only.",
+    "Not a Godot comparison.",
+    "Not image or pixel comparison.",
+    "Not parity.",
+    "Not physical validation.",
+    "Not renderer equivalence.",
+    "Dashboard seed organizes recorded evidence only; it does not validate scientific correctness."
+  ],
+  "groups": [
+    {
+      "groupId": "core_smoke_observer_grin_radial_smoke_family_v1",
+      "title": "Core Smoke Observer / GRIN Radial Smoke Family v1",
+      "observerBasis": "Core smoke observer",
+      "fixtureFamily": "grin_radial_smoke_family_v1",
+      "fixturePaths": [
+        "Fixtures/grin_radial_smoke.json",
+        "Fixtures/grin_radial_smoke_variant.json",
+        "Fixtures/grin_radial_smoke_observer_variant.json",
+        "Fixtures/grin_radial_smoke_resolution_variant.json"
+      ],
+      "channelIds": [
+        "bend_magnitude_metric",
+        "traversal_step_count"
+      ],
+      "sourceIndexPath": "reports/glowing_heart_v2_6_difference_packet_index.preview.json",
+      "sourceGraphPath": "Docs/Observatory/Observation_Atlas/Atlas_Graph/glowing_heart_difference_packet_exhibits.graph.json",
+      "sourceEvidenceMapPath": "reports/glowing_heart_v2_9_evidence_map.svg",
+      "sourceGalleryPath": "Docs/xPRIMEray/project_glowing_heart_v2_4_difference_packet_gallery.md",
+      "statusCounts": {
+        "Comparable": 2,
+        "Unknown": 2,
+        "NotComparable": 1,
+        "RequiresTransform": 0
+      },
+      "exhibits": [
+        {
+          "exhibitId": "comparable_zero",
+          "title": "Comparable Zero",
+          "status": "Comparable",
+          "rule": "bend_magnitude_same_observer",
+          "leftFixture": "Fixtures/grin_radial_smoke.json",
+          "rightFixture": "Fixtures/grin_radial_smoke.json",
+          "leftChannel": "bend_magnitude_metric",
+          "rightChannel": "bend_magnitude_metric",
+          "countCompared": 880,
+          "maxAbsDifference": 0,
+          "meanAbsDifference": 0,
+          "nonZeroCount": 0,
+          "claimBoundary": [
+            "Core-vs-Core only.",
+            "Not a Godot comparison.",
+            "Not image or pixel comparison.",
+            "Not parity.",
+            "Zero difference does not establish equivalence with another runtime or measurement system."
+          ]
+        },
+        {
+          "exhibitId": "comparable_nonzero",
+          "title": "Comparable Non-Zero",
+          "status": "Comparable",
+          "rule": "bend_magnitude_same_observer",
+          "leftFixture": "Fixtures/grin_radial_smoke.json",
+          "rightFixture": "Fixtures/grin_radial_smoke_variant.json",
+          "leftChannel": "bend_magnitude_metric",
+          "rightChannel": "bend_magnitude_metric",
+          "countCompared": 880,
+          "maxAbsDifference": 0.00031490779,
+          "meanAbsDifference": 0.00019547191841352225,
+          "nonZeroCount": 872,
+          "claimBoundary": [
+            "Core-vs-Core only.",
+            "Not a Godot comparison.",
+            "Not image or pixel comparison.",
+            "Not parity.",
+            "Non-zero difference demonstrates numeric distinction between retained Core artifacts only."
+          ]
+        },
+        {
+          "exhibitId": "unknown_observer_mismatch",
+          "title": "Unknown Observer Mismatch",
+          "status": "Unknown",
+          "rule": "bend_magnitude_context_mismatch",
+          "leftFixture": "Fixtures/grin_radial_smoke.json",
+          "rightFixture": "Fixtures/grin_radial_smoke_observer_variant.json",
+          "leftChannel": "bend_magnitude_metric",
+          "rightChannel": "bend_magnitude_metric",
+          "countCompared": 0,
+          "maxAbsDifference": 0,
+          "meanAbsDifference": 0,
+          "nonZeroCount": 0,
+          "claimBoundary": [
+            "Core-vs-Core only.",
+            "Not a Godot comparison.",
+            "Not image or pixel comparison.",
+            "Not parity.",
+            "Unknown means eligibility was not established."
+          ]
+        },
+        {
+          "exhibitId": "unknown_coordinate_grid_mismatch",
+          "title": "Unknown Coordinate-Grid Mismatch",
+          "status": "Unknown",
+          "rule": "bend_magnitude_context_mismatch",
+          "leftFixture": "Fixtures/grin_radial_smoke.json",
+          "rightFixture": "Fixtures/grin_radial_smoke_resolution_variant.json",
+          "leftChannel": "bend_magnitude_metric",
+          "rightChannel": "bend_magnitude_metric",
+          "countCompared": 0,
+          "maxAbsDifference": 0,
+          "meanAbsDifference": 0,
+          "nonZeroCount": 0,
+          "claimBoundary": [
+            "Core-vs-Core only.",
+            "Not a Godot comparison.",
+            "Not image or pixel comparison.",
+            "Not parity.",
+            "Unknown means eligibility was not established."
+          ]
+        },
+        {
+          "exhibitId": "not_comparable_channel",
+          "title": "NotComparable Channel",
+          "status": "NotComparable",
+          "rule": "traversal_steps_vs_bend_not_comparable",
+          "leftFixture": "Fixtures/grin_radial_smoke.json",
+          "rightFixture": "Fixtures/grin_radial_smoke.json",
+          "leftChannel": "bend_magnitude_metric",
+          "rightChannel": "traversal_step_count",
+          "countCompared": 0,
+          "maxAbsDifference": 0,
+          "meanAbsDifference": 0,
+          "nonZeroCount": 0,
+          "claimBoundary": [
+            "Core-vs-Core only.",
+            "Not a Godot comparison.",
+            "Not image or pixel comparison.",
+            "Not parity.",
+            "No bend data was relabeled as traversal steps."
+          ]
+        }
+      ]
+    }
+  ]
+}

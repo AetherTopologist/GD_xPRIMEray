@@ -4,19 +4,19 @@ Overall status: **PASS**
 
 Command: `/usr/bin/python3 tools/glowing_heart_preflight.py`
 
-Total duration: 17.27 seconds
+Total duration: 16.55 seconds
 
 ## Sections
 
 | Section | Status | Duration |
 |---|---|---:|
-| Python syntax | `PASS` | 0.04s |
+| Python syntax | `PASS` | 0.03s |
 | JSON syntax | `PASS` | 0.00s |
 | Atlas Graph validation | `PASS` | 0.02s |
-| Evidence Chain health | `PASS` | 0.09s |
+| Evidence Chain health | `PASS` | 0.08s |
 | SVG safety | `PASS` | 0.00s |
-| .NET builds | `PASS` | 2.08s |
-| MkDocs | `PASS` | 15.04s |
+| .NET builds | `PASS` | 1.90s |
+| MkDocs | `PASS` | 14.52s |
 
 ## Failure Details
 

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-labelledby="dashboard-title dashboard-desc">
+<title id="dashboard-title">Glowing Heart Observer Fixture Dashboard</title>
+<desc id="dashboard-desc">One Core smoke observer group with five recorded comparison-decision exhibits.</desc>
+<rect width="1400" height="900" fill="#f8fafc"/>
+<text x="36" y="38" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#475569">PROJECT GLOWING HEART · DASHBOARD SEED VIEW</text>
+<text x="36" y="78" font-family="system-ui, sans-serif" font-size="28" font-weight="700" fill="#0f172a">Project Glowing Heart Observer Fixture Dashboard Seed</text>
+<g id="core_smoke_observer_grin_radial_smoke_family_v1" data-node-kind="dashboard-group">
+<rect x="36" y="105" width="1328" height="178" rx="7" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+<text x="60" y="143" font-family="system-ui, sans-serif" font-size="20" font-weight="700" fill="#0f172a">Core Smoke Observer / GRIN Radial Smoke Family v1</text>
+<text x="60" y="177" font-family="system-ui, sans-serif" font-size="13" fill="#475569">Observer: Core smoke observer</text>
+<text x="60" y="202" font-family="system-ui, sans-serif" font-size="13" fill="#475569">Fixture family: grin_radial_smoke_family_v1</text>
+<text x="60" y="227" font-family="system-ui, sans-serif" font-size="13" fill="#475569">Channels: bend_magnitude_metric · traversal_step_count</text>
+<rect x="760" y="160" width="135" height="48" rx="5" fill="#dcfce7" stroke="#86efac"/>
+<text x="827.5" y="180" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#166534">Comparable</text>
+<text x="827.5" y="199" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#166534">2</text>
+<rect x="905" y="160" width="135" height="48" rx="5" fill="#fef3c7" stroke="#fcd34d"/>
+<text x="972.5" y="180" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#92400e">Unknown</text>
+<text x="972.5" y="199" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#92400e">2</text>
+<rect x="1050" y="160" width="135" height="48" rx="5" fill="#fee2e2" stroke="#fca5a5"/>
+<text x="1117.5" y="180" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#7f1d1d">NotComparable</text>
+<text x="1117.5" y="199" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#7f1d1d">1</text>
+<rect x="1195" y="160" width="135" height="48" rx="5" fill="#dbeafe" stroke="#93c5fd"/>
+<text x="1262.5" y="180" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#1e40af">RequiresTransform</text>
+<text x="1262.5" y="199" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#1e40af">0</text>
+<rect x="760" y="226" width="570" height="34" rx="4" fill="#f1f5f9" stroke="#cbd5e1"/>
+<text x="1045" y="248" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#334155">CLAIM-BOUNDED · RECORDED EVIDENCE ONLY</text>
+</g>
+<g id="comparable_zero" data-node-kind="exhibit" data-status="Comparable">
+<desc>Core-vs-Core only. Not a Godot comparison. Not image or pixel comparison. Not parity. Zero difference does not establish equivalence with another runtime or measurement system.</desc>
+<rect x="25" y="335" width="250" height="430" rx="7" fill="#ffffff" stroke="#86efac" stroke-width="2"/>
+<rect x="41" y="353" width="218" height="32" rx="4" fill="#dcfce7"/>
+<text x="150" y="375" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#166534">Comparable</text>
+<text x="41" y="417" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#0f172a">Comparable Zero</text>
+<text x="41" y="475" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#64748b">RULE</text>
+<text x="41" y="494" font-family="ui-monospace, monospace" font-size="11" fill="#334155">bend_magnitude_same_observer</text>
+<line x1="41" y1="555" x2="259" y2="555" stroke="#e2e8f0"/>
+<text x="41" y="582" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#64748b">SEED METRICS</text>
+<text x="41" y="608" font-family="system-ui, sans-serif" font-size="13" font-weight="650" fill="#0f172a">880 compared / 0 non-zero</text>
+<text x="41" y="632" font-family="system-ui, sans-serif" font-size="11" fill="#475569">max 0 / mean 0</text>
+<text x="41" y="672" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">bend_magnitude_metric</text>
+<text x="41" y="690" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">to bend_magnitude_metric</text>
+<rect x="41" y="709" width="218" height="34" rx="4" fill="#f1f5f9" stroke="#cbd5e1"/>
+<text x="150" y="731" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#334155">CLAIM BOUNDARY RECORDED</text>
+</g>
+<g id="comparable_nonzero" data-node-kind="exhibit" data-status="Comparable">
+<desc>Core-vs-Core only. Not a Godot comparison. Not image or pixel comparison. Not parity. Non-zero difference demonstrates numeric distinction between retained Core artifacts only.</desc>
+<rect x="300" y="335" width="250" height="430" rx="7" fill="#ffffff" stroke="#86efac" stroke-width="2"/>
+<rect x="316" y="353" width="218" height="32" rx="4" fill="#dcfce7"/>
+<text x="425" y="375" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#166534">Comparable</text>
+<text x="316" y="417" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#0f172a">Comparable Non-Zero</text>
+<text x="316" y="475" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#64748b">RULE</text>
+<text x="316" y="494" font-family="ui-monospace, monospace" font-size="11" fill="#334155">bend_magnitude_same_observer</text>
+<line x1="316" y1="555" x2="534" y2="555" stroke="#e2e8f0"/>
+<text x="316" y="582" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#64748b">SEED METRICS</text>
+<text x="316" y="608" font-family="system-ui, sans-serif" font-size="13" font-weight="650" fill="#0f172a">880 compared / 872 non-zero</text>
+<text x="316" y="632" font-family="system-ui, sans-serif" font-size="11" fill="#475569">max 0.00031490779 / mean</text>
+<text x="316" y="647" font-family="system-ui, sans-serif" font-size="11" fill="#475569">0.00019547191841352225</text>
+<text x="316" y="672" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">bend_magnitude_metric</text>
+<text x="316" y="690" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">to bend_magnitude_metric</text>
+<rect x="316" y="709" width="218" height="34" rx="4" fill="#f1f5f9" stroke="#cbd5e1"/>
+<text x="425" y="731" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#334155">CLAIM BOUNDARY RECORDED</text>
+</g>
+<g id="unknown_observer_mismatch" data-node-kind="exhibit" data-status="Unknown">
+<desc>Core-vs-Core only. Not a Godot comparison. Not image or pixel comparison. Not parity. Unknown means eligibility was not established.</desc>
+<rect x="575" y="335" width="250" height="430" rx="7" fill="#ffffff" stroke="#fcd34d" stroke-width="2"/>
+<rect x="591" y="353" width="218" height="32" rx="4" fill="#fef3c7"/>
+<text x="700" y="375" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#92400e">Unknown</text>
+<text x="591" y="417" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#0f172a">Unknown Observer</text>
+<text x="591" y="440" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#0f172a">Mismatch</text>
+<text x="591" y="475" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#64748b">RULE</text>
+<text x="591" y="494" font-family="ui-monospace, monospace" font-size="11" fill="#334155">bend_magnitude_context_mismatch</text>
+<line x1="591" y1="555" x2="809" y2="555" stroke="#e2e8f0"/>
+<text x="591" y="582" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#64748b">SEED METRICS</text>
+<text x="591" y="608" font-family="system-ui, sans-serif" font-size="13" font-weight="650" fill="#0f172a">0 compared / 0 non-zero</text>
+<text x="591" y="632" font-family="system-ui, sans-serif" font-size="11" fill="#475569">max 0 / mean 0</text>
+<text x="591" y="672" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">bend_magnitude_metric</text>
+<text x="591" y="690" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">to bend_magnitude_metric</text>
+<rect x="591" y="709" width="218" height="34" rx="4" fill="#f1f5f9" stroke="#cbd5e1"/>
+<text x="700" y="731" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#334155">CLAIM BOUNDARY RECORDED</text>
+</g>
+<g id="unknown_coordinate_grid_mismatch" data-node-kind="exhibit" data-status="Unknown">
+<desc>Core-vs-Core only. Not a Godot comparison. Not image or pixel comparison. Not parity. Unknown means eligibility was not established.</desc>
+<rect x="850" y="335" width="250" height="430" rx="7" fill="#ffffff" stroke="#fcd34d" stroke-width="2"/>
+<rect x="866" y="353" width="218" height="32" rx="4" fill="#fef3c7"/>
+<text x="975" y="375" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#92400e">Unknown</text>
+<text x="866" y="417" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#0f172a">Unknown Coordinate-Grid</text>
+<text x="866" y="440" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#0f172a">Mismatch</text>
+<text x="866" y="475" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#64748b">RULE</text>
+<text x="866" y="494" font-family="ui-monospace, monospace" font-size="11" fill="#334155">bend_magnitude_context_mismatch</text>
+<line x1="866" y1="555" x2="1084" y2="555" stroke="#e2e8f0"/>
+<text x="866" y="582" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#64748b">SEED METRICS</text>
+<text x="866" y="608" font-family="system-ui, sans-serif" font-size="13" font-weight="650" fill="#0f172a">0 compared / 0 non-zero</text>
+<text x="866" y="632" font-family="system-ui, sans-serif" font-size="11" fill="#475569">max 0 / mean 0</text>
+<text x="866" y="672" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">bend_magnitude_metric</text>
+<text x="866" y="690" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">to bend_magnitude_metric</text>
+<rect x="866" y="709" width="218" height="34" rx="4" fill="#f1f5f9" stroke="#cbd5e1"/>
+<text x="975" y="731" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#334155">CLAIM BOUNDARY RECORDED</text>
+</g>
+<g id="not_comparable_channel" data-node-kind="exhibit" data-status="NotComparable">
+<desc>Core-vs-Core only. Not a Godot comparison. Not image or pixel comparison. Not parity. No bend data was relabeled as traversal steps.</desc>
+<rect x="1125" y="335" width="250" height="430" rx="7" fill="#ffffff" stroke="#fca5a5" stroke-width="2"/>
+<rect x="1141" y="353" width="218" height="32" rx="4" fill="#fee2e2"/>
+<text x="1250" y="375" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#7f1d1d">NotComparable</text>
+<text x="1141" y="417" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#0f172a">NotComparable Channel</text>
+<text x="1141" y="475" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#64748b">RULE</text>
+<text x="1141" y="494" font-family="ui-monospace, monospace" font-size="11" fill="#334155">traversal_steps_vs_bend_not_comparable</text>
+<line x1="1141" y1="555" x2="1359" y2="555" stroke="#e2e8f0"/>
+<text x="1141" y="582" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#64748b">SEED METRICS</text>
+<text x="1141" y="608" font-family="system-ui, sans-serif" font-size="13" font-weight="650" fill="#0f172a">0 compared / 0 non-zero</text>
+<text x="1141" y="632" font-family="system-ui, sans-serif" font-size="11" fill="#475569">max 0 / mean 0</text>
+<text x="1141" y="672" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">bend_magnitude_metric</text>
+<text x="1141" y="690" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">to traversal_step_count</text>
+<rect x="1141" y="709" width="218" height="34" rx="4" fill="#f1f5f9" stroke="#cbd5e1"/>
+<text x="1250" y="731" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#334155">CLAIM BOUNDARY RECORDED</text>
+</g>
+<text x="36" y="820" font-family="system-ui, sans-serif" font-size="12" fill="#475569">Core-vs-Core only · not a Godot, image, or pixel comparison · no parity claim</text>
+<text x="1364" y="820" text-anchor="end" font-family="system-ui, sans-serif" font-size="12" fill="#475569">Status and metrics sourced from dashboard seed</text>
+<text x="36" y="854" font-family="system-ui, sans-serif" font-size="11" fill="#64748b">Dashboard view organizes recorded evidence; it does not establish scientific correctness.</text>
+</svg>
