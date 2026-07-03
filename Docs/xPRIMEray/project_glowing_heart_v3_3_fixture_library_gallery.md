@@ -55,6 +55,8 @@ The four fixtures in this family are distinguished by a single parameter change 
 **Artifacts (site-published):**  
 [manifest.json](../assets/glowing_heart/v3_3/grin_radial_smoke/manifest.json) · [run_summary.md](../assets/glowing_heart/v3_3/grin_radial_smoke/run_summary.md) · [ray_metrics.csv](../assets/glowing_heart/v3_3/grin_radial_smoke/ray_metrics.csv)
 
+**Resolution ladder:** [Baseline](../assets/glowing_heart/v3_4/grin_radial_smoke/smoke/snapshot_ascii.txt) · [Compact](../assets/glowing_heart/v3_4/grin_radial_smoke/mini/snapshot_ascii.txt) · [Gallery detail](../assets/glowing_heart/v3_4/grin_radial_smoke/standard/snapshot_ascii.txt) · [Full ladder](project_glowing_heart_v3_4_resolution_ladder.md)
+
 **ASCII preview** (`bend_magnitude` · scale: `.` = low → `@` = high):
 ```
    ..:--==++**####%%%%####**++==--:..   
@@ -101,6 +103,8 @@ The four fixtures in this family are distinguished by a single parameter change 
 
 **Artifacts (site-published):**  
 [manifest.json](../assets/glowing_heart/v3_3/grin_radial_smoke_variant/manifest.json) · [run_summary.md](../assets/glowing_heart/v3_3/grin_radial_smoke_variant/run_summary.md) · [ray_metrics.csv](../assets/glowing_heart/v3_3/grin_radial_smoke_variant/ray_metrics.csv)
+
+**Resolution ladder:** [Baseline](../assets/glowing_heart/v3_4/grin_radial_smoke_variant/smoke/snapshot_ascii.txt) · [Compact](../assets/glowing_heart/v3_4/grin_radial_smoke_variant/mini/snapshot_ascii.txt) · [Gallery detail](../assets/glowing_heart/v3_4/grin_radial_smoke_variant/standard/snapshot_ascii.txt) · [Full ladder](project_glowing_heart_v3_4_resolution_ladder.md)
 
 **ASCII preview:**
 ```
@@ -152,6 +156,8 @@ The four fixtures in this family are distinguished by a single parameter change 
 **Artifacts (site-published):**  
 [manifest.json](../assets/glowing_heart/v3_3/grin_radial_smoke_observer_variant/manifest.json) · [run_summary.md](../assets/glowing_heart/v3_3/grin_radial_smoke_observer_variant/run_summary.md) · [ray_metrics.csv](../assets/glowing_heart/v3_3/grin_radial_smoke_observer_variant/ray_metrics.csv)
 
+**Resolution ladder:** [Baseline](../assets/glowing_heart/v3_4/grin_radial_smoke_observer_variant/smoke/snapshot_ascii.txt) · [Compact](../assets/glowing_heart/v3_4/grin_radial_smoke_observer_variant/mini/snapshot_ascii.txt) · [Gallery detail](../assets/glowing_heart/v3_4/grin_radial_smoke_observer_variant/standard/snapshot_ascii.txt) · [Full ladder](project_glowing_heart_v3_4_resolution_ladder.md)
+
 **ASCII preview:**
 ```
    ..::--=++***##########***++=--::..   
@@ -201,6 +207,10 @@ The four fixtures in this family are distinguished by a single parameter change 
 
 **Artifacts (site-published):**  
 [manifest.json](../assets/glowing_heart/v3_3/grin_radial_smoke_resolution_variant/manifest.json) · [run_summary.md](../assets/glowing_heart/v3_3/grin_radial_smoke_resolution_variant/run_summary.md) · [ray_metrics.csv](../assets/glowing_heart/v3_3/grin_radial_smoke_resolution_variant/ray_metrics.csv)
+
+**Resolution ladder:** [Baseline](../assets/glowing_heart/v3_4/grin_radial_smoke_resolution_variant/smoke/snapshot_ascii.txt) · [Compact](../assets/glowing_heart/v3_4/grin_radial_smoke_resolution_variant/mini/snapshot_ascii.txt) · [Gallery detail](../assets/glowing_heart/v3_4/grin_radial_smoke_resolution_variant/standard/snapshot_ascii.txt) · [Full ladder](project_glowing_heart_v3_4_resolution_ladder.md)
+
+The +1-column resolution sensitivity is specific to this fixture's native 41x22 baseline. Compact and Gallery detail use the shared family footprints, so they show density scaling rather than preserving that one-column delta.
 
 **ASCII preview:**
 ```

@@ -1,0 +1,70 @@
+{
+  "schema": "xprimeray.glowing_heart.run_manifest.v0.6",
+  "runId": "20260703T161439Z_grin_radial_smoke_resolution_variant",
+  "timestampUtc": "2026-07-03T16:14:39Z",
+  "source": "cli",
+  "phase": "Project Glowing Heart v0.6",
+  "fixture": {
+    "name": "grin_radial_smoke_resolution_variant",
+    "comparisonIdentity": "grin_radial_smoke_family_v1",
+    "path": "Fixtures/grin_radial_smoke_resolution_variant.json",
+    "mode": "radial_grin_smoke",
+    "observerBasis": "origin=[0,0,-2];forward=[0,0,1];up=[0,1,0];fovDegrees=60"
+  },
+  "result": {
+    "validation": "PASS",
+    "rays": 902,
+    "hits": 0,
+    "misses": 902,
+    "stepsPerRay": 32,
+    "fieldSamples": 28864,
+    "meanBend": 0.000960229547,
+    "maxBend": 0.00562415784
+  },
+  "artifacts": {
+    "rayMetricsCsv": "ray_metrics.csv",
+    "runSummaryMd": "run_summary.md",
+    "observatoryEntryJson": "observatory_entry.json",
+    "snapshotPpm": "snapshot.ppm",
+    "snapshotHeatmapCsv": "snapshot_heatmap.csv",
+    "snapshotAsciiTxt": "snapshot_ascii.txt",
+    "snapshotChannel": "bend_magnitude_metric",
+    "snapshotRepresentation": "scalar_grid",
+    "traversalStepCountCsv": "traversal_step_count.csv",
+    "retainedChannels": [
+      {
+        "channelId": "bend_magnitude_metric",
+        "kind": "measurement",
+        "producer": "core",
+        "source": "RayMetric.BendMagnitude",
+        "fixtureIdentity": "grin_radial_smoke_resolution_variant",
+        "fixtureComparisonIdentity": "grin_radial_smoke_family_v1",
+        "observerBasis": "origin=[0,0,-2];forward=[0,0,1];up=[0,1,0];fovDegrees=60",
+        "representation": "scalar_grid",
+        "artifactPath": "snapshot_heatmap.csv",
+        "gridWidth": 41,
+        "gridHeight": 22
+      },
+      {
+        "channelId": "traversal_step_count",
+        "kind": "measurement",
+        "producer": "core",
+        "source": "MetricRayState.IntegrationSteps",
+        "fixtureIdentity": "grin_radial_smoke_resolution_variant",
+        "fixtureComparisonIdentity": "grin_radial_smoke_family_v1",
+        "observerBasis": "origin=[0,0,-2];forward=[0,0,1];up=[0,1,0];fovDegrees=60",
+        "representation": "scalar_grid",
+        "artifactPath": "traversal_step_count.csv",
+        "gridWidth": 41,
+        "gridHeight": 22
+      }
+    ]
+  },
+  "limitations": [
+    "Core smoke transport only",
+    "Godot parity is not claimed",
+    "Hermetic closure is not claimed",
+    "Collision behavior is not modeled",
+    "Portal behavior is not modeled"
+  ]
+}

@@ -1,0 +1,2 @@
+fixture,mode,width,height,rays,steps_per_ray,field_samples,hits,misses,mean_bend,max_bend,validation
+grin_radial_smoke_variant,radial_grin_smoke,80,44,3520,32,112640,0,3520,0.00117830385,0.00671569305,FAIL

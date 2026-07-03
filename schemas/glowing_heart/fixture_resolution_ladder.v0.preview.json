@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://xprimeray.dev/schemas/glowing-heart/fixture-resolution-ladder/v0.preview.json",
+  "title": "Project Glowing Heart Fixture Resolution Ladder v0 Preview",
+  "type": "object",
+  "required": ["schema", "generatedUtc", "milestone", "parityClaim", "tiers", "records", "claimBoundary"],
+  "additionalProperties": false,
+  "$defs": {
+    "status": { "type": "string", "enum": ["PASS", "FAIL", "DEFERRED"] },
+    "tier": {
+      "type": "object",
+      "required": ["id", "description", "targetWidth", "targetHeight"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "enum": ["smoke", "mini", "standard", "high"] },
+        "description": { "type": "string", "minLength": 1 },
+        "targetWidth": { "type": ["integer", "null"], "minimum": 1 },
+        "targetHeight": { "type": ["integer", "null"], "minimum": 1 }
+      }
+    },
+    "record": {
+      "type": "object",
+      "required": [
+        "fixtureName", "fixturePath", "tier", "gridWidth", "gridHeight", "rayCount",
+        "status", "runtimeSeconds", "meanBend", "maxBend", "artifactPath",
+        "publishedAssetPath", "reason"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "fixtureName": { "type": "string", "minLength": 1 },
+        "fixturePath": { "type": "string", "pattern": "^Fixtures/" },
+        "tier": { "type": "string", "enum": ["smoke", "mini", "standard", "high"] },
+        "gridWidth": { "type": ["integer", "null"], "minimum": 1 },
+        "gridHeight": { "type": ["integer", "null"], "minimum": 1 },
+        "rayCount": { "type": ["integer", "null"], "minimum": 1 },
+        "status": { "$ref": "#/$defs/status" },
+        "runtimeSeconds": { "type": ["number", "null"], "minimum": 0 },
+        "meanBend": { "type": ["number", "null"], "minimum": 0 },
+        "maxBend": { "type": ["number", "null"], "minimum": 0 },
+        "artifactPath": { "type": ["string", "null"], "pattern": "^output/" },
+        "publishedAssetPath": { "type": ["string", "null"], "pattern": "^Docs/assets/" },
+        "reason": { "type": ["string", "null"] }
+      }
+    }
+  },
+  "properties": {
+    "schema": { "const": "xprimeray.glowing_heart.fixture_resolution_ladder.v0.preview" },
+    "generatedUtc": { "type": "string", "format": "date-time" },
+    "milestone": { "const": "Glowing Heart v3.4 — Fixture Library Resolution Ladder" },
+    "parityClaim": { "const": "NONE" },
+    "tiers": { "type": "array", "items": { "$ref": "#/$defs/tier" }, "minItems": 4, "maxItems": 4 },
+    "records": { "type": "array", "items": { "$ref": "#/$defs/record" }, "minItems": 1 },
+    "claimBoundary": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  }
+}

@@ -188,6 +188,7 @@ nav:
           - Public Proposal: xPRIMEray/project_glowing_heart_public_proposal.md
           - Architecture Vision: xPRIMEray/project_glowing_heart_architecture_vision.md
       - Evidence Gallery:
+          - Fixture Browser: xPRIMEray/glowing_heart_fixture_browser.md
           - v2.4 Difference Packet Gallery: xPRIMEray/project_glowing_heart_v2_4_difference_packet_gallery.md
           - v2.9 Evidence Map: xPRIMEray/project_glowing_heart_v2_9_evidence_map.md
           - v2.10 Evidence Map Index: xPRIMEray/project_glowing_heart_v2_10_evidence_map_index.md
@@ -196,6 +197,7 @@ nav:
           - v3.1 Dashboard Renderer: xPRIMEray/project_glowing_heart_v3_1_dashboard_renderer.md
           - v3.2 Fixture Gallery Index: xPRIMEray/project_glowing_heart_v3_2_fixture_gallery_index.md
           - v3.3 Fixture Library Gallery: xPRIMEray/project_glowing_heart_v3_3_fixture_library_gallery.md
+          - v3.4 Resolution Ladder: xPRIMEray/project_glowing_heart_v3_4_resolution_ladder.md
       - Health / Preflight:
           - v2.11 Evidence Chain Health: xPRIMEray/project_glowing_heart_v2_11_evidence_chain_health.md
           - v2.12 Preflight: xPRIMEray/project_glowing_heart_v2_12_preflight.md

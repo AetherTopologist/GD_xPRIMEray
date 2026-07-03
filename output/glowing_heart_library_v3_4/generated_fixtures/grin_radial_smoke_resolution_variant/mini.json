@@ -1,0 +1,52 @@
+{
+  "name": "grin_radial_smoke_resolution_variant",
+  "comparisonIdentity": "grin_radial_smoke_family_v1",
+  "description": "Deliberate Core eligibility variant with a changed coordinate grid.",
+  "rayGrid": {
+    "width": 80,
+    "height": 44
+  },
+  "transport": {
+    "mode": "radial_grin_smoke",
+    "maxStepsPerRay": 32,
+    "stepSize": 0.05
+  },
+  "observer": {
+    "origin": [
+      0,
+      0,
+      -2
+    ],
+    "forward": [
+      0,
+      0,
+      1
+    ],
+    "up": [
+      0,
+      1,
+      0
+    ],
+    "fovDegrees": 60
+  },
+  "fields": [
+    {
+      "type": "grin_radial",
+      "center": [
+        0,
+        0,
+        0
+      ],
+      "radiusOuter": 1.5,
+      "amplitude": 0.25,
+      "curveType": "Power",
+      "gamma": 1.0
+    }
+  ],
+  "validation": {
+    "requireHermeticClosure": false,
+    "minFieldSamples": 1,
+    "minMeanBend": 1e-06,
+    "maxMisses": 3520
+  }
+}
