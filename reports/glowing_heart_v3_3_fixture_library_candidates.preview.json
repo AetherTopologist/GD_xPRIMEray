@@ -1,0 +1,197 @@
+{
+  "schema": "xprimeray.glowing_heart.fixture_library_candidates.v3_3.preview",
+  "generatedUtc": "2026-07-03T03:10:00Z",
+  "milestone": "Glowing Heart v3.3 — Fixture Library Release Candidate",
+  "parityClaim": "NONE",
+  "runtimeExecuted": false,
+  "totalDiscovered": 56,
+  "totalCoreJson": 4,
+  "totalGodotOnly": 50,
+  "totalSharedMetadata": 2,
+  "families": [
+    {
+      "familyId": "grin_radial_smoke_family_v1",
+      "fixtureCount": 4,
+      "coreRunnable": true,
+      "description": "Radial GRIN smoke transport family. The only Core-runnable family in the current library. Four variants covering the canonical configuration plus amplitude, observer-FOV, and resolution sensitivity tests."
+    },
+    {
+      "familyId": "hermetic_observatory_godot",
+      "fixtureCount": 3,
+      "coreRunnable": false,
+      "description": "Hermetic closure observatory fixtures (.tscn). Godot runtime required."
+    },
+    {
+      "familyId": "blackhole_minimal_godot",
+      "fixtureCount": 3,
+      "coreRunnable": false,
+      "description": "Black hole minimal fingerprint family (.tscn). Godot runtime required."
+    },
+    {
+      "familyId": "einstein_ring_minimal_godot",
+      "fixtureCount": 3,
+      "coreRunnable": false,
+      "description": "Einstein ring minimal family (.tscn). Godot runtime required."
+    },
+    {
+      "familyId": "grin_basic_visual_godot",
+      "fixtureCount": 9,
+      "coreRunnable": false,
+      "description": "GRIN basic visual family with straight/offaxis/dual-attractor variants (.tscn). Godot runtime required."
+    },
+    {
+      "familyId": "curved_minimal_godot",
+      "fixtureCount": 2,
+      "coreRunnable": false,
+      "description": "Curved minimal transport fixtures (.tscn). Godot runtime required."
+    },
+    {
+      "familyId": "boundary_shell_godot",
+      "fixtureCount": 3,
+      "coreRunnable": false,
+      "description": "Boundary shell entry and policy fixtures (.tscn). Godot runtime required."
+    },
+    {
+      "familyId": "metric_basic_visual_godot",
+      "fixtureCount": 3,
+      "coreRunnable": false,
+      "description": "Metric transport visual fixtures (.tscn). Godot runtime required."
+    },
+    {
+      "familyId": "overspace_hermetic_godot",
+      "fixtureCount": 3,
+      "coreRunnable": false,
+      "description": "Overspace hermetic room topology variants (.tscn). Godot runtime required."
+    },
+    {
+      "familyId": "overspace_wormhole_godot",
+      "fixtureCount": 5,
+      "coreRunnable": false,
+      "description": "Overspace wormhole witness room fixtures (.tscn). Godot runtime required."
+    },
+    {
+      "familyId": "atomic_orbital_godot",
+      "fixtureCount": 2,
+      "coreRunnable": false,
+      "description": "Atomic orbital GRIN room and visual observatory (.tscn). Godot runtime required."
+    },
+    {
+      "familyId": "wormhole_transport_demo_godot",
+      "fixtureCount": 1,
+      "coreRunnable": false,
+      "description": "Wormhole transport demo (.tscn). Godot runtime required."
+    },
+    {
+      "familyId": "domain_resolver_stress_godot",
+      "fixtureCount": 1,
+      "coreRunnable": false,
+      "description": "Domain resolver stress fixture (.tscn). Godot runtime required."
+    },
+    {
+      "familyId": "shared_metadata",
+      "fixtureCount": 2,
+      "coreRunnable": false,
+      "description": "Shared fixture metadata bridge files (Fixtures/shared/). Schema bridges only; not runnable."
+    }
+  ],
+  "candidates": [
+    {
+      "fixturePath": "Fixtures/grin_radial_smoke.json",
+      "name": "grin_radial_smoke",
+      "comparisonIdentity": "grin_radial_smoke_family_v1",
+      "rayGrid": {"width": 40, "height": 22},
+      "transportMode": "radial_grin_smoke",
+      "observerSummary": "origin=[0,0,-2], forward=[0,0,1], fovDegrees=60",
+      "fieldSummary": "grin_radial, center=[0,0,0], radiusOuter=1.5, amplitude=0.25, Power/gamma=1.0",
+      "channelsAvailable": ["bend_magnitude_metric", "traversal_step_count"],
+      "recommendedInclusion": "include",
+      "reason": "Canonical primary fixture. First Core smoke run. Foundation for all family comparisons.",
+      "role": "canonical_primary"
+    },
+    {
+      "fixturePath": "Fixtures/grin_radial_smoke_variant.json",
+      "name": "grin_radial_smoke_variant",
+      "comparisonIdentity": "grin_radial_smoke_family_v1",
+      "rayGrid": {"width": 40, "height": 22},
+      "transportMode": "radial_grin_smoke",
+      "observerSummary": "origin=[0,0,-2], forward=[0,0,1], fovDegrees=60",
+      "fieldSummary": "grin_radial, center=[0,0,0], radiusOuter=1.5, amplitude=0.3 (+20%), Power/gamma=1.0",
+      "channelsAvailable": ["bend_magnitude_metric", "traversal_step_count"],
+      "recommendedInclusion": "include",
+      "reason": "Amplitude sensitivity variant (+20% field strength). Demonstrates measurable bend-magnitude increase. First amplitude variation in the library.",
+      "role": "sensitivity_variant"
+    },
+    {
+      "fixturePath": "Fixtures/grin_radial_smoke_observer_variant.json",
+      "name": "grin_radial_smoke_observer_variant",
+      "comparisonIdentity": "grin_radial_smoke_family_v1",
+      "rayGrid": {"width": 40, "height": 22},
+      "transportMode": "radial_grin_smoke",
+      "observerSummary": "origin=[0,0,-2], forward=[0,0,1], fovDegrees=61 (+1 deg FOV)",
+      "fieldSummary": "grin_radial, center=[0,0,0], radiusOuter=1.5, amplitude=0.25, Power/gamma=1.0",
+      "channelsAvailable": ["bend_magnitude_metric", "traversal_step_count"],
+      "recommendedInclusion": "include",
+      "reason": "Observer FOV eligibility variant (+1 degree). Confirms that observer basis shifts produce distinct ASCII patterns. Core eligibility test for observer variation.",
+      "role": "observer_variant"
+    },
+    {
+      "fixturePath": "Fixtures/grin_radial_smoke_resolution_variant.json",
+      "name": "grin_radial_smoke_resolution_variant",
+      "comparisonIdentity": "grin_radial_smoke_family_v1",
+      "rayGrid": {"width": 41, "height": 22},
+      "transportMode": "radial_grin_smoke",
+      "observerSummary": "origin=[0,0,-2], forward=[0,0,1], fovDegrees=60",
+      "fieldSummary": "grin_radial, center=[0,0,0], radiusOuter=1.5, amplitude=0.25, Power/gamma=1.0",
+      "channelsAvailable": ["bend_magnitude_metric", "traversal_step_count"],
+      "recommendedInclusion": "include",
+      "reason": "Resolution eligibility variant (41x22 vs 40x22). Confirms Core CLI handles non-standard grid dimensions. Increases ray count to 902.",
+      "role": "resolution_variant"
+    },
+    {
+      "fixturePath": "Fixtures/shared/glowing_heart_grin_bridge.v0.preview.json",
+      "name": "glowing_heart_grin_bridge",
+      "comparisonIdentity": null,
+      "rayGrid": null,
+      "transportMode": null,
+      "observerSummary": "Metadata bridge only",
+      "fieldSummary": "Metadata only",
+      "channelsAvailable": [],
+      "recommendedInclusion": "defer",
+      "reason": "Shared fixture metadata bridge. Schema definition only. Not runnable via CLI. Deferred to schema category."
+    },
+    {
+      "fixturePath": "Fixtures/shared/glowing_heart_observer_target.v0.preview.json",
+      "name": "glowing_heart_observer_target",
+      "comparisonIdentity": null,
+      "rayGrid": null,
+      "transportMode": null,
+      "observerSummary": "Observer target contract only",
+      "fieldSummary": null,
+      "channelsAvailable": [],
+      "recommendedInclusion": "defer",
+      "reason": "Observer target alignment contract. Not a runnable fixture. Deferred to schema/metadata category."
+    }
+  ],
+  "deferredCategories": [
+    {
+      "category": "Godot-scene fixtures (.tscn)",
+      "count": 50,
+      "reason": "Require Godot runtime. Core CLI cannot load .tscn scene files. Deferred to future Core-implemented fixture families."
+    },
+    {
+      "category": "Shared metadata bridges",
+      "count": 2,
+      "reason": "Schema/contract files only. Not runnable transport fixtures."
+    }
+  ],
+  "claimBoundary": [
+    "Core smoke transport only.",
+    "Not a Godot comparison.",
+    "Not image or pixel comparison.",
+    "Not parity.",
+    "Not physical validation.",
+    "Not renderer equivalence.",
+    "All Godot-only fixtures deferred without prejudice.",
+    "Library represents current Core CLI capability boundary only."
+  ]
+}

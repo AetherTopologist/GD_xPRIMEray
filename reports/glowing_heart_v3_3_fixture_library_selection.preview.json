@@ -1,0 +1,101 @@
+{
+  "schema": "xprimeray.glowing_heart.fixture_library_selection.v3_3.preview",
+  "generatedUtc": "2026-07-03T03:10:00Z",
+  "milestone": "Glowing Heart v3.3 — Fixture Library Release Candidate",
+  "parityClaim": "NONE",
+  "selectionPolicy": "one_per_unique_role_within_family",
+  "notes": "At v3.3, the Core library contains exactly one runnable family (grin_radial_smoke_family_v1). All four fixtures are unique by role and are included. All Godot-only fixtures deferred conservatively.",
+  "selected": [
+    {
+      "fixturePath": "Fixtures/grin_radial_smoke.json",
+      "name": "grin_radial_smoke",
+      "comparisonIdentity": "grin_radial_smoke_family_v1",
+      "role": "canonical_primary",
+      "selectionReason": "Canonical baseline. Required anchor for family comparisons.",
+      "runId": "20260703T030244Z_grin_radial_smoke",
+      "runPacketPath": "output/glowing_heart_library_v3_3/20260703T030244Z_grin_radial_smoke",
+      "validation": "PASS",
+      "rays": 880,
+      "grid": "40x22",
+      "meanBend": 0.000983294914,
+      "maxBend": 0.00562361022,
+      "fieldSamples": 28160,
+      "channels": ["bend_magnitude_metric", "traversal_step_count"]
+    },
+    {
+      "fixturePath": "Fixtures/grin_radial_smoke_variant.json",
+      "name": "grin_radial_smoke_variant",
+      "comparisonIdentity": "grin_radial_smoke_family_v1",
+      "role": "sensitivity_variant",
+      "selectionReason": "Unique by field amplitude (+20%). Demonstrates that parameter sensitivity is measurable in Core artifact output.",
+      "runId": "20260703T030247Z_grin_radial_smoke_variant",
+      "runPacketPath": "output/glowing_heart_library_v3_3/20260703T030247Z_grin_radial_smoke_variant",
+      "validation": "PASS",
+      "rays": 880,
+      "grid": "40x22",
+      "meanBend": 0.00117876683,
+      "maxBend": 0.00671275519,
+      "fieldSamples": 28160,
+      "channels": ["bend_magnitude_metric", "traversal_step_count"]
+    },
+    {
+      "fixturePath": "Fixtures/grin_radial_smoke_observer_variant.json",
+      "name": "grin_radial_smoke_observer_variant",
+      "comparisonIdentity": "grin_radial_smoke_family_v1",
+      "role": "observer_variant",
+      "selectionReason": "Unique by observer basis (fovDegrees=61). Confirms observer-dependent transport behavior is captured.",
+      "runId": "20260703T030253Z_grin_radial_smoke_observer_variant",
+      "runPacketPath": "output/glowing_heart_library_v3_3/20260703T030253Z_grin_radial_smoke_observer_variant",
+      "validation": "PASS",
+      "rays": 880,
+      "grid": "40x22",
+      "meanBend": 0.000958973251,
+      "maxBend": 0.00562446611,
+      "fieldSamples": 28160,
+      "channels": ["bend_magnitude_metric", "traversal_step_count"]
+    },
+    {
+      "fixturePath": "Fixtures/grin_radial_smoke_resolution_variant.json",
+      "name": "grin_radial_smoke_resolution_variant",
+      "comparisonIdentity": "grin_radial_smoke_family_v1",
+      "role": "resolution_variant",
+      "selectionReason": "Unique by ray grid (41x22, 902 rays). Confirms Core CLI handles non-standard aspect grid.",
+      "runId": "20260703T030308Z_grin_radial_smoke_resolution_variant",
+      "runPacketPath": "output/glowing_heart_library_v3_3/20260703T030308Z_grin_radial_smoke_resolution_variant",
+      "validation": "PASS",
+      "rays": 902,
+      "grid": "41x22",
+      "meanBend": 0.000960229547,
+      "maxBend": 0.00562415784,
+      "fieldSamples": 28864,
+      "channels": ["bend_magnitude_metric", "traversal_step_count"]
+    }
+  ],
+  "deferred": [
+    {
+      "category": "Godot-only scene fixtures",
+      "count": 50,
+      "reason": "Require Godot runtime. Not runnable via Core CLI."
+    },
+    {
+      "category": "Shared metadata bridges",
+      "count": 2,
+      "reason": "Schema/contract files only. Not runnable transport fixtures."
+    }
+  ],
+  "summary": {
+    "totalDiscovered": 56,
+    "selected": 4,
+    "deferred": 52,
+    "failed": 0,
+    "allSelectedPassed": true
+  },
+  "claimBoundary": [
+    "Core smoke transport only.",
+    "Not a Godot comparison.",
+    "Not image or pixel comparison.",
+    "Not parity.",
+    "Not physical validation.",
+    "Not renderer equivalence."
+  ]
+}

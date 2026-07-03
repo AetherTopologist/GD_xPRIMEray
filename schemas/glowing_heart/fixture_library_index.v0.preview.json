@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://xprimeray.dev/schemas/glowing-heart/fixture-library-index/v0.preview.json",
+  "title": "Project Glowing Heart Fixture Library Index v0 Preview",
+  "description": "Schema for the Core fixture library index. Records which fixture families have been run, their artifact locations, metrics, and claim boundaries. Not a parity or validation schema.",
+  "type": "object",
+  "required": ["schema", "generatedUtc", "milestone", "parityClaim", "families", "claimBoundary"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "type": "string" },
+    "generatedUtc": { "type": "string" },
+    "milestone": { "type": "string" },
+    "parityClaim": { "type": "string", "enum": ["NONE", "CANDIDATE", "UNDER_REVIEW", "SUPPORTED"] },
+    "totalSelected": { "type": "integer" },
+    "totalPassed": { "type": "integer" },
+    "totalDeferred": { "type": "integer" },
+    "families": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["familyId", "fixtures", "claimBoundary"],
+        "additionalProperties": false,
+        "properties": {
+          "familyId": { "type": "string" },
+          "description": { "type": "string" },
+          "fixtures": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["fixturePath", "name", "role", "runId", "runPacketPath", "validation", "grid", "rays", "channels"],
+              "additionalProperties": false,
+              "properties": {
+                "fixturePath": { "type": "string" },
+                "name": { "type": "string" },
+                "role": { "type": "string" },
+                "runId": { "type": "string" },
+                "runPacketPath": { "type": "string" },
+                "publishedArtifactPath": { "type": ["string", "null"] },
+                "validation": { "type": "string", "enum": ["PASS", "FAIL", "SKIP"] },
+                "grid": { "type": "string" },
+                "rays": { "type": "integer" },
+                "fieldSamples": { "type": ["integer", "null"] },
+                "meanBend": { "type": ["number", "null"] },
+                "maxBend": { "type": ["number", "null"] },
+                "channels": { "type": "array", "items": { "type": "string" } },
+                "asciiPreviewPath": { "type": ["string", "null"] },
+                "manifestPath": { "type": ["string", "null"] }
+              }
+            }
+          },
+          "claimBoundary": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "claimBoundary": { "type": "array", "items": { "type": "string" } }
+  }
+}

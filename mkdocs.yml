@@ -195,10 +195,12 @@ nav:
           - v3.0 Dashboard Seed: xPRIMEray/project_glowing_heart_v3_0_dashboard_seed.md
           - v3.1 Dashboard Renderer: xPRIMEray/project_glowing_heart_v3_1_dashboard_renderer.md
           - v3.2 Fixture Gallery Index: xPRIMEray/project_glowing_heart_v3_2_fixture_gallery_index.md
+          - v3.3 Fixture Library Gallery: xPRIMEray/project_glowing_heart_v3_3_fixture_library_gallery.md
       - Health / Preflight:
           - v2.11 Evidence Chain Health: xPRIMEray/project_glowing_heart_v2_11_evidence_chain_health.md
           - v2.12 Preflight: xPRIMEray/project_glowing_heart_v2_12_preflight.md
           - v2.13 Release Candidate: xPRIMEray/project_glowing_heart_v2_13_release_candidate.md
+          - v3.3 Fixture Library Release Candidate: xPRIMEray/project_glowing_heart_v3_3_fixture_library_release_candidate.md
       - Architecture:
           - Engineering Review: xPRIMEray/project_glowing_heart_review.md
           - Execution Plan: xPRIMEray/project_glowing_heart_execution_plan.md

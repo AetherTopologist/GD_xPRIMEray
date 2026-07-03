@@ -1,0 +1,12 @@
+/home/bb/code/godot_xPRIMEray/src/XPrimeRay.ObserverInstrumentation/bin/Debug/net8.0/XPrimeRay.ObserverInstrumentation.deps.json
+/home/bb/code/godot_xPRIMEray/src/XPrimeRay.ObserverInstrumentation/bin/Debug/net8.0/XPrimeRay.ObserverInstrumentation.dll
+/home/bb/code/godot_xPRIMEray/src/XPrimeRay.ObserverInstrumentation/bin/Debug/net8.0/XPrimeRay.ObserverInstrumentation.pdb
+/home/bb/code/godot_xPRIMEray/src/XPrimeRay.ObserverInstrumentation/obj/Debug/net8.0/XPrimeRay.ObserverInstrumentation.GeneratedMSBuildEditorConfig.editorconfig
+/home/bb/code/godot_xPRIMEray/src/XPrimeRay.ObserverInstrumentation/obj/Debug/net8.0/XPrimeRay.ObserverInstrumentation.AssemblyInfoInputs.cache
+/home/bb/code/godot_xPRIMEray/src/XPrimeRay.ObserverInstrumentation/obj/Debug/net8.0/XPrimeRay.ObserverInstrumentation.AssemblyInfo.cs
+/home/bb/code/godot_xPRIMEray/src/XPrimeRay.ObserverInstrumentation/obj/Debug/net8.0/XPrimeRay.ObserverInstrumentation.csproj.CoreCompileInputs.cache
+/home/bb/code/godot_xPRIMEray/src/XPrimeRay.ObserverInstrumentation/obj/Debug/net8.0/XPrimeRay.ObserverInstrumentation.sourcelink.json
+/home/bb/code/godot_xPRIMEray/src/XPrimeRay.ObserverInstrumentation/obj/Debug/net8.0/XPrimeRay.ObserverInstrumentation.dll
+/home/bb/code/godot_xPRIMEray/src/XPrimeRay.ObserverInstrumentation/obj/Debug/net8.0/refint/XPrimeRay.ObserverInstrumentation.dll
+/home/bb/code/godot_xPRIMEray/src/XPrimeRay.ObserverInstrumentation/obj/Debug/net8.0/XPrimeRay.ObserverInstrumentation.pdb
+/home/bb/code/godot_xPRIMEray/src/XPrimeRay.ObserverInstrumentation/obj/Debug/net8.0/ref/XPrimeRay.ObserverInstrumentation.dll

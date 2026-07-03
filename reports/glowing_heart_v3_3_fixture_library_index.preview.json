@@ -1,0 +1,102 @@
+{
+  "schema": "xprimeray.glowing_heart.fixture_library_index.v0.preview",
+  "generatedUtc": "2026-07-03T03:10:00Z",
+  "milestone": "Glowing Heart v3.3 — Fixture Library Release Candidate",
+  "parityClaim": "NONE",
+  "totalSelected": 4,
+  "totalPassed": 4,
+  "totalDeferred": 52,
+  "families": [
+    {
+      "familyId": "grin_radial_smoke_family_v1",
+      "description": "Radial GRIN smoke transport. Observer-facing bend-magnitude snapshots from a radial gradient-index field. The only Core-runnable fixture family at v3.3.",
+      "fixtures": [
+        {
+          "fixturePath": "Fixtures/grin_radial_smoke.json",
+          "name": "grin_radial_smoke",
+          "role": "canonical_primary",
+          "runId": "20260703T030244Z_grin_radial_smoke",
+          "runPacketPath": "output/glowing_heart_library_v3_3/20260703T030244Z_grin_radial_smoke",
+          "publishedArtifactPath": "Docs/assets/glowing_heart/v3_3/grin_radial_smoke",
+          "validation": "PASS",
+          "grid": "40x22",
+          "rays": 880,
+          "fieldSamples": 28160,
+          "meanBend": 0.000983294914,
+          "maxBend": 0.00562361022,
+          "channels": ["bend_magnitude_metric", "traversal_step_count"],
+          "asciiPreviewPath": "Docs/assets/glowing_heart/v3_3/grin_radial_smoke/snapshot_ascii.txt",
+          "manifestPath": "Docs/assets/glowing_heart/v3_3/grin_radial_smoke/manifest.json"
+        },
+        {
+          "fixturePath": "Fixtures/grin_radial_smoke_variant.json",
+          "name": "grin_radial_smoke_variant",
+          "role": "sensitivity_variant",
+          "runId": "20260703T030247Z_grin_radial_smoke_variant",
+          "runPacketPath": "output/glowing_heart_library_v3_3/20260703T030247Z_grin_radial_smoke_variant",
+          "publishedArtifactPath": "Docs/assets/glowing_heart/v3_3/grin_radial_smoke_variant",
+          "validation": "PASS",
+          "grid": "40x22",
+          "rays": 880,
+          "fieldSamples": 28160,
+          "meanBend": 0.00117876683,
+          "maxBend": 0.00671275519,
+          "channels": ["bend_magnitude_metric", "traversal_step_count"],
+          "asciiPreviewPath": "Docs/assets/glowing_heart/v3_3/grin_radial_smoke_variant/snapshot_ascii.txt",
+          "manifestPath": "Docs/assets/glowing_heart/v3_3/grin_radial_smoke_variant/manifest.json"
+        },
+        {
+          "fixturePath": "Fixtures/grin_radial_smoke_observer_variant.json",
+          "name": "grin_radial_smoke_observer_variant",
+          "role": "observer_variant",
+          "runId": "20260703T030253Z_grin_radial_smoke_observer_variant",
+          "runPacketPath": "output/glowing_heart_library_v3_3/20260703T030253Z_grin_radial_smoke_observer_variant",
+          "publishedArtifactPath": "Docs/assets/glowing_heart/v3_3/grin_radial_smoke_observer_variant",
+          "validation": "PASS",
+          "grid": "40x22",
+          "rays": 880,
+          "fieldSamples": 28160,
+          "meanBend": 0.000958973251,
+          "maxBend": 0.00562446611,
+          "channels": ["bend_magnitude_metric", "traversal_step_count"],
+          "asciiPreviewPath": "Docs/assets/glowing_heart/v3_3/grin_radial_smoke_observer_variant/snapshot_ascii.txt",
+          "manifestPath": "Docs/assets/glowing_heart/v3_3/grin_radial_smoke_observer_variant/manifest.json"
+        },
+        {
+          "fixturePath": "Fixtures/grin_radial_smoke_resolution_variant.json",
+          "name": "grin_radial_smoke_resolution_variant",
+          "role": "resolution_variant",
+          "runId": "20260703T030308Z_grin_radial_smoke_resolution_variant",
+          "runPacketPath": "output/glowing_heart_library_v3_3/20260703T030308Z_grin_radial_smoke_resolution_variant",
+          "publishedArtifactPath": "Docs/assets/glowing_heart/v3_3/grin_radial_smoke_resolution_variant",
+          "validation": "PASS",
+          "grid": "41x22",
+          "rays": 902,
+          "fieldSamples": 28864,
+          "meanBend": 0.000960229547,
+          "maxBend": 0.00562415784,
+          "channels": ["bend_magnitude_metric", "traversal_step_count"],
+          "asciiPreviewPath": "Docs/assets/glowing_heart/v3_3/grin_radial_smoke_resolution_variant/snapshot_ascii.txt",
+          "manifestPath": "Docs/assets/glowing_heart/v3_3/grin_radial_smoke_resolution_variant/manifest.json"
+        }
+      ],
+      "claimBoundary": [
+        "Core smoke transport only.",
+        "No geometry intersection modeled.",
+        "All misses (880–902 per fixture) are the expected result of a field-only smoke pass.",
+        "Not a Godot comparison.",
+        "Not parity.",
+        "Not physical validation."
+      ]
+    }
+  ],
+  "claimBoundary": [
+    "Core fixture artifact generation only.",
+    "Not a Godot comparison.",
+    "Not image or pixel comparison.",
+    "Not parity.",
+    "Not physical validation.",
+    "Not renderer equivalence.",
+    "Gallery shows recorded Core artifacts only."
+  ]
+}

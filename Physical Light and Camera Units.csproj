@@ -8,5 +8,7 @@
   <ItemGroup>
     <Compile Remove="src/XPrimeRay.Core/**/*.cs" />
     <Compile Remove="src/XPrimeRay.Testbench.Cli/**/*.cs" />
+    <Compile Remove="src/XPrimeRay.ObserverInstrumentation/**/*.cs" />
+    <Compile Remove="src/XPrimeRay.ObserverInstrumentation.Tests/**/*.cs" />
   </ItemGroup>
 </Project>

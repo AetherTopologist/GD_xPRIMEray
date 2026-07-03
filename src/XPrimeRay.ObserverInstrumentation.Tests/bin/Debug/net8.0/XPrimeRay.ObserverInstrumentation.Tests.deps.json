@@ -1,0 +1,36 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "XPrimeRay.ObserverInstrumentation.Tests/1.0.0": {
+        "dependencies": {
+          "XPrimeRay.ObserverInstrumentation": "1.0.0"
+        },
+        "runtime": {
+          "XPrimeRay.ObserverInstrumentation.Tests.dll": {}
+        }
+      },
+      "XPrimeRay.ObserverInstrumentation/1.0.0": {
+        "runtime": {
+          "XPrimeRay.ObserverInstrumentation.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "XPrimeRay.ObserverInstrumentation.Tests/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "XPrimeRay.ObserverInstrumentation/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

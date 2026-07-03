@@ -8,6 +8,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XPrimeRay.Core", "src\XPrim
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XPrimeRay.Testbench.Cli", "src\XPrimeRay.Testbench.Cli\XPrimeRay.Testbench.Cli.csproj", "{5D354FA4-1E12-4120-A7D1-7BECF716AF99}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XPrimeRay.ObserverInstrumentation", "src\XPrimeRay.ObserverInstrumentation\XPrimeRay.ObserverInstrumentation.csproj", "{7413C6DE-D798-40E3-9D88-EE9D788C665A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XPrimeRay.ObserverInstrumentation.Tests", "src\XPrimeRay.ObserverInstrumentation.Tests\XPrimeRay.ObserverInstrumentation.Tests.csproj", "{F7A8F8EC-511F-4E7F-99E1-AC7AC110031D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,9 +37,23 @@ Global
 		{5D354FA4-1E12-4120-A7D1-7BECF716AF99}.ExportDebug|Any CPU.Build.0 = Debug|Any CPU
 		{5D354FA4-1E12-4120-A7D1-7BECF716AF99}.ExportRelease|Any CPU.ActiveCfg = Release|Any CPU
 		{5D354FA4-1E12-4120-A7D1-7BECF716AF99}.ExportRelease|Any CPU.Build.0 = Release|Any CPU
+		{7413C6DE-D798-40E3-9D88-EE9D788C665A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7413C6DE-D798-40E3-9D88-EE9D788C665A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7413C6DE-D798-40E3-9D88-EE9D788C665A}.ExportDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7413C6DE-D798-40E3-9D88-EE9D788C665A}.ExportDebug|Any CPU.Build.0 = Debug|Any CPU
+		{7413C6DE-D798-40E3-9D88-EE9D788C665A}.ExportRelease|Any CPU.ActiveCfg = Debug|Any CPU
+		{7413C6DE-D798-40E3-9D88-EE9D788C665A}.ExportRelease|Any CPU.Build.0 = Debug|Any CPU
+		{F7A8F8EC-511F-4E7F-99E1-AC7AC110031D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7A8F8EC-511F-4E7F-99E1-AC7AC110031D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7A8F8EC-511F-4E7F-99E1-AC7AC110031D}.ExportDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7A8F8EC-511F-4E7F-99E1-AC7AC110031D}.ExportDebug|Any CPU.Build.0 = Debug|Any CPU
+		{F7A8F8EC-511F-4E7F-99E1-AC7AC110031D}.ExportRelease|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7A8F8EC-511F-4E7F-99E1-AC7AC110031D}.ExportRelease|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{5CCBD102-8E05-4515-881D-F276651F99CE} = {80A1D4DB-B7B8-4AEC-8D5E-C7186D0FC571}
 		{5D354FA4-1E12-4120-A7D1-7BECF716AF99} = {80A1D4DB-B7B8-4AEC-8D5E-C7186D0FC571}
+		{7413C6DE-D798-40E3-9D88-EE9D788C665A} = {80A1D4DB-B7B8-4AEC-8D5E-C7186D0FC571}
+		{F7A8F8EC-511F-4E7F-99E1-AC7AC110031D} = {80A1D4DB-B7B8-4AEC-8D5E-C7186D0FC571}
 	EndGlobalSection
 EndGlobal
