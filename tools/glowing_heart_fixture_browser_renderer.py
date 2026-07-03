@@ -20,10 +20,10 @@ TIER_LABELS = {
     "high": "Extended",
 }
 ROLE_LABELS = {
-    "canonical_primary": "Canonical",
-    "sensitivity_variant": "Amplitude sensitivity",
-    "observer_variant": "Observer sensitivity",
-    "resolution_variant": "Grid sensitivity",
+    "canonical_primary": "Canonical primary",
+    "sensitivity_variant": "+20% GRIN amplitude",
+    "observer_variant": "+1 degree observer FOV",
+    "resolution_variant": "+1 grid column baseline sensitivity",
 }
 SOURCE_BASE = "https://github.com/xPRIMEray/GD_xPRIMEray/blob/main"
 
@@ -46,11 +46,20 @@ def artifact_link(path: str, docs: bool) -> str:
     return "../" + asset.as_posix()
 
 
+def compact_preview(path: str) -> str:
+    lines = Path(path).read_text(encoding="utf-8").splitlines()
+    grid = lines[7:] if len(lines) > 7 else lines
+    return "\n".join(line[::4].rstrip() for line in grid[::8])
+
+
 def render(library: dict[str, Any], ladder: dict[str, Any], docs: bool) -> str:
     families = library.get("families", [])
     if len(families) != 1:
         raise ValueError("v3.5 expects exactly one published fixture family")
     family = families[0]
+    fixtures = family["fixtures"]
+    canonical = json.loads(Path(fixtures[0]["fixturePath"]).read_text(encoding="utf-8"))
+    observer = canonical["observer"]
     records = ladder.get("records", [])
     by_fixture: dict[str, list[dict[str, Any]]] = {}
     for record in records:
@@ -66,13 +75,28 @@ def render(library: dict[str, Any], ladder: dict[str, Any], docs: bool) -> str:
         "",
         "Browse the retained fixture family by experimental role and sampling density. The highest published passing tier is surfaced first; manifests and metric tables remain available for deeper inspection.",
         "",
+        "[Start with the fixture cards](#fixtures)",
+        "",
         "## Reading Boundary",
         "",
-        "These pages expose measurements produced by the Core smoke transport fixtures. They do not establish Godot parity, physical validation, renderer equivalence, or proof. Higher resolution means a denser sampling grid, not a different transport model.",
+        "**What this is:** Core CLI bend-magnitude fixture artifacts and traversal-step records.",
         "",
-        f"## {family['familyId']}",
+        "**What this is not:** a Godot comparison, pixel parity, physical validation, renderer equivalence, or proof.",
+        "",
+        "Higher resolution means more rays through the same declared fixture, not a new physical model.",
+        "",
+        "## Fixture Family Overview",
+        "",
+        f"- Family: `{family['familyId']}`",
+        f"- Observer basis: origin `{observer['origin']}`, forward `{observer['forward']}`, up `{observer['up']}`, canonical FOV `{observer['fovDegrees']}` degrees",
+        "- Channels: `bend_magnitude_metric`, `traversal_step_count`",
+        f"- Status: {len(fixtures)} fixtures; 12/12 attempted ladder runs PASS; Extended tier deferred by policy",
         "",
         family["description"],
+        "",
+        '<a id="fixtures"></a>',
+        "",
+        "## Fixtures",
         "",
         '<div class="grid cards" markdown>',
         "",
@@ -97,6 +121,17 @@ def render(library: dict[str, Any], ladder: dict[str, Any], docs: bool) -> str:
         }
         channels = " · ".join(f"`{channel}`" for channel in fixture["channels"])
         role = ROLE_LABELS[fixture["role"]]
+        evidence = (
+            "[v3.3 library gallery](project_glowing_heart_v3_3_fixture_library_gallery.md) · "
+            "[v3.4 resolution ladder](project_glowing_heart_v3_4_resolution_ladder.md) · "
+            "[v2.9 evidence map](project_glowing_heart_v2_9_evidence_map.md) · "
+            "[v3.1 dashboard](project_glowing_heart_v3_1_dashboard_renderer.md)"
+            if docs else
+            "`Docs/xPRIMEray/project_glowing_heart_v3_3_fixture_library_gallery.md` · "
+            "`Docs/xPRIMEray/project_glowing_heart_v3_4_resolution_ladder.md` · "
+            "`Docs/xPRIMEray/project_glowing_heart_v2_9_evidence_map.md` · "
+            "`Docs/xPRIMEray/project_glowing_heart_v3_1_dashboard_renderer.md`"
+        )
         lines.extend([
             f'-   **`{fixture["name"]}`**',
             "",
@@ -104,16 +139,35 @@ def render(library: dict[str, Any], ladder: dict[str, Any], docs: bool) -> str:
             "",
             f"    Best passing tier: **{TIER_LABELS[best['tier']]} {best['gridWidth']}x{best['gridHeight']}** · {best['rayCount']} rays",
             "",
+            "    Available tiers: Baseline grid · Compact 80x44 · Gallery detail 320x176 · Extended 640x352 (not run in v3.4)",
+            "",
             f"    Channels: {channels}",
             "",
-            f"    [{TIER_LABELS[best['tier']]} preview]({links['Snapshot']}) · [Run summary]({links['Summary']})",
+            f"    Artifacts: [Snapshot]({links['Snapshot']}) · [Manifest]({links['Manifest']}) · [Summary]({links['Summary']}) · [Metrics]({links['Metrics CSV']})",
             "",
-            f"    Raw data: [Manifest]({links['Manifest']}) · [Metrics CSV]({links['Metrics CSV']})",
+            f"    Evidence: {evidence}",
             "",
-            "    Evidence: [Fixture gallery](project_glowing_heart_v3_3_fixture_library_gallery.md) · [Resolution ladder](project_glowing_heart_v3_4_resolution_ladder.md)" if docs else "    Evidence: `Docs/xPRIMEray/project_glowing_heart_v3_3_fixture_library_gallery.md` · `Docs/xPRIMEray/project_glowing_heart_v3_4_resolution_ladder.md`",
+            f"    Raw data: [Manifest JSON]({links['Manifest']}) · [Metrics CSV]({links['Metrics CSV']})",
             "",
         ])
-    lines.extend(["</div>", "", "## Resolution Ladder", "", "| Fixture | Baseline | Compact | Gallery detail | Extended |", "|---|---|---|---|---|"])
+    lines.extend(["</div>", "", "## Gallery Detail Previews", "", "These lightweight displays are downsampled from each published Gallery-detail ASCII snapshot. Open the linked snapshot for the complete 320x176 text grid.", ""])
+    for fixture in fixtures:
+        standard = next(r for r in by_fixture[fixture["name"]] if r["tier"] == "standard")
+        snapshot_path = f"{standard['publishedAssetPath']}/snapshot_ascii.txt"
+        snapshot_link = artifact_link(snapshot_path, docs)
+        lines.extend([
+            f'<details><summary><code>{fixture["name"]}</code> preview</summary>',
+            "",
+            '<pre style="max-height: 18rem; overflow: auto; font-size: 0.62rem; line-height: 1;">',
+            compact_preview(snapshot_path),
+            "</pre>",
+            "",
+            f"[Open full snapshot]({snapshot_link})",
+            "",
+            "</details>",
+            "",
+        ])
+    lines.extend(["## Resolution Ladder", "", "| Fixture | Baseline | Compact | Gallery detail | Extended |", "|---|---|---|---|---|"])
     for fixture in family["fixtures"]:
         fixture_records = {r["tier"]: r for r in by_fixture[fixture["name"]]}
         cells = []
@@ -129,6 +183,8 @@ def render(library: dict[str, Any], ladder: dict[str, Any], docs: bool) -> str:
     lines.extend([
         "",
         "Extended is a policy deferral, not a failed run. It was not run in v3.4 because Gallery detail was the declared stopping point.",
+        "",
+        "The [v3.4 resolution ladder](project_glowing_heart_v3_4_resolution_ladder.md) retains the v3.4.1 correction history and canonical-fixture integrity note." if docs else "The v3.4.1 correction history remains in `Docs/xPRIMEray/project_glowing_heart_v3_4_resolution_ladder.md`.",
         "",
         "## Downloads and Developer Sources",
         "",
