@@ -15,6 +15,7 @@ public readonly struct UvRevealRegion
     public float UMax { get; }
     public float VMin { get; }
     public float VMax { get; }
+    public bool IsValid => _isValid;
     public bool CrossesUSeam => UMin > UMax;
 
     private readonly bool _isValid;

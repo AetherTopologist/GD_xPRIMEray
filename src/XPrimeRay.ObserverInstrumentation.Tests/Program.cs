@@ -8,7 +8,11 @@ internal static class Program
         {
             (nameof(SphericalUvMathTests), SphericalUvMathTests.Run),
             (nameof(CheckerProbeMathTests), CheckerProbeMathTests.Run),
-            (nameof(UvRevealRegionTests), UvRevealRegionTests.Run)
+            (nameof(UvRevealRegionTests), UvRevealRegionTests.Run),
+            (nameof(MetadataCatalogTests), MetadataCatalogTests.Run),
+            (nameof(InstrumentTests), InstrumentTests.Run),
+            (nameof(RegistryAndBufferTests), RegistryAndBufferTests.Run),
+            (nameof(AllocationTests), AllocationTests.Run)
         };
 
         int failures = 0;
