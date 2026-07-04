@@ -9,6 +9,8 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using XPrimeRay.Perf; // adjust namespace new PerfScope.cs
+using XPrimeRay.ObserverInstrumentation.Instruments;
+using XPrimeRay.ObserverInstrumentation.Runtime;
 using RendererCore.Common;
 using RendererCore.SceneSnapshot;
 using RendererCore.Fields;
@@ -2268,6 +2270,7 @@ private bool _fixtureDebugHasExplicitBackgroundGroup = false;
 	private RayBeamRenderer.HitPayload[] _dbgHits = Array.Empty<RayBeamRenderer.HitPayload>();
 	private int _dbgRayCount = 0;
 	private int _dbgPtWrite = 0;
+	private ObserverInstrumentationAdapter _instrumentationAdapter;
 
 	private const int Pass2QuickRayCacheSize = 512;
 	private const float Pass2QuickRayCacheQuantize = 10f;
@@ -4118,6 +4121,7 @@ private sealed class OverlayRollingWindow
 		GD.Print("✅ GrinFilmCamera ready. Rendering film.");
 			_smartScaleEnableEdgeArmed = SmartScaleEnabled;
 			_smartScaleRunOnReadyDeferred = SmartScaleRunOnReady;
+			InitObserverInstrumentationAdapter();
 			CallDeferred(nameof(EmitFixtureCurvatureDisabledWarning));
 		}
 
@@ -20635,6 +20639,13 @@ private sealed class OverlayRollingWindow
 			// ---- Debug overlay draw ONCE per band ----
 			ApplyHudOverlayVisualSettings();
 			PushTraversalOverlayStateToFilmOverlay(filmW, filmH, cfg.RenderTestFirstPassTraversalMode, yStart, yEnd);
+
+			// Stage 1C: run observer instrumentation on the validated hit buffer.
+			// Both _dbgHits production paths (threaded and regular) complete before this point.
+			// Reads _dbgHits read-only; SetData and overlay are not affected.
+			if (wantDbg && _dbgRayCount > 0)
+				_instrumentationAdapter?.RunFrame(_dbgHits.AsSpan(0, _dbgRayCount));
+
 			if (wantDbg && _filmOverlay != null)
 			{
 				ulong dbgOverlayStart = 0;
@@ -22814,6 +22825,19 @@ private sealed class OverlayRollingWindow
 		if (_dbgCnt.Length < rays) Array.Resize(ref _dbgCnt, rays);
 		if (_dbgHits.Length < rays) Array.Resize(ref _dbgHits, rays);
 		if (_dbgPts.Length < pts) Array.Resize(ref _dbgPts, pts);
+	}
+
+	private void InitObserverInstrumentationAdapter()
+	{
+		var registry = new InstrumentRegistry(
+			new FlagCaptureInstrument(),
+			new SurfaceUvInstrument(),
+			new CheckerProbeInstrument());
+		// Feature mask starts disabled; adapter performs zero work until the mask is set.
+		// Call _instrumentationAdapter.UpdateCatalog(...) and registry.SetEnabledMask(...)
+		// (before Seal) to activate instruments for a specific scene configuration.
+		registry.Seal();
+		_instrumentationAdapter = new ObserverInstrumentationAdapter(registry, DebugMaxFilmRays);
 	}
 
 	private void ValidateDebugOverlayData(int debugMaxFilmRays)

@@ -11,4 +11,7 @@
     <Compile Remove="src/XPrimeRay.ObserverInstrumentation/**/*.cs" />
     <Compile Remove="src/XPrimeRay.ObserverInstrumentation.Tests/**/*.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="src/XPrimeRay.ObserverInstrumentation/XPrimeRay.ObserverInstrumentation.csproj" />
+  </ItemGroup>
 </Project>

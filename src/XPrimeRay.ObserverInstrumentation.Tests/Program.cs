@@ -12,7 +12,9 @@ internal static class Program
             (nameof(MetadataCatalogTests), MetadataCatalogTests.Run),
             (nameof(InstrumentTests), InstrumentTests.Run),
             (nameof(RegistryAndBufferTests), RegistryAndBufferTests.Run),
-            (nameof(AllocationTests), AllocationTests.Run)
+            (nameof(AllocationTests), AllocationTests.Run),
+            (nameof(SurfaceUvInstrumentTests), SurfaceUvInstrumentTests.Run),
+            (nameof(Stage1CAdapterTests), Stage1CAdapterTests.Run)
         };
 
         int failures = 0;

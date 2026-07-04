@@ -19,6 +19,7 @@ public sealed class InstrumentRegistry
     }
 
     public int Count => _instruments.Length;
+    public bool IsSealed => _sealed;
     public ObserverInstrumentMask EnabledMask { get; private set; } = ObserverInstrumentMask.None;
 
     public void SetEnabledMask(ObserverInstrumentMask enabledMask)
