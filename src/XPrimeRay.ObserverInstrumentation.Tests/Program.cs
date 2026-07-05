@@ -14,7 +14,8 @@ internal static class Program
             (nameof(RegistryAndBufferTests), RegistryAndBufferTests.Run),
             (nameof(AllocationTests), AllocationTests.Run),
             (nameof(SurfaceUvInstrumentTests), SurfaceUvInstrumentTests.Run),
-            (nameof(Stage1CAdapterTests), Stage1CAdapterTests.Run)
+            (nameof(Stage1CAdapterTests), Stage1CAdapterTests.Run),
+            (nameof(Stage1CLifecycleTests), Stage1CLifecycleTests.Run)
         };
 
         int failures = 0;

@@ -9,7 +9,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using XPrimeRay.Perf; // adjust namespace new PerfScope.cs
-using XPrimeRay.ObserverInstrumentation.Instruments;
+using XPrimeRay.ObserverInstrumentation.Abstractions;
 using XPrimeRay.ObserverInstrumentation.Runtime;
 using RendererCore.Common;
 using RendererCore.SceneSnapshot;
@@ -22829,16 +22829,35 @@ private sealed class OverlayRollingWindow
 
 	private void InitObserverInstrumentationAdapter()
 	{
-		var registry = new InstrumentRegistry(
-			new FlagCaptureInstrument(),
-			new SurfaceUvInstrument(),
-			new CheckerProbeInstrument());
-		// Feature mask starts disabled; adapter performs zero work until the mask is set.
-		// Call _instrumentationAdapter.UpdateCatalog(...) and registry.SetEnabledMask(...)
-		// (before Seal) to activate instruments for a specific scene configuration.
-		registry.Seal();
-		_instrumentationAdapter = new ObserverInstrumentationAdapter(registry, DebugMaxFilmRays);
+		// Default: disabled. Feature mask remains None until ApplyInstrumentationConfiguration is called.
+		// FromConfiguration builds a fresh sealed registry; no registry is shared or mutated.
+		_instrumentationAdapter = ObserverInstrumentationAdapter.FromConfiguration(
+			ObserverInstrumentationConfiguration.Disabled,
+			DebugMaxFilmRays);
 	}
+
+	// Safe activation path. Creates a fresh adapter from the new configuration.
+	// A sealed InstrumentRegistry is never mutated; the old adapter and registry are discarded.
+	public void ApplyInstrumentationConfiguration(ObserverInstrumentationConfiguration config)
+	{
+		_instrumentationAdapter = ObserverInstrumentationAdapter.FromConfiguration(config, DebugMaxFilmRays);
+	}
+
+	internal ulong InstrumentationFrameSequenceForTesting =>
+		_instrumentationAdapter?.FrameSequence ?? 0UL;
+
+	internal ReadOnlySpan<InstrumentObservation> GetInstrumentationObservationsForTesting()
+	{
+		return _instrumentationAdapter == null
+			? ReadOnlySpan<InstrumentObservation>.Empty
+			: _instrumentationAdapter.Observations;
+	}
+
+	internal bool InstrumentationOverflowForTesting =>
+		_instrumentationAdapter?.OverflowOccurred ?? false;
+
+	internal int InstrumentationDroppedObservationCountForTesting =>
+		_instrumentationAdapter?.DroppedObservationCount ?? 0;
 
 	private void ValidateDebugOverlayData(int debugMaxFilmRays)
 	{
