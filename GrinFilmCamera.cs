@@ -2268,6 +2268,8 @@ private bool _fixtureDebugHasExplicitBackgroundGroup = false;
 	private int[] _dbgOff = Array.Empty<int>();         // offsets per ray
 	private int[] _dbgCnt = Array.Empty<int>();         // counts per ray
 	private RayBeamRenderer.HitPayload[] _dbgHits = Array.Empty<RayBeamRenderer.HitPayload>();
+	private int[] _dbgHitPx = Array.Empty<int>();
+	private int[] _dbgHitPy = Array.Empty<int>();
 	private int _dbgRayCount = 0;
 	private int _dbgPtWrite = 0;
 	private ObserverInstrumentationAdapter _instrumentationAdapter;
@@ -17247,6 +17249,8 @@ private sealed class OverlayRollingWindow
 										ColliderName = sample.NeedHitName ? sample.HitName : "<none>",
 										Albedo = Colors.White
 									};
+									_dbgHitPx[rayIndex] = sample.X;
+									_dbgHitPy[rayIndex] = sample.Y;
 								}
 								if (statsEnabled)
 								{
@@ -20485,6 +20489,8 @@ private sealed class OverlayRollingWindow
 									ColliderName = needHitName ? hitName : "<none>",
 									Albedo = Colors.White
 								};
+								_dbgHitPx[rayIndex] = x;
+								_dbgHitPy[rayIndex] = y;
 								if (cfg.VerbosePerfLogs && _dbgHits[rayIndex].Valid != hadHit)
 								{
 									GD.Print($"Debug hit validity mismatch at rayIndex={rayIndex}");
@@ -22824,6 +22830,8 @@ private sealed class OverlayRollingWindow
 		if (_dbgOff.Length < rays) Array.Resize(ref _dbgOff, rays);
 		if (_dbgCnt.Length < rays) Array.Resize(ref _dbgCnt, rays);
 		if (_dbgHits.Length < rays) Array.Resize(ref _dbgHits, rays);
+		if (_dbgHitPx.Length < rays) Array.Resize(ref _dbgHitPx, rays);
+		if (_dbgHitPy.Length < rays) Array.Resize(ref _dbgHitPy, rays);
 		if (_dbgPts.Length < pts) Array.Resize(ref _dbgPts, pts);
 	}
 
@@ -22858,6 +22866,12 @@ private sealed class OverlayRollingWindow
 
 	internal int InstrumentationDroppedObservationCountForTesting =>
 		_instrumentationAdapter?.DroppedObservationCount ?? 0;
+
+	internal ReadOnlySpan<int> GetDebugRayPixelXForTesting() =>
+		_dbgHitPx.AsSpan(0, _dbgRayCount);
+
+	internal ReadOnlySpan<int> GetDebugRayPixelYForTesting() =>
+		_dbgHitPy.AsSpan(0, _dbgRayCount);
 
 	private void ValidateDebugOverlayData(int debugMaxFilmRays)
 	{
