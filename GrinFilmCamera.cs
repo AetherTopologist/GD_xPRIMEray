@@ -22861,6 +22861,13 @@ private sealed class OverlayRollingWindow
 			: _instrumentationAdapter.Observations;
 	}
 
+	internal ReadOnlySpan<TextureSampleObservation> GetInstrumentationTextureSamplesForTesting()
+	{
+		return _instrumentationAdapter == null
+			? ReadOnlySpan<TextureSampleObservation>.Empty
+			: _instrumentationAdapter.TextureSamples;
+	}
+
 	internal bool InstrumentationOverflowForTesting =>
 		_instrumentationAdapter?.OverflowOccurred ?? false;
 

@@ -15,7 +15,9 @@ internal static class Program
             (nameof(AllocationTests), AllocationTests.Run),
             (nameof(SurfaceUvInstrumentTests), SurfaceUvInstrumentTests.Run),
             (nameof(Stage1CAdapterTests), Stage1CAdapterTests.Run),
-            (nameof(Stage1CLifecycleTests), Stage1CLifecycleTests.Run)
+            (nameof(Stage1CLifecycleTests), Stage1CLifecycleTests.Run),
+            (nameof(TextureSampleObservationTests), TextureSampleObservationTests.Run),
+            (nameof(TextureResourceTests), TextureResourceTests.Run)
         };
 
         int failures = 0;

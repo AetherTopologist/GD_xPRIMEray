@@ -13,7 +13,8 @@ public enum InstrumentKind
 {
     SurfaceUv = 0,
     CheckerProbe = 1,
-    FlagCapture = 2
+    FlagCapture = 2,
+    TextureSample = 3
 }
 
 public enum InstrumentHitKind
@@ -30,5 +31,6 @@ public enum ObserverInstrumentMask
     SurfaceUv = 1 << 0,
     CheckerProbe = 1 << 1,
     FlagCapture = 1 << 2,
-    All = SurfaceUv | CheckerProbe | FlagCapture
+    TextureSample = 1 << 3,
+    All = SurfaceUv | CheckerProbe | FlagCapture | TextureSample
 }

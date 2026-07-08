@@ -62,15 +62,24 @@ public sealed class InstrumentRegistry
                 continue;
             }
 
-            instrument.Observe(
+            instrument.ObserveWithExtensions(
                 in context,
                 catalogAvailable,
                 metadataAvailable,
                 in metadata,
-                out InstrumentObservation observation);
+                out InstrumentObservation observation,
+                out TextureSampleObservation textureObservation,
+                out bool hasTextureObservation);
             if (!frameBuffer.TryAppend(in observation))
             {
                 return false;
+            }
+
+            if (hasTextureObservation)
+            {
+                // Secondary texture payload overflow is explicitly non-authoritative here:
+                // it must not turn a successfully appended base observation into a transport failure.
+                frameBuffer.TryAppendTextureSample(in textureObservation);
             }
         }
 

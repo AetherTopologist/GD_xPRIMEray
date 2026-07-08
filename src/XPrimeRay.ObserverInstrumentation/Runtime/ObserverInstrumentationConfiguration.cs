@@ -1,5 +1,6 @@
 using XPrimeRay.ObserverInstrumentation.Abstractions;
 using XPrimeRay.ObserverInstrumentation.Metadata;
+using XPrimeRay.ObserverInstrumentation.Resources;
 
 namespace XPrimeRay.ObserverInstrumentation.Runtime;
 
@@ -12,4 +13,6 @@ public sealed class ObserverInstrumentationConfiguration
 
     public ObserverInstrumentMask EnabledMask { get; init; } = ObserverInstrumentMask.None;
     public InstrumentMetadataCatalog? Catalog { get; init; }
+    public TextureBindingCatalog? TextureBindings { get; init; }
+    public TextureResourceSnapshot? TextureResources { get; init; }
 }

@@ -24,6 +24,8 @@ public partial class Oi006CheckerDiagnosticHeadless : Node
     private const int CheckerTilesV = 4;
     private const float UvAgreementTolerance = 1e-6f;
     private const string OutputRelPath = "res://output/observer_instrumentation/oi_006_checker_diagnostic.png";
+    private const string UpscaledOutputRelPath = "res://output/observer_instrumentation/oi_007_checker_diagnostic_upscaled.png";
+    private const int UpscaleFactor = 16;
 
     private GrinFilmCamera _film;
     private ulong _lastSequence;
@@ -309,6 +311,24 @@ public partial class Oi006CheckerDiagnosticHeadless : Node
             img.SetPixel(px, py, color);
         }
 
+        // Count source pixel classes before saving (40×22 = trivial).
+        int srcBlack = 0, srcWhite = 0, srcMagenta = 0, srcGray = 0, srcTransparent = 0;
+        var black    = new Color(0f,   0f,   0f,   1f);
+        var white    = new Color(1f,   1f,   1f,   1f);
+        var magenta  = new Color(1f,   0f,   1f,   1f);
+        var gray     = new Color(0.5f, 0.5f, 0.5f, 1f);
+        var transparent = new Color(0f, 0f,  0f,   0f);
+        for (int cy = 0; cy < filmH; cy++)
+            for (int cx = 0; cx < filmW; cx++)
+            {
+                Color c = img.GetPixel(cx, cy);
+                if      (c == black)       srcBlack++;
+                else if (c == white)       srcWhite++;
+                else if (c == magenta)     srcMagenta++;
+                else if (c == gray)        srcGray++;
+                else if (c == transparent) srcTransparent++;
+            }
+
         string dir = ProjectSettings.GlobalizePath("res://output/observer_instrumentation");
         DirAccess.MakeDirRecursiveAbsolute(dir);
         string globalPath = ProjectSettings.GlobalizePath(OutputRelPath);
@@ -316,7 +336,32 @@ public partial class Oi006CheckerDiagnosticHeadless : Node
         if (saveErr != Error.Ok)
             return $"SavePng failed err={saveErr} path={globalPath}";
 
-        GD.Print($"[OI-006] PNG written: {globalPath} ({filmW}x{filmH}) coordCount={coordCount} maxRayIndex={maxRayIndex}");
+        GD.Print($"[OI-006] PNG written: {globalPath} ({filmW}x{filmH}) " +
+                 $"black={srcBlack} white={srcWhite} magenta={srcMagenta} gray={srcGray} transparent={srcTransparent} " +
+                 $"coordCount={coordCount} maxRayIndex={maxRayIndex}");
+
+        // OI-007: nearest-neighbor upscale — manual pixel loop, no interpolation.
+        int upW = filmW * UpscaleFactor;
+        int upH = filmH * UpscaleFactor;
+        Image upImg = Image.CreateEmpty(upW, upH, false, Image.Format.Rgba8);
+        for (int oy = 0; oy < upH; oy++)
+        {
+            int sy = oy / UpscaleFactor;
+            for (int ox = 0; ox < upW; ox++)
+                upImg.SetPixel(ox, oy, img.GetPixel(ox / UpscaleFactor, sy));
+        }
+
+        int pixelsPerSource = UpscaleFactor * UpscaleFactor;
+        string upPath = ProjectSettings.GlobalizePath(UpscaledOutputRelPath);
+        Error upErr = upImg.SavePng(upPath);
+        if (upErr != Error.Ok)
+            return $"SavePng (upscale) failed err={upErr} path={upPath}";
+
+        GD.Print($"[OI-007] PNG written: {upPath} ({upW}x{upH}) scale={UpscaleFactor}x " +
+                 $"black={srcBlack * pixelsPerSource} white={srcWhite * pixelsPerSource} " +
+                 $"magenta={srcMagenta * pixelsPerSource} gray={srcGray * pixelsPerSource} " +
+                 $"transparent={srcTransparent * pixelsPerSource}");
+
         return null;
     }
 

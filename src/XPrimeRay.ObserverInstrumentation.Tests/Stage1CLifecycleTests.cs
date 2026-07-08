@@ -16,6 +16,7 @@ internal static class Stage1CLifecycleTests
         RunEnabledMaskProducesObservations();
         RunFrameClearAndReuse();
         RunOverflowReporting();
+        RunFrameAndIncrementalOverflowMatch();
         RunCatalogNullProducesDiagnosticUnresolved();
         RunUnknownColliderProducesOtherGeometryHit();
         RunSurfaceUvOnlyFrameSequence();
@@ -45,8 +46,8 @@ internal static class Stage1CLifecycleTests
 
         session.RunFrame(new[] { SurfaceHit(0, "probe") });
 
-        // 3 instruments x 1 hit = 3 observations
-        TestAssert.Equal(3, session.LastObservationCount, "enabled: all three instruments observe surface hit");
+        // 4 instruments x 1 hit = 4 observations after adding the texture-sample seam.
+        TestAssert.Equal(4, session.LastObservationCount, "enabled: all four instruments observe surface hit");
         TestAssert.False(session.OverflowOccurred, "enabled: no overflow within capacity");
         TestAssert.Equal(0, session.DroppedObservationCount, "enabled: zero dropped");
     }
@@ -56,27 +57,66 @@ internal static class Stage1CLifecycleTests
         ObserverInstrumentationSession session = AllEnabled(maxHitsCapacity: 16);
 
         session.RunFrame(new[] { SurfaceHit(0, "probe") });
-        TestAssert.Equal(3, session.LastObservationCount, "reuse: first frame 3 observations");
+        TestAssert.Equal(4, session.LastObservationCount, "reuse: first frame 4 observations");
 
         // Second frame must start fresh, not accumulate.
         session.RunFrame(new[] { SurfaceHit(1, "probe") });
-        TestAssert.Equal(3, session.LastObservationCount, "reuse: second frame still 3, not 6");
-        TestAssert.Equal(3, session.FrameBuffer.Count, "reuse: buffer count equals LastObservationCount");
+        TestAssert.Equal(4, session.LastObservationCount, "reuse: second frame still 4, not 8");
+        TestAssert.Equal(4, session.FrameBuffer.Count, "reuse: buffer count equals LastObservationCount");
     }
 
     private static void RunOverflowReporting()
     {
-        // maxHitsCapacity=1 → buffer holds 3 slots (3 instruments x 1 hit).
-        // Two hits require 6 slots → overflow fires on the second Evaluate call.
+        // maxHitsCapacity=1 → buffer holds 4 slots (4 instruments x 1 hit).
+        // Two hits require 8 slots → overflow fires on the second Evaluate call.
         ObserverInstrumentationSession session = AllEnabled(maxHitsCapacity: 1);
 
-        TestAssert.Equal(3, session.ObservationCapacity, "overflow: capacity is 3 (3 instruments x 1 hit)");
+        TestAssert.Equal(4, session.ObservationCapacity, "overflow: capacity is 4 (4 instruments x 1 hit)");
 
         session.RunFrame(new[] { SurfaceHit(0, "probe"), SurfaceHit(1, "probe") });
 
         TestAssert.True(session.OverflowOccurred, "overflow: OverflowOccurred set on buffer saturation");
         TestAssert.True(session.DroppedObservationCount > 0, "overflow: DroppedObservationCount positive");
-        TestAssert.Equal(3, session.FrameBuffer.Count, "overflow: buffer fills to capacity and stops");
+        TestAssert.Equal(4, session.FrameBuffer.Count, "overflow: buffer fills to capacity and stops");
+    }
+
+    private static void RunFrameAndIncrementalOverflowMatch()
+    {
+        InstrumentContext[] contexts =
+        {
+            SurfaceHit(0, "probe"),
+            SurfaceHit(1, "probe"),
+            SurfaceHit(2, "probe")
+        };
+
+        ObserverInstrumentationSession batch = AllEnabled(maxHitsCapacity: 1);
+        batch.RunFrame(contexts);
+
+        ObserverInstrumentationSession incremental = AllEnabled(maxHitsCapacity: 1);
+        incremental.BeginFrame();
+        for (int i = 0; i < contexts.Length; i++)
+        {
+            if (!incremental.ProcessContext(in contexts[i]))
+                break;
+        }
+        incremental.EndFrame();
+
+        TestAssert.True(batch.OverflowOccurred, "batch overflow: overflow reported");
+        TestAssert.True(incremental.OverflowOccurred, "incremental overflow: overflow reported");
+        TestAssert.Equal(
+            incremental.DroppedObservationCount,
+            batch.DroppedObservationCount,
+            "batch overflow: dropped count matches incremental break behavior");
+        TestAssert.Equal(1, batch.DroppedObservationCount, "batch overflow: stops after first dropped context");
+        TestAssert.Equal(
+            incremental.LastObservationCount,
+            batch.LastObservationCount,
+            "batch overflow: observation count matches incremental");
+        TestAssert.Equal(4, batch.LastObservationCount, "batch overflow: buffer remains at capacity");
+        TestAssert.Equal(
+            incremental.FrameSequence,
+            batch.FrameSequence,
+            "batch overflow: frame sequence matches incremental");
     }
 
     private static void RunCatalogNullProducesDiagnosticUnresolved()
@@ -91,7 +131,7 @@ internal static class Stage1CLifecycleTests
 
         session.RunFrame(new[] { SurfaceHit(0, "probe") });
 
-        TestAssert.Equal(3, session.LastObservationCount, "null catalog: three observations");
+        TestAssert.Equal(4, session.LastObservationCount, "null catalog: four observations");
         for (int i = 0; i < session.FrameBuffer.Count; i++)
         {
             session.FrameBuffer.TryGet(i, out InstrumentObservation obs);
@@ -117,7 +157,7 @@ internal static class Stage1CLifecycleTests
             0, true, 0, Vector3.UnitY, Vector3.UnitY, "wall_panel");
         session.RunFrame(new[] { ctx });
 
-        TestAssert.Equal(3, session.LastObservationCount, "unknown collider: three observations");
+        TestAssert.Equal(4, session.LastObservationCount, "unknown collider: four observations");
         for (int i = 0; i < session.FrameBuffer.Count; i++)
         {
             session.FrameBuffer.TryGet(i, out InstrumentObservation obs);

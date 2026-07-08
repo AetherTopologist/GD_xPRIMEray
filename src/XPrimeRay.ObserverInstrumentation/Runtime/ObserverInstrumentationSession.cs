@@ -16,16 +16,21 @@ public sealed class ObserverInstrumentationSession
     public ObserverInstrumentationSession(
         InstrumentRegistry registry,
         int maxHitsCapacity,
-        InstrumentMetadataCatalog? catalog = null)
+        InstrumentMetadataCatalog? catalog = null,
+        int textureHitsCapacity = 0)
     {
         ArgumentNullException.ThrowIfNull(registry);
         if (!registry.IsSealed)
             throw new InvalidOperationException("Registry must be sealed before creating a session.");
         if (maxHitsCapacity < 0)
             throw new ArgumentOutOfRangeException(nameof(maxHitsCapacity));
+        if (textureHitsCapacity < 0)
+            throw new ArgumentOutOfRangeException(nameof(textureHitsCapacity));
         _registry = registry;
         _catalog = catalog;
-        _frameBuffer = new InstrumentFrameBuffer(registry.Count * maxHitsCapacity);
+        _frameBuffer = new InstrumentFrameBuffer(
+            registry.Count * maxHitsCapacity,
+            textureHitsCapacity);
     }
 
     public bool IsEnabled => _registry.EnabledMask != ObserverInstrumentMask.None;
@@ -54,10 +59,18 @@ public sealed class ObserverInstrumentationSession
         var registry = new InstrumentRegistry(
             new FlagCaptureInstrument(),
             new SurfaceUvInstrument(),
-            new CheckerProbeInstrument());
+            new CheckerProbeInstrument(),
+            new TextureSampleInstrument(config.TextureBindings, config.TextureResources));
         registry.SetEnabledMask(config.EnabledMask);
         registry.Seal();
-        return new ObserverInstrumentationSession(registry, maxHitsCapacity, config.Catalog);
+        int textureCapacity = (config.EnabledMask & ObserverInstrumentMask.TextureSample) != 0
+            ? maxHitsCapacity
+            : 0;
+        return new ObserverInstrumentationSession(
+            registry,
+            maxHitsCapacity,
+            config.Catalog,
+            textureCapacity);
     }
 
     // Full-span entry point for pure tests (no Godot type conversion needed).
@@ -67,7 +80,10 @@ public sealed class ObserverInstrumentationSession
         if (IsEnabled)
         {
             for (int i = 0; i < contexts.Length; i++)
-                ProcessContext(in contexts[i]);
+            {
+                if (!ProcessContext(in contexts[i]))
+                    break;
+            }
         }
         EndFrame();
     }

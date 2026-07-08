@@ -33,6 +33,7 @@ public sealed class ObserverInstrumentationAdapter
     public int LastObservationCount => _session.LastObservationCount;
     internal ulong FrameSequence => _session.FrameSequence;
     internal ReadOnlySpan<InstrumentObservation> Observations => _session.FrameBuffer.AsSpan();
+    internal ReadOnlySpan<TextureSampleObservation> TextureSamples => _session.FrameBuffer.TextureSamples;
 
     public InstrumentFrameBuffer FrameBuffer => _session.FrameBuffer;
 

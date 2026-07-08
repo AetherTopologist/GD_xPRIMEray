@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("XPrimeRay.ObserverInstrumentation")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+90b1cb6b1fe248ba4241bd669f72bc002b3b2585")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f65794d29100c0593726a4cf7e6d1b3689c2420d")]
 [assembly: System.Reflection.AssemblyProductAttribute("XPrimeRay.ObserverInstrumentation")]
 [assembly: System.Reflection.AssemblyTitleAttribute("XPrimeRay.ObserverInstrumentation")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

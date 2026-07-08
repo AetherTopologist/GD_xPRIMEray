@@ -1,0 +1,83 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://Tests/ObserverInstrumentation/Oi012TextureSampleDiagnosticHeadless.cs" id="1_controller"]
+[ext_resource type="Script" path="res://RayBeamRenderer.cs" id="2_rbr"]
+[ext_resource type="Script" path="res://GrinFilmCamera.cs" id="4_film"]
+[ext_resource type="Script" path="res://Tests/ObserverInstrumentation/Oi011ProbeBody.cs" id="5_probe"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_probe"]
+radius = 1.0
+height = 2.0
+
+[sub_resource type="SphereShape3D" id="SphereShape_probe"]
+radius = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Material_probe"]
+albedo_color = Color(0.7, 0.7, 0.7, 1)
+
+[node name="Oi012TextureSampleDiagnosticHeadless" type="Node3D"]
+script = ExtResource("1_controller")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4)
+current = true
+fov = 8.0
+near = 0.01
+far = 20.0
+
+[node name="texture_probe" type="StaticBody3D" parent="." groups=["fixture_geometry", "raytrace_geometry"]]
+script = ExtResource("5_probe")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="texture_probe"]
+material_override = SubResource("Material_probe")
+mesh = SubResource("SphereMesh_probe")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="texture_probe"]
+shape = SubResource("SphereShape_probe")
+
+[node name="RayBeamRenderer" type="Node3D" parent="."]
+visible = false
+script = ExtResource("2_rbr")
+CameraPath = NodePath("../Camera3D")
+StepsPerRay = 120
+StepLength = 0.05
+MinStepLength = 0.01
+MaxStepLength = 0.05
+CollisionRaySubdivideThreshold = 0.05
+MaxCollisionSubsteps = 2
+CollisionRadius = 0.003
+UseIntegratedField = false
+FieldStrength = 0.0
+StopOnHit = true
+TerminateTrailOnHit = true
+RequireHitToRender = false
+DebugMode = 1
+DebugOverlayOwnedByFilm = true
+UpdateEveryFrame = false
+
+[node name="GrinFilmCamera" type="Node" parent="."]
+script = ExtResource("4_film")
+Width = 40
+Height = 22
+FilmResolutionScale = 1.0
+NeedColliderNames = true
+ApplyPresetOnReady = false
+UpdateEveryFrame = true
+UpdateEveryFrameBudgetMs = 500.0
+UpdateEveryFrameMaxRowsPerStep = 22
+RenderStepMaxMs = 1000
+RenderStepMaxSegmentsPerFrame = 10000000
+TargetMsPerFrame = 1000
+MaxRowsPerFrameCap = 22
+RowsPerFrame = 22
+MinRowsPerFrame = 1
+MaxDistance = 6.0
+BroadphaseControlMode = 2
+BroadphasePolicy = 1
+DebugEveryNPixels = 1
+DebugMaxFilmRays = 2048
+EnableFramePerf = false
+RenderStepPhaseLog = false
+DebugSnapshotLog = false
+DebugProbeLog = false
+RayBeamRendererPath = NodePath("../RayBeamRenderer")
