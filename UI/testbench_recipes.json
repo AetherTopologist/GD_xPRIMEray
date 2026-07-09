@@ -339,6 +339,36 @@
         "transport_shape_regions_overlay.png"
       ],
       "guardrailText": "ReferenceTransportOracle is a renderer-reference comparison, not physical ground truth. Oracle outputs must not feed rendering or resolver decisions."
+    },
+    {
+      "id": "observer_instrumentation_diagnostics",
+      "title": "Observer Instrumentation Diagnostics",
+      "script": "scripts/run_observer_instrumentation_diagnostics.sh",
+      "workingDirectory": ".",
+      "scriptArgs": ["{timestamp}"],
+      "testbenchWrappedOutput": false,
+      "outputRoot": "output/observer_instrumentation/runs",
+      "rootEnv": "",
+      "qualityPresets": ["smoke"],
+      "defaultQuality": "smoke",
+      "qualityEnv": {
+        "smoke": {}
+      },
+      "allowedOverlayModes": ["none"],
+      "allowedPlacements": ["none"],
+      "overlayEnv": {},
+      "expectedReports": [
+        "observer_instrumentation_report.md"
+      ],
+      "expectedContactSheets": [],
+      "expectedSummaries": [
+        "summary.json"
+      ],
+      "expectedPreviews": [
+        "artifacts/oi_007_checker_diagnostic_upscaled.png",
+        "artifacts/oi_006_checker_diagnostic.png"
+      ],
+      "guardrailText": "Observer Instrumentation diagnostic bundle. PASS/FAIL is determined by the headless fixture exit codes. This recipe does not modify the renderer, transport, or observatory catalog. PNG artifacts encode instrument observations, not rendered pixels."
     }
   ]
 }

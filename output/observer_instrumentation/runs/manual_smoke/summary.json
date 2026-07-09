@@ -1,0 +1,21 @@
+{
+  "schema": "xprimeray.observer_instrumentation.diagnostics.v1",
+  "run_id": "oi_diagnostics_manual_smoke",
+  "timestamp": "2026-07-09T01:54:32Z",
+  "duration_seconds": 2,
+  "bundle": "/home/bb/code/godot_xPRIMEray/output/observer_instrumentation/runs/manual_smoke",
+  "overall_verdict": "PASS",
+  "core_pass": 3,
+  "core_fail": 0,
+  "extended_pass": 2,
+  "extended_fail": 0,
+  "skipped": 0,
+  "guardrail": "diagnostic-only; no transport change; no catalog write; PNG artifacts encode instrument observations not rendered pixels",
+  "fixtures": {
+    "oi_001": { "label": "OI-001", "name": "Equator UV Band Probe", "core": true, "verdict": "PASS", "exit_code": 0, "log": "logs/oi_001.log" },
+    "oi_005": { "label": "OI-005", "name": "Checker Chain Verification", "core": true, "verdict": "PASS", "exit_code": 0, "log": "logs/oi_005.log" },
+    "oi_006": { "label": "OI-006", "name": "Checker Diagnostic PNG", "core": true, "verdict": "PASS", "exit_code": 0, "log": "logs/oi_006.log" },
+    "oi_011": { "label": "OI-011", "name": "Texture CPU Source Parity", "core": false, "verdict": "PASS", "exit_code": 0, "log": "logs/oi_011.log" },
+    "oi_012": { "label": "OI-012", "name": "Texture Sample Diagnostic PNG", "core": false, "verdict": "PASS", "exit_code": 0, "log": "logs/oi_012.log" }
+  }
+}
