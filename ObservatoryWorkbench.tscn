@@ -1,0 +1,29 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" uid="uid://t2xyvpcd8ste" path="res://test.tscn" id="1_test"]
+[ext_resource type="PackedScene" path="res://UI/TestBenchPanel.tscn" id="2_bench"]
+[ext_resource type="PackedScene" path="res://UI/ObservatoryWorkbenchPanel.tscn" id="3_oi"]
+
+[node name="ObservatoryWorkbench" type="Node"]
+
+[node name="TestHarness" parent="." instance=ExtResource("1_test")]
+
+[node name="UILayer" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="SidePanel" type="MarginContainer" parent="UILayer"]
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -996.0
+offset_right = -16.0
+grow_horizontal = 0
+
+[node name="Tabs" type="TabContainer" parent="UILayer/SidePanel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="TestBench" parent="UILayer/SidePanel/Tabs" instance=ExtResource("2_bench")]
+
+[node name="Observatory" parent="UILayer/SidePanel/Tabs" instance=ExtResource("3_oi")]
