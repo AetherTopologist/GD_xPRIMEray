@@ -146,7 +146,7 @@ public partial class BoundaryLayerVolume : Node3D
 	/// The transform maps source-local coordinates to destination-local coordinates
 	/// with a 180° forward flip, matching linked portal-camera conventions.
 	/// </summary>
-	[Export] public NodePath LinkedBoundaryPath;
+	[Export] public NodePath LinkedBoundaryPath = new NodePath();
 	/// <summary>
 	/// Offset applied after the crossing transform so the sample resumes just outside
 	/// the destination shell instead of remaining inside it.
