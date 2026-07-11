@@ -1,0 +1,1 @@
+cd '/home/bb/code/godot_xPRIMEray' && 'bash' '/home/bb/code/godot_xPRIMEray/scripts/run_observer_instrumentation_diagnostics.sh' '20260711T215207Z'

@@ -1,0 +1,61 @@
+{
+  "schema": "xprimeray.testbench.run_manifest.v1",
+  "manifest_path": "/home/bb/code/godot_xPRIMEray/output/observer_instrumentation/runs/manual_smoke/testbench_run_manifest.json",
+  "recipe_id": "observer_instrumentation_diagnostics",
+  "recipe_title": "Observer Instrumentation Diagnostics",
+  "quality": "smoke",
+  "overlay": {
+    "mode": "none",
+    "placement": "none",
+    "postprocess_only": true,
+    "placement_descriptive_only": true
+  },
+  "exact_command": "cd \u0027/home/bb/code/godot_xPRIMEray\u0027 \u0026\u0026 \u0027bash\u0027 \u0027/home/bb/code/godot_xPRIMEray/scripts/run_observer_instrumentation_diagnostics.sh\u0027 \u002720260711T215207Z\u0027",
+  "working_directory": "/home/bb/code/godot_xPRIMEray",
+  "env": {},
+  "planned_output_folder": "/home/bb/code/godot_xPRIMEray/output/observer_instrumentation/runs/20260711T215207Z",
+  "testbench_wrapped_output": false,
+  "source_script_artifacts_preserved": true,
+  "dry_run": false,
+  "status": "running",
+  "started_utc": "2026-07-11T21:52:07Z",
+  "updated_utc": "2026-07-11T21:52:07Z",
+  "duration_seconds": 0.0140226,
+  "duration_text": "0s",
+  "smoke_success_known": false,
+  "artifacts": {
+    "folder": "/home/bb/code/godot_xPRIMEray/output/observer_instrumentation/runs/manual_smoke",
+    "report": "/home/bb/code/godot_xPRIMEray/output/observer_instrumentation/runs/manual_smoke/observer_instrumentation_report.md",
+    "contact_sheet": "",
+    "summary": "/home/bb/code/godot_xPRIMEray/output/observer_instrumentation/runs/manual_smoke/summary.json",
+    "preview": "/home/bb/code/godot_xPRIMEray/output/observer_instrumentation/runs/manual_smoke/artifacts/oi_007_checker_diagnostic_upscaled.png",
+    "expected_reports": [
+      "/home/bb/code/godot_xPRIMEray/output/observer_instrumentation/runs/20260711T215207Z/observer_instrumentation_report.md"
+    ],
+    "expected_contact_sheets": [],
+    "expected_summaries": [
+      "/home/bb/code/godot_xPRIMEray/output/observer_instrumentation/runs/20260711T215207Z/summary.json"
+    ],
+    "expected_previews": [
+      "/home/bb/code/godot_xPRIMEray/output/observer_instrumentation/runs/20260711T215207Z/artifacts/oi_007_checker_diagnostic_upscaled.png",
+      "/home/bb/code/godot_xPRIMEray/output/observer_instrumentation/runs/20260711T215207Z/artifacts/oi_006_checker_diagnostic.png"
+    ]
+  },
+  "cockpit_summary": "Observer Instrumentation Diagnostics: report found; contact sheet missing; duration 0s.",
+  "guardrail_text": "Observer Instrumentation diagnostic bundle. PASS/FAIL is determined by the headless fixture exit codes. This recipe does not modify the renderer, transport, or observatory catalog. PNG artifacts encode instrument observations, not rendered pixels.",
+  "visual_grammar": {
+    "straight_reference": "#d8d8d8",
+    "curved_transport": [
+      "#00d7ff",
+      "#ff4fd8"
+    ],
+    "density": "#2f7dff",
+    "curvature": "#f2c14e",
+    "unresolved_failed_transport": [
+      "#ff4b2f",
+      "#ff9a2f"
+    ],
+    "observer_camera": "small_labeled_glyph",
+    "field_center_nucleus": "crosshair"
+  }
+}

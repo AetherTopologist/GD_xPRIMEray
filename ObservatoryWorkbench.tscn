@@ -1,29 +1,54 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="PackedScene" uid="uid://t2xyvpcd8ste" path="res://test.tscn" id="1_test"]
-[ext_resource type="PackedScene" path="res://UI/TestBenchPanel.tscn" id="2_bench"]
-[ext_resource type="PackedScene" path="res://UI/ObservatoryWorkbenchPanel.tscn" id="3_oi"]
+[ext_resource type="PackedScene" path="res://UI/ObservatoryWorkbenchPanel.tscn" id="2_oi"]
+[ext_resource type="PackedScene" path="res://UI/TestBenchPanel.tscn" id="3_bench"]
+[ext_resource type="Script" path="res://UI/ObservatoryWorkbench.gd" id="4_workbench"]
 
 [node name="ObservatoryWorkbench" type="Node"]
+script = ExtResource("4_workbench")
 
 [node name="TestHarness" parent="." instance=ExtResource("1_test")]
 
 [node name="UILayer" type="CanvasLayer" parent="."]
 layer = 10
 
-[node name="SidePanel" type="MarginContainer" parent="UILayer"]
+[node name="UIRoot" type="Control" parent="UILayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="SideDock" type="PanelContainer" parent="UILayer/UIRoot"]
+clip_contents = true
 anchor_left = 1.0
 anchor_top = 0.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -996.0
-offset_right = -16.0
+offset_left = -540.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = -12.0
 grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 0
 
-[node name="Tabs" type="TabContainer" parent="UILayer/SidePanel"]
-anchor_right = 1.0
-anchor_bottom = 1.0
+[node name="Tabs" type="TabContainer" parent="UILayer/UIRoot/SideDock"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+current_tab = 0
 
-[node name="TestBench" parent="UILayer/SidePanel/Tabs" instance=ExtResource("2_bench")]
+[node name="Observatory" parent="UILayer/UIRoot/SideDock/Tabs" instance=ExtResource("2_oi")]
+layout_mode = 2
 
-[node name="Observatory" parent="UILayer/SidePanel/Tabs" instance=ExtResource("3_oi")]
+[node name="TestBenchScroll" type="ScrollContainer" parent="UILayer/UIRoot/SideDock/Tabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+follow_focus = true
+
+[node name="TestBenchPanel" parent="UILayer/UIRoot/SideDock/Tabs/TestBenchScroll" instance=ExtResource("3_bench")]
+layout_mode = 2

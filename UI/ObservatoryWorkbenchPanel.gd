@@ -21,23 +21,23 @@ const FIXTURE_PNGS_FALLBACK := [
 @onready var _stop_button: Button = $Margin/Root/Actions/StopButton
 @onready var _open_bundle_button: Button = $Margin/Root/Actions/OpenBundleButton
 @onready var _open_report_button: Button = $Margin/Root/Actions/OpenReportButton
-@onready var _detail_header: Label = $Margin/Root/Body/Right/DetailHeader
-@onready var _preview_texture: TextureRect = $Margin/Root/Body/Right/PreviewArea/PreviewTexture
-@onready var _provenance_log: TextEdit = $Margin/Root/Body/Right/ProvenanceLog
+@onready var _detail_header: Label = $Margin/Root/DetailHeader
+@onready var _preview_texture: TextureRect = $Margin/Root/PreviewArea/PreviewTexture
+@onready var _provenance_log: TextEdit = $Margin/Root/ProvenanceLog
 
 @onready var _fixture_chips: Array = [
-	$Margin/Root/Body/Left/Oi001Row/Oi001Chip,
-	$Margin/Root/Body/Left/Oi006Row/Oi006Chip,
-	$Margin/Root/Body/Left/Oi012Row/Oi012Chip,
+	$Margin/Root/Experiments/Oi001Row/Oi001Chip,
+	$Margin/Root/Experiments/Oi006Row/Oi006Chip,
+	$Margin/Root/Experiments/Oi012Row/Oi012Chip,
 ]
 @onready var _fixture_btns: Array = [
-	$Margin/Root/Body/Left/Oi001Row/Oi001Btn,
-	$Margin/Root/Body/Left/Oi006Row/Oi006Btn,
-	$Margin/Root/Body/Left/Oi012Row/Oi012Btn,
+	$Margin/Root/Experiments/Oi001Row/Oi001Btn,
+	$Margin/Root/Experiments/Oi006Row/Oi006Btn,
+	$Margin/Root/Experiments/Oi012Row/Oi012Btn,
 ]
 
 var _bundle_dir := ""
-var _verdicts := ["—", "—", "—"]
+var _verdicts := ["-", "-", "-"]
 var _selected := 0
 var _is_running := false
 var _poll_timer: Timer
@@ -69,7 +69,7 @@ func _setup_poll_timer() -> void:
 
 func _on_run_pressed() -> void:
 	_bundle_dir = ""
-	_verdicts = ["—", "—", "—"]
+	_verdicts = ["-", "-", "-"]
 	var result = JSON.parse_string(str(_controller.call(
 		"RunJson", RECIPE_ID, "smoke", "none", "none"
 	)))
@@ -145,11 +145,11 @@ func _finalize() -> void:
 	for idx in FIXTURE_IDS.size():
 		var fid: String = FIXTURE_IDS[idx]
 		if fixtures.has(fid):
-			_verdicts[idx] = str(fixtures[fid].get("verdict", "—"))
+			_verdicts[idx] = str(fixtures[fid].get("verdict", "-"))
 		else:
-			_verdicts[idx] = "—"
+			_verdicts[idx] = "-"
 
-	var overall := str(summary.get("overall_verdict", "—"))
+	var overall := str(summary.get("overall_verdict", "-"))
 	if overall == "PASS":
 		_status_chip.text = "PASS"
 		_status_chip.add_theme_color_override("font_color", Color(0.45, 0.95, 0.58))
@@ -173,8 +173,8 @@ func _on_fixture_selected(idx: int) -> void:
 func _refresh_detail_panel(idx: int) -> void:
 	var label: String = FIXTURE_LABELS[idx]
 	var verdict: String = _verdicts[idx]
-	_detail_header.text = "%s — %s" % [label, FIXTURE_NAMES[idx]]
-	if verdict != "—":
+	_detail_header.text = "%s - %s" % [label, FIXTURE_NAMES[idx]]
+	if verdict != "-":
 		_detail_header.text += " [%s]" % verdict
 
 	var png_path := ""
@@ -224,7 +224,7 @@ func _refresh_chips() -> void:
 				chip.add_theme_color_override("font_color", Color(0.45, 0.95, 0.58))
 			"FAIL":
 				chip.add_theme_color_override("font_color", Color(1.0, 0.38, 0.32))
-			"…":
+			"...":
 				chip.add_theme_color_override("font_color", Color(1.0, 0.82, 0.35))
 
 
@@ -240,13 +240,13 @@ func _set_state_idle() -> void:
 
 func _set_state_running() -> void:
 	_is_running = true
-	_status_chip.text = "Running…"
+	_status_chip.text = "Running..."
 	_status_chip.remove_theme_color_override("font_color")
 	_run_button.disabled = true
 	_stop_button.disabled = false
 	_open_bundle_button.disabled = true
 	_open_report_button.disabled = true
-	_verdicts = ["…", "…", "…"]
+	_verdicts = ["...", "...", "..."]
 	_refresh_chips()
 	_provenance_log.text = ""
 
