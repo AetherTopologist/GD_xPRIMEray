@@ -1,9 +1,23 @@
 extends PanelContainer
 
 const RECIPE_ID := "observer_instrumentation_diagnostics"
-const FIXTURE_IDS := ["oi_001", "oi_006", "oi_012"]
+const FIXTURE_IDS    := ["oi_001", "oi_006", "oi_012"]
 const FIXTURE_LABELS := ["OI-001", "OI-006", "OI-012"]
-const FIXTURE_NAMES := ["Equator UV Band", "Checker Diagnostic", "Texture Sample"]
+const FIXTURE_NAMES  := ["Equator UV Band", "Checker Diagnostic", "Texture Sample"]
+
+const FIXTURE_CLAIMS := [
+	"UV coordinates at the equatorial band land in the expected V-range for all surface hits.",
+	"Light and dark checker classifications route consistently with no unresolved diagnostic pixels.",
+	"Texture observations match the configured CPU source with zero measured channel difference.",
+]
+const FIXTURE_BOUNDARIES := [
+	"Does not verify UV at poles, seam wrap, or non-equatorial regions.",
+	"Verifies probe routing and checker logic; does not verify rendered pixel color accuracy.",
+	"Validates the diagnostic read-back path, not the renderer's filtering or mip selection.",
+]
+# Reserved for future content; EvidenceCard hides the section when the string is empty.
+const FIXTURE_WHY := ["", "", ""]
+
 const FIXTURE_PNGS := [
 	"",
 	"artifacts/oi_007_checker_diagnostic_upscaled.png",
@@ -15,15 +29,28 @@ const FIXTURE_PNGS_FALLBACK := [
 	"artifacts/oi_012_texture_sample_diagnostic.png",
 ]
 
+# [display_label, metric_key] pairs per fixture.
+# metric_key matches keys in summary.json["fixtures"][fid]["metrics"] (primary)
+# and in the fixture log PASS/FAIL line (fallback). Same table drives both paths.
+const FIXTURE_METRIC_DEFS := [
+	# OI-001
+	[["Surface hits", "surface"], ["UV in band", "vBand"], ["UV mean", "vMean"],
+	 ["UV min", "vMin"], ["UV max", "vMax"], ["Unresolved", "unresolvedAny"]],
+	# OI-006
+	[["Surface hits", "surface"], ["Checker hits", "checker"], ["Light cells", "light"],
+	 ["Dark cells", "dark"], ["Unresolved probe", "unresolvedProbe"], ["UV mismatch", "uvMismatch"]],
+	# OI-012
+	[["Samples", "samples"], ["Mismatches", "mismatches"], ["Max Δ channel", "maxChannelDelta"],
+	 ["Mean Δ channel", "meanChannelDelta"], ["Written pixels", "writtenPixels"], ["Unique pixels", "uniquePixels"]],
+]
+
 @onready var _controller: Node = $TestBenchController
 @onready var _status_chip: Label = $Margin/Root/Header/StatusChip
 @onready var _run_button: Button = $Margin/Root/Actions/RunButton
 @onready var _stop_button: Button = $Margin/Root/Actions/StopButton
 @onready var _open_bundle_button: Button = $Margin/Root/Actions/OpenBundleButton
 @onready var _open_report_button: Button = $Margin/Root/Actions/OpenReportButton
-@onready var _detail_header: Label = $Margin/Root/DetailHeader
-@onready var _preview_texture: TextureRect = $Margin/Root/PreviewArea/PreviewTexture
-@onready var _provenance_log: TextEdit = $Margin/Root/ProvenanceLog
+@onready var _evidence_card: EvidenceCard = $Margin/Root/EvidenceScroll/EvidenceCard
 
 @onready var _fixture_chips: Array = [
 	$Margin/Root/Experiments/Oi001Row/Oi001Chip,
@@ -41,7 +68,7 @@ var _verdicts := ["-", "-", "-"]
 var _selected := 0
 var _is_running := false
 var _poll_timer: Timer
-var _preview_path := ""
+var _summary := {}  # Cached after _finalize(); used by _get_fixture_metrics().
 
 
 func _ready() -> void:
@@ -70,6 +97,7 @@ func _setup_poll_timer() -> void:
 func _on_run_pressed() -> void:
 	_bundle_dir = ""
 	_verdicts = ["-", "-", "-"]
+	_summary = {}
 	var result = JSON.parse_string(str(_controller.call(
 		"RunJson", RECIPE_ID, "smoke", "none", "none"
 	)))
@@ -98,8 +126,7 @@ func _poll() -> void:
 		return
 	var log_chunk := str(_controller.call("DrainLog"))
 	if not log_chunk.is_empty() and _is_running:
-		_provenance_log.text += log_chunk
-		_provenance_log.scroll_vertical = _provenance_log.get_line_count()
+		_evidence_card.append_log(log_chunk)
 		_apply_live_chips(log_chunk)
 
 	var status = JSON.parse_string(str(_controller.call("GetStatusJson")))
@@ -122,6 +149,7 @@ func _apply_live_chips(log_chunk: String) -> void:
 
 func _finalize() -> void:
 	_is_running = false
+
 	if _bundle_dir.is_empty():
 		_set_state_error("No bundle dir.")
 		return
@@ -135,21 +163,20 @@ func _finalize() -> void:
 	if f == null:
 		_set_state_error("Cannot open summary.json.")
 		return
-	var summary = JSON.parse_string(f.get_as_text())
+	var parsed = JSON.parse_string(f.get_as_text())
 	f = null
-	if typeof(summary) != TYPE_DICTIONARY:
+	if typeof(parsed) != TYPE_DICTIONARY:
 		_set_state_error("summary.json unreadable.")
 		return
 
-	var fixtures: Dictionary = summary.get("fixtures", {})
+	_summary = parsed
+
+	var fixtures: Dictionary = _summary.get("fixtures", {})
 	for idx in FIXTURE_IDS.size():
 		var fid: String = FIXTURE_IDS[idx]
-		if fixtures.has(fid):
-			_verdicts[idx] = str(fixtures[fid].get("verdict", "-"))
-		else:
-			_verdicts[idx] = "-"
+		_verdicts[idx] = str(fixtures.get(fid, {}).get("verdict", "-"))
 
-	var overall := str(summary.get("overall_verdict", "-"))
+	var overall := str(_summary.get("overall_verdict", "-"))
 	if overall == "PASS":
 		_status_chip.text = "PASS"
 		_status_chip.add_theme_color_override("font_color", Color(0.45, 0.95, 0.58))
@@ -162,56 +189,131 @@ func _finalize() -> void:
 	_open_bundle_button.disabled = false
 	_open_report_button.disabled = false
 	_refresh_chips()
-	_refresh_detail_panel(_selected)
+	_evidence_card.populate(_build_card_data(_selected))
 
 
 func _on_fixture_selected(idx: int) -> void:
 	_selected = idx
-	_refresh_detail_panel(idx)
+	if _is_running:
+		# During a run: show claim/boundary for the new selection without clearing
+		# the streaming log. Metrics remain as pending placeholders.
+		_evidence_card.populate({
+			"title": "%s — %s" % [FIXTURE_LABELS[idx], FIXTURE_NAMES[idx]],
+			"verdict": "...",
+			"claim": FIXTURE_CLAIMS[idx],
+			"boundary": FIXTURE_BOUNDARIES[idx],
+			"why_it_matters": FIXTURE_WHY[idx],
+			"metrics": [],
+			"legacy_metrics": false,
+			"artifact_path": "",
+			"log_text": "",
+		})
+	else:
+		_evidence_card.populate(_build_card_data(idx))
 
 
-func _refresh_detail_panel(idx: int) -> void:
-	var label: String = FIXTURE_LABELS[idx]
-	var verdict: String = _verdicts[idx]
-	_detail_header.text = "%s - %s" % [label, FIXTURE_NAMES[idx]]
-	if verdict != "-":
-		_detail_header.text += " [%s]" % verdict
+# Assemble the full data dict for EvidenceCard.populate().
+func _build_card_data(idx: int) -> Dictionary:
+	var metric_result := _get_fixture_metrics(idx)
 
-	var png_path := ""
-	if not _bundle_dir.is_empty():
+	var artifact_path := ""
+	if not _bundle_dir.is_empty() and not FIXTURE_PNGS[idx].is_empty():
 		var primary: String = _bundle_dir + "/" + FIXTURE_PNGS[idx]
 		var fallback: String = _bundle_dir + "/" + FIXTURE_PNGS_FALLBACK[idx]
-		if not FIXTURE_PNGS[idx].is_empty() and FileAccess.file_exists(primary):
-			png_path = primary
-		elif not FIXTURE_PNGS_FALLBACK[idx].is_empty() and FileAccess.file_exists(fallback):
-			png_path = fallback
-	_update_preview(png_path)
+		if FileAccess.file_exists(primary):
+			artifact_path = primary
+		elif FileAccess.file_exists(fallback):
+			artifact_path = fallback
 
-	var log_path := ""
+	var log_text := ""
 	if not _bundle_dir.is_empty():
-		log_path = _bundle_dir + "/logs/" + FIXTURE_IDS[idx] + ".log"
-	if not _is_running and not log_path.is_empty() and FileAccess.file_exists(log_path):
-		var f := FileAccess.open(log_path, FileAccess.READ)
-		if f != null:
-			_provenance_log.text = f.get_as_text()
-			_provenance_log.scroll_vertical = _provenance_log.get_line_count()
-			f = null
+		var log_path: String = _bundle_dir + "/logs/" + FIXTURE_IDS[idx] + ".log"
+		if FileAccess.file_exists(log_path):
+			var lf := FileAccess.open(log_path, FileAccess.READ)
+			if lf != null:
+				log_text = lf.get_as_text()
+				lf = null
+
+	return {
+		"title": "%s — %s" % [FIXTURE_LABELS[idx], FIXTURE_NAMES[idx]],
+		"verdict": _verdicts[idx],
+		"claim": FIXTURE_CLAIMS[idx],
+		"boundary": FIXTURE_BOUNDARIES[idx],
+		"why_it_matters": FIXTURE_WHY[idx],
+		"metrics": metric_result["rows"],
+		"legacy_metrics": metric_result["legacy"],
+		"artifact_path": artifact_path,
+		"log_text": log_text,
+	}
 
 
-func _update_preview(path: String) -> void:
-	if path.is_empty():
-		_preview_path = ""
-		_preview_texture.texture = null
-		return
-	if path == _preview_path:
-		return
-	_preview_path = path
-	var image := Image.new()
-	var err := image.load(path)
-	if err != OK:
-		_preview_texture.texture = null
-		return
-	_preview_texture.texture = ImageTexture.create_from_image(image)
+# Returns {rows: Array[{key, value}], legacy: bool}.
+#
+# Primary path: summary.json["fixtures"][fid]["metrics"] — a Dictionary of
+# metric_key → value strings. Expected when bundles include structured metrics.
+#
+# Fallback path: parse the fixture log, merging all [OI-NNN]-prefixed lines.
+# Sets legacy=true so the card can display the "legacy" indicator.
+func _get_fixture_metrics(idx: int) -> Dictionary:
+	var fid: String = FIXTURE_IDS[idx]
+	var verdict: String = _verdicts[idx]
+
+	if _bundle_dir.is_empty() or verdict == "-" or verdict == "...":
+		return {"rows": [], "legacy": false}
+
+	# Primary: structured metrics block in summary.json
+	var fixture_entry: Dictionary = _summary.get("fixtures", {}).get(fid, {})
+	if fixture_entry.has("metrics") and typeof(fixture_entry["metrics"]) == TYPE_DICTIONARY:
+		return {
+			"rows": _apply_metric_defs(idx, fixture_entry["metrics"]),
+			"legacy": false,
+		}
+
+	# Fallback: parse the fixture log
+	var log_path: String = _bundle_dir + "/logs/" + fid + ".log"
+	if not FileAccess.file_exists(log_path):
+		return {"rows": [], "legacy": false}
+	var lf := FileAccess.open(log_path, FileAccess.READ)
+	if lf == null:
+		return {"rows": [], "legacy": false}
+	var raw := _parse_fixture_metrics(lf.get_as_text(), FIXTURE_LABELS[idx])
+	lf = null
+	return {
+		"rows": _apply_metric_defs(idx, raw),
+		"legacy": true,
+	}
+
+
+# Apply FIXTURE_METRIC_DEFS ordering to a raw key→value dict, producing
+# the [{key: display_label, value}] array that EvidenceCard.populate() expects.
+func _apply_metric_defs(idx: int, raw: Dictionary) -> Array:
+	var rows := []
+	for row_def in FIXTURE_METRIC_DEFS[idx]:
+		var display: String = row_def[0]
+		var key: String = row_def[1]
+		rows.append({"key": display, "value": raw.get(key, "—")})
+	return rows
+
+
+func _parse_kv(line: String) -> Dictionary:
+	var result := {}
+	for part in line.split(" "):
+		if "=" in part:
+			var kv := part.split("=", true, 1)
+			if kv.size() == 2:
+				result[kv[0]] = kv[1]
+	return result
+
+
+func _parse_fixture_metrics(log_text: String, fixture_label: String) -> Dictionary:
+	# Merge key=value fields from ALL [OI-NNN]-prefixed lines.
+	# Later lines overwrite earlier ones — the acceptance (PASS/FAIL) line wins.
+	var prefix := "[%s]" % fixture_label
+	var result := {}
+	for line in log_text.split("\n"):
+		if line.begins_with(prefix):
+			result.merge(_parse_kv(line), true)
+	return result
 
 
 func _refresh_chips() -> void:
@@ -248,7 +350,8 @@ func _set_state_running() -> void:
 	_open_report_button.disabled = true
 	_verdicts = ["...", "...", "..."]
 	_refresh_chips()
-	_provenance_log.text = ""
+	_evidence_card.reset_for_run()
+	_on_fixture_selected(_selected)
 
 
 func _set_state_error(msg: String) -> void:
@@ -256,4 +359,4 @@ func _set_state_error(msg: String) -> void:
 	_status_chip.add_theme_color_override("font_color", Color(1.0, 0.38, 0.32))
 	_run_button.disabled = false
 	_stop_button.disabled = true
-	_provenance_log.text += "\n[error] " + msg
+	_evidence_card.show_error(msg)

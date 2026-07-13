@@ -1,0 +1,143 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://UI/EvidenceCard.gd" id="1_ec"]
+
+[node name="EvidenceCard" type="PanelContainer"]
+script = ExtResource("1_ec")
+size_flags_horizontal = 3
+
+[node name="CardMargin" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 6
+
+[node name="CardRoot" type="VBoxContainer" parent="CardMargin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="CardHeader" type="HBoxContainer" parent="CardMargin/CardRoot"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="CardTitle" type="Label" parent="CardMargin/CardRoot/CardHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = ""
+theme_override_font_sizes/font_size = 12
+text_overrun_behavior = 3
+
+[node name="CardVerdict" type="Label" parent="CardMargin/CardRoot/CardHeader"]
+layout_mode = 2
+text = "-"
+
+[node name="Divider" type="HSeparator" parent="CardMargin/CardRoot"]
+layout_mode = 2
+
+[node name="ClaimSection" type="VBoxContainer" parent="CardMargin/CardRoot"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="ClaimLabel" type="Label" parent="CardMargin/CardRoot/ClaimSection"]
+layout_mode = 2
+text = "CLAIM"
+theme_override_font_sizes/font_size = 10
+
+[node name="ClaimText" type="Label" parent="CardMargin/CardRoot/ClaimSection"]
+layout_mode = 2
+autowrap_mode = 3
+text = ""
+
+[node name="BoundarySection" type="VBoxContainer" parent="CardMargin/CardRoot"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="BoundaryLabel" type="Label" parent="CardMargin/CardRoot/BoundarySection"]
+layout_mode = 2
+text = "BOUNDARY"
+theme_override_font_sizes/font_size = 10
+
+[node name="BoundaryText" type="Label" parent="CardMargin/CardRoot/BoundarySection"]
+layout_mode = 2
+autowrap_mode = 3
+text = ""
+
+[node name="WhySection" type="VBoxContainer" parent="CardMargin/CardRoot"]
+layout_mode = 2
+theme_override_constants/separation = 2
+visible = false
+
+[node name="WhyLabel" type="Label" parent="CardMargin/CardRoot/WhySection"]
+layout_mode = 2
+text = "WHY IT MATTERS"
+theme_override_font_sizes/font_size = 10
+
+[node name="WhyText" type="Label" parent="CardMargin/CardRoot/WhySection"]
+layout_mode = 2
+autowrap_mode = 3
+text = ""
+
+[node name="MetricsSection" type="VBoxContainer" parent="CardMargin/CardRoot"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="MetricsHeader" type="HBoxContainer" parent="CardMargin/CardRoot/MetricsSection"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="MetricsLabel" type="Label" parent="CardMargin/CardRoot/MetricsSection/MetricsHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "METRICS"
+theme_override_font_sizes/font_size = 10
+
+[node name="LegacyChip" type="Label" parent="CardMargin/CardRoot/MetricsSection/MetricsHeader"]
+layout_mode = 2
+text = "legacy"
+theme_override_font_sizes/font_size = 10
+visible = false
+
+[node name="MetricsContainer" type="VBoxContainer" parent="CardMargin/CardRoot/MetricsSection"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="PreviewArea" type="PanelContainer" parent="CardMargin/CardRoot"]
+custom_minimum_size = Vector2(0, 140)
+layout_mode = 2
+size_flags_horizontal = 3
+visible = false
+
+[node name="PreviewTexture" type="TextureRect" parent="CardMargin/CardRoot/PreviewArea"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LogSection" type="VBoxContainer" parent="CardMargin/CardRoot"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="LogHeader" type="HBoxContainer" parent="CardMargin/CardRoot/LogSection"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="LogLabel" type="Label" parent="CardMargin/CardRoot/LogSection/LogHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "TECHNICAL LOG"
+theme_override_font_sizes/font_size = 10
+
+[node name="LogToggle" type="Button" parent="CardMargin/CardRoot/LogSection/LogHeader"]
+layout_mode = 2
+flat = true
+text = "> Log"
+
+[node name="ProvenanceLog" type="TextEdit" parent="CardMargin/CardRoot/LogSection"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+size_flags_horizontal = 3
+visible = false
+editable = false
+wrap_mode = 1

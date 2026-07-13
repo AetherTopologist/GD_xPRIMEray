@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://UI/ObservatoryWorkbenchPanel.gd" id="1_gd"]
 [ext_resource type="Script" path="res://UI/TestBenchController.cs" id="2_cs"]
+[ext_resource type="PackedScene" path="res://UI/EvidenceCard.tscn" id="3_ec"]
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_1"]
 
@@ -29,7 +30,7 @@ theme_override_constants/separation = 8
 [node name="TitleLabel" type="Label" parent="Margin/Root/Header"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Observatory Workbench v0.1"
+text = "Observatory Workbench"
 theme_override_font_sizes/font_size = 14
 
 [node name="StatusChip" type="Label" parent="Margin/Root/Header"]
@@ -106,31 +107,12 @@ text_overrun_behavior = 3
 layout_mode = 2
 text = "-"
 
-[node name="DetailHeader" type="Label" parent="Margin/Root"]
-layout_mode = 2
-text = "OI-001 - Equator UV Band"
-theme_override_font_sizes/font_size = 12
-text_overrun_behavior = 3
-
-[node name="PreviewArea" type="PanelContainer" parent="Margin/Root"]
-custom_minimum_size = Vector2(0, 160)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="PreviewTexture" type="TextureRect" parent="Margin/Root/PreviewArea"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-expand_mode = 1
-stretch_mode = 5
-
-[node name="ProvenanceLog" type="TextEdit" parent="Margin/Root"]
-custom_minimum_size = Vector2(0, 96)
+[node name="EvidenceScroll" type="ScrollContainer" parent="Margin/Root"]
 layout_mode = 2
 size_flags_vertical = 3
-editable = false
-wrap_mode = 1
+
+[node name="EvidenceCard" parent="Margin/Root/EvidenceScroll" instance=ExtResource("3_ec")]
+layout_mode = 2
 
 [node name="Actions" type="GridContainer" parent="Margin/Root"]
 layout_mode = 2
