@@ -50,7 +50,7 @@ const FIXTURE_METRIC_DEFS := [
 @onready var _stop_button: Button = $Margin/Root/Actions/StopButton
 @onready var _open_bundle_button: Button = $Margin/Root/Actions/OpenBundleButton
 @onready var _open_report_button: Button = $Margin/Root/Actions/OpenReportButton
-@onready var _evidence_card: EvidenceCard = $Margin/Root/EvidenceScroll/EvidenceCard
+@onready var _evidence_card = $Margin/Root/EvidenceScroll/EvidenceCard
 
 @onready var _fixture_chips: Array = [
 	$Margin/Root/Experiments/Oi001Row/Oi001Chip,
