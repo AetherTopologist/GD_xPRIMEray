@@ -17,6 +17,7 @@ public partial class OverspaceTrophyRoomDemo : Node3D
 	[Export] public bool BuildDefaultGraphIfMissing = true;
 	[Export] public UniverseGraph DemoGraph;
 	[Export] public bool EnableAutoValidation = false;
+	[Export] public bool ExternalTraversalOwnerActive = false;
 	[Export] public string ValidationCapturePath = "res://output/overspace/overspace_first_milestone.png";
 	[Export(PropertyHint.Range, "0.5,20,0.1")] public float ValidationMoveSpeed = 3.2f;
 	[Export(PropertyHint.Range, "0,10,0.1")] public float ValidationCaptureDelaySeconds = 1.0f;
@@ -66,6 +67,17 @@ public partial class OverspaceTrophyRoomDemo : Node3D
 		InitializeValidationMode();
 	}
 
+	public void OverrideViewerCamera(Camera3D camera)
+	{
+		_viewerCamera = camera;
+		EnsureViewerSeesAllZones();
+	}
+
+	public void SetExternalTraversalOwnerActive(bool active)
+	{
+		ExternalTraversalOwnerActive = active;
+	}
+
 	public override void _Process(double delta)
 	{
 		UpdatePortalViews();
@@ -85,17 +97,20 @@ public partial class OverspaceTrophyRoomDemo : Node3D
 			return;
 		}
 
-		foreach (KeyValuePair<WormholePortal, string> entry in _anchorIdByPortal)
+		if (!ExternalTraversalOwnerActive)
 		{
-			WormholePortal portal = entry.Key;
-			float currentDelta = portal.SignedRadiusDelta(_viewerCamera.GlobalPosition);
-			float previousDelta = _lastPortalDelta.TryGetValue(portal, out float storedDelta) ? storedDelta : currentDelta;
-			_lastPortalDelta[portal] = currentDelta;
-
-			if (previousDelta > 0f && currentDelta <= 0f)
+			foreach (KeyValuePair<WormholePortal, string> entry in _anchorIdByPortal)
 			{
-				TeleportVia(portal, entry.Value);
-				break;
+				WormholePortal portal = entry.Key;
+				float currentDelta = portal.SignedRadiusDelta(_viewerCamera.GlobalPosition);
+				float previousDelta = _lastPortalDelta.TryGetValue(portal, out float storedDelta) ? storedDelta : currentDelta;
+				_lastPortalDelta[portal] = currentDelta;
+
+				if (previousDelta > 0f && currentDelta <= 0f)
+				{
+					TeleportVia(portal, entry.Value);
+					break;
+				}
 			}
 		}
 

@@ -1,0 +1,173 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://Transport/TransportChamberOrchestrator.gd" id="1_orchestrator"]
+[ext_resource type="PackedScene" path="res://Transport/TransportChamberPlayer.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://overspace_trophy_room_demo.tscn" id="3_overspace"]
+[ext_resource type="Script" path="res://GrinFilmCamera.cs" id="4_grin"]
+[ext_resource type="Script" path="res://RayBeamRenderer.cs" id="5_rbr"]
+[ext_resource type="Script" path="res://FieldSource3D.cs" id="6_field"]
+[ext_resource type="Script" path="res://BoundaryLayerVolume.cs" id="7_boundary"]
+[ext_resource type="Script" path="res://FilmOverlay2D.cs" id="8_overlay"]
+
+[sub_resource type="BoxShape3D" id="BoxShape_floor"]
+size = Vector3(20, 0.25, 22)
+
+[sub_resource type="BoxShape3D" id="BoxShape_wall"]
+size = Vector3(20, 8, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape_side_wall"]
+size = Vector3(0.3, 8, 22)
+
+[node name="TransportChamberWorld" type="Node3D"]
+script = ExtResource("1_orchestrator")
+
+[node name="TransportChamberPlayer" parent="." instance=ExtResource("2_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 10)
+
+[node name="OverspaceTrophyRoom" parent="." instance=ExtResource("3_overspace")]
+
+[node name="GalleryCollision" type="Node3D" parent="."]
+
+[node name="Floor" type="StaticBody3D" parent="GalleryCollision"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GalleryCollision/Floor"]
+shape = SubResource("BoxShape_floor")
+
+[node name="Ceiling" type="StaticBody3D" parent="GalleryCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GalleryCollision/Ceiling"]
+shape = SubResource("BoxShape_floor")
+
+[node name="BackWall" type="StaticBody3D" parent="GalleryCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, -8)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GalleryCollision/BackWall"]
+shape = SubResource("BoxShape_wall")
+
+[node name="FrontWall" type="StaticBody3D" parent="GalleryCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 11)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GalleryCollision/FrontWall"]
+shape = SubResource("BoxShape_wall")
+
+[node name="LeftWall" type="StaticBody3D" parent="GalleryCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 4, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GalleryCollision/LeftWall"]
+shape = SubResource("BoxShape_side_wall")
+
+[node name="RightWall" type="StaticBody3D" parent="GalleryCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 4, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GalleryCollision/RightWall"]
+shape = SubResource("BoxShape_side_wall")
+
+[node name="GalleryFieldSource" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 2.55, -1)
+script = ExtResource("6_field")
+ROuter = 2.5
+Amp = 1.0
+DebugVizInGame = true
+
+[node name="EarthFieldSource" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.55, -135.6)
+script = ExtResource("6_field")
+ROuter = 2.5
+Amp = 1.0
+DebugVizInGame = true
+
+[node name="GalleryBoundary" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 2.55, -1)
+script = ExtResource("7_boundary")
+Radius = 1.1
+ExecutionMode = 1
+Behavior = 1
+LinkedBoundaryPath = NodePath("../EarthBoundary")
+SceneTransformExitOffset = 0.4
+
+[node name="EarthBoundary" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.55, -135.6)
+script = ExtResource("7_boundary")
+Radius = 1.1
+ExecutionMode = 1
+Behavior = 1
+LinkedBoundaryPath = NodePath("../GalleryBoundary")
+SceneTransformExitOffset = 0.4
+
+[node name="RayBeamRenderer" type="Node3D" parent="."]
+visible = false
+script = ExtResource("5_rbr")
+CameraPath = NodePath("../TransportChamberPlayer/Head/PlayerCamera")
+StepsPerRay = 80
+StepLength = 0.07
+MinStepLength = 0.001
+MaxStepLength = 0.35
+LowCurvaturePerpAccel = 0.3
+BendScale = 1.0
+FieldCenterIsCamera = false
+DebugMode = 0
+Alpha = 1.0
+TerminateTrailOnHit = false
+UpdateEveryFrame = false
+
+[node name="GrinFilmCamera" type="Node" parent="."]
+script = ExtResource("4_grin")
+Width = 160
+Height = 90
+FilmResolutionScale = 0.25
+ShadingMode = 1
+Pass1DoHitTest = false
+FlipNormalToCamera = false
+UpdateEveryFrame = false
+UpdateEveryFrameBudgetMs = 80.0
+UpdateEveryFrameMaxRowsPerStep = 16
+RenderStepMaxMs = 120
+RenderStepMaxSegmentsPerFrame = 2000000
+TargetMsPerFrame = 33
+MaxRowsPerFrameCap = 16
+EnableFramePerf = false
+RenderStepPhaseLog = false
+RenderStepBandLog = false
+DebugSnapshotLog = false
+DebugProbeLog = false
+AutoRangeMin = 0.01
+RayBeamRendererPath = NodePath("../RayBeamRenderer")
+FilmViewPath = NodePath("../CanvasLayer/FilmView")
+FilmOverlayPath = NodePath("../CanvasLayer/FilmOverlay2D")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+layer = 2
+
+[node name="FilmView" type="TextureRect" parent="CanvasLayer"]
+offset_left = 12.0
+offset_top = 88.0
+offset_right = 332.0
+offset_bottom = 268.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="FilmBoundaryLabel" type="Label" parent="CanvasLayer"]
+offset_left = 12.0
+offset_top = 272.0
+offset_right = 332.0
+offset_bottom = 310.0
+mouse_filter = 2
+text = "Exploratory GrinFilm / RayBeam view
+Not Observer Instrumentation evidence"
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 3
+
+[node name="FilmOverlay2D" type="TextureRect" parent="CanvasLayer"]
+modulate = Color(1, 1, 1, 0.55)
+offset_left = 12.0
+offset_top = 88.0
+offset_right = 332.0
+offset_bottom = 268.0
+mouse_filter = 2
+script = ExtResource("8_overlay")
+CameraPath = NodePath("../../TransportChamberPlayer/Head/PlayerCamera")
+DrawFilmGradientNormals = true
+RayWidth = 2.0
+FilmGradientScale = 30.0
