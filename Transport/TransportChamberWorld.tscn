@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://Transport/TransportChamberOrchestrator.gd" id="1_orchestrator"]
 [ext_resource type="PackedScene" path="res://Transport/TransportChamberPlayer.tscn" id="2_player"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://FieldSource3D.cs" id="6_field"]
 [ext_resource type="Script" path="res://BoundaryLayerVolume.cs" id="7_boundary"]
 [ext_resource type="Script" path="res://FilmOverlay2D.cs" id="8_overlay"]
+[ext_resource type="Script" path="res://Transport/FilmController.gd" id="9_film_controller"]
 
 [sub_resource type="BoxShape3D" id="BoxShape_floor"]
 size = Vector3(20, 0.25, 22)
@@ -68,14 +69,14 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 2.55, -1)
 script = ExtResource("6_field")
 ROuter = 2.5
 Amp = 1.0
-DebugVizInGame = true
+DebugVizInGame = false
 
 [node name="EarthFieldSource" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.55, -135.6)
 script = ExtResource("6_field")
 ROuter = 2.5
 Amp = 1.0
-DebugVizInGame = true
+DebugVizInGame = false
 
 [node name="GalleryBoundary" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 2.55, -1)
@@ -117,7 +118,7 @@ Width = 160
 Height = 90
 FilmResolutionScale = 0.25
 ShadingMode = 1
-Pass1DoHitTest = false
+Pass1DoHitTest = true
 FlipNormalToCamera = false
 UpdateEveryFrame = false
 UpdateEveryFrameBudgetMs = 80.0
@@ -126,6 +127,9 @@ RenderStepMaxMs = 120
 RenderStepMaxSegmentsPerFrame = 2000000
 TargetMsPerFrame = 33
 MaxRowsPerFrameCap = 16
+UseThreadedBands = true
+ThreadedBandWorkerCount = 1
+ThreadedBandRowsPerChunk = 16
 EnableFramePerf = false
 RenderStepPhaseLog = false
 RenderStepBandLog = false
@@ -136,8 +140,35 @@ RayBeamRendererPath = NodePath("../RayBeamRenderer")
 FilmViewPath = NodePath("../CanvasLayer/FilmView")
 FilmOverlayPath = NodePath("../CanvasLayer/FilmOverlay2D")
 
+[node name="FilmController" type="Node" parent="."]
+script = ExtResource("9_film_controller")
+film_camera_path = NodePath("../GrinFilmCamera")
+film_view_path = NodePath("../CanvasLayer/FilmView")
+film_overlay_path = NodePath("../CanvasLayer/FilmOverlay2D")
+status_label_path = NodePath("../CanvasLayer/FilmStatusLabel")
+boundary_label_path = NodePath("../CanvasLayer/FilmBoundaryLabel")
+player_path = NodePath("../TransportChamberPlayer")
+
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 layer = 2
+
+[node name="FilmStatusLabel" type="Label" parent="CanvasLayer"]
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 520.0
+offset_bottom = 34.0
+mouse_filter = 2
+text = "Film: OFF  |  Quality: Preview 40x22  |  Opacity: Hidden"
+theme_override_font_sizes/font_size = 13
+
+[node name="LocomotionStatusLabel" type="Label" parent="CanvasLayer"]
+offset_left = 12.0
+offset_top = 38.0
+offset_right = 760.0
+offset_bottom = 60.0
+mouse_filter = 2
+text = "Move: Walk  |  WASD + mouse  |  Shift sprint  |  V walk/fly  |  G film  |  [ ] opacity  |  Tab telemetry  |  Esc Observatory"
+theme_override_font_sizes/font_size = 12
 
 [node name="FilmView" type="TextureRect" parent="CanvasLayer"]
 offset_left = 12.0
@@ -160,7 +191,7 @@ theme_override_font_sizes/font_size = 12
 autowrap_mode = 3
 
 [node name="FilmOverlay2D" type="TextureRect" parent="CanvasLayer"]
-modulate = Color(1, 1, 1, 0.55)
+modulate = Color(1, 1, 1, 0.35)
 offset_left = 12.0
 offset_top = 88.0
 offset_right = 332.0

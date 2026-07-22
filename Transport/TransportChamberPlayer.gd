@@ -1,6 +1,11 @@
 extends CharacterBody3D
 
+signal loco_mode_changed(mode_name: String)
+
+enum LocomotionMode { WALK, FLY }
+
 const WALK_SPEED := 5.0
+const FLY_VERTICAL_SPEED := 4.0
 const SPRINT_MULTIPLIER := 2.0
 const GRAVITY := 9.8
 const MOUSE_SENSITIVITY := 0.0025
@@ -12,6 +17,7 @@ const PITCH_MAX := 1.4
 
 var _pitch := 0.0
 var _input_enabled := true
+var _loco_mode: LocomotionMode = LocomotionMode.WALK
 
 
 func _ready() -> void:
@@ -25,6 +31,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
 		_pitch = clamp(_pitch - event.relative.y * MOUSE_SENSITIVITY, PITCH_MIN, PITCH_MAX)
 		_head.rotation.x = _pitch
+	elif event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_V:
+			_toggle_locomotion_mode()
+			get_viewport().set_input_as_handled()
 
 
 func _physics_process(delta: float) -> void:
@@ -32,10 +42,19 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector3.ZERO
 		return
 
-	if not is_on_floor():
-		velocity.y -= GRAVITY * delta
-	elif velocity.y < 0.0:
-		velocity.y = 0.0
+	match _loco_mode:
+		LocomotionMode.WALK:
+			if not is_on_floor():
+				velocity.y -= GRAVITY * delta
+			elif velocity.y < 0.0:
+				velocity.y = 0.0
+		LocomotionMode.FLY:
+			var vertical := 0.0
+			if Input.is_action_pressed("move_up"):
+				vertical += FLY_VERTICAL_SPEED
+			if Input.is_action_pressed("move_down"):
+				vertical -= FLY_VERTICAL_SPEED
+			velocity.y = vertical
 
 	var input_dir := Vector3.ZERO
 	if Input.is_action_pressed("move_forward"):
@@ -74,6 +93,9 @@ func SetInputEnabled(enabled: bool, release_mouse := true) -> void:
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	elif Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	var film_controller := get_parent().get_node_or_null("FilmController") if get_parent() != null else null
+	if film_controller != null and film_controller.has_method("SetInputEnabled"):
+		film_controller.call("SetInputEnabled", enabled)
 
 
 func ApplyCameraTransform(camera_transform: Transform3D) -> void:
@@ -86,3 +108,26 @@ func ApplyCameraTransform(camera_transform: Transform3D) -> void:
 	global_position = camera_transform.origin - global_basis * _head.position
 	_camera.transform = Transform3D.IDENTITY
 	velocity = Vector3.ZERO
+
+
+func GetLocomotionModeName() -> String:
+	return "Fly" if _loco_mode == LocomotionMode.FLY else "Walk"
+
+
+func SetLocomotionModeForTesting(mode_name: String) -> void:
+	var requested := mode_name.strip_edges().to_lower()
+	var next_mode := LocomotionMode.FLY if requested == "fly" else LocomotionMode.WALK
+	_set_locomotion_mode(next_mode)
+
+
+func _toggle_locomotion_mode() -> void:
+	var next_mode := LocomotionMode.FLY if _loco_mode == LocomotionMode.WALK else LocomotionMode.WALK
+	_set_locomotion_mode(next_mode)
+
+
+func _set_locomotion_mode(mode: LocomotionMode) -> void:
+	if _loco_mode == mode:
+		return
+	_loco_mode = mode
+	velocity.y = 0.0
+	loco_mode_changed.emit(GetLocomotionModeName())
