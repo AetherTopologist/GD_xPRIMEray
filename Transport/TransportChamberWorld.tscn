@@ -137,68 +137,137 @@ DebugSnapshotLog = false
 DebugProbeLog = false
 AutoRangeMin = 0.01
 RayBeamRendererPath = NodePath("../RayBeamRenderer")
-FilmViewPath = NodePath("../CanvasLayer/FilmView")
-FilmOverlayPath = NodePath("../CanvasLayer/FilmOverlay2D")
+FilmViewPath = NodePath("../CanvasLayer/HUDRoot/FilmModule/FilmPlate/FilmView")
+FilmOverlayPath = NodePath("../CanvasLayer/HUDRoot/FilmModule/FilmPlate/FilmOverlay2D")
 
 [node name="FilmController" type="Node" parent="."]
 script = ExtResource("9_film_controller")
 film_camera_path = NodePath("../GrinFilmCamera")
-film_view_path = NodePath("../CanvasLayer/FilmView")
-film_overlay_path = NodePath("../CanvasLayer/FilmOverlay2D")
-status_label_path = NodePath("../CanvasLayer/FilmStatusLabel")
-boundary_label_path = NodePath("../CanvasLayer/FilmBoundaryLabel")
+film_plate_path = NodePath("../CanvasLayer/HUDRoot/FilmModule/FilmPlate")
+film_view_path = NodePath("../CanvasLayer/HUDRoot/FilmModule/FilmPlate/FilmView")
+film_overlay_path = NodePath("../CanvasLayer/HUDRoot/FilmModule/FilmPlate/FilmOverlay2D")
+status_label_path = NodePath("../CanvasLayer/HUDRoot/FilmModule/FilmStatusLabel")
+boundary_label_path = NodePath("../CanvasLayer/HUDRoot/FilmModule/FilmBoundaryLabel")
 player_path = NodePath("../TransportChamberPlayer")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 layer = 2
 
-[node name="FilmStatusLabel" type="Label" parent="CanvasLayer"]
-offset_left = 12.0
-offset_top = 12.0
-offset_right = 520.0
-offset_bottom = 34.0
+[node name="HUDRoot" type="Control" parent="CanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
-text = "Film: OFF  |  Quality: Preview 40x22  |  Opacity: Hidden"
+
+[node name="FilmModule" type="VBoxContainer" parent="CanvasLayer/HUDRoot"]
+offset_left = 12.0
+offset_top = 80.0
+offset_right = 352.0
+offset_bottom = 336.0
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="FilmStatusLabel" type="Label" parent="CanvasLayer/HUDRoot/FilmModule"]
+layout_mode = 2
+mouse_filter = 2
+text = "Film: OFF | Preview 80x45 | Opacity: Hidden | Shading: Geometric Normal Debug"
 theme_override_font_sizes/font_size = 13
+autowrap_mode = 3
 
-[node name="LocomotionStatusLabel" type="Label" parent="CanvasLayer"]
-offset_left = 12.0
-offset_top = 38.0
-offset_right = 760.0
-offset_bottom = 60.0
+[node name="FilmPlate" type="Control" parent="CanvasLayer/HUDRoot/FilmModule"]
+custom_minimum_size = Vector2(320, 180)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
 mouse_filter = 2
-text = "Move: Walk  |  WASD + mouse  |  Shift sprint  |  V walk/fly  |  G film  |  [ ] opacity  |  Tab telemetry  |  Esc Observatory"
-theme_override_font_sizes/font_size = 12
 
-[node name="FilmView" type="TextureRect" parent="CanvasLayer"]
-offset_left = 12.0
-offset_top = 88.0
-offset_right = 332.0
-offset_bottom = 268.0
+[node name="FilmView" type="TextureRect" parent="CanvasLayer/HUDRoot/FilmModule/FilmPlate"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="FilmBoundaryLabel" type="Label" parent="CanvasLayer"]
-offset_left = 12.0
-offset_top = 272.0
-offset_right = 332.0
-offset_bottom = 310.0
+[node name="FilmOverlay2D" type="TextureRect" parent="CanvasLayer/HUDRoot/FilmModule/FilmPlate"]
+modulate = Color(1, 1, 1, 0.35)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("8_overlay")
+CameraPath = NodePath("../../../../../TransportChamberPlayer/Head/PlayerCamera")
+DrawFilmGradientNormals = true
+RayWidth = 2.0
+FilmGradientScale = 30.0
+
+[node name="FilmBoundaryLabel" type="Label" parent="CanvasLayer/HUDRoot/FilmModule"]
+layout_mode = 2
 mouse_filter = 2
 text = "Exploratory GrinFilm / RayBeam view
 Not Observer Instrumentation evidence"
 theme_override_font_sizes/font_size = 12
 autowrap_mode = 3
 
-[node name="FilmOverlay2D" type="TextureRect" parent="CanvasLayer"]
-modulate = Color(1, 1, 1, 0.35)
-offset_left = 12.0
-offset_top = 88.0
-offset_right = 332.0
-offset_bottom = 268.0
+[node name="TelemetryModule" type="VBoxContainer" parent="CanvasLayer/HUDRoot"]
+visible = false
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -332.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = 180.0
 mouse_filter = 2
-script = ExtResource("8_overlay")
-CameraPath = NodePath("../../TransportChamberPlayer/Head/PlayerCamera")
-DrawFilmGradientNormals = true
-RayWidth = 2.0
-FilmGradientScale = 30.0
+theme_override_constants/separation = 4
+
+[node name="TelemetryLabel" type="Label" parent="CanvasLayer/HUDRoot/TelemetryModule"]
+layout_mode = 2
+mouse_filter = 2
+text = "Telemetry hidden"
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 3
+
+[node name="PortalModule" type="VBoxContainer" parent="CanvasLayer/HUDRoot"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -72.0
+offset_right = 340.0
+offset_bottom = -12.0
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="PortalStatusLabel" type="Label" parent="CanvasLayer/HUDRoot/PortalModule"]
+layout_mode = 2
+mouse_filter = 2
+text = "Zone: Gallery | Portal: Earth | delta: --"
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 3
+
+[node name="ObserverModule" type="VBoxContainer" parent="CanvasLayer/HUDRoot"]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -332.0
+offset_top = -82.0
+offset_right = -12.0
+offset_bottom = -12.0
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="ObserverStatusLabel" type="Label" parent="CanvasLayer/HUDRoot/ObserverModule"]
+layout_mode = 2
+mouse_filter = 2
+text = "Walk | V fly | G film | N shading
+[ ] opacity | Tab telemetry | Esc Observatory"
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 3

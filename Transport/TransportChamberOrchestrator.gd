@@ -12,7 +12,11 @@ extends Node3D
 @onready var _overspace_debug_overlay: Control = $OverspaceTrophyRoom/CanvasLayer/OverspaceDebugOverlay
 @onready var _gallery_field: Node = $GalleryFieldSource
 @onready var _earth_field: Node = $EarthFieldSource
-@onready var _locomotion_label: Label = $CanvasLayer/LocomotionStatusLabel
+@onready var _hud_root: Control = $CanvasLayer/HUDRoot
+@onready var _telemetry_module: Control = $CanvasLayer/HUDRoot/TelemetryModule
+@onready var _telemetry_label: Label = $CanvasLayer/HUDRoot/TelemetryModule/TelemetryLabel
+@onready var _portal_label: Label = $CanvasLayer/HUDRoot/PortalModule/PortalStatusLabel
+@onready var _locomotion_label: Label = $CanvasLayer/HUDRoot/ObserverModule/ObserverStatusLabel
 
 var _cooldown_remaining := 0.0
 var _last_gallery_delta := 0.0
@@ -36,9 +40,11 @@ func _ready() -> void:
 	if _player.has_signal("loco_mode_changed"):
 		_player.loco_mode_changed.connect(_on_locomotion_mode_changed)
 	_on_locomotion_mode_changed(_player.GetLocomotionModeName())
+	SetHudVisibleForGameplay(true)
 	_set_advanced_telemetry_visible(false)
 	_set_chamber_summary()
 	_prime_portal_deltas()
+	_update_portal_status()
 
 
 func _exit_tree() -> void:
@@ -68,6 +74,9 @@ func _process(delta: float) -> void:
 	var camera: Camera3D = _player.get_camera()
 	_try_cross(_gallery_portal, camera.global_position, true)
 	_try_cross(_earth_portal, camera.global_position, false)
+	_update_portal_status()
+	if _advanced_telemetry_visible:
+		_update_telemetry_label()
 
 
 func _try_cross(portal: Node3D, camera_position: Vector3, gallery_side: bool) -> void:
@@ -88,6 +97,7 @@ func _try_cross(portal: Node3D, camera_position: Vector3, gallery_side: bool) ->
 				_film_controller.call("NotifyCameraTransformJump")
 			_cooldown_remaining = 0.4
 			_prime_portal_deltas()
+			_update_portal_status()
 
 
 func _prime_portal_deltas() -> void:
@@ -114,14 +124,81 @@ func _set_chamber_summary() -> void:
 
 func _set_advanced_telemetry_visible(visible: bool) -> void:
 	_advanced_telemetry_visible = visible
+	if _telemetry_module != null:
+		_telemetry_module.visible = visible
 	if _overspace_debug_overlay != null:
-		_overspace_debug_overlay.visible = visible
+		_overspace_debug_overlay.visible = false
 	for field in [_gallery_field, _earth_field]:
 		if field != null:
-			field.set("DebugVizInGame", visible)
+			field.set("DebugVizInGame", false)
+	_update_telemetry_label()
+
+
+func SetHudVisibleForGameplay(visible: bool) -> void:
+	if _hud_root != null:
+		_hud_root.visible = visible
 
 
 func _on_locomotion_mode_changed(mode_name: String) -> void:
 	if _locomotion_label == null:
 		return
-	_locomotion_label.text = "Move: %s  |  WASD + mouse  |  Shift sprint  |  V walk/fly  |  G film  |  [ ] opacity  |  Tab telemetry  |  Esc Observatory" % mode_name
+	_locomotion_label.text = "%s | WASD + mouse | Shift sprint | V fly\nG film | N shading | [ ] opacity | Tab telemetry | Esc Observatory" % mode_name
+
+
+func _update_portal_status() -> void:
+	if _portal_label == null:
+		return
+	var zone := _current_zone_name()
+	var target := "Earth" if zone == "Gallery" else "Gallery"
+	var delta := _last_gallery_delta if zone == "Gallery" else _last_earth_delta
+	_portal_label.text = "Zone: %s | Portal: %s | delta: %+0.3f" % [
+		zone,
+		target,
+		delta,
+	]
+
+
+func _update_telemetry_label() -> void:
+	if _telemetry_label == null:
+		return
+	var zone := _current_zone_name()
+	var gallery_delta := _last_gallery_delta
+	var earth_delta := _last_earth_delta
+	var film_mode := "unknown"
+	var quality := "unknown"
+	var shading := "unknown"
+	var compute := "off"
+	if _film_controller != null:
+		if _film_controller.has_method("GetModeName"):
+			film_mode = str(_film_controller.call("GetModeName"))
+		if _film_controller.has_method("GetQualityName"):
+			quality = str(_film_controller.call("GetQualityName"))
+		if _film_controller.has_method("GetShadingModeName"):
+			shading = str(_film_controller.call("GetShadingModeName"))
+		if _film_controller.has_method("IsComputeActive"):
+			compute = "active" if bool(_film_controller.call("IsComputeActive")) else "idle"
+	var rows := "--"
+	var scale := "--"
+	if _film_camera != null:
+		rows = str(_film_camera.get("MaxRowsPerFrameCap"))
+		scale = "%0.2f" % float(_film_camera.get("FilmResolutionScale"))
+	_telemetry_label.text = "Telemetry\nZone: %s\nGallery delta: %+0.3f\nEarth delta: %+0.3f\nFilm: %s / %s / %s\nRows cap: %s | scale: %s | compute: %s\nMapped-vector graphic: deferred" % [
+		zone,
+		gallery_delta,
+		earth_delta,
+		film_mode,
+		quality,
+		shading,
+		rows,
+		scale,
+		compute,
+	]
+
+
+func _current_zone_name() -> String:
+	var camera: Camera3D = _player.get_camera()
+	if camera == null or _gallery_portal == null or _earth_portal == null:
+		return "Gallery"
+	var gallery_distance := camera.global_position.distance_to(_gallery_portal.global_position)
+	var earth_distance := camera.global_position.distance_to(_earth_portal.global_position)
+	return "Earth" if earth_distance < gallery_distance else "Gallery"

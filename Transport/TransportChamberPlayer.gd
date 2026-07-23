@@ -96,6 +96,8 @@ func SetInputEnabled(enabled: bool, release_mouse := true) -> void:
 	var film_controller := get_parent().get_node_or_null("FilmController") if get_parent() != null else null
 	if film_controller != null and film_controller.has_method("SetInputEnabled"):
 		film_controller.call("SetInputEnabled", enabled)
+	if get_parent() != null and get_parent().has_method("SetHudVisibleForGameplay"):
+		get_parent().call("SetHudVisibleForGameplay", enabled)
 
 
 func ApplyCameraTransform(camera_transform: Transform3D) -> void:
