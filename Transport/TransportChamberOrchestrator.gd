@@ -8,6 +8,7 @@ extends Node3D
 @onready var _film_camera: Node = $GrinFilmCamera
 @onready var _ray_renderer: Node = $RayBeamRenderer
 @onready var _film_controller: Node = $FilmController
+@onready var _field_dial: Node = $FieldDialController
 @onready var _summary_label: Label = $OverspaceTrophyRoom/CanvasLayer/DemoSummary
 @onready var _overspace_debug_overlay: Control = $OverspaceTrophyRoom/CanvasLayer/OverspaceDebugOverlay
 @onready var _gallery_field: Node = $GalleryFieldSource
@@ -39,6 +40,8 @@ func _ready() -> void:
 	player_camera.current = true
 	if _player.has_signal("loco_mode_changed"):
 		_player.loco_mode_changed.connect(_on_locomotion_mode_changed)
+	if _field_dial != null and _field_dial.has_signal("field_strength_changed"):
+		_field_dial.connect("field_strength_changed", Callable(self, "_on_field_strength_changed"))
 	_on_locomotion_mode_changed(_player.GetLocomotionModeName())
 	SetHudVisibleForGameplay(true)
 	_set_advanced_telemetry_visible(false)
@@ -139,10 +142,23 @@ func SetHudVisibleForGameplay(visible: bool) -> void:
 		_hud_root.visible = visible
 
 
+func SetInputEnabled(enabled: bool, release_mouse := true) -> void:
+	if _player != null and _player.has_method("SetInputEnabled"):
+		_player.call("SetInputEnabled", enabled, release_mouse)
+	if _field_dial != null and _field_dial.has_method("SetInputEnabled"):
+		_field_dial.call("SetInputEnabled", enabled)
+	SetHudVisibleForGameplay(enabled)
+
+
 func _on_locomotion_mode_changed(mode_name: String) -> void:
 	if _locomotion_label == null:
 		return
-	_locomotion_label.text = "%s | WASD + mouse | Shift sprint | V fly\nG film | N shading | [ ] opacity | Tab telemetry | Esc Observatory" % mode_name
+	_locomotion_label.text = "%s | WASD + mouse | Shift sprint | V fly\nG film | N shading | [ ] opacity | , . field | 0 straight | 1 full | H hermetic\nTab telemetry | Esc Observatory" % mode_name
+
+
+func _on_field_strength_changed(_value: float) -> void:
+	if _advanced_telemetry_visible:
+		_update_telemetry_label()
 
 
 func _update_portal_status() -> void:
@@ -168,6 +184,11 @@ func _update_telemetry_label() -> void:
 	var quality := "unknown"
 	var shading := "unknown"
 	var compute := "off"
+	var field_value := 1.0
+	var field_state := "FULL"
+	var display_preset := "Gallery"
+	var reference_amp := 0.0
+	var bend_scale := 0.0
 	if _film_controller != null:
 		if _film_controller.has_method("GetModeName"):
 			film_mode = str(_film_controller.call("GetModeName"))
@@ -177,15 +198,31 @@ func _update_telemetry_label() -> void:
 			shading = str(_film_controller.call("GetShadingModeName"))
 		if _film_controller.has_method("IsComputeActive"):
 			compute = "active" if bool(_film_controller.call("IsComputeActive")) else "idle"
+	if _field_dial != null:
+		if _field_dial.has_method("GetFieldStrength"):
+			field_value = float(_field_dial.call("GetFieldStrength"))
+		if _field_dial.has_method("GetFieldStateName"):
+			field_state = str(_field_dial.call("GetFieldStateName"))
+		if _field_dial.has_method("GetDisplayPresetName"):
+			display_preset = str(_field_dial.call("GetDisplayPresetName"))
+		if _field_dial.has_method("GetReferenceAmp"):
+			reference_amp = float(_field_dial.call("GetReferenceAmp"))
+		if _field_dial.has_method("GetBendScale"):
+			bend_scale = float(_field_dial.call("GetBendScale"))
 	var rows := "--"
 	var scale := "--"
 	if _film_camera != null:
 		rows = str(_film_camera.get("MaxRowsPerFrameCap"))
 		scale = "%0.2f" % float(_film_camera.get("FilmResolutionScale"))
-	_telemetry_label.text = "Telemetry\nZone: %s\nGallery delta: %+0.3f\nEarth delta: %+0.3f\nFilm: %s / %s / %s\nRows cap: %s | scale: %s | compute: %s\nMapped-vector graphic: deferred" % [
+	_telemetry_label.text = "Telemetry\nZone: %s | Display: %s\nGallery delta: %+0.3f\nEarth delta: %+0.3f\nField: %0.2f / %s\nReference Amp: %0.2f | BendScale: %0.2f\nFilm: %s / %s / %s\nRows cap: %s | scale: %s | compute: %s\nMapped-vector graphic: deferred" % [
 		zone,
+		display_preset,
 		gallery_delta,
 		earth_delta,
+		field_value,
+		field_state,
+		reference_amp,
+		bend_scale,
 		film_mode,
 		quality,
 		shading,

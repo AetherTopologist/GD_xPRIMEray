@@ -1,0 +1,101 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://FieldSource3D.cs" id="1_field"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_floor"]
+size = Vector3(12, 0.25, 12)
+
+[sub_resource type="BoxShape3D" id="BoxShape_floor"]
+size = Vector3(12, 0.25, 12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_side"]
+size = Vector3(0.25, 8, 12)
+
+[sub_resource type="BoxShape3D" id="BoxShape_side"]
+size = Vector3(0.25, 8, 12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_back"]
+size = Vector3(12, 8, 0.25)
+
+[sub_resource type="BoxShape3D" id="BoxShape_back"]
+size = Vector3(12, 8, 0.25)
+
+[sub_resource type="StandardMaterial3D" id="Material_structure_blue"]
+albedo_color = Color(0.42, 0.55, 0.72, 1)
+emission_enabled = true
+emission = Color(0.025, 0.04, 0.065, 1)
+
+[sub_resource type="StandardMaterial3D" id="Material_floor_blue"]
+albedo_color = Color(0.30, 0.42, 0.58, 1)
+emission_enabled = true
+emission = Color(0.02, 0.03, 0.055, 1)
+
+[node name="HermeticRoomDisplay" type="Node3D"]
+visible = false
+
+[node name="HermeticFieldSource" type="Node3D" parent="."]
+script = ExtResource("1_field")
+Enabled = false
+ROuter = 4.0
+Amp = 0.6
+DebugVizInGame = false
+
+[node name="BackWall" type="StaticBody3D" parent="." groups=["fixture_geometry", "raytrace_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="BackWall"]
+mesh = SubResource("BoxMesh_back")
+material_override = SubResource("Material_structure_blue")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BackWall"]
+shape = SubResource("BoxShape_back")
+
+[node name="FrontWall" type="StaticBody3D" parent="." groups=["fixture_geometry", "raytrace_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="FrontWall"]
+mesh = SubResource("BoxMesh_back")
+material_override = SubResource("Material_structure_blue")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FrontWall"]
+shape = SubResource("BoxShape_back")
+
+[node name="LeftWall" type="StaticBody3D" parent="." groups=["fixture_geometry", "raytrace_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LeftWall"]
+mesh = SubResource("BoxMesh_side")
+material_override = SubResource("Material_structure_blue")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LeftWall"]
+shape = SubResource("BoxShape_side")
+
+[node name="RightWall" type="StaticBody3D" parent="." groups=["fixture_geometry", "raytrace_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RightWall"]
+mesh = SubResource("BoxMesh_side")
+material_override = SubResource("Material_structure_blue")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RightWall"]
+shape = SubResource("BoxShape_side")
+
+[node name="Floor" type="StaticBody3D" parent="." groups=["fixture_geometry", "raytrace_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("BoxMesh_floor")
+material_override = SubResource("Material_floor_blue")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("BoxShape_floor")
+
+[node name="Ceiling" type="StaticBody3D" parent="." groups=["fixture_geometry", "raytrace_geometry"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ceiling"]
+mesh = SubResource("BoxMesh_floor")
+material_override = SubResource("Material_structure_blue")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ceiling"]
+shape = SubResource("BoxShape_floor")

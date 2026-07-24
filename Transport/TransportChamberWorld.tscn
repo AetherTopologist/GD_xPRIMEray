@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://Transport/TransportChamberOrchestrator.gd" id="1_orchestrator"]
 [ext_resource type="PackedScene" path="res://Transport/TransportChamberPlayer.tscn" id="2_player"]
@@ -9,6 +9,8 @@
 [ext_resource type="Script" path="res://BoundaryLayerVolume.cs" id="7_boundary"]
 [ext_resource type="Script" path="res://FilmOverlay2D.cs" id="8_overlay"]
 [ext_resource type="Script" path="res://Transport/FilmController.gd" id="9_film_controller"]
+[ext_resource type="Script" path="res://Transport/FieldDialController.gd" id="10_field_dial"]
+[ext_resource type="PackedScene" path="res://Transport/HermeticRoomDisplay.tscn" id="11_hermetic"]
 
 [sub_resource type="BoxShape3D" id="BoxShape_floor"]
 size = Vector3(20, 0.25, 22)
@@ -26,6 +28,8 @@ script = ExtResource("1_orchestrator")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 10)
 
 [node name="OverspaceTrophyRoom" parent="." instance=ExtResource("3_overspace")]
+
+[node name="HermeticRoomDisplay" parent="." instance=ExtResource("11_hermetic")]
 
 [node name="GalleryCollision" type="Node3D" parent="."]
 
@@ -106,6 +110,7 @@ MinStepLength = 0.001
 MaxStepLength = 0.35
 LowCurvaturePerpAccel = 0.3
 BendScale = 1.0
+FieldStrength = 1.0
 FieldCenterIsCamera = false
 DebugMode = 0
 Alpha = 1.0
@@ -118,6 +123,7 @@ Width = 160
 Height = 90
 FilmResolutionScale = 0.25
 ShadingMode = 1
+SkyColor = Color(1, 0, 1, 1)
 Pass1DoHitTest = true
 FlipNormalToCamera = false
 UpdateEveryFrame = false
@@ -150,6 +156,19 @@ status_label_path = NodePath("../CanvasLayer/HUDRoot/FilmModule/FilmStatusLabel"
 boundary_label_path = NodePath("../CanvasLayer/HUDRoot/FilmModule/FilmBoundaryLabel")
 player_path = NodePath("../TransportChamberPlayer")
 
+[node name="FieldDialController" type="Node" parent="."]
+script = ExtResource("10_field_dial")
+ray_renderer_path = NodePath("../RayBeamRenderer")
+film_controller_path = NodePath("../FilmController")
+player_path = NodePath("../TransportChamberPlayer")
+overspace_root_path = NodePath("../OverspaceTrophyRoom")
+gallery_collision_path = NodePath("../GalleryCollision")
+hermetic_display_path = NodePath("../HermeticRoomDisplay")
+field_bar_path = NodePath("../CanvasLayer/HUDRoot/FilmModule/FieldDialRow/FieldStrengthBar")
+field_value_label_path = NodePath("../CanvasLayer/HUDRoot/FilmModule/FieldDialRow/FieldValueLabel")
+gallery_field_paths = Array[NodePath]([NodePath("../GalleryFieldSource"), NodePath("../EarthFieldSource")])
+hermetic_field_path = NodePath("../HermeticRoomDisplay/HermeticFieldSource")
+
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 layer = 2
 
@@ -165,7 +184,7 @@ mouse_filter = 2
 offset_left = 12.0
 offset_top = 80.0
 offset_right = 352.0
-offset_bottom = 336.0
+offset_bottom = 372.0
 mouse_filter = 2
 theme_override_constants/separation = 6
 
@@ -209,11 +228,45 @@ DrawFilmGradientNormals = true
 RayWidth = 2.0
 FilmGradientScale = 30.0
 
+[node name="FieldDialRow" type="HBoxContainer" parent="CanvasLayer/HUDRoot/FilmModule"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 5
+
+[node name="StraightLabel" type="Label" parent="CanvasLayer/HUDRoot/FilmModule/FieldDialRow"]
+layout_mode = 2
+mouse_filter = 2
+text = "STRAIGHT"
+theme_override_font_sizes/font_size = 10
+
+[node name="FieldStrengthBar" type="ProgressBar" parent="CanvasLayer/HUDRoot/FilmModule/FieldDialRow"]
+custom_minimum_size = Vector2(94, 12)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+max_value = 1.0
+step = 0.05
+value = 1.0
+show_percentage = false
+
+[node name="FullLabel" type="Label" parent="CanvasLayer/HUDRoot/FilmModule/FieldDialRow"]
+layout_mode = 2
+mouse_filter = 2
+text = "FULL"
+theme_override_font_sizes/font_size = 10
+
+[node name="FieldValueLabel" type="Label" parent="CanvasLayer/HUDRoot/FilmModule/FieldDialRow"]
+custom_minimum_size = Vector2(88, 0)
+layout_mode = 2
+mouse_filter = 2
+text = "Field: 1.00 · FULL"
+theme_override_font_sizes/font_size = 11
+
 [node name="FilmBoundaryLabel" type="Label" parent="CanvasLayer/HUDRoot/FilmModule"]
 layout_mode = 2
 mouse_filter = 2
-text = "Exploratory GrinFilm / RayBeam view
-Not Observer Instrumentation evidence"
+text = "Exploratory GrinFilm · geometry fixed · not OI evidence
+Magenta = no hit · RGB = geometric face normal"
 theme_override_font_sizes/font_size = 12
 autowrap_mode = 3
 
@@ -268,6 +321,7 @@ theme_override_constants/separation = 4
 layout_mode = 2
 mouse_filter = 2
 text = "Walk | V fly | G film | N shading
-[ ] opacity | Tab telemetry | Esc Observatory"
+[ ] opacity | , . field | 0 straight | 1 full | H hermetic
+Tab telemetry | Esc Observatory"
 theme_override_font_sizes/font_size = 12
 autowrap_mode = 3

@@ -217,6 +217,16 @@ func NotifyCameraTransformJump() -> void:
 	_update_status()
 
 
+func NotifyFieldStrengthChanged() -> void:
+	match _mode:
+		FilmMode.LIVE:
+			_restart_film_pass()
+			_set_film_compute(true)
+		FilmMode.SNAPSHOT:
+			_snapshot_forced_stale = true
+	_update_status()
+
+
 func _apply_quality_preview() -> void:
 	_quality_name = "Preview 80x45"
 	_apply_quality(0.5, 16, 16, 80.0)
