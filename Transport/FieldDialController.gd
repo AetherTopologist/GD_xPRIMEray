@@ -27,7 +27,7 @@ var _input_enabled := true
 var _held_direction := 0
 var _repeat_timer := 0.0
 var _display_preset := DISPLAY_GALLERY
-var _gallery_player_transform := Transform3D(Basis.IDENTITY, Vector3(0.0, 0.15, 10.0))
+var _gallery_camera_transform := Transform3D(Basis.IDENTITY, Vector3(0.0, 1.8, 10.0))
 var _hermetic_camera_transform := Transform3D(Basis.IDENTITY, Vector3(0.0, 1.6, 5.2))
 
 @onready var _ray_renderer: Node = get_node_or_null(ray_renderer_path)
@@ -179,7 +179,7 @@ func _set_display_preset(preset: String, invalidate_film: bool) -> void:
 	if _hermetic_field != null:
 		_hermetic_field.set("Enabled", hermetic_active)
 	if _player != null and _player.has_method("ApplyCameraTransform"):
-		_player.call("ApplyCameraTransform", _hermetic_camera_transform if hermetic_active else _gallery_player_transform)
+		_player.call("ApplyCameraTransform", _hermetic_camera_transform if hermetic_active else _gallery_camera_transform)
 	if invalidate_film and _film_controller != null and _film_controller.has_method("NotifyCameraTransformJump"):
 		_film_controller.call("NotifyCameraTransformJump")
 	_update_display()
