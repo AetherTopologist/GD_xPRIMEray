@@ -617,6 +617,7 @@ public partial class RayBeamRenderer : Node3D
 		public Vector3 Normal;
 		public ulong ColliderId;
 		public int PrimitiveOrShapeId;
+		public bool HadNumericalFailure;
 	}
 
 	public readonly struct LedgerContinuationSummary
@@ -3477,6 +3478,7 @@ public partial class RayBeamRenderer : Node3D
 		d2kMax = 0f;
 		turnSum = 0f;
 		turnMax = 0f;
+		bool hadNumericalFailure = false;
 
 		hitInfo = new Pass1HitInfo
 		{
@@ -3485,7 +3487,8 @@ public partial class RayBeamRenderer : Node3D
 			Position = Vector3.Zero,
 			Normal = Vector3.Up,
 			ColliderId = 0,
-			PrimitiveOrShapeId = -1
+			PrimitiveOrShapeId = -1,
+			HadNumericalFailure = false
 		};
 		stoppedEarly = false;
 		maxStepsReached = false;
@@ -3616,10 +3619,12 @@ public partial class RayBeamRenderer : Node3D
 
 					RecordPass1TelemetryDerivativeSample(a, v, ref telemetryDerivativeState);
 
+					if (float.IsNaN(a.X) || float.IsNaN(a.Y) || float.IsNaN(a.Z))
+						hadNumericalFailure = true;
 					float aLen = a.Length();
 				// DECISION: sanitize non-finite/overlarge acceleration.
-				if (!float.IsFinite(aLen)) { a = Vector3.Zero; aLen = 0f; }
-				else if (aLen > 50f) { a *= (50f / aLen); aLen = 50f; } // DECISION: clamp extreme acceleration.
+				if (!float.IsFinite(aLen)) { hadNumericalFailure = true; a = Vector3.Zero; aLen = 0f; }
+				else if (aLen > 50f) { hadNumericalFailure = true; a *= (50f / aLen); aLen = 50f; } // DECISION: clamp extreme acceleration.
 
 				float step = ComputeAdaptiveIntegratedStepLength(
 					v,
@@ -3912,6 +3917,7 @@ public partial class RayBeamRenderer : Node3D
 			d2kMax = telemetryDerivativeState.D2kMax;
 			turnSum = telemetryDerivativeState.TurnSum;
 			turnMax = telemetryDerivativeState.TurnMax;
+			hitInfo.HadNumericalFailure = hadNumericalFailure;
 			return written;
 		}
 
