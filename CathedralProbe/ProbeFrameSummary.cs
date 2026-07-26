@@ -5,7 +5,7 @@ public struct ProbeFrameSummary
 {
 	public int TotalPixels;
 	public int HitGeometryCount;
-	public int BackgroundExitCount;
+	public int BackgroundResolvedCount;
 	public int MaxStepsExhaustedCount;
 	public int StoppedEarlyAbsorbedCount;
 	public int NumericalFailureCount;

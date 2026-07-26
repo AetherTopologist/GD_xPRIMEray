@@ -2223,6 +2223,10 @@ public partial class GrinFilmCamera : Node
 	private Vector3[] _pass1HitPos = Array.Empty<Vector3>();
 	private Vector3[] _pass1HitNormal = Array.Empty<Vector3>();
 	private ulong[] _pass1HitColliderId = Array.Empty<ulong>();
+	private ProbeOutcomeCode[] _probeOutcomes = Array.Empty<ProbeOutcomeCode>();
+	private byte[] _probeRefinLevel = Array.Empty<byte>();
+	private ProbeFrameSummary _probeFrameSummary;
+	private int _probeUnprocessedCount = 0;
 	// Cathedral Probe / Ultra-Turbo memristor-style per-pixel curvature experience fingerprint (lightweight, in-memory for run).
 	// Stability: EWMA (higher = historically stable/easy transport → candidate for relaxed local budgets in ultra-turbo).
 	// Class: coarse transport phenotype for scheduling hints.
@@ -9093,6 +9097,130 @@ private sealed class OverlayRollingWindow
 		}
 	}
 
+	private void ResetCathedralProbeBuffersForPass()
+	{
+		if (_probeOutcomes.Length > 0)
+		{
+			Array.Fill(_probeOutcomes, ProbeOutcomeCode.Unprocessed);
+		}
+		if (_probeRefinLevel.Length > 0)
+		{
+			Array.Clear(_probeRefinLevel, 0, _probeRefinLevel.Length);
+		}
+		_probeFrameSummary = default;
+		_probeUnprocessedCount = _probeOutcomes.Length;
+	}
+
+	private void EnsureCathedralProbeBufferCapacity(int pixelCount, bool resetIfAllocated)
+	{
+		int safeCount = Math.Max(0, pixelCount);
+		if (_probeOutcomes.Length != safeCount)
+		{
+			_probeOutcomes = new ProbeOutcomeCode[safeCount];
+			_probeRefinLevel = new byte[safeCount];
+			ResetCathedralProbeBuffersForPass();
+			return;
+		}
+
+		if (_probeRefinLevel.Length != safeCount)
+		{
+			_probeRefinLevel = new byte[safeCount];
+			resetIfAllocated = true;
+		}
+
+		if (resetIfAllocated)
+		{
+			ResetCathedralProbeBuffersForPass();
+		}
+	}
+
+	private static ProbeOutcomeCode ClassifyCathedralProbeOutcome(
+		bool hadNumericalFailure,
+		bool found,
+		ProbeSurfaceClass surfaceClass,
+		bool maxStepsReached,
+		bool stoppedEarly)
+	{
+		if (hadNumericalFailure) return ProbeOutcomeCode.NumericalFailure;
+		if (maxStepsReached) return ProbeOutcomeCode.MaxStepsExhausted;
+		if (stoppedEarly) return ProbeOutcomeCode.StoppedEarlyAbsorbed;
+		if (surfaceClass == ProbeSurfaceClass.Geometry) return ProbeOutcomeCode.HitGeometry;
+		if (surfaceClass == ProbeSurfaceClass.Background) return ProbeOutcomeCode.BackgroundResolved;
+		if (!found) return ProbeOutcomeCode.BackgroundResolved;
+		return ProbeOutcomeCode.Invalid;
+	}
+
+	private void FinalizeCathedralProbeSnapshotSummary(int filmW, int filmH)
+	{
+		int totalPixels = Math.Max(0, filmW) * Math.Max(0, filmH);
+		if (totalPixels <= 0 || _probeOutcomes.Length < totalPixels)
+		{
+			_probeFrameSummary = default;
+			_probeUnprocessedCount = totalPixels;
+			return;
+		}
+
+		int unprocessedCount = 0;
+		int hitGeometryCount = 0;
+		int backgroundResolvedCount = 0;
+		int maxStepsExhaustedCount = 0;
+		int stoppedEarlyAbsorbedCount = 0;
+		int numericalFailureCount = 0;
+		for (int i = 0; i < totalPixels; i++)
+		{
+			switch (_probeOutcomes[i])
+			{
+				case ProbeOutcomeCode.HitGeometry:
+					hitGeometryCount++;
+					break;
+				case ProbeOutcomeCode.BackgroundResolved:
+					backgroundResolvedCount++;
+					break;
+				case ProbeOutcomeCode.MaxStepsExhausted:
+					maxStepsExhaustedCount++;
+					break;
+				case ProbeOutcomeCode.StoppedEarlyAbsorbed:
+					stoppedEarlyAbsorbedCount++;
+					break;
+				case ProbeOutcomeCode.NumericalFailure:
+					numericalFailureCount++;
+					break;
+				default:
+					unprocessedCount++;
+					break;
+			}
+		}
+
+		_probeUnprocessedCount = unprocessedCount;
+		_probeFrameSummary = new ProbeFrameSummary
+		{
+			TotalPixels = totalPixels,
+			HitGeometryCount = hitGeometryCount,
+			BackgroundResolvedCount = backgroundResolvedCount,
+			MaxStepsExhaustedCount = maxStepsExhaustedCount,
+			StoppedEarlyAbsorbedCount = stoppedEarlyAbsorbedCount,
+			NumericalFailureCount = numericalFailureCount,
+			RegionCount = 0,
+			SelectableRegionCount = 0,
+			LargestRegionPixelCount = 0,
+			LargestRegionId = 0,
+			LastRefinementPixelsAttempted = 0,
+			LastRefinementNewlyResolved = 0,
+			LastRefinementStillUnresolved = 0,
+			ContextKey = default
+		};
+
+		if (unprocessedCount > 0)
+		{
+			GD.PushWarning($"[CathedralProbe][FrameSummary] unprocessed={_probeUnprocessedCount} after completed snapshot pass");
+		}
+		GD.Print(
+			$"[CathedralProbe][FrameSummary] total={_probeFrameSummary.TotalPixels} " +
+			$"hitGeometry={_probeFrameSummary.HitGeometryCount} backgroundResolved={_probeFrameSummary.BackgroundResolvedCount} " +
+			$"maxStepsExhausted={_probeFrameSummary.MaxStepsExhaustedCount} stoppedEarlyAbsorbed={_probeFrameSummary.StoppedEarlyAbsorbedCount} " +
+			$"numericalFailure={_probeFrameSummary.NumericalFailureCount} unprocessed={_probeUnprocessedCount}");
+	}
+
 	private void EnsureFixtureRowParticipationCapacity(int filmHeight)
 	{
 		int resolvedHeight = Math.Max(0, filmHeight);
@@ -13426,6 +13554,8 @@ private sealed class OverlayRollingWindow
 			// DECISION: wrap when we finished all rows.
 			if (_rowCursor >= _filmHeight)
 			{
+				if (!cfg.UpdateEveryFrame)
+					FinalizeCathedralProbeSnapshotSummary(_filmWidth, _filmHeight);
 				ResetRowCursor("completed");
 				rowCursorResetThisStep = true;
 			}
@@ -13898,6 +14028,7 @@ private sealed class OverlayRollingWindow
 			if (frameStart)
 			{
 				_frameIndex++;
+				ResetCathedralProbeBuffersForPass();
 				// DECISION: reset perf frame only when stats enabled.
 				if (statsEnabled)
 				{
@@ -14650,6 +14781,14 @@ private sealed class OverlayRollingWindow
 					_pass1HitPos[pi] = hitInfo.Position;
 					_pass1HitNormal[pi] = hitInfo.Normal;
 					_pass1HitColliderId[pi] = hitInfo.ColliderId;
+					hitInfo.SurfaceClass = ClassifyProbeSurfaceClass(hitInfo.Found, hitInfo.ColliderId);
+					ProbeOutcomeCode probeOutcome = ClassifyCathedralProbeOutcome(
+						hitInfo.HadNumericalFailure,
+						hitInfo.Found,
+						hitInfo.SurfaceClass,
+						maxStepsReached,
+						stoppedEarly);
+					FillProbeOutcomeBlock(_probeOutcomes, x, y, stride, filmW, filmH, probeOutcome);
 
 					// Cathedral Probe memristor update: lightweight curvature experience fingerprint for this pixel.
 					// Captures recent effort (steps vs budget, max-step events) + hit success to drive ultra-turbo decisions.
@@ -20782,6 +20921,8 @@ private sealed class OverlayRollingWindow
 				if (_rowCursor >= filmH)
 				{
 					_rbr.EmitBoundaryValidationSummary($"film={filmW}x{filmH}");
+					if (!cfg.UpdateEveryFrame)
+						FinalizeCathedralProbeSnapshotSummary(filmW, filmH);
 					ResetRowCursor("completed");
 					if (QuitAfterCompletedPass)
 					{
@@ -21464,17 +21605,34 @@ private sealed class OverlayRollingWindow
 			return absorbedByInnerRadius ? "absorbed" : "miss";
 		}
 
+		return ClassifyProbeSurfaceClass(hadHit, colliderId) switch
+		{
+			ProbeSurfaceClass.Geometry => "source",
+			ProbeSurfaceClass.Background => "background",
+			_ => "unclassified"
+		};
+	}
+
+	private ProbeSurfaceClass ClassifyProbeSurfaceClass(bool hadHit, ulong colliderId)
+	{
+		if (!hadHit)
+		{
+			return ProbeSurfaceClass.None;
+		}
+
 		if (_fixtureDebugSourceIds.Contains(colliderId))
 		{
-			return "source";
+			return ProbeSurfaceClass.Geometry;
 		}
 
 		if (_fixtureDebugHasExplicitBackgroundGroup)
 		{
-			return _fixtureDebugBackgroundIds.Contains(colliderId) ? "background" : "unclassified";
+			return _fixtureDebugBackgroundIds.Contains(colliderId)
+				? ProbeSurfaceClass.Background
+				: ProbeSurfaceClass.Unknown;
 		}
 
-		return "background";
+		return ProbeSurfaceClass.Background;
 	}
 
 	private string ClassifyFixtureTransportKind(
@@ -22275,6 +22433,38 @@ private sealed class OverlayRollingWindow
 		return filled;
 	}
 
+	private static int FillProbeOutcomeBlock(ProbeOutcomeCode[] values, int x, int y, int stride, int filmW, int filmH, ProbeOutcomeCode value)
+	{
+		if (values == null || values.Length == 0)
+		{
+			return 0;
+		}
+
+		if (stride <= 1)
+		{
+			if (x >= 0 && x < filmW && y >= 0 && y < filmH)
+			{
+				values[(y * filmW) + x] = value;
+				return 1;
+			}
+			return 0;
+		}
+
+		int filled = 0;
+		int yMax = Math.Min(filmH, y + stride);
+		int xMax = Math.Min(filmW, x + stride);
+		for (int yy = y; yy < yMax; yy++)
+		{
+			for (int xx = x; xx < xMax; xx++)
+			{
+				values[(yy * filmW) + xx] = value;
+				filled++;
+			}
+		}
+
+		return filled;
+	}
+
 	private static int FillVector3Block(Vector3[] values, int x, int y, int stride, int filmW, int filmH, Vector3 value)
 	{
 		if (values == null || values.Length == 0)
@@ -22565,6 +22755,7 @@ private sealed class OverlayRollingWindow
 		if (_img != null && _filmWidth == targetW && _filmHeight == targetH)
 		{
 			EnsureTelemetryHeatmapCapacity(targetPixels);
+			EnsureCathedralProbeBufferCapacity(targetPixels, resetIfAllocated: false);
 			if (_pass2PrevHadHit.Length != targetPixels)
 				_pass2PrevHadHit = new byte[targetPixels];
 				if (_pass2HadHitLostThisFrame.Length != targetPixels)
@@ -22720,6 +22911,7 @@ private sealed class OverlayRollingWindow
 		_img = Image.CreateEmpty(_filmWidth, _filmHeight, false, Image.Format.Rgba8);
 		_img.Fill(cfg.SkyColor);
 		EnsureTelemetryHeatmapCapacity(_filmWidth * _filmHeight);
+		EnsureCathedralProbeBufferCapacity(_filmWidth * _filmHeight, resetIfAllocated: true);
 		ClearTelemetryHeatmapArrays();
 		_fixtureFinalHitOnlyImg = Image.CreateEmpty(_filmWidth, _filmHeight, false, Image.Format.Rgba8);
 		_fixtureFinalHitOnlyImg.Fill(Colors.Black);

@@ -12,7 +12,7 @@ public struct ProbeRegionRecord
 	public byte MaxRefinementLevel;
 	public bool IsPrimarilyMaxStepsExhausted;
 	public int CountHitGeometry;
-	public int CountBackgroundExit;
+	public int CountBackgroundResolved;
 	public int CountMaxStepsExhausted;
 	public int CountStoppedEarlyAbsorbed;
 	public int CountNumericalFailure;

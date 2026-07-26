@@ -617,6 +617,7 @@ public partial class RayBeamRenderer : Node3D
 		public Vector3 Normal;
 		public ulong ColliderId;
 		public int PrimitiveOrShapeId;
+		public ProbeSurfaceClass SurfaceClass;
 		public bool HadNumericalFailure;
 	}
 
@@ -3488,6 +3489,7 @@ public partial class RayBeamRenderer : Node3D
 			Normal = Vector3.Up,
 			ColliderId = 0,
 			PrimitiveOrShapeId = -1,
+			SurfaceClass = ProbeSurfaceClass.None,
 			HadNumericalFailure = false
 		};
 		stoppedEarly = false;
