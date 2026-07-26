@@ -2225,6 +2225,8 @@ public partial class GrinFilmCamera : Node
 	private ulong[] _pass1HitColliderId = Array.Empty<ulong>();
 	private ProbeOutcomeCode[] _probeOutcomes = Array.Empty<ProbeOutcomeCode>();
 	private byte[] _probeRefinLevel = Array.Empty<byte>();
+	private ushort[] _regionLabels = Array.Empty<ushort>();
+	private readonly List<ProbeRegionRecord> _probeRegions = new();
 	private ProbeFrameSummary _probeFrameSummary;
 	private int _probeUnprocessedCount = 0;
 	private SelectedProbeTransportRequest _selectedProbeTransportRequest;
@@ -9115,6 +9117,11 @@ private sealed class OverlayRollingWindow
 		{
 			Array.Clear(_probeRefinLevel, 0, _probeRefinLevel.Length);
 		}
+		if (_regionLabels.Length > 0)
+		{
+			Array.Clear(_regionLabels, 0, _regionLabels.Length);
+		}
+		_probeRegions.Clear();
 		_probeFrameSummary = default;
 		_probeUnprocessedCount = _probeOutcomes.Length;
 	}
@@ -9126,6 +9133,7 @@ private sealed class OverlayRollingWindow
 		{
 			_probeOutcomes = new ProbeOutcomeCode[safeCount];
 			_probeRefinLevel = new byte[safeCount];
+			_regionLabels = new ushort[safeCount];
 			ResetCathedralProbeBuffersForPass();
 			return;
 		}
@@ -9133,6 +9141,11 @@ private sealed class OverlayRollingWindow
 		if (_probeRefinLevel.Length != safeCount)
 		{
 			_probeRefinLevel = new byte[safeCount];
+			resetIfAllocated = true;
+		}
+		if (_regionLabels.Length != safeCount)
+		{
+			_regionLabels = new ushort[safeCount];
 			resetIfAllocated = true;
 		}
 
@@ -9709,6 +9722,10 @@ private sealed class OverlayRollingWindow
 		int maxStepsExhaustedCount = 0;
 		int stoppedEarlyAbsorbedCount = 0;
 		int numericalFailureCount = 0;
+		int regionCount = 0;
+		int selectableRegionCount = 0;
+		int largestRegionPixelCount = 0;
+		ushort largestRegionId = 0;
 		for (int i = 0; i < totalPixels; i++)
 		{
 			switch (_probeOutcomes[i])
@@ -9735,6 +9752,38 @@ private sealed class OverlayRollingWindow
 		}
 
 		_probeUnprocessedCount = unprocessedCount;
+		if (unprocessedCount == 0)
+		{
+			ProbeRegionAnalyzer.Analyze(
+				filmW,
+				filmH,
+				new ReadOnlySpan<ProbeOutcomeCode>(_probeOutcomes, 0, totalPixels),
+				new Span<ushort>(_regionLabels, 0, totalPixels),
+				_probeRegions);
+			regionCount = _probeRegions.Count;
+			for (int i = 0; i < _probeRegions.Count; i++)
+			{
+				ProbeRegionRecord region = _probeRegions[i];
+				if (region.IsPrimarilyMaxStepsExhausted)
+				{
+					selectableRegionCount++;
+				}
+				if (region.PixelCount > largestRegionPixelCount)
+				{
+					largestRegionPixelCount = region.PixelCount;
+					largestRegionId = region.Id;
+				}
+			}
+		}
+		else
+		{
+			_probeRegions.Clear();
+			if (_regionLabels.Length >= totalPixels)
+			{
+				Array.Clear(_regionLabels, 0, totalPixels);
+			}
+		}
+
 		_probeFrameSummary = new ProbeFrameSummary
 		{
 			TotalPixels = totalPixels,
@@ -9743,10 +9792,10 @@ private sealed class OverlayRollingWindow
 			MaxStepsExhaustedCount = maxStepsExhaustedCount,
 			StoppedEarlyAbsorbedCount = stoppedEarlyAbsorbedCount,
 			NumericalFailureCount = numericalFailureCount,
-			RegionCount = 0,
-			SelectableRegionCount = 0,
-			LargestRegionPixelCount = 0,
-			LargestRegionId = 0,
+			RegionCount = regionCount,
+			SelectableRegionCount = selectableRegionCount,
+			LargestRegionPixelCount = largestRegionPixelCount,
+			LargestRegionId = largestRegionId,
 			LastRefinementPixelsAttempted = 0,
 			LastRefinementNewlyResolved = 0,
 			LastRefinementStillUnresolved = 0,
@@ -9761,7 +9810,21 @@ private sealed class OverlayRollingWindow
 			$"[CathedralProbe][FrameSummary] total={_probeFrameSummary.TotalPixels} " +
 			$"hitGeometry={_probeFrameSummary.HitGeometryCount} backgroundResolved={_probeFrameSummary.BackgroundResolvedCount} " +
 			$"maxStepsExhausted={_probeFrameSummary.MaxStepsExhaustedCount} stoppedEarlyAbsorbed={_probeFrameSummary.StoppedEarlyAbsorbedCount} " +
-			$"numericalFailure={_probeFrameSummary.NumericalFailureCount} unprocessed={_probeUnprocessedCount}");
+			$"numericalFailure={_probeFrameSummary.NumericalFailureCount} unprocessed={_probeUnprocessedCount} " +
+			$"regions={_probeFrameSummary.RegionCount} selectable={_probeFrameSummary.SelectableRegionCount} " +
+			$"largestRegionId={_probeFrameSummary.LargestRegionId} largestRegionPixels={_probeFrameSummary.LargestRegionPixelCount}");
+		if (_probeRegions.Count > 0)
+		{
+			int topCount = Math.Min(5, _probeRegions.Count);
+			for (int i = 0; i < topCount; i++)
+			{
+				ProbeRegionRecord region = _probeRegions[i];
+				GD.Print(
+					$"[CathedralProbe][Region] rank={i + 1} id={region.Id} pixels={region.PixelCount} " +
+					$"bounds=({region.MinX},{region.MinY})-({region.MaxX},{region.MaxY}) " +
+					$"maxSteps={region.CountMaxStepsExhausted} selectable={region.IsPrimarilyMaxStepsExhausted}");
+			}
+		}
 	}
 
 	private void EnsureFixtureRowParticipationCapacity(int filmHeight)

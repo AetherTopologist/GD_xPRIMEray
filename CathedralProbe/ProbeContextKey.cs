@@ -1,3 +1,5 @@
+#nullable enable
+
 /// <summary>
 /// Exact probe-context identity after caller-side quantization.
 /// </summary>
@@ -60,7 +62,7 @@ public readonly struct ProbeContextKey : System.IEquatable<ProbeContextKey>
 			&& RefinementPolicyVersion == other.RefinementPolicyVersion;
 	}
 
-	public override bool Equals(object obj)
+	public override bool Equals(object? obj)
 	{
 		return obj is ProbeContextKey other && Equals(other);
 	}
@@ -93,3 +95,5 @@ public readonly struct ProbeContextKey : System.IEquatable<ProbeContextKey>
 		return !left.Equals(right);
 	}
 }
+
+#nullable restore
