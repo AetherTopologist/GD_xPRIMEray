@@ -13,6 +13,8 @@ internal static class ProbeRegionAnalyzerTests
 		TwoSeparatedComponents();
 		ResolvedPixelsSplitComponents();
 		NumericalFailureExcluded();
+		StoppedEarlyAbsorbedExcluded();
+		InvalidExcluded();
 		DeterministicIdsAndBoundingBoxes();
 		InsufficientOutputCapacityIsDeterministic();
 		RepeatAnalysisProducesIdenticalLabelsAndRecords();
@@ -136,6 +138,45 @@ internal static class ProbeRegionAnalyzerTests
 		TestAssert.Equal((ushort)0, labels[1], "numerical failure label");
 		TestAssert.Equal(0, records[0].CountNumericalFailure, "record 0 numerical count");
 		TestAssert.Equal(0, records[1].CountNumericalFailure, "record 1 numerical count");
+	}
+
+	private static void StoppedEarlyAbsorbedExcluded()
+	{
+		ExcludedMiddleValue(ProbeOutcomeCode.StoppedEarlyAbsorbed, "stopped early");
+	}
+
+	private static void InvalidExcluded()
+	{
+		ExcludedMiddleValue(ProbeOutcomeCode.Invalid, "invalid");
+	}
+
+	private static void ExcludedMiddleValue(ProbeOutcomeCode excludedValue, string label)
+	{
+		ProbeOutcomeCode[] outcomes =
+		{
+			ProbeOutcomeCode.MaxStepsExhausted,
+			excludedValue,
+			ProbeOutcomeCode.MaxStepsExhausted
+		};
+		ushort[] labels = new ushort[outcomes.Length];
+		var records = new List<ProbeRegionRecord>();
+
+		ProbeRegionAnalyzer.Analyze(3, 1, outcomes, labels, records);
+
+		TestAssert.Equal(2, records.Count, $"{label} exclusion region count");
+		TestAssert.Equal((ushort)0, labels[1], $"{label} middle label");
+		TestAssert.True(labels[0] != 0, $"{label} left label nonzero");
+		TestAssert.True(labels[2] != 0, $"{label} right label nonzero");
+		TestAssert.True(labels[0] != labels[2], $"{label} outer labels distinct");
+		for (int i = 0; i < records.Count; i++)
+		{
+			TestAssert.Equal(1, records[i].PixelCount, $"{label} record {i} pixel count");
+			TestAssert.Equal(1, records[i].CountMaxStepsExhausted, $"{label} record {i} max-step count");
+			TestAssert.Equal(0, records[i].CountHitGeometry, $"{label} record {i} hit count");
+			TestAssert.Equal(0, records[i].CountBackgroundResolved, $"{label} record {i} background count");
+			TestAssert.Equal(0, records[i].CountStoppedEarlyAbsorbed, $"{label} record {i} stopped count");
+			TestAssert.Equal(0, records[i].CountNumericalFailure, $"{label} record {i} numerical count");
+		}
 	}
 
 	private static void DeterministicIdsAndBoundingBoxes()

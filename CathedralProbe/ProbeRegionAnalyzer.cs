@@ -95,7 +95,7 @@ public static class ProbeRegionAnalyzer
 			int index = queue[head++];
 			int x = index % filmW;
 			int y = index / filmW;
-			AddPixelToRecord(ref record, outcomes[index], x, y);
+			AddPixelToRecord(ref record, x, y);
 
 			TryEnqueue(index - filmW, y > 0, outcomes, regionLabels, queue, ref tail, regionId);
 			TryEnqueue(index - 1, x > 0, outcomes, regionLabels, queue, ref tail, regionId);
@@ -130,7 +130,6 @@ public static class ProbeRegionAnalyzer
 
 	private static void AddPixelToRecord(
 		ref ProbeRegionRecord record,
-		ProbeOutcomeCode outcome,
 		int x,
 		int y)
 	{
@@ -139,25 +138,7 @@ public static class ProbeRegionAnalyzer
 		if (y < record.MinY) record.MinY = (ushort)y;
 		if (x > record.MaxX) record.MaxX = (ushort)x;
 		if (y > record.MaxY) record.MaxY = (ushort)y;
-
-		switch (outcome)
-		{
-			case ProbeOutcomeCode.HitGeometry:
-				record.CountHitGeometry++;
-				break;
-			case ProbeOutcomeCode.BackgroundResolved:
-				record.CountBackgroundResolved++;
-				break;
-			case ProbeOutcomeCode.MaxStepsExhausted:
-				record.CountMaxStepsExhausted++;
-				break;
-			case ProbeOutcomeCode.StoppedEarlyAbsorbed:
-				record.CountStoppedEarlyAbsorbed++;
-				break;
-			case ProbeOutcomeCode.NumericalFailure:
-				record.CountNumericalFailure++;
-				break;
-		}
+		record.CountMaxStepsExhausted++;
 	}
 
 	private static int CompareRegionRecords(ProbeRegionRecord left, ProbeRegionRecord right)

@@ -169,14 +169,15 @@ Stage 0 runs in **SNAPSHOT mode only**. LIVE mode is a non-goal.
 2. **Key capture.** At start of first RenderStep(), `CathedralProbeEngine` computes the current `ProbeContextKey`. If it matches and outcomes are not all `Unprocessed`, skip to step 5. If different: full reset (D5), then proceed.
 3. **Base pass — PROBING.** 12 RenderStep() calls execute. After each band, `ProcessPass1Pixel` writes one `ProbeOutcomeCode` byte per pixel. Status: `PROBING`.
 4. **Pass finalization.** After RenderStep 12: assert no `Unprocessed` pixels remain. Compute `ProbeFrameSummary`.
-5. **Region analysis.** Call `ProbeRegionAnalyzer.Analyze()`. Produces `ushort[] _regionLabels` and `List<ProbeRegionRecord>` sorted by PixelCount descending. Status: `READY`.
-6. **User navigation.** J/K scroll through ranked regions. Adapter displays selected region bounding box outline. Telemetry shows region index, pixel count, dominant outcome, refinement level.
-7. **Refinement request — REFINING.** User presses P. `CathedralProbeEngine.RequestRefinement(selectedRegionId)` called synchronously. Iterates `_regionLabels[]` to find matching pixels. Reruns with `ProbePolicy.RefinedStepsPerRay`. Capped at `ProbePolicy.MaxPixelsPerRequest`. Increments `_probeRefinLevel[i]` for each rerun pixel.
-8. **Refinement outcome recording.** After each rerun pixel: update `_probeOutcomes[i]`. If `HitGeometry` or `BackgroundResolved`: pixel is now resolved.
-9. **Post-refinement region analysis.** Re-run `ProbeRegionAnalyzer.Analyze()` on updated outcome plane. Compute before/after unresolved counts.
-10. **Result reporting.** Emit `ProbeRefinementResult`. Status: `UPDATED` if `NewlyResolvedCount > 0`, else `STILL UNRESOLVED`.
-11. **Repeat or reset.** User may press P again (next refinement level, if ceiling not reached) or R (full reset → step 2).
-12. **Evidence export.** Produces evidence bundle (D13) on user command or session end.
+5. **Selected-index transport availability.** A caller-supplied set of pixel indices can be rerun through the production selected-index executor under a supplied policy and context key. This is enabling transport infrastructure only: it does not select regions, orchestrate refinement, mutate the base film, update `_probeOutcomes`, or write evidence.
+6. **Region analysis.** Call `ProbeRegionAnalyzer.Analyze()`. Produces `ushort[] _regionLabels` and `List<ProbeRegionRecord>` sorted by PixelCount descending. Status: `READY`.
+7. **User navigation.** J/K scroll through ranked regions. Adapter displays selected region bounding box outline. Telemetry shows region index, pixel count, dominant outcome, refinement level.
+8. **Refinement request — REFINING.** User presses P. `CathedralProbeEngine.RequestRefinement(selectedRegionId)` called synchronously. Iterates `_regionLabels[]` to find matching pixels. Reruns with `ProbePolicy.RefinedStepsPerRay`. Capped at `ProbePolicy.MaxPixelsPerRequest`. Increments `_probeRefinLevel[i]` for each rerun pixel.
+9. **Refinement outcome recording.** After each rerun pixel: update `_probeOutcomes[i]`. If `HitGeometry` or `BackgroundResolved`: pixel is now resolved.
+10. **Post-refinement region analysis.** Re-run `ProbeRegionAnalyzer.Analyze()` on updated outcome plane. Compute before/after unresolved counts.
+11. **Result reporting.** Emit `ProbeRefinementResult`. Status: `UPDATED` if `NewlyResolvedCount > 0`, else `STILL UNRESOLVED`.
+12. **Repeat or reset.** User may press P again (next refinement level, if ceiling not reached) or R (full reset → step 2).
+13. **Evidence export.** Produces evidence bundle (D13) on user command or session end.
 
 > **Synchronous constraint:** The refinement pass in step 7 runs on the calling thread. `MaxPixelsPerRequest` is the only budget cap — set conservatively (e.g., 500 pixels at 160×90).
 
@@ -306,7 +307,7 @@ public static class ProbeRegionAnalyzer
 
 ## D8 — Allocation-Safe Data Layout
 
-Two parallel byte arrays in `GrinFilmCamera`. No struct-of-arrays, no per-pixel object heap allocations. No per-region pixel-membership arrays.
+Three parallel persistent arrays in `GrinFilmCamera`. No struct-of-arrays, no per-pixel object heap allocations. No per-region pixel-membership arrays.
 
 **Full-film persistent arrays (Cathedral Probe additions):**
 
@@ -322,8 +323,8 @@ Two parallel byte arrays in `GrinFilmCamera`. No struct-of-arrays, no per-pixel 
 - Allocated alongside existing full-film arrays in `GrinFilmCamera`
 - Reallocated on resolution change (D5)
 - Reset (memset to 0) on `ProbeContextKey` invalidation — not freed
-- `_regionLabels` allocated lazily at first region analysis call
-- BFS frontier: `Stack<int>` allocated once in `ProbeRegionAnalyzer` and reused across calls
+- `_regionLabels` allocated during film-capacity initialization alongside `_probeOutcomes` and `_probeRefinLevel`
+- BFS frontier: reusable `int[]` scratch allocated by `ProbeRegionAnalyzer` and reused across calls
 
 **No per-region heap arrays.** When a refinement request arrives for region R, `CathedralProbeEngine` scans `_regionLabels[]` linearly (O(filmW×filmH)) to collect matching pixel indices into a reusable `int[]` scratch buffer. At 160×90 this is 14,400 iterations — imperceptible.
 
@@ -446,6 +447,20 @@ After a SNAPSHOT pass, identify 10 pixels with `MaxStepsReached=true`. For each,
 
 **Negative-answer condition:** If zero pixels resolve, the wormhole's magenta region may be a true geometric void, not a budget limitation. Do not proceed with refinement implementation. Escalate to architecture review — the Stage 0 research question may have a negative answer for this scene.
 
+### D11.4 — Selected-index transport promotion
+
+The selected-index transport executor was promoted from the D11.3 prerequisite probe into its own rollback commit between outcome recording and region analysis.
+
+Rationale:
+
+- Temporary full-frame reruns produced physics-space locking warnings when invoked from unsafe callbacks.
+- Production refinement requires caller-selected pixels, not a second full-frame render.
+- The executor preserves the base film, `_probeOutcomes`, and `_probeRefinLevel` while writing to caller-owned result storage.
+- The executor validates the supplied `ProbeContextKey` before running and refuses stale context.
+- Execution is synchronous and pumped from a safe process point. It is not threaded refinement, region selection, outcome application, UI, overlay, or evidence export.
+
+Selected-index execution is enabling transport infrastructure only. Region selection and refinement orchestration remain separate later commits.
+
 ---
 
 ## D12 — File Manifest
@@ -462,6 +477,7 @@ After a SNAPSHOT pass, identify 10 pixels with `MaxStepsReached=true`. For each,
 | `CathedralProbe/ProbeRefinementRequest.cs` | readonly struct | RegionId only. No `using Godot;`. |
 | `CathedralProbe/ProbeRefinementResult.cs` | struct | All result fields. No `using Godot;`. |
 | `CathedralProbe/ProbeRegionAnalyzer.cs` | static class | BFS Analyze() method. Pure C#. No `using Godot;`. |
+| `CathedralProbe/ProbeSelectedIndexResult.cs` | struct | Caller-owned selected-pixel rerun result. No `using Godot;`. |
 | `CathedralProbe/CathedralProbeEngine.cs` | class | Orchestrator: key management, RequestRefinement, summary computation. No `using Godot;`. |
 | `Transport/CathedralProbeAdapter.gd` | GDScript | Input handling, status label, overlay drawing, telemetry display. Calls C# surface only. |
 
@@ -470,7 +486,7 @@ After a SNAPSHOT pass, identify 10 pixels with `MaxStepsReached=true`. For each,
 | File | Change | Scope |
 |---|---|---|
 | `RayBeamRenderer.cs` | Add `public bool HadNumericalFailure` to `Pass1HitInfo` struct (lines 612–620). Set at NaN guard (~line 3620): detect `float.IsNaN(aSum)` before clamp, set local flag, propagate to `Pass1HitInfo` at loop end. | 2–3 lines total |
-| `GrinFilmCamera.cs` | Allocate `_probeOutcomes[]`, `_probeRefinLevel[]`, `_regionLabels[]` alongside existing full-film arrays. In `ProcessPass1Pixel`: write ProbeOutcomeCode from hit info after step loop. After full SNAPSHOT pass: call `CathedralProbeEngine`. Expose C# surface methods for adapter (D9). Wire `IncrementGeometryEpoch()` to preset switch callsite. | Additive — ~100 lines net new |
+| `GrinFilmCamera.cs` | Allocate `_probeOutcomes[]`, `_probeRefinLevel[]`, `_regionLabels[]` alongside existing full-film arrays. In `ProcessPass1Pixel`: write ProbeOutcomeCode from hit info after step loop. Add safe selected-index transport infrastructure. After full SNAPSHOT pass: analyze unresolved regions. Later commits expose C# surface methods for adapter (D9) and wire `IncrementGeometryEpoch()` to preset switch callsite. | Additive, staged by rollback commit |
 
 ### Protected — zero changes
 
@@ -543,7 +559,7 @@ These items are out of scope for Stage 0 and must not be introduced. If a design
 
 ## D15 — Ordered Commit Plan
 
-Five commits. Each is a complete rollback point — reverting a commit leaves the codebase in a valid, buildable, test-passing state.
+Six commits. Each is a complete rollback point — reverting a commit leaves the codebase in a valid, buildable, test-passing state.
 
 ### Commit 1 — Rollback A · Data structures only
 
@@ -553,26 +569,36 @@ Five commits. Each is a complete rollback point — reverting a commit leaves th
 
 ### Commit 2 — Rollback B · Outcome recording
 
-*Gate: D11.1 and D11.3 must have cleared before this commit.*
+*Gate: D11.1 must have cleared before this commit.*
 
 - **Files modified:** `GrinFilmCamera.cs` — allocate `_probeOutcomes[]` and `_probeRefinLevel[]`; populate `ProbeOutcomeCode` in `ProcessPass1Pixel`; compute `ProbeFrameSummary` after full SNAPSHOT pass; log summary to console
 - **No display change.** Verification: SNAPSHOT pass completes; console prints outcome counts; `MaxStepsExhaustedCount` matches D11.1 probe results. All OI tests still pass.
 
-### Commit 3 — Rollback C · Region analysis
+### Commit 3 — Rollback C · Safe selected-index transport
+
+*Promoted from D11.3 before region analysis.*
+
+- **Files added:** `CathedralProbe/ProbeSelectedIndexResult.cs`
+- **Files modified:** `ProbeContextKey.cs`, `GrinFilmCamera.cs`
+- **Behavior:** add a caller-selected pixel rerun executor that accepts pixel indices, refined `StepsPerRay`, refined `StepLength`, and a current `ProbeContextKey`; writes to caller-owned result storage; validates context; preserves base film and persistent outcome/refinement buffers.
+- **Non-goals:** no region selection, no refinement orchestration, no outcome application, no full-frame rerun, no UI, no evidence export.
+- **Verification:** deterministic selected-index reruns agree across repeated runs and at least one selected exhausted pixel resolves to `HitGeometry` or `BackgroundResolved`. All OI tests still pass.
+
+### Commit 4 — Rollback D · Region analysis
 
 *Gate: D11.2 must have cleared before this commit.*
 
-- **Files added:** `CathedralProbe/CathedralProbeEngine.cs` — key management, Analyze() call, region list management
-- **Files modified:** `GrinFilmCamera.cs` — allocate `_regionLabels[]`; wire `CathedralProbeEngine.RunRegionAnalysis()` to SNAPSHOT freeze; expose C# surface methods as stubs
+- **Files modified:** `CathedralProbe/ProbeRegionAnalyzer.cs`, `GrinFilmCamera.cs`, pure C# tests
+- **Behavior:** allocate `_regionLabels[]` alongside film-capacity probe buffers; analyze `MaxStepsExhausted` components after complete SNAPSHOT outcome planes; update `ProbeFrameSummary` region counts.
 - **Verification:** Console prints region count and largest region pixel count. Acceptance tests 1–4 pass. All OI tests still pass.
 
-### Commit 4 — Rollback D · Refinement pass + acceptance fixture
+### Commit 5 — Rollback E · Refinement pass + acceptance fixture
 
 - **Files modified:** `CathedralProbeEngine.cs` — implement `RequestRefinement()`, pixel re-run loop, result computation, `ExportEvidenceBundle()`
 - **Files modified:** `GrinFilmCamera.cs` — wire `IncrementGeometryEpoch()` to preset switch callsite; complete C# surface methods
 - **Verification:** All 11 acceptance tests pass in console fixture. Evidence bundle writes correctly. All OI tests still pass. No Godot display change yet.
 
-### Commit 5 — Rollback E · Godot adapter and UI
+### Commit 6 — Rollback F · Godot adapter and UI
 
 - **Files added:** `Transport/CathedralProbeAdapter.gd` — P/J/K/R/O input handling; status label; unresolved overlay (magenta, yellow-NaN, white bounding-box outline); telemetry display; mandatory wording text
 - **Verification:** Open `ObservatoryWorkbench.tscn` in editor — no errors on load. Enter SNAPSHOT mode — status shows PROBING then READY. Press J/K — region selection changes, bounding box visible. Press P — status changes to UPDATED or STILL UNRESOLVED. Press R — status returns to STALE. "More steps = more attempt, not more truth." visible adjacent to P key hint. All OI tests still pass.
