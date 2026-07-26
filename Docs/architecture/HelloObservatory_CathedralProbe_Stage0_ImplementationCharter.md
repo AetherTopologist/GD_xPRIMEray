@@ -8,31 +8,37 @@
 
 ## D1 — Stage 0 Outcome Taxonomy
 
-The taxonomy below is the complete vocabulary for Stage 0. Derived directly from the three transport booleans and the NaN guard in the step loop. No RGB pixel inspection, no raycast-return parsing, no shading inference.
+The taxonomy below is the complete vocabulary for Stage 0. Derived from pass-1 transport state, the NaN guard in the step loop, and a bounded surface classification attached to the pass-1 hit payload. No RGB pixel inspection, no shaded-pixel inspection, no texture readback.
 
 | Code | Value | Source | Resolved? | Refineable? |
 |---|---|---|---|---|
 | `Unprocessed` | 0 | Initial state — pixel not yet computed in this pass | — | — |
-| `HitGeometry` | 1 | `_pass1HitFound == true` | **Yes** | No |
-| `BackgroundExit` | 2 | Not hit, not budget-exhausted, not absorbed — ray traveled `maxDistance` cleanly | **Yes** | No |
+| `HitGeometry` | 1 | `Pass1HitInfo.SurfaceClass == Geometry` and no higher-precedence unresolved/error state | **Yes** | No |
+| `BackgroundResolved` | 2 | `Pass1HitInfo.SurfaceClass == Background`, or no hit without a higher-precedence unresolved/error state | **Yes** | No |
 | `MaxStepsExhausted` | 3 | `_pass1MaxStepsReached == true` — *primary unresolved target* | No | **Yes — primary** |
 | `StoppedEarlyAbsorbed` | 4 | `_pass1StoppedEarly == true` (absorbed inside inner radius, no geometry contact) | No | Yes — secondary |
 | `NumericalFailure` | 5 | NaN or overflow detected during integration (new flag on `Pass1HitInfo`) | No | **No — error class** |
 | `Invalid` | 255 | Should never appear in a completed pass — corrupted write or buffer misalignment | Error | No |
 
-### Mapping from transport booleans
+### Mapping from pass-1 state
 
 Written in `ProcessPass1Pixel` after the step loop returns, before `ShadeChunk()` is called. Evaluated in this priority order:
 
 ```csharp
-if      (hitInfo.HadNumericalFailure)     outcome = NumericalFailure;
-else if (hitInfo.Found)                   outcome = HitGeometry;
-else if (hitInfo.MaxStepsReached)         outcome = MaxStepsExhausted;
-else if (hitInfo.StoppedEarly)            outcome = StoppedEarlyAbsorbed;
-else                                      outcome = BackgroundExit;
+if      (hitInfo.HadNumericalFailure)             outcome = NumericalFailure;
+else if (maxStepsReached)                         outcome = MaxStepsExhausted;
+else if (stoppedEarly)                            outcome = StoppedEarlyAbsorbed;
+else if (hitInfo.SurfaceClass == Geometry)        outcome = HitGeometry;
+else if (hitInfo.SurfaceClass == Background)      outcome = BackgroundResolved;
+else if (!hitInfo.Found)                          outcome = BackgroundResolved;
+else                                              outcome = Invalid;
 ```
 
 `NumericalFailure` is checked first — a pixel that had both a NaN and a subsequent hit must be flagged as `NumericalFailure`. The hit result under numerical corruption is not trustworthy.
+
+`MaxStepsExhausted` is checked before resolved surface classes. If a pass exhausts its configured step budget, the outcome remains `MaxStepsExhausted` even when a background or geometry collider was incidentally contacted during that exhausted pass. This preserves the unresolved target for D11 and later region analysis.
+
+`Pass1HitInfo.Found` means physics collider contact only. It is not sufficient to establish `HitGeometry`. Stage 0 requires `Pass1HitInfo.SurfaceClass`, populated from the same source/background collider identity mechanism already used by fixture diagnostics.
 
 ---
 
@@ -56,9 +62,9 @@ A connected component is selectable only if its dominant outcome (majority code 
 
 `NumericalFailure` pixels are **excluded from region analysis**. They are counted separately in `ProbeFrameSummary.NumericalFailureCount`. They are displayed as a distinct overlay color (yellow-warning, not magenta) if the failure count exceeds zero. They are never included in a refinement request. The evidence bundle records their count and the context key so they can be reproduced for investigation.
 
-### BackgroundExit behavior
+### BackgroundResolved behavior
 
-`BackgroundExit` is fully resolved. Displayed as the current SkyColor — identical to pre-Cathedral-Probe behavior. Does not appear in the unresolved overlay. Does not participate in region analysis. The outcome byte is recorded, enabling future evidence queries.
+`BackgroundResolved` is fully resolved. It includes clean no-hit background resolution and declared background-collider contacts when no higher-precedence unresolved/error state applies. Displayed as the current SkyColor or existing background diagnostic presentation — identical to pre-Cathedral-Probe behavior. Does not appear in the unresolved overlay. Does not participate in region analysis. The outcome byte is recorded, enabling future evidence queries.
 
 ### Topology-candidate status
 
@@ -166,7 +172,7 @@ Stage 0 runs in **SNAPSHOT mode only**. LIVE mode is a non-goal.
 5. **Region analysis.** Call `ProbeRegionAnalyzer.Analyze()`. Produces `ushort[] _regionLabels` and `List<ProbeRegionRecord>` sorted by PixelCount descending. Status: `READY`.
 6. **User navigation.** J/K scroll through ranked regions. Adapter displays selected region bounding box outline. Telemetry shows region index, pixel count, dominant outcome, refinement level.
 7. **Refinement request — REFINING.** User presses P. `CathedralProbeEngine.RequestRefinement(selectedRegionId)` called synchronously. Iterates `_regionLabels[]` to find matching pixels. Reruns with `ProbePolicy.RefinedStepsPerRay`. Capped at `ProbePolicy.MaxPixelsPerRequest`. Increments `_probeRefinLevel[i]` for each rerun pixel.
-8. **Refinement outcome recording.** After each rerun pixel: update `_probeOutcomes[i]`. If `HitGeometry` or `BackgroundExit`: pixel is now resolved.
+8. **Refinement outcome recording.** After each rerun pixel: update `_probeOutcomes[i]`. If `HitGeometry` or `BackgroundResolved`: pixel is now resolved.
 9. **Post-refinement region analysis.** Re-run `ProbeRegionAnalyzer.Analyze()` on updated outcome plane. Compute before/after unresolved counts.
 10. **Result reporting.** Emit `ProbeRefinementResult`. Status: `UPDATED` if `NewlyResolvedCount > 0`, else `STILL UNRESOLVED`.
 11. **Repeat or reset.** User may press P again (next refinement level, if ceiling not reached) or R (full reset → step 2).
@@ -187,7 +193,7 @@ public enum ProbeOutcomeCode : byte
 {
     Unprocessed          = 0,
     HitGeometry          = 1,
-    BackgroundExit       = 2,
+    BackgroundResolved   = 2,
     MaxStepsExhausted    = 3,
     StoppedEarlyAbsorbed = 4,
     NumericalFailure     = 5,
@@ -224,7 +230,7 @@ public struct ProbeRegionRecord
     public bool   IsPrimarilyMaxStepsExhausted;  // selectable-region flag (D2)
     // Outcome distribution — inline, no allocation
     public int    CountHitGeometry;
-    public int    CountBackgroundExit;
+    public int    CountBackgroundResolved;
     public int    CountMaxStepsExhausted;
     public int    CountStoppedEarlyAbsorbed;
     public int    CountNumericalFailure;
@@ -238,7 +244,7 @@ public struct ProbeFrameSummary
 {
     public int    TotalPixels;
     public int    HitGeometryCount;
-    public int    BackgroundExitCount;
+    public int    BackgroundResolvedCount;
     public int    MaxStepsExhaustedCount;
     public int    StoppedEarlyAbsorbedCount;
     public int    NumericalFailureCount;
@@ -429,10 +435,12 @@ Add logging to every property setter on `FieldSourceSnap` or any type that write
 
 **Gates:** refinement pass viability (D6 step 7), `RefinedStepsPerRay` selection for `ProbePolicy`.
 
-After a SNAPSHOT pass, identify 10 pixels with `MaxStepsReached=true`. For each, manually construct and re-execute a single-pixel transport pass with `StepsPerRay` multiplied by 4 (e.g., 64→256). Log the new outcome for each pixel.
+After a SNAPSHOT pass, identify 10 pixels with `MaxStepsReached=true`. For each, manually construct and re-execute a single-pixel transport pass with `StepsPerRay` multiplied by 4 (e.g., 64→256). Log the original outcome, refined outcome, original/refined step counts, timing, and repeat determinism for each pixel.
 
 **Pass conditions:**
-- At least one pixel resolves to `HitGeometry` — refinement is viable
+- At least one pixel resolves to `HitGeometry` or `BackgroundResolved` — refinement is viable
+- Report separately how many selected pixels transition to `HitGeometry` and how many transition to `BackgroundResolved`
+- If zero selected pixels resolve, record the negative scientific result and stop before production refinement
 - Rerun is deterministic — identical inputs produce identical outcome across two reruns
 - Rerun time per pixel is bounded — informs `MaxPixelsPerRequest` setting
 
