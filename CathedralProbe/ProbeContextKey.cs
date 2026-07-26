@@ -16,6 +16,34 @@ public readonly struct ProbeContextKey : System.IEquatable<ProbeContextKey>
 	public readonly uint BoundaryLayerEpoch;
 	public readonly byte RefinementPolicyVersion;
 
+	public ProbeContextKey(
+		uint cameraOriginHash,
+		uint cameraBasisHash,
+		float fovDeg,
+		ushort filmWidth,
+		ushort filmHeight,
+		ushort baseStepsPerRay,
+		float bendScale,
+		float fieldStrength,
+		uint fieldSourceEpoch,
+		uint geometryEpoch,
+		uint boundaryLayerEpoch,
+		byte refinementPolicyVersion)
+	{
+		CameraOriginHash = cameraOriginHash;
+		CameraBasisHash = cameraBasisHash;
+		FovDeg = fovDeg;
+		FilmWidth = filmWidth;
+		FilmHeight = filmHeight;
+		BaseStepsPerRay = baseStepsPerRay;
+		BendScale = bendScale;
+		FieldStrength = fieldStrength;
+		FieldSourceEpoch = fieldSourceEpoch;
+		GeometryEpoch = geometryEpoch;
+		BoundaryLayerEpoch = boundaryLayerEpoch;
+		RefinementPolicyVersion = refinementPolicyVersion;
+	}
+
 	public bool Equals(ProbeContextKey other)
 	{
 		return CameraOriginHash == other.CameraOriginHash

@@ -2227,6 +2227,13 @@ public partial class GrinFilmCamera : Node
 	private byte[] _probeRefinLevel = Array.Empty<byte>();
 	private ProbeFrameSummary _probeFrameSummary;
 	private int _probeUnprocessedCount = 0;
+	private SelectedProbeTransportRequest _selectedProbeTransportRequest;
+	private bool _selectedProbeTransportPending = false;
+	private bool _selectedProbeTransportCompleted = false;
+	private bool _selectedProbeTransportSuccess = false;
+	private int _selectedProbeTransportCompletedCount = 0;
+	private long _selectedProbeTransportElapsedTicks = 0;
+	private string _selectedProbeTransportStatus = "idle";
 	// Cathedral Probe / Ultra-Turbo memristor-style per-pixel curvature experience fingerprint (lightweight, in-memory for run).
 	// Stability: EWMA (higher = historically stable/easy transport → candidate for relaxed local budgets in ultra-turbo).
 	// Class: coarse transport phenotype for scheduling hints.
@@ -4401,6 +4408,7 @@ private sealed class OverlayRollingWindow
 			SyncAndApplyIfDirty("process");
 			// Keep broadphase controls in sync each frame so the inspector reflects effective state.
 			UpdateBroadphaseEffectiveState();
+			PumpSelectedProbeTransport();
 			PumpSmartScaleController();
 			if (!UpdateEveryFrame && ShouldEmitMetadataOnlyOverlay())
 			{
@@ -9131,6 +9139,541 @@ private sealed class OverlayRollingWindow
 		if (resetIfAllocated)
 		{
 			ResetCathedralProbeBuffersForPass();
+		}
+	}
+
+	private sealed class SelectedProbeTransportRequest
+	{
+		public int[] PixelIndices = Array.Empty<int>();
+		public ProbeSelectedIndexResult[] Results = Array.Empty<ProbeSelectedIndexResult>();
+		public int RefinedStepsPerRay;
+		public float RefinedStepLength;
+		public ProbeContextKey ContextKey;
+	}
+
+	public bool TryBuildCurrentProbeContextKey(byte refinementPolicyVersion, out ProbeContextKey contextKey, out string reason)
+	{
+		contextKey = default;
+		reason = string.Empty;
+		if (_cam == null || !GodotObject.IsInstanceValid(_cam))
+		{
+			reason = "camera_unavailable";
+			return false;
+		}
+		if (_rbr == null || !GodotObject.IsInstanceValid(_rbr))
+		{
+			reason = "renderer_unavailable";
+			return false;
+		}
+
+		ResolveSelectedProbeFilmDimensions(out int filmW, out int filmH);
+		if (filmW <= 0 || filmW > ushort.MaxValue || filmH <= 0 || filmH > ushort.MaxValue)
+		{
+			reason = "film_dimensions_invalid";
+			return false;
+		}
+
+		contextKey = new ProbeContextKey(
+			HashVector3Quantized(_cam.GlobalTransform.Origin),
+			HashBasisQuantized(_cam.GlobalTransform.Basis),
+			QuantizeFloat(_cam.Fov, 1000f),
+			(ushort)filmW,
+			(ushort)filmH,
+			(ushort)Math.Clamp(_rbr.StepsPerRay, 0, ushort.MaxValue),
+			QuantizeFloat(_rbr.BendScale, 1000f),
+			QuantizeFloat(_rbr.FieldStrength, 1000f),
+			HashNodeGroupForProbeContext("field_sources"),
+			HashNodeGroupForProbeContext("raytrace_geometry", "fixture_geometry"),
+			HashNodeGroupForProbeContext("boundary_layer_volumes"),
+			refinementPolicyVersion);
+		return true;
+	}
+
+	/// <summary>
+	/// Queues a caller-selected transport pass. The actual physics queries run from _Process via
+	/// PumpSelectedProbeTransport, which keeps this path out of physics-space locked callbacks.
+	/// </summary>
+	public bool TryRequestSelectedProbeTransport(
+		ReadOnlySpan<int> pixelIndices,
+		int refinedStepsPerRay,
+		float refinedStepLength,
+		in ProbeContextKey contextKey,
+		ProbeSelectedIndexResult[] resultStorage,
+		out string reason)
+	{
+		reason = string.Empty;
+		if (_selectedProbeTransportPending)
+		{
+			reason = "selected_probe_transport_already_pending";
+			return false;
+		}
+		if (pixelIndices.Length <= 0)
+		{
+			reason = "no_pixel_indices";
+			return false;
+		}
+		if (resultStorage == null || resultStorage.Length < pixelIndices.Length)
+		{
+			reason = "result_storage_too_small";
+			return false;
+		}
+		if (refinedStepsPerRay <= 0 || !float.IsFinite(refinedStepLength) || refinedStepLength <= 0f)
+		{
+			reason = "refined_policy_invalid";
+			return false;
+		}
+		if (!TryBuildCurrentProbeContextKey(contextKey.RefinementPolicyVersion, out ProbeContextKey currentKey, out reason))
+		{
+			return false;
+		}
+		if (currentKey != contextKey)
+		{
+			reason = "context_key_mismatch";
+			return false;
+		}
+
+		int filmW = contextKey.FilmWidth;
+		int filmH = contextKey.FilmHeight;
+		int pixelCount = filmW * filmH;
+		if (filmW <= 0 || filmH <= 0 || pixelCount <= 0)
+		{
+			reason = "film_not_initialized";
+			return false;
+		}
+
+		int[] copiedIndices = new int[pixelIndices.Length];
+		for (int i = 0; i < pixelIndices.Length; i++)
+		{
+			int pixelIndex = pixelIndices[i];
+			if (pixelIndex < 0 || pixelIndex >= pixelCount)
+			{
+				reason = $"pixel_index_out_of_range:{pixelIndex}";
+				return false;
+			}
+			copiedIndices[i] = pixelIndex;
+		}
+
+		_selectedProbeTransportRequest = new SelectedProbeTransportRequest
+		{
+			PixelIndices = copiedIndices,
+			Results = resultStorage,
+			RefinedStepsPerRay = refinedStepsPerRay,
+			RefinedStepLength = refinedStepLength,
+			ContextKey = contextKey
+		};
+		_selectedProbeTransportCompleted = false;
+		_selectedProbeTransportSuccess = false;
+		_selectedProbeTransportCompletedCount = 0;
+		_selectedProbeTransportElapsedTicks = 0;
+		_selectedProbeTransportStatus = "pending_process_phase";
+		_selectedProbeTransportPending = true;
+		return true;
+	}
+
+	public bool TryGetSelectedProbeTransportStatus(
+		out bool completed,
+		out bool success,
+		out int completedCount,
+		out long elapsedTicks,
+		out string status)
+	{
+		completed = _selectedProbeTransportCompleted;
+		success = _selectedProbeTransportSuccess;
+		completedCount = _selectedProbeTransportCompletedCount;
+		elapsedTicks = _selectedProbeTransportElapsedTicks;
+		status = _selectedProbeTransportStatus ?? string.Empty;
+		return _selectedProbeTransportPending || _selectedProbeTransportCompleted;
+	}
+
+	private static float QuantizeFloat(float value, float scale)
+	{
+		if (!float.IsFinite(value))
+		{
+			return 0f;
+		}
+		float safeScale = Math.Max(1f, scale);
+		return MathF.Round(value * safeScale) / safeScale;
+	}
+
+	private static int QuantizeFloatToInt(float value, float scale = 10000f)
+	{
+		if (!float.IsFinite(value))
+		{
+			return 0;
+		}
+		float safeScale = Math.Max(1f, scale);
+		return (int)MathF.Round(value * safeScale);
+	}
+
+	private struct ProbeContextHashBuilder
+	{
+		private uint _hash;
+
+		public ProbeContextHashBuilder(uint seed)
+		{
+			_hash = seed;
+		}
+
+		public uint Value => _hash;
+
+		public void AddBool(bool value) => AddUInt(value ? 1u : 0u);
+
+		public void AddInt(int value) => AddUInt(unchecked((uint)value));
+
+		public void AddUInt(uint value)
+		{
+			_hash ^= value & 0xFFu;
+			_hash *= 16777619u;
+			_hash ^= (value >> 8) & 0xFFu;
+			_hash *= 16777619u;
+			_hash ^= (value >> 16) & 0xFFu;
+			_hash *= 16777619u;
+			_hash ^= (value >> 24) & 0xFFu;
+			_hash *= 16777619u;
+		}
+
+		public void AddULong(ulong value)
+		{
+			AddUInt(unchecked((uint)value));
+			AddUInt(unchecked((uint)(value >> 32)));
+		}
+
+		public void AddString(string value)
+		{
+			if (value == null)
+			{
+				AddUInt(0xFFFFFFFFu);
+				return;
+			}
+			AddInt(value.Length);
+			for (int i = 0; i < value.Length; i++)
+			{
+				AddUInt(value[i]);
+			}
+		}
+	}
+
+	private void ResolveSelectedProbeFilmDimensions(out int filmW, out int filmH)
+	{
+		float scale = Mathf.Max(0.01f, FilmResolutionScale);
+		filmW = Mathf.Max(1, Mathf.RoundToInt(Width * scale));
+		filmH = Mathf.Max(1, Mathf.RoundToInt(Height * scale));
+	}
+
+	private static void AddQuantizedFloat(ref ProbeContextHashBuilder hash, float value, float scale = 10000f)
+	{
+		hash.AddInt(QuantizeFloatToInt(value, scale));
+	}
+
+	private static void AddQuantizedVector3(ref ProbeContextHashBuilder hash, Vector3 value)
+	{
+		AddQuantizedFloat(ref hash, value.X);
+		AddQuantizedFloat(ref hash, value.Y);
+		AddQuantizedFloat(ref hash, value.Z);
+	}
+
+	private static void AddQuantizedBasis(ref ProbeContextHashBuilder hash, Basis basis)
+	{
+		AddQuantizedVector3(ref hash, basis.X);
+		AddQuantizedVector3(ref hash, basis.Y);
+		AddQuantizedVector3(ref hash, basis.Z);
+	}
+
+	private static uint HashVector3Quantized(Vector3 value)
+	{
+		var hash = new ProbeContextHashBuilder(2166136261u);
+		AddQuantizedVector3(ref hash, value);
+		return hash.Value;
+	}
+
+	private static uint HashBasisQuantized(Basis basis)
+	{
+		var hash = new ProbeContextHashBuilder(2166136261u);
+		AddQuantizedBasis(ref hash, basis);
+		return hash.Value;
+	}
+
+	private uint HashNodeGroupForProbeContext(params string[] groupNames)
+	{
+		var hash = new ProbeContextHashBuilder(2166136261u);
+		SceneTree tree = GetTree();
+		if (tree == null || groupNames == null || groupNames.Length == 0)
+		{
+			return hash.Value;
+		}
+
+		var nodesByPath = new SortedDictionary<string, Node>(StringComparer.Ordinal);
+		foreach (string groupName in groupNames)
+		{
+			if (string.IsNullOrWhiteSpace(groupName))
+			{
+				continue;
+			}
+
+			foreach (Node node in tree.GetNodesInGroup(groupName.Trim()))
+			{
+				if (node == null || !GodotObject.IsInstanceValid(node))
+				{
+					continue;
+				}
+				nodesByPath[node.GetPath().ToString()] = node;
+			}
+		}
+
+		foreach ((string path, Node node) in nodesByPath)
+		{
+			hash.AddString(path);
+			hash.AddULong(node.GetInstanceId());
+			hash.AddInt((int)node.ProcessMode);
+			if (node is Node3D node3D)
+			{
+				hash.AddBool(node3D.Visible);
+				AddQuantizedVector3(ref hash, node3D.GlobalTransform.Origin);
+				AddQuantizedBasis(ref hash, node3D.GlobalTransform.Basis);
+			}
+			if (node is CollisionObject3D collisionObject)
+			{
+				hash.AddUInt(collisionObject.CollisionLayer);
+				hash.AddUInt(collisionObject.CollisionMask);
+			}
+			AddProbeContextPropertyIfPresent(ref hash, node, "Enabled");
+			AddProbeContextPropertyIfPresent(ref hash, node, "Amp");
+			AddProbeContextPropertyIfPresent(ref hash, node, "A");
+			AddProbeContextPropertyIfPresent(ref hash, node, "B");
+			AddProbeContextPropertyIfPresent(ref hash, node, "C");
+			AddProbeContextPropertyIfPresent(ref hash, node, "RInner");
+			AddProbeContextPropertyIfPresent(ref hash, node, "ROuter");
+			AddProbeContextPropertyIfPresent(ref hash, node, "Radius");
+		}
+
+		return hash.Value;
+	}
+
+	private static void AddProbeContextPropertyIfPresent(ref ProbeContextHashBuilder hash, Node node, string propertyName)
+	{
+		try
+		{
+			Variant value = node.Get(propertyName);
+			if (value.VariantType == Variant.Type.Nil)
+			{
+				return;
+			}
+			hash.AddString(propertyName);
+			hash.AddString(value.ToString());
+		}
+		catch (Exception)
+		{
+			// Missing exported properties are expected across heterogeneous node groups.
+		}
+	}
+
+	private void PumpSelectedProbeTransport()
+	{
+		if (!_selectedProbeTransportPending || _selectedProbeTransportRequest == null)
+		{
+			return;
+		}
+
+		SelectedProbeTransportRequest request = _selectedProbeTransportRequest;
+		_selectedProbeTransportPending = false;
+		_selectedProbeTransportCompleted = false;
+		_selectedProbeTransportSuccess = false;
+		_selectedProbeTransportCompletedCount = 0;
+		_selectedProbeTransportElapsedTicks = 0;
+		_selectedProbeTransportStatus = "running_process_phase";
+
+		Stopwatch stopwatch = Stopwatch.StartNew();
+		try
+		{
+			if (!TryBuildCurrentProbeContextKey(request.ContextKey.RefinementPolicyVersion, out ProbeContextKey currentKey, out string reason))
+			{
+				_selectedProbeTransportStatus = reason;
+				return;
+			}
+			if (currentKey != request.ContextKey)
+			{
+				_selectedProbeTransportStatus = "context_key_mismatch";
+				return;
+			}
+			if (!TryResolveRenderSpaceState(out PhysicsDirectSpaceState3D space, out string renderSpaceSource))
+			{
+				_selectedProbeTransportStatus = $"physics_space_unavailable:{renderSpaceSource}";
+				return;
+			}
+
+			ResolveEffectiveConfig(out EffectiveConfig cfg);
+			RefreshFixtureDebugSourceIds(cfg.FixtureDebugSourceGroup);
+			int completed = ExecuteSelectedProbeTransportNow(request, space, renderSpaceSource, in cfg);
+			_selectedProbeTransportCompletedCount = completed;
+			_selectedProbeTransportSuccess = completed == request.PixelIndices.Length;
+			_selectedProbeTransportStatus = _selectedProbeTransportSuccess ? "completed" : "partial";
+		}
+		catch (Exception ex)
+		{
+			_selectedProbeTransportStatus = $"exception:{ex.GetType().Name}";
+			_selectedProbeTransportSuccess = false;
+		}
+		finally
+		{
+			stopwatch.Stop();
+			_selectedProbeTransportElapsedTicks = stopwatch.ElapsedTicks;
+			_selectedProbeTransportCompleted = true;
+		}
+	}
+
+	private int ExecuteSelectedProbeTransportNow(
+		SelectedProbeTransportRequest request,
+		PhysicsDirectSpaceState3D space,
+		string renderSpaceSource,
+		in EffectiveConfig cfg)
+	{
+		if (_cam == null || _rbr == null || request == null || request.Results == null)
+		{
+			return 0;
+		}
+
+		int filmW = request.ContextKey.FilmWidth;
+		int filmH = request.ContextKey.FilmHeight;
+		if (filmW <= 0 || filmH <= 0)
+		{
+			return 0;
+		}
+
+		int savedStepsPerRay = _rbr.StepsPerRay;
+		float savedStepLength = _rbr.StepLength;
+		float savedMinStepLength = _rbr.MinStepLength;
+		float savedMaxStepLength = _rbr.MaxStepLength;
+		try
+		{
+			_rbr.StepsPerRay = Math.Max(1, request.RefinedStepsPerRay);
+			_rbr.StepLength = Math.Max(0.0001f, request.RefinedStepLength);
+			_rbr.MinStepLength = Math.Min(savedMinStepLength, _rbr.StepLength);
+			_rbr.MaxStepLength = Math.Max(savedMaxStepLength, _rbr.StepLength);
+
+			RayBeamRenderer.FieldSourceSnap[] fieldSnaps = GetFieldSourceSnaps(in cfg, _frameIndex, out bool hasSources, out _);
+			float beta = 0f;
+			float gamma = 2f;
+			if (cfg.UseCameraPropsBetaGamma)
+			{
+				beta = ReadFloat(_cam, "Beta", 0f);
+				gamma = ReadFloat(_cam, "Gamma", 2f);
+			}
+			Vector3 center = cfg.RayMarch.FieldCenterIsCamera ? _cam.GlobalPosition : cfg.RayMarch.FieldCenter;
+			Basis basis = _cam.GlobalTransform.Basis;
+			Vector3 camPos = _cam.GlobalPosition;
+			float fovRad = Mathf.DegToRad(_cam.Fov);
+			float tanHalf = Mathf.Tan(fovRad * 0.5f);
+			float aspect = (float)filmW / Math.Max(1f, filmH);
+			float pxPerRad = 0f;
+			if (cfg.RayMarch.UseScreenSpaceCollisionCadence)
+			{
+				float vpHeight = Mathf.Max(1f, _cam.GetViewport()?.GetVisibleRect().Size.Y ?? 720f);
+				pxPerRad = (vpHeight * 0.5f) / Mathf.Max(1e-6f, tanHalf);
+			}
+
+			int maxSeg = Math.Max(4, _rbr.EstimateMaxSegmentsPerRay() + 4);
+			var segs = new RayBeamRenderer.RaySeg[maxSeg];
+			var quickRayParams = new PhysicsRayQueryParameters3D
+			{
+				CollisionMask = cfg.RayMarch.CollisionMask,
+				CollideWithBodies = true,
+				CollideWithAreas = true,
+				HitFromInside = cfg.Pass2HitFromInside,
+				HitBackFaces = cfg.Pass2HitBackFaces
+			};
+
+			string sceneName = ResolveHudSceneName();
+			string fixtureName = ResolveHudFixtureName();
+			int completed = 0;
+			for (int i = 0; i < request.PixelIndices.Length; i++)
+			{
+				int pixelIndex = request.PixelIndices[i];
+				int x = pixelIndex % filmW;
+				int y = pixelIndex / filmW;
+				float v = ((y + 0.5f) / filmH) * 2f - 1f;
+				v = -v;
+				float u = ((x + 0.5f) / filmW) * 2f - 1f;
+				Vector3 dirCam = new Vector3(u * tanHalf * aspect, v * tanHalf, -1f).Normalized();
+				Vector3 dirWorld = (basis * dirCam).Normalized();
+				Vector3 bendDir = basis.X;
+
+				_rbr.BuildRaySegmentsCamera_Pass1(
+					space,
+					ref quickRayParams,
+					_cam,
+					pxPerRad,
+					camPos,
+					camPos,
+					dirWorld,
+					bendDir,
+					center,
+					beta,
+					gamma,
+					fieldSnaps,
+					hasSources,
+					cfg.Film.MaxDistance,
+					segs,
+					0,
+					segs.Length,
+					default,
+					false,
+					0f,
+					cfg.RayMarch.StopOnHit || cfg.RayMarch.TerminateTrailOnHit || cfg.RayMarch.RequireHitToRender,
+					cfg.Pass1DoHitTest,
+					cfg.Pass1ProbeEveryNSegments,
+					cfg.Pass1ProbeMinTravelDelta,
+					renderSpaceSource,
+					sceneName,
+					fixtureName,
+					"cathedral_probe_selected_index",
+					out RayBeamRenderer.Pass1HitInfo hitInfo,
+					out bool stoppedEarly,
+					out bool maxStepsReached,
+					out _,
+					out int stepsIntegrated,
+					out _,
+					out _,
+					out _,
+					out _,
+					out _,
+					out _,
+					out _,
+					out _,
+					out _,
+					out _,
+					out _,
+					out _,
+					out _,
+					FrameSnapshotBus.CurrentSnapshot?.CurvatureGrid,
+					null);
+
+				hitInfo.SurfaceClass = ClassifyProbeSurfaceClass(hitInfo.Found, hitInfo.ColliderId);
+				request.Results[i] = new ProbeSelectedIndexResult
+				{
+					PixelIndex = pixelIndex,
+					Outcome = ClassifyCathedralProbeOutcome(
+						hitInfo.HadNumericalFailure,
+						hitInfo.Found,
+						hitInfo.SurfaceClass,
+						maxStepsReached,
+						stoppedEarly),
+					SurfaceClass = hitInfo.SurfaceClass,
+					FinalStepCount = stepsIntegrated,
+					HadNumericalFailure = hitInfo.HadNumericalFailure,
+					Found = hitInfo.Found,
+					MaxStepsReached = maxStepsReached,
+					StoppedEarly = stoppedEarly
+				};
+				completed++;
+			}
+			return completed;
+		}
+		finally
+		{
+			_rbr.StepsPerRay = savedStepsPerRay;
+			_rbr.StepLength = savedStepLength;
+			_rbr.MinStepLength = savedMinStepLength;
+			_rbr.MaxStepLength = savedMaxStepLength;
 		}
 	}
 
