@@ -18,7 +18,8 @@ internal static class Program
             (nameof(Stage1CLifecycleTests), Stage1CLifecycleTests.Run),
             (nameof(TextureSampleObservationTests), TextureSampleObservationTests.Run),
             (nameof(TextureResourceTests), TextureResourceTests.Run),
-            (nameof(ProbeRegionAnalyzerTests), ProbeRegionAnalyzerTests.Run)
+            (nameof(ProbeRegionAnalyzerTests), ProbeRegionAnalyzerTests.Run),
+            (nameof(ProbeRegionRefinementEngineTests), ProbeRegionRefinementEngineTests.Run)
         };
 
         int failures = 0;

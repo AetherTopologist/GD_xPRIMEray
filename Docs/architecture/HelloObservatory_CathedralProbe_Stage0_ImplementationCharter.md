@@ -172,10 +172,10 @@ Stage 0 runs in **SNAPSHOT mode only**. LIVE mode is a non-goal.
 5. **Selected-index transport availability.** A caller-supplied set of pixel indices can be rerun through the production selected-index executor under a supplied policy and context key. This is enabling transport infrastructure only: it does not select regions, orchestrate refinement, mutate the base film, update `_probeOutcomes`, or write evidence.
 6. **Region analysis.** Call `ProbeRegionAnalyzer.Analyze()`. Produces `ushort[] _regionLabels` and `List<ProbeRegionRecord>` sorted by PixelCount descending. Status: `READY`.
 7. **User navigation.** J/K scroll through ranked regions. Adapter displays selected region bounding box outline. Telemetry shows region index, pixel count, dominant outcome, refinement level.
-8. **Refinement request — REFINING.** User presses P. `CathedralProbeEngine.RequestRefinement(selectedRegionId)` called synchronously. Iterates `_regionLabels[]` to find matching pixels. Reruns with `ProbePolicy.RefinedStepsPerRay`. Capped at `ProbePolicy.MaxPixelsPerRequest`. Increments `_probeRefinLevel[i]` for each rerun pixel.
-9. **Refinement outcome recording.** After each rerun pixel: update `_probeOutcomes[i]`. If `HitGeometry` or `BackgroundResolved`: pixel is now resolved.
-10. **Post-refinement region analysis.** Re-run `ProbeRegionAnalyzer.Analyze()` on updated outcome plane. Compute before/after unresolved counts.
-11. **Result reporting.** Emit `ProbeRefinementResult`. Status: `UPDATED` if `NewlyResolvedCount > 0`, else `STILL UNRESOLVED`.
+8. **Selected-region refinement request — REFINING.** A caller requests a concrete `regionId`. The request is accepted only after a complete SNAPSHOT, for the current `ProbeContextKey`, frame generation, film dimensions, and a non-empty `_regionLabels[]` membership set. Pixel indices are copied from `_regionLabels[]` in deterministic row-major order.
+9. **Selected-index execution.** The existing selected-index executor reruns exactly those caller-selected pixels under the bounded `ProbePolicy` refinement effort. It is pumped synchronously from the safe process point established in Commit 3. It does not mutate `_img`, `_probeOutcomes`, `_probeRefinLevel`, labels, display textures, or transport policy while executing.
+10. **Atomic refinement application.** After execution, validation rechecks context, frame generation, dimensions, result count, index correspondence, duplicate absence, and bounds. Any failure applies nothing and records a deterministic failure reason. Success replaces the selected pixels' `ProbeOutcomeCode`, updates `_probeRefinLevel` monotonically, reruns `ProbeRegionAnalyzer.Analyze()`, and refreshes `ProbeFrameSummary`.
+11. **Result reporting.** Emit a concise `ProbeRefinementSummary` evidence block with pre/post frame counts, selected/applied/resolved counts, transition histogram, child-region counts, context match, atomic-apply flag, and policy values. This is human-readable runtime evidence only, not an evidence-file export.
 12. **Repeat or reset.** User may press P again (next refinement level, if ceiling not reached) or R (full reset → step 2).
 13. **Evidence export.** Produces evidence bundle (D13) on user command or session end.
 
@@ -592,11 +592,20 @@ Six commits. Each is a complete rollback point — reverting a commit leaves the
 - **Behavior:** allocate `_regionLabels[]` alongside film-capacity probe buffers; analyze `MaxStepsExhausted` components after complete SNAPSHOT outcome planes; update `ProbeFrameSummary` region counts.
 - **Verification:** Console prints region count and largest region pixel count. Acceptance tests 1–4 pass. All OI tests still pass.
 
-### Commit 5 — Rollback E · Refinement pass + acceptance fixture
+### Commit 5A — Rollback E1 · Selected-region refinement orchestration
 
-- **Files modified:** `CathedralProbeEngine.cs` — implement `RequestRefinement()`, pixel re-run loop, result computation, `ExportEvidenceBundle()`
-- **Files modified:** `GrinFilmCamera.cs` — wire `IncrementGeometryEpoch()` to preset switch callsite; complete C# surface methods
-- **Verification:** All 11 acceptance tests pass in console fixture. Evidence bundle writes correctly. All OI tests still pass. No Godot display change yet.
+- **Files added:** `CathedralProbe/ProbeRefinementSummary.cs`, `CathedralProbe/ProbeSeamDiagnosticPixel.cs`, `CathedralProbe/ProbeRegionRefinementEngine.cs`
+- **Files modified:** `GrinFilmCamera.cs`, `ProbePolicy.cs`, pure C# tests
+- **Behavior:** collect selected region pixels in row-major order, dispatch the existing selected-index executor, validate completion, atomically apply refined outcomes, update refinement levels, rerun region analysis, update `ProbeFrameSummary`, and print a concise human-readable refinement evidence block.
+- **Seam diagnostic:** add a pure data contract for configured seam pixels. Disabled/unset by default; unavailable telemetry must be explicit rather than fabricated.
+- **Non-goals:** no region-selection UI, mouse interaction, overlays, hatching, evidence-file export, LIVE-mode refinement, transport math change, or visual styling.
+- **Verification:** pure orchestration tests cover row-major selection, rejection paths, atomicity, transition counters, child-region regeneration, deterministic failure reasons, seam unavailable telemetry, and bounded warm allocation. All OI tests still pass.
+
+### Commit 5B — Rollback E2 · Acceptance fixture and evidence export
+
+- **Files modified:** future bounded fixture/reporting files only.
+- **Behavior:** add the acceptance fixture and file evidence export once Commit 5A proves stable.
+- **Non-goals:** no UI or overlay work.
 
 ### Commit 6 — Rollback F · Godot adapter and UI
 

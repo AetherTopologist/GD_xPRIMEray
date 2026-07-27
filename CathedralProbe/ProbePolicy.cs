@@ -10,4 +10,22 @@ public readonly struct ProbePolicy
 	public readonly int MaxPixelsPerRequest;
 	public readonly byte MaxRefinementLevel;
 	public readonly byte Version;
+
+	public ProbePolicy(
+		int baseStepsPerRay,
+		float baseStepLength,
+		int refinedStepsPerRay,
+		float refinedStepLength,
+		int maxPixelsPerRequest,
+		byte maxRefinementLevel,
+		byte version)
+	{
+		BaseStepsPerRay = baseStepsPerRay;
+		BaseStepLength = baseStepLength;
+		RefinedStepsPerRay = refinedStepsPerRay;
+		RefinedStepLength = refinedStepLength;
+		MaxPixelsPerRequest = maxPixelsPerRequest;
+		MaxRefinementLevel = maxRefinementLevel;
+		Version = version;
+	}
 }

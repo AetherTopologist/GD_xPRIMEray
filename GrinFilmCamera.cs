@@ -2229,6 +2229,13 @@ public partial class GrinFilmCamera : Node
 	private readonly List<ProbeRegionRecord> _probeRegions = new();
 	private ProbeFrameSummary _probeFrameSummary;
 	private int _probeUnprocessedCount = 0;
+	private const byte CathedralProbeRefinementPolicyVersion = 1;
+	private int _probeFrameGeneration = 0;
+	private bool _probeSnapshotComplete = false;
+	private ProbeContextKey _probeFrameContextKey;
+	private int _nextProbeRefinementRequestId = 1;
+	private ProbeRefinementSummary _lastProbeRefinementSummary;
+	private RegionProbeRefinementRequest _activeRegionProbeRefinementRequest;
 	private SelectedProbeTransportRequest _selectedProbeTransportRequest;
 	private bool _selectedProbeTransportPending = false;
 	private bool _selectedProbeTransportCompleted = false;
@@ -4411,6 +4418,7 @@ private sealed class OverlayRollingWindow
 			// Keep broadphase controls in sync each frame so the inspector reflects effective state.
 			UpdateBroadphaseEffectiveState();
 			PumpSelectedProbeTransport();
+			PumpCathedralProbeRegionRefinementCompletion();
 			PumpSmartScaleController();
 			if (!UpdateEveryFrame && ShouldEmitMetadataOnlyOverlay())
 			{
@@ -9124,6 +9132,9 @@ private sealed class OverlayRollingWindow
 		_probeRegions.Clear();
 		_probeFrameSummary = default;
 		_probeUnprocessedCount = _probeOutcomes.Length;
+		_probeSnapshotComplete = false;
+		_probeFrameContextKey = default;
+		_activeRegionProbeRefinementRequest = null;
 	}
 
 	private void EnsureCathedralProbeBufferCapacity(int pixelCount, bool resetIfAllocated)
@@ -9162,6 +9173,21 @@ private sealed class OverlayRollingWindow
 		public int RefinedStepsPerRay;
 		public float RefinedStepLength;
 		public ProbeContextKey ContextKey;
+	}
+
+	private sealed class RegionProbeRefinementRequest
+	{
+		public int RequestId;
+		public ushort SourceRegionId;
+		public byte RequestedRefinementLevel;
+		public int SourceFrameGeneration;
+		public int FilmWidth;
+		public int FilmHeight;
+		public ProbeContextKey ContextKey;
+		public ProbePolicy Policy;
+		public int[] PixelIndices = Array.Empty<int>();
+		public ProbeSelectedIndexResult[] Results = Array.Empty<ProbeSelectedIndexResult>();
+		public ProbeFrameSummary FrameSummaryBefore;
 	}
 
 	public bool TryBuildCurrentProbeContextKey(byte refinementPolicyVersion, out ProbeContextKey contextKey, out string reason)
@@ -9296,6 +9322,358 @@ private sealed class OverlayRollingWindow
 		elapsedTicks = _selectedProbeTransportElapsedTicks;
 		status = _selectedProbeTransportStatus ?? string.Empty;
 		return _selectedProbeTransportPending || _selectedProbeTransportCompleted;
+	}
+
+	public bool TryRequestCathedralProbeRegionRefinement(
+		ushort regionId,
+		byte requestedRefinementLevel,
+		out ProbeRefinementSummary summary)
+	{
+		summary = default;
+		if (!_probeSnapshotComplete || _probeUnprocessedCount != 0)
+		{
+			summary = ProbeRefinementSummary.Failure(
+				_nextProbeRefinementRequestId,
+				regionId,
+				requestedRefinementLevel,
+				0,
+				true,
+				"snapshot_not_complete");
+			_lastProbeRefinementSummary = summary;
+			return false;
+		}
+		if (regionId == 0)
+		{
+			summary = ProbeRefinementSummary.Failure(
+				_nextProbeRefinementRequestId,
+				regionId,
+				requestedRefinementLevel,
+				0,
+				true,
+				"region_id_zero");
+			_lastProbeRefinementSummary = summary;
+			return false;
+		}
+		if (_selectedProbeTransportPending || _activeRegionProbeRefinementRequest != null)
+		{
+			summary = ProbeRefinementSummary.Failure(
+				_nextProbeRefinementRequestId,
+				regionId,
+				requestedRefinementLevel,
+				0,
+				true,
+				"selected_index_request_active");
+			_lastProbeRefinementSummary = summary;
+			return false;
+		}
+		if (!TryBuildCurrentProbeContextKey(CathedralProbeRefinementPolicyVersion, out ProbeContextKey currentContext, out string reason))
+		{
+			summary = ProbeRefinementSummary.Failure(
+				_nextProbeRefinementRequestId,
+				regionId,
+				requestedRefinementLevel,
+				0,
+				false,
+				reason);
+			_lastProbeRefinementSummary = summary;
+			return false;
+		}
+		if (currentContext != _probeFrameContextKey)
+		{
+			summary = ProbeRefinementSummary.Failure(
+				_nextProbeRefinementRequestId,
+				regionId,
+				requestedRefinementLevel,
+				0,
+				false,
+				"context_key_mismatch");
+			_lastProbeRefinementSummary = summary;
+			return false;
+		}
+
+		int filmW = _probeFrameContextKey.FilmWidth;
+		int filmH = _probeFrameContextKey.FilmHeight;
+		int totalPixels = filmW * filmH;
+		if (totalPixels <= 0 || _regionLabels.Length < totalPixels)
+		{
+			summary = ProbeRefinementSummary.Failure(
+				_nextProbeRefinementRequestId,
+				regionId,
+				requestedRefinementLevel,
+				0,
+				true,
+				"film_dimensions_invalid");
+			_lastProbeRefinementSummary = summary;
+			return false;
+		}
+
+		int regionPixelCount = 0;
+		for (int i = 0; i < totalPixels; i++)
+		{
+			if (_regionLabels[i] == regionId)
+			{
+				regionPixelCount++;
+			}
+		}
+		if (regionPixelCount == 0)
+		{
+			summary = ProbeRefinementSummary.Failure(
+				_nextProbeRefinementRequestId,
+				regionId,
+				requestedRefinementLevel,
+				0,
+				true,
+				"region_not_found_or_empty");
+			_lastProbeRefinementSummary = summary;
+			return false;
+		}
+
+		ProbePolicy policy = BuildCathedralProbeRefinementPolicy(requestedRefinementLevel, totalPixels);
+		if (requestedRefinementLevel == 0 || requestedRefinementLevel > policy.MaxRefinementLevel)
+		{
+			summary = ProbeRefinementSummary.Failure(
+				_nextProbeRefinementRequestId,
+				regionId,
+				requestedRefinementLevel,
+				regionPixelCount,
+				true,
+				"requested_refinement_level_invalid");
+			_lastProbeRefinementSummary = summary;
+			return false;
+		}
+		if (regionPixelCount > policy.MaxPixelsPerRequest)
+		{
+			summary = ProbeRefinementSummary.Failure(
+				_nextProbeRefinementRequestId,
+				regionId,
+				requestedRefinementLevel,
+				regionPixelCount,
+				true,
+				"selected_pixel_capacity_exceeded");
+			_lastProbeRefinementSummary = summary;
+			return false;
+		}
+
+		int[] selected = new int[regionPixelCount];
+		if (!ProbeRegionRefinementEngine.CollectRegionPixelsRowMajor(
+			filmW,
+			filmH,
+			new ReadOnlySpan<ushort>(_regionLabels, 0, totalPixels),
+			regionId,
+			selected,
+			out int selectedCount,
+			out reason))
+		{
+			summary = ProbeRefinementSummary.Failure(
+				_nextProbeRefinementRequestId,
+				regionId,
+				requestedRefinementLevel,
+				0,
+				true,
+				reason);
+			_lastProbeRefinementSummary = summary;
+			return false;
+		}
+		if (selectedCount != selected.Length)
+		{
+			summary = ProbeRefinementSummary.Failure(
+				_nextProbeRefinementRequestId,
+				regionId,
+				requestedRefinementLevel,
+				selectedCount,
+				true,
+				"selected_pixel_count_changed");
+			_lastProbeRefinementSummary = summary;
+			return false;
+		}
+
+		var results = new ProbeSelectedIndexResult[selected.Length];
+		int requestId = _nextProbeRefinementRequestId++;
+		_activeRegionProbeRefinementRequest = new RegionProbeRefinementRequest
+		{
+			RequestId = requestId,
+			SourceRegionId = regionId,
+			RequestedRefinementLevel = requestedRefinementLevel,
+			SourceFrameGeneration = _probeFrameGeneration,
+			FilmWidth = filmW,
+			FilmHeight = filmH,
+			ContextKey = _probeFrameContextKey,
+			Policy = policy,
+			PixelIndices = selected,
+			Results = results,
+			FrameSummaryBefore = _probeFrameSummary
+		};
+		if (!TryRequestSelectedProbeTransport(
+			selected,
+			policy.RefinedStepsPerRay,
+			policy.RefinedStepLength,
+			in _probeFrameContextKey,
+			results,
+			out reason))
+		{
+			_activeRegionProbeRefinementRequest = null;
+			summary = ProbeRefinementSummary.Failure(
+				requestId,
+				regionId,
+				requestedRefinementLevel,
+				selected.Length,
+				reason != "context_key_mismatch",
+				reason);
+			_lastProbeRefinementSummary = summary;
+			return false;
+		}
+
+		summary = new ProbeRefinementSummary
+		{
+			RequestId = requestId,
+			SourceRegionId = regionId,
+			RequestedRefinementLevel = requestedRefinementLevel,
+			SelectedPixelCount = selected.Length,
+			ContextMatched = true,
+			AppliedAtomically = false,
+			FailureReason = "pending_process_phase",
+			PolicyMaxSteps = policy.RefinedStepsPerRay,
+			PolicyStepSize = policy.RefinedStepLength
+		};
+		_lastProbeRefinementSummary = summary;
+		return true;
+	}
+
+	public bool TryGetLastCathedralProbeRefinementSummary(out ProbeRefinementSummary summary)
+	{
+		summary = _lastProbeRefinementSummary;
+		return summary.RequestId != 0;
+	}
+
+	private ProbePolicy BuildCathedralProbeRefinementPolicy(byte requestedRefinementLevel, int totalPixels)
+	{
+		int baseSteps = Math.Max(1, _rbr?.StepsPerRay ?? 1);
+		float baseStepLength = Math.Max(0.0001f, _rbr?.StepLength ?? 0.0001f);
+		float maxStepLength = Math.Max(baseStepLength, _rbr?.MaxStepLength ?? baseStepLength);
+		int multiplier = Math.Max(1, 1 + (requestedRefinementLevel * 3));
+		int refinedSteps = Math.Clamp(baseSteps * multiplier, baseSteps, 4096);
+		return new ProbePolicy(
+			baseSteps,
+			baseStepLength,
+			refinedSteps,
+			maxStepLength,
+			Math.Max(1, totalPixels),
+			3,
+			CathedralProbeRefinementPolicyVersion);
+	}
+
+	private void PumpCathedralProbeRegionRefinementCompletion()
+	{
+		RegionProbeRefinementRequest request = _activeRegionProbeRefinementRequest;
+		if (request == null)
+		{
+			return;
+		}
+		if (!TryGetSelectedProbeTransportStatus(
+			out bool completed,
+			out bool success,
+			out int completedCount,
+			out long elapsedTicks,
+			out string status) || !completed)
+		{
+			return;
+		}
+
+		_activeRegionProbeRefinementRequest = null;
+		if (!success || completedCount != request.PixelIndices.Length)
+		{
+			_lastProbeRefinementSummary = ProbeRefinementSummary.Failure(
+				request.RequestId,
+				request.SourceRegionId,
+				request.RequestedRefinementLevel,
+				request.PixelIndices.Length,
+				status != "context_key_mismatch",
+				status);
+			_lastProbeRefinementSummary.PolicyMaxSteps = request.Policy.RefinedStepsPerRay;
+			_lastProbeRefinementSummary.PolicyStepSize = request.Policy.RefinedStepLength;
+			_lastProbeRefinementSummary.ElapsedTicks = elapsedTicks;
+			PrintCathedralProbeRefinementEvidence(request.FrameSummaryBefore, _probeFrameSummary, _lastProbeRefinementSummary);
+			return;
+		}
+		if (!TryBuildCurrentProbeContextKey(CathedralProbeRefinementPolicyVersion, out ProbeContextKey currentContext, out string reason))
+		{
+			_lastProbeRefinementSummary = ProbeRefinementSummary.Failure(
+				request.RequestId,
+				request.SourceRegionId,
+				request.RequestedRefinementLevel,
+				request.PixelIndices.Length,
+				false,
+				reason);
+			PrintCathedralProbeRefinementEvidence(request.FrameSummaryBefore, _probeFrameSummary, _lastProbeRefinementSummary);
+			return;
+		}
+
+		ProbeFrameSummary before = _probeFrameSummary;
+		_lastProbeRefinementSummary = ProbeRegionRefinementEngine.ApplySelectedRegionResults(
+			request.RequestId,
+			request.SourceRegionId,
+			request.RequestedRefinementLevel,
+			request.FilmWidth,
+			request.FilmHeight,
+			request.SourceFrameGeneration,
+			_probeFrameGeneration,
+			in request.ContextKey,
+			in currentContext,
+			request.Policy.RefinedStepsPerRay,
+			request.Policy.RefinedStepLength,
+			elapsedTicks,
+			new ReadOnlySpan<int>(request.PixelIndices),
+			new ReadOnlySpan<ProbeSelectedIndexResult>(request.Results, 0, completedCount),
+			_probeOutcomes,
+			_probeRefinLevel,
+			_regionLabels,
+			_probeRegions,
+			ref _probeFrameSummary);
+		PrintCathedralProbeRefinementEvidence(before, _probeFrameSummary, _lastProbeRefinementSummary);
+	}
+
+	private static void PrintCathedralProbeRefinementEvidence(
+		ProbeFrameSummary before,
+		ProbeFrameSummary after,
+		ProbeRefinementSummary summary)
+	{
+		float reductionPct = summary.PreviousMaxStepsCount > 0
+			? (summary.ResolvedPixelCount * 100f) / summary.PreviousMaxStepsCount
+			: 0f;
+		GD.Print(
+			$"FRAME BEFORE total={before.TotalPixels} geometry={before.HitGeometryCount} background={before.BackgroundResolvedCount} " +
+			$"maxSteps={before.MaxStepsExhaustedCount} fault={before.NumericalFailureCount} invalid=0 " +
+			$"regions={before.RegionCount} largest={before.LargestRegionPixelCount}");
+		GD.Print(
+			$"FRAME AFTER total={after.TotalPixels} geometry={after.HitGeometryCount} background={after.BackgroundResolvedCount} " +
+			$"maxSteps={after.MaxStepsExhaustedCount} fault={after.NumericalFailureCount} invalid=0 " +
+			$"regions={after.RegionCount} largest={after.LargestRegionPixelCount}");
+		GD.Print("CATHEDRAL REFINEMENT");
+		GD.Print($"request={summary.RequestId}");
+		GD.Print($"sourceRegion={summary.SourceRegionId}");
+		GD.Print($"level={summary.RequestedRefinementLevel}");
+		GD.Print($"selected={summary.SelectedPixelCount}");
+		GD.Print($"applied={summary.AppliedPixelCount}");
+		GD.Print($"previousUnresolved={summary.PreviousMaxStepsCount}");
+		GD.Print($"resolved={summary.ResolvedPixelCount}");
+		GD.Print($"remaining={summary.RemainingMaxStepsCount}");
+		GD.Print($"reductionPct={reductionPct:0.###}");
+		GD.Print($"toGeometry={summary.BecameHitGeometryCount}");
+		GD.Print($"toBackground={summary.BecameBackgroundResolvedCount}");
+		GD.Print($"toAbsorbed={summary.BecameStoppedEarlyAbsorbedCount}");
+		GD.Print($"toFault={summary.BecameNumericalFailureCount}");
+		GD.Print($"toInvalid={summary.BecameInvalidCount}");
+		GD.Print($"childRegions={summary.ChildRegionCount}");
+		GD.Print($"largestChildId={summary.LargestChildRegionId}");
+		GD.Print($"largestChildPixels={summary.LargestChildRegionPixelCount}");
+		GD.Print($"contextMatch={(summary.ContextMatched ? "true" : "false")}");
+		GD.Print($"atomicApply={(summary.AppliedAtomically ? "true" : "false")}");
+		if (!summary.AppliedAtomically && !string.IsNullOrEmpty(summary.FailureReason))
+		{
+			GD.Print($"failure={summary.FailureReason}");
+		}
+		GD.Print($"policy.maxSteps={summary.PolicyMaxSteps}");
+		GD.Print($"policy.stepSize={summary.PolicyStepSize:0.######}");
 	}
 
 	private static float QuantizeFloat(float value, float scale)
@@ -9713,6 +10091,8 @@ private sealed class OverlayRollingWindow
 		{
 			_probeFrameSummary = default;
 			_probeUnprocessedCount = totalPixels;
+			_probeSnapshotComplete = false;
+			_probeFrameContextKey = default;
 			return;
 		}
 
@@ -9784,6 +10164,10 @@ private sealed class OverlayRollingWindow
 			}
 		}
 
+		ProbeContextKey summaryContext = default;
+		bool hasSummaryContext = unprocessedCount == 0 &&
+			TryBuildCurrentProbeContextKey(CathedralProbeRefinementPolicyVersion, out summaryContext, out _);
+
 		_probeFrameSummary = new ProbeFrameSummary
 		{
 			TotalPixels = totalPixels,
@@ -9799,8 +10183,18 @@ private sealed class OverlayRollingWindow
 			LastRefinementPixelsAttempted = 0,
 			LastRefinementNewlyResolved = 0,
 			LastRefinementStillUnresolved = 0,
-			ContextKey = default
+			ContextKey = summaryContext
 		};
+		_probeSnapshotComplete = unprocessedCount == 0 && hasSummaryContext;
+		if (_probeSnapshotComplete)
+		{
+			_probeFrameContextKey = summaryContext;
+			_probeFrameGeneration++;
+		}
+		else
+		{
+			_probeFrameContextKey = default;
+		}
 
 		if (unprocessedCount > 0)
 		{
