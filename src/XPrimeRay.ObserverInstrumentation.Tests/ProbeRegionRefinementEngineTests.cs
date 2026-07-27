@@ -15,6 +15,7 @@ internal static class ProbeRegionRefinementEngineTests
 		SuccessfulAtomicApply();
 		LevelMonotonicity();
 		ResolvedCountCorrectness();
+		MixedTransitionResolvedSemantics();
 		TransitionHistograms();
 		UnchangedMaxStepsCount();
 		ChildRegionRegenerationOnSplit();
@@ -188,6 +189,31 @@ internal static class ProbeRegionRefinementEngineTests
 		TestAssert.Equal(4, summary.PreviousMaxStepsCount, "previous max");
 		TestAssert.Equal(1, summary.RemainingMaxStepsCount, "remaining max");
 		TestAssert.Equal(3, summary.ResolvedPixelCount, "resolved max");
+		AssertSummaryReconciliation(summary, "resolved count");
+		TestAssert.Equal(summary.ResolvedPixelCount, fixture.FrameSummary.LastRefinementNewlyResolved, "frame summary newly resolved");
+	}
+
+	private static void MixedTransitionResolvedSemantics()
+	{
+		var fixture = CreateFixture(
+			3,
+			1,
+			ProbeOutcomeCode.HitGeometry,
+			ProbeOutcomeCode.BackgroundResolved,
+			ProbeOutcomeCode.StoppedEarlyAbsorbed);
+
+		ProbeRefinementSummary summary = Apply(fixture);
+
+		TestAssert.Equal(3, summary.PreviousMaxStepsCount, "mixed previous max");
+		TestAssert.Equal(1, summary.BecameHitGeometryCount, "mixed to geometry");
+		TestAssert.Equal(1, summary.BecameBackgroundResolvedCount, "mixed to background");
+		TestAssert.Equal(1, summary.BecameStoppedEarlyAbsorbedCount, "mixed to absorbed");
+		TestAssert.Equal(0, summary.RemainingMaxStepsCount, "mixed remaining max");
+		TestAssert.Equal(2, summary.ResolvedPixelCount, "mixed resolved excludes absorbed");
+		TestAssert.Equal(3, summary.AppliedPixelCount, "mixed applied count");
+		TestAssert.True(summary.AppliedAtomically, "mixed atomic apply");
+		AssertSummaryReconciliation(summary, "mixed transition");
+		TestAssert.Equal(2, fixture.FrameSummary.LastRefinementNewlyResolved, "mixed frame summary newly resolved");
 	}
 
 	private static void TransitionHistograms()
@@ -208,6 +234,8 @@ internal static class ProbeRegionRefinementEngineTests
 		TestAssert.Equal(1, summary.BecameStoppedEarlyAbsorbedCount, "to absorbed");
 		TestAssert.Equal(1, summary.BecameNumericalFailureCount, "to fault");
 		TestAssert.Equal(1, summary.BecameInvalidCount, "to invalid");
+		TestAssert.Equal(2, summary.ResolvedPixelCount, "transition resolved excludes absorbed fault invalid");
+		AssertSummaryReconciliation(summary, "transition histogram");
 	}
 
 	private static void UnchangedMaxStepsCount()
@@ -218,6 +246,7 @@ internal static class ProbeRegionRefinementEngineTests
 
 		TestAssert.Equal(2, summary.UnchangedMaxStepsCount, "unchanged max");
 		TestAssert.Equal(2, summary.ResolvedPixelCount, "resolved with unchanged max");
+		AssertSummaryReconciliation(summary, "unchanged max");
 	}
 
 	private static void ChildRegionRegenerationOnSplit()
@@ -435,6 +464,23 @@ internal static class ProbeRegionRefinementEngineTests
 		{
 			TestAssert.Equal(expected[i], actual[i], $"{label} {i}");
 		}
+	}
+
+	private static void AssertSummaryReconciliation(ProbeRefinementSummary summary, string label)
+	{
+		TestAssert.Equal(
+			summary.PreviousMaxStepsCount,
+			summary.BecameHitGeometryCount +
+				summary.BecameBackgroundResolvedCount +
+				summary.BecameStoppedEarlyAbsorbedCount +
+				summary.BecameNumericalFailureCount +
+				summary.BecameInvalidCount +
+				summary.UnchangedMaxStepsCount,
+			$"{label} transition total");
+		TestAssert.Equal(
+			summary.BecameHitGeometryCount + summary.BecameBackgroundResolvedCount,
+			summary.ResolvedPixelCount,
+			$"{label} resolved semantic total");
 	}
 
 	private sealed class RefinementFixture

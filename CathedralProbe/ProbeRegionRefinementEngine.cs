@@ -184,7 +184,7 @@ public static class ProbeRegionRefinementEngine
 		}
 
 		summary.RemainingMaxStepsCount = summary.UnchangedMaxStepsCount;
-		summary.ResolvedPixelCount = summary.PreviousMaxStepsCount - summary.RemainingMaxStepsCount;
+		summary.ResolvedPixelCount = summary.BecameHitGeometryCount + summary.BecameBackgroundResolvedCount;
 
 		ProbeRegionAnalyzer.Analyze(
 			filmWidth,
