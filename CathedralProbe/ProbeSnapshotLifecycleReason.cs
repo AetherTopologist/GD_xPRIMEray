@@ -1,0 +1,17 @@
+/// <summary>
+/// Terminal or transitional reason for a Cathedral Probe snapshot request.
+/// </summary>
+public enum ProbeSnapshotLifecycleReason : byte
+{
+	None = 0,
+	PhysicsSpaceUnavailable = 1,
+	ContextConstructionFailed = 2,
+	ContextChanged = 3,
+	DimensionsChanged = 4,
+	RequestSuperseded = 5,
+	TransportRejected = 6,
+	CapacityExceeded = 7,
+	UnprocessedPixelsRemaining = 8,
+	TimeoutOrFrameBudgetExhausted = 9,
+	InternalValidationFailed = 10,
+}

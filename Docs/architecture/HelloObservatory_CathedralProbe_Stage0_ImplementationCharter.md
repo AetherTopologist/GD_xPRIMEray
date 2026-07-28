@@ -601,10 +601,18 @@ Six commits. Each is a complete rollback point — reverting a commit leaves the
 - **Non-goals:** no region-selection UI, mouse interaction, overlays, hatching, evidence-file export, LIVE-mode refinement, transport math change, or visual styling.
 - **Verification:** pure orchestration tests cover row-major selection, rejection paths, atomicity, transition counters, child-region regeneration, deterministic failure reasons, seam unavailable telemetry, and bounded warm allocation. All OI tests still pass.
 
-### Commit 5B — Rollback E2 · Acceptance fixture and evidence export
+### Commit 5B — Rollback E2 · Reliable snapshot lifecycle
+
+- **Files added:** pure snapshot lifecycle state/result types, pure lifecycle tests, and a maintained headless snapshot lifecycle harness.
+- **Files modified:** `GrinFilmCamera.cs`, pure C# tests, and this charter.
+- **Behavior:** add explicit snapshot lifecycle states (`Inactive`, `Requested`, `WaitingForPhysics`, `Capturing`, `Complete`, `Incomplete`, `Invalidated`, `Failed`), request generations, physics-safe waiting/start, bounded lifecycle budget, truthful terminal reasons, atomic complete-frame finalization, stable `CATHEDRAL SNAPSHOT` evidence output, and one maintained headless completion demonstration.
+- **Boundary:** the current runtime has a single persistent probe outcome/region buffer. During capture, the frame is not refinement-eligible and must not be read as complete evidence; the previous terminal lifecycle result remains available until the replacement request reaches a terminal state.
+- **Non-goals:** no diagnostics panel, user-facing keybindings, seam A/B/C calibration, refinement trigger, semantic overlays, evidence-file export, LIVE refinement, fixture calibration, or transport redesign.
+
+### Commit 5C — Rollback E3 · Acceptance fixture and evidence export
 
 - **Files modified:** future bounded fixture/reporting files only.
-- **Behavior:** add the acceptance fixture and file evidence export once Commit 5A proves stable.
+- **Behavior:** add the acceptance fixture and file evidence export once Commit 5B proves stable.
 - **Non-goals:** no UI or overlay work.
 
 ### Commit 6 — Rollback F · Godot adapter and UI

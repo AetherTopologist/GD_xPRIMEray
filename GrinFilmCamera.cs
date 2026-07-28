@@ -2236,6 +2236,25 @@ public partial class GrinFilmCamera : Node
 	private int _nextProbeRefinementRequestId = 1;
 	private ProbeRefinementSummary _lastProbeRefinementSummary;
 	private RegionProbeRefinementRequest _activeRegionProbeRefinementRequest;
+	private const int CathedralProbeDefaultSnapshotLifecycleBudgetFrames = 240;
+	private int _nextProbeSnapshotRequestId = 1;
+	private bool _probeSnapshotLifecycleActive = false;
+	private bool _probeSnapshotLifecycleInitialized = false;
+	private bool _probeSnapshotLifecycleEvidenceEmitted = false;
+	private int _probeSnapshotLifecycleRequestId = 0;
+	private int _probeSnapshotLifecycleGeneration = 0;
+	private int _probeSnapshotLifecycleBudgetFrames = CathedralProbeDefaultSnapshotLifecycleBudgetFrames;
+	private int _probeSnapshotLifecycleProcessStartFrame = 0;
+	private int _probeSnapshotLifecyclePhysicsStartFrame = 0;
+	private int _probeSnapshotLifecycleProcessElapsed = 0;
+	private int _probeSnapshotLifecyclePhysicsElapsed = 0;
+	private ProbeSnapshotLifecycleState _probeSnapshotLifecycleState = ProbeSnapshotLifecycleState.Inactive;
+	private ProbeSnapshotLifecycleReason _probeSnapshotLifecycleReason = ProbeSnapshotLifecycleReason.None;
+	private ProbeContextKey _probeSnapshotLifecycleContextKey;
+	private int _probeSnapshotLifecycleWidth = 0;
+	private int _probeSnapshotLifecycleHeight = 0;
+	private ProbePolicy _probeSnapshotLifecyclePolicy;
+	private ProbeSnapshotLifecycleResult _lastProbeSnapshotLifecycleResult;
 	private SelectedProbeTransportRequest _selectedProbeTransportRequest;
 	private bool _selectedProbeTransportPending = false;
 	private bool _selectedProbeTransportCompleted = false;
@@ -4403,6 +4422,7 @@ private sealed class OverlayRollingWindow
 	public override void _PhysicsProcess(double delta)
 	{
 		RefreshCachedRenderSpaceState();
+		PumpCathedralProbeSnapshotLifecycle();
 	}
 
 		public override void _Process(double delta)
@@ -9545,6 +9565,365 @@ private sealed class OverlayRollingWindow
 		return summary.RequestId != 0;
 	}
 
+	public bool TryRequestCathedralProbeSnapshot(
+		int lifecycleBudgetPhysicsFrames,
+		out ProbeSnapshotLifecycleResult result)
+	{
+		if (_probeSnapshotLifecycleActive)
+		{
+			CompleteCathedralProbeSnapshotLifecycle(
+				ProbeSnapshotLifecycleState.Invalidated,
+				ProbeSnapshotLifecycleReason.RequestSuperseded,
+				contextMatched: false,
+				dimensionsMatched: false);
+		}
+
+		_probeSnapshotLifecycleRequestId = _nextProbeSnapshotRequestId++;
+		_probeSnapshotLifecycleGeneration++;
+		_probeSnapshotLifecycleBudgetFrames = Math.Max(1, lifecycleBudgetPhysicsFrames);
+		_probeSnapshotLifecycleProcessStartFrame = (int)Engine.GetProcessFrames();
+		_probeSnapshotLifecyclePhysicsStartFrame = (int)Engine.GetPhysicsFrames();
+		_probeSnapshotLifecycleProcessElapsed = 0;
+		_probeSnapshotLifecyclePhysicsElapsed = 0;
+		_probeSnapshotLifecycleInitialized = false;
+		_probeSnapshotLifecycleEvidenceEmitted = false;
+		_probeSnapshotLifecycleActive = true;
+		_probeSnapshotLifecycleReason = ProbeSnapshotLifecycleReason.None;
+		_probeSnapshotLifecycleState = ProbeSnapshotLifecycleState.Requested;
+		_probeSnapshotLifecycleContextKey = default;
+		_probeSnapshotLifecycleWidth = 0;
+		_probeSnapshotLifecycleHeight = 0;
+		_probeSnapshotLifecyclePolicy = default;
+		result = BuildCurrentCathedralProbeSnapshotLifecycleResult(
+			ProbeSnapshotLifecycleState.Requested,
+			ProbeSnapshotLifecycleReason.None,
+			contextMatched: true,
+			dimensionsMatched: true);
+		return true;
+	}
+
+	public bool TryGetCathedralProbeSnapshotLifecycleResult(out ProbeSnapshotLifecycleResult result)
+	{
+		if (_probeSnapshotLifecycleActive)
+		{
+			result = BuildCurrentCathedralProbeSnapshotLifecycleResult(
+				_probeSnapshotLifecycleState,
+				_probeSnapshotLifecycleReason,
+				contextMatched: true,
+				dimensionsMatched: true);
+			return true;
+		}
+
+		result = _lastProbeSnapshotLifecycleResult;
+		return result.RequestId != 0;
+	}
+
+	private void PumpCathedralProbeSnapshotLifecycle()
+	{
+		if (!_probeSnapshotLifecycleActive)
+		{
+			return;
+		}
+
+		_probeSnapshotLifecycleProcessElapsed = Math.Max(0, (int)Engine.GetProcessFrames() - _probeSnapshotLifecycleProcessStartFrame);
+		_probeSnapshotLifecyclePhysicsElapsed = Math.Max(0, (int)Engine.GetPhysicsFrames() - _probeSnapshotLifecyclePhysicsStartFrame);
+		if (_probeSnapshotLifecyclePhysicsElapsed > _probeSnapshotLifecycleBudgetFrames)
+		{
+			CompleteCathedralProbeSnapshotLifecycle(
+				ProbeSnapshotLifecycleState.Incomplete,
+				ProbeSnapshotLifecycleReason.TimeoutOrFrameBudgetExhausted,
+				contextMatched: true,
+				dimensionsMatched: true);
+			return;
+		}
+
+		if (!TryResolveRenderSpaceState(out _, out string renderSpaceSource))
+		{
+			_probeSnapshotLifecycleState = ProbeSnapshotLifecycleState.WaitingForPhysics;
+			_probeSnapshotLifecycleReason = ProbeSnapshotLifecycleReason.PhysicsSpaceUnavailable;
+			if (_probeSnapshotLifecyclePhysicsElapsed == _probeSnapshotLifecycleBudgetFrames)
+			{
+				CompleteCathedralProbeSnapshotLifecycle(
+					ProbeSnapshotLifecycleState.Incomplete,
+					ProbeSnapshotLifecycleReason.PhysicsSpaceUnavailable,
+					contextMatched: true,
+					dimensionsMatched: true);
+			}
+			return;
+		}
+
+		if (!_probeSnapshotLifecycleInitialized)
+		{
+			if (!InitializeCathedralProbeSnapshotLifecycle(out string initReason))
+			{
+				CompleteCathedralProbeSnapshotLifecycle(
+					ProbeSnapshotLifecycleState.Failed,
+					MapSnapshotLifecycleReason(initReason),
+					contextMatched: initReason != "context_construction_failed",
+					dimensionsMatched: initReason != "dimensions_changed");
+				return;
+			}
+		}
+
+		if (!ValidateActiveCathedralProbeSnapshotContext(out bool contextMatched, out bool dimensionsMatched))
+		{
+			CompleteCathedralProbeSnapshotLifecycle(
+				ProbeSnapshotLifecycleState.Invalidated,
+				contextMatched ? ProbeSnapshotLifecycleReason.DimensionsChanged : ProbeSnapshotLifecycleReason.ContextChanged,
+				contextMatched,
+				dimensionsMatched);
+			return;
+		}
+
+		_probeSnapshotLifecycleState = ProbeSnapshotLifecycleState.Capturing;
+		_probeSnapshotLifecycleReason = ProbeSnapshotLifecycleReason.None;
+		RenderStep();
+	}
+
+	private bool InitializeCathedralProbeSnapshotLifecycle(out string reason)
+	{
+		reason = string.Empty;
+		ResolveEffectiveConfig(out EffectiveConfig cfg);
+		EnsureFilmImageSize(in cfg);
+		int totalPixels = _filmWidth * _filmHeight;
+		if (_filmWidth <= 0 || _filmHeight <= 0 || totalPixels <= 0 ||
+			_probeOutcomes.Length < totalPixels || _probeRefinLevel.Length < totalPixels || _regionLabels.Length < totalPixels)
+		{
+			reason = "capacity_exceeded";
+			return false;
+		}
+		if (!TryBuildCurrentProbeContextKey(CathedralProbeRefinementPolicyVersion, out ProbeContextKey contextKey, out _))
+		{
+			reason = "context_construction_failed";
+			return false;
+		}
+
+		_probeSnapshotLifecycleContextKey = contextKey;
+		_probeSnapshotLifecycleWidth = _filmWidth;
+		_probeSnapshotLifecycleHeight = _filmHeight;
+		_probeSnapshotLifecyclePolicy = new ProbePolicy(
+			Math.Max(1, _rbr?.StepsPerRay ?? 1),
+			Math.Max(0.0001f, _rbr?.StepLength ?? 0.0001f),
+			Math.Max(1, _rbr?.StepsPerRay ?? 1),
+			Math.Max(0.0001f, _rbr?.StepLength ?? 0.0001f),
+			totalPixels,
+			3,
+			CathedralProbeRefinementPolicyVersion);
+		if (_rowCursor != 0)
+		{
+			ResetRowCursor("cathedral_snapshot_request");
+		}
+		ResetCathedralProbeBuffersForPass();
+		_probeSnapshotComplete = false;
+		_probeFrameContextKey = default;
+		UpdateEveryFrame = false;
+		_probeSnapshotLifecycleInitialized = true;
+		_probeSnapshotLifecycleState = ProbeSnapshotLifecycleState.Capturing;
+		_probeSnapshotLifecycleReason = ProbeSnapshotLifecycleReason.None;
+		return true;
+	}
+
+	private bool ValidateActiveCathedralProbeSnapshotContext(out bool contextMatched, out bool dimensionsMatched)
+	{
+		contextMatched = false;
+		dimensionsMatched = _filmWidth == _probeSnapshotLifecycleWidth && _filmHeight == _probeSnapshotLifecycleHeight;
+		if (!dimensionsMatched)
+		{
+			return false;
+		}
+		if (!TryBuildCurrentProbeContextKey(CathedralProbeRefinementPolicyVersion, out ProbeContextKey currentContext, out _))
+		{
+			return false;
+		}
+		contextMatched = currentContext == _probeSnapshotLifecycleContextKey;
+		return contextMatched;
+	}
+
+	private static ProbeSnapshotLifecycleReason MapSnapshotLifecycleReason(string reason)
+	{
+		return reason switch
+		{
+			"capacity_exceeded" => ProbeSnapshotLifecycleReason.CapacityExceeded,
+			"context_construction_failed" => ProbeSnapshotLifecycleReason.ContextConstructionFailed,
+			"dimensions_changed" => ProbeSnapshotLifecycleReason.DimensionsChanged,
+			"transport_rejected" => ProbeSnapshotLifecycleReason.TransportRejected,
+			_ => ProbeSnapshotLifecycleReason.InternalValidationFailed,
+		};
+	}
+
+	private void CompleteCathedralProbeSnapshotLifecycle(
+		ProbeSnapshotLifecycleState terminalState,
+		ProbeSnapshotLifecycleReason terminalReason,
+		bool contextMatched,
+		bool dimensionsMatched)
+	{
+		if (!_probeSnapshotLifecycleActive)
+		{
+			return;
+		}
+
+		var result = BuildCurrentCathedralProbeSnapshotLifecycleResult(
+			terminalState,
+			terminalReason,
+			contextMatched,
+			dimensionsMatched);
+		if (terminalState == ProbeSnapshotLifecycleState.Complete &&
+			!ProbeSnapshotLifecycleModel.CanComplete(result))
+		{
+			result.State = ProbeSnapshotLifecycleState.Failed;
+			result.Reason = ProbeSnapshotLifecycleReason.InternalValidationFailed;
+			result.RefinementEligible = false;
+		}
+		_lastProbeSnapshotLifecycleResult = result;
+		_probeSnapshotLifecycleState = result.State;
+		_probeSnapshotLifecycleReason = result.Reason;
+		_probeSnapshotLifecycleActive = false;
+		_probeSnapshotLifecycleInitialized = false;
+		if (result.State != ProbeSnapshotLifecycleState.Complete)
+		{
+			_probeSnapshotComplete = false;
+		}
+		PrintCathedralProbeSnapshotEvidenceOnce(result);
+	}
+
+	private ProbeSnapshotLifecycleResult BuildCurrentCathedralProbeSnapshotLifecycleResult(
+		ProbeSnapshotLifecycleState state,
+		ProbeSnapshotLifecycleReason reason,
+		bool contextMatched,
+		bool dimensionsMatched)
+	{
+		int width = _probeSnapshotLifecycleWidth > 0 ? _probeSnapshotLifecycleWidth : _filmWidth;
+		int height = _probeSnapshotLifecycleHeight > 0 ? _probeSnapshotLifecycleHeight : _filmHeight;
+		int totalPixels = Math.Max(0, width) * Math.Max(0, height);
+		int unprocessed = 0;
+		int hitGeometry = 0;
+		int background = 0;
+		int maxSteps = 0;
+		int absorbed = 0;
+		int fault = 0;
+		int invalid = 0;
+		if (_probeOutcomes.Length >= totalPixels)
+		{
+			CountCathedralProbeOutcomes(
+				totalPixels,
+				out unprocessed,
+				out hitGeometry,
+				out background,
+				out maxSteps,
+				out absorbed,
+				out fault,
+				out invalid);
+		}
+		else
+		{
+			unprocessed = totalPixels;
+		}
+
+		bool complete = state == ProbeSnapshotLifecycleState.Complete;
+		bool regionAvailable = complete && unprocessed == 0;
+		int processed = Math.Max(0, totalPixels - unprocessed);
+		return new ProbeSnapshotLifecycleResult
+		{
+			RequestId = _probeSnapshotLifecycleRequestId,
+			State = state,
+			Reason = reason,
+			Width = width,
+			Height = height,
+			TotalPixelCount = totalPixels,
+			ProcessedPixelCount = processed,
+			UnprocessedPixelCount = unprocessed,
+			ContextMatched = contextMatched,
+			DimensionsMatched = dimensionsMatched,
+			PolicyMaxSteps = _probeSnapshotLifecyclePolicy.BaseStepsPerRay,
+			PolicyStepSize = _probeSnapshotLifecyclePolicy.BaseStepLength,
+			HitGeometryCount = hitGeometry,
+			BackgroundResolvedCount = background,
+			MaxStepsExhaustedCount = maxSteps,
+			StoppedEarlyAbsorbedCount = absorbed,
+			NumericalFailureCount = fault,
+			InvalidCount = invalid,
+			RegionAnalysisAvailable = regionAvailable,
+			RegionCount = regionAvailable ? _probeFrameSummary.RegionCount : 0,
+			SelectableRegionCount = regionAvailable ? _probeFrameSummary.SelectableRegionCount : 0,
+			LargestRegionId = regionAvailable ? _probeFrameSummary.LargestRegionId : (ushort)0,
+			LargestRegionPixelCount = regionAvailable ? _probeFrameSummary.LargestRegionPixelCount : 0,
+			RefinementEligible = regionAvailable && _probeFrameSummary.SelectableRegionCount > 0,
+			ProcessFramesElapsed = _probeSnapshotLifecycleProcessElapsed,
+			PhysicsFramesElapsed = _probeSnapshotLifecyclePhysicsElapsed
+		};
+	}
+
+	private static string SnapshotLifecycleStateToken(ProbeSnapshotLifecycleState state)
+	{
+		return state switch
+		{
+			ProbeSnapshotLifecycleState.Inactive => "inactive",
+			ProbeSnapshotLifecycleState.Requested => "requested",
+			ProbeSnapshotLifecycleState.WaitingForPhysics => "waiting_for_physics",
+			ProbeSnapshotLifecycleState.Capturing => "capturing",
+			ProbeSnapshotLifecycleState.Complete => "complete",
+			ProbeSnapshotLifecycleState.Incomplete => "incomplete",
+			ProbeSnapshotLifecycleState.Invalidated => "invalidated",
+			ProbeSnapshotLifecycleState.Failed => "failed",
+			_ => "unknown",
+		};
+	}
+
+	private static string SnapshotLifecycleReasonToken(ProbeSnapshotLifecycleReason reason)
+	{
+		return reason switch
+		{
+			ProbeSnapshotLifecycleReason.None => "none",
+			ProbeSnapshotLifecycleReason.PhysicsSpaceUnavailable => "physics_space_unavailable",
+			ProbeSnapshotLifecycleReason.ContextConstructionFailed => "context_construction_failed",
+			ProbeSnapshotLifecycleReason.ContextChanged => "context_changed",
+			ProbeSnapshotLifecycleReason.DimensionsChanged => "dimensions_changed",
+			ProbeSnapshotLifecycleReason.RequestSuperseded => "request_superseded",
+			ProbeSnapshotLifecycleReason.TransportRejected => "transport_rejected",
+			ProbeSnapshotLifecycleReason.CapacityExceeded => "capacity_exceeded",
+			ProbeSnapshotLifecycleReason.UnprocessedPixelsRemaining => "unprocessed_pixels_remaining",
+			ProbeSnapshotLifecycleReason.TimeoutOrFrameBudgetExhausted => "timeout_or_frame_budget_exhausted",
+			ProbeSnapshotLifecycleReason.InternalValidationFailed => "internal_validation_failed",
+			_ => "unknown",
+		};
+	}
+
+	private void PrintCathedralProbeSnapshotEvidenceOnce(ProbeSnapshotLifecycleResult result)
+	{
+		if (_probeSnapshotLifecycleEvidenceEmitted)
+		{
+			return;
+		}
+		_probeSnapshotLifecycleEvidenceEmitted = true;
+		GD.Print("CATHEDRAL SNAPSHOT");
+		GD.Print($"request={result.RequestId}");
+		GD.Print($"state={SnapshotLifecycleStateToken(result.State)}");
+		GD.Print($"reason={SnapshotLifecycleReasonToken(result.Reason)}");
+		GD.Print($"dimensions={result.Width}x{result.Height}");
+		GD.Print($"processed={result.ProcessedPixelCount}");
+		GD.Print($"total={result.TotalPixelCount}");
+		GD.Print($"unprocessed={result.UnprocessedPixelCount}");
+		GD.Print($"contextMatch={(result.ContextMatched ? "true" : "false")}");
+		GD.Print($"dimensionsMatch={(result.DimensionsMatched ? "true" : "false")}");
+		GD.Print($"policy.maxSteps={result.PolicyMaxSteps}");
+		GD.Print($"policy.stepSize={result.PolicyStepSize:0.######}");
+		GD.Print($"refinementEligible={(result.RefinementEligible ? "true" : "false")}");
+		GD.Print("OUTCOMES");
+		GD.Print($"geometry={result.HitGeometryCount}");
+		GD.Print($"background={result.BackgroundResolvedCount}");
+		GD.Print($"maxSteps={result.MaxStepsExhaustedCount}");
+		GD.Print($"absorbed={result.StoppedEarlyAbsorbedCount}");
+		GD.Print($"fault={result.NumericalFailureCount}");
+		GD.Print($"invalid={result.InvalidCount}");
+		GD.Print($"unprocessed={result.UnprocessedPixelCount}");
+		GD.Print("REGIONS");
+		GD.Print($"available={(result.RegionAnalysisAvailable ? "true" : "false")}");
+		GD.Print($"count={result.RegionCount}");
+		GD.Print($"selectable={result.SelectableRegionCount}");
+		GD.Print($"largestId={result.LargestRegionId}");
+		GD.Print($"largestPixels={result.LargestRegionPixelCount}");
+	}
+
 	private ProbePolicy BuildCathedralProbeRefinementPolicy(byte requestedRefinementLevel, int totalPixels)
 	{
 		int baseSteps = Math.Max(1, _rbr?.StepsPerRay ?? 1);
@@ -10096,40 +10475,19 @@ private sealed class OverlayRollingWindow
 			return;
 		}
 
-		int unprocessedCount = 0;
-		int hitGeometryCount = 0;
-		int backgroundResolvedCount = 0;
-		int maxStepsExhaustedCount = 0;
-		int stoppedEarlyAbsorbedCount = 0;
-		int numericalFailureCount = 0;
+		CountCathedralProbeOutcomes(
+			totalPixels,
+			out int unprocessedCount,
+			out int hitGeometryCount,
+			out int backgroundResolvedCount,
+			out int maxStepsExhaustedCount,
+			out int stoppedEarlyAbsorbedCount,
+			out int numericalFailureCount,
+			out int invalidCount);
 		int regionCount = 0;
 		int selectableRegionCount = 0;
 		int largestRegionPixelCount = 0;
 		ushort largestRegionId = 0;
-		for (int i = 0; i < totalPixels; i++)
-		{
-			switch (_probeOutcomes[i])
-			{
-				case ProbeOutcomeCode.HitGeometry:
-					hitGeometryCount++;
-					break;
-				case ProbeOutcomeCode.BackgroundResolved:
-					backgroundResolvedCount++;
-					break;
-				case ProbeOutcomeCode.MaxStepsExhausted:
-					maxStepsExhaustedCount++;
-					break;
-				case ProbeOutcomeCode.StoppedEarlyAbsorbed:
-					stoppedEarlyAbsorbedCount++;
-					break;
-				case ProbeOutcomeCode.NumericalFailure:
-					numericalFailureCount++;
-					break;
-				default:
-					unprocessedCount++;
-					break;
-			}
-		}
 
 		_probeUnprocessedCount = unprocessedCount;
 		if (unprocessedCount == 0)
@@ -10190,10 +10548,41 @@ private sealed class OverlayRollingWindow
 		{
 			_probeFrameContextKey = summaryContext;
 			_probeFrameGeneration++;
+			if (_probeSnapshotLifecycleActive &&
+				_probeSnapshotLifecycleInitialized &&
+				_probeSnapshotLifecycleWidth == filmW &&
+				_probeSnapshotLifecycleHeight == filmH &&
+				summaryContext == _probeSnapshotLifecycleContextKey &&
+				_probeFrameSummary.TotalPixels == totalPixels &&
+				_probeFrameSummary.TotalPixels ==
+					unprocessedCount +
+					hitGeometryCount +
+					backgroundResolvedCount +
+					maxStepsExhaustedCount +
+					stoppedEarlyAbsorbedCount +
+					numericalFailureCount +
+					invalidCount)
+			{
+				CompleteCathedralProbeSnapshotLifecycle(
+					ProbeSnapshotLifecycleState.Complete,
+					ProbeSnapshotLifecycleReason.None,
+					contextMatched: true,
+					dimensionsMatched: true);
+			}
 		}
 		else
 		{
 			_probeFrameContextKey = default;
+			if (_probeSnapshotLifecycleActive && _probeSnapshotLifecycleInitialized)
+			{
+				CompleteCathedralProbeSnapshotLifecycle(
+					ProbeSnapshotLifecycleState.Incomplete,
+					unprocessedCount > 0
+						? ProbeSnapshotLifecycleReason.UnprocessedPixelsRemaining
+						: ProbeSnapshotLifecycleReason.InternalValidationFailed,
+					contextMatched: hasSummaryContext,
+					dimensionsMatched: _probeSnapshotLifecycleWidth == filmW && _probeSnapshotLifecycleHeight == filmH);
+			}
 		}
 
 		if (unprocessedCount > 0)
@@ -10218,6 +10607,57 @@ private sealed class OverlayRollingWindow
 					$"bounds=({region.MinX},{region.MinY})-({region.MaxX},{region.MaxY}) " +
 					$"maxSteps={region.CountMaxStepsExhausted} selectable={region.IsPrimarilyMaxStepsExhausted}");
 			}
+		}
+	}
+
+	private void CountCathedralProbeOutcomes(
+		int totalPixels,
+		out int unprocessedCount,
+		out int hitGeometryCount,
+		out int backgroundResolvedCount,
+		out int maxStepsExhaustedCount,
+		out int stoppedEarlyAbsorbedCount,
+		out int numericalFailureCount,
+		out int invalidCount)
+	{
+		unprocessedCount = 0;
+		hitGeometryCount = 0;
+		backgroundResolvedCount = 0;
+		maxStepsExhaustedCount = 0;
+		stoppedEarlyAbsorbedCount = 0;
+		numericalFailureCount = 0;
+		invalidCount = 0;
+		int safeTotal = Math.Clamp(totalPixels, 0, _probeOutcomes.Length);
+		for (int i = 0; i < safeTotal; i++)
+		{
+			switch (_probeOutcomes[i])
+			{
+				case ProbeOutcomeCode.HitGeometry:
+					hitGeometryCount++;
+					break;
+				case ProbeOutcomeCode.BackgroundResolved:
+					backgroundResolvedCount++;
+					break;
+				case ProbeOutcomeCode.MaxStepsExhausted:
+					maxStepsExhaustedCount++;
+					break;
+				case ProbeOutcomeCode.StoppedEarlyAbsorbed:
+					stoppedEarlyAbsorbedCount++;
+					break;
+				case ProbeOutcomeCode.NumericalFailure:
+					numericalFailureCount++;
+					break;
+				case ProbeOutcomeCode.Invalid:
+					invalidCount++;
+					break;
+				default:
+					unprocessedCount++;
+					break;
+			}
+		}
+		if (safeTotal < totalPixels)
+		{
+			unprocessedCount += totalPixels - safeTotal;
 		}
 	}
 
