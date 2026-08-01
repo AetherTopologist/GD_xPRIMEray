@@ -8,6 +8,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../XPrimeRay.ObserverInstrumentation/XPrimeRay.ObserverInstrumentation.csproj" />
+    <ProjectReference Include="../XPrimeRay.ObservationLayer/XPrimeRay.ObservationLayer.csproj" />
     <Compile Include="../../CathedralProbe/*.cs" Link="CathedralProbe/%(Filename)%(Extension)" />
   </ItemGroup>
 </Project>

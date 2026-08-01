@@ -5,4 +5,7 @@
     <Nullable>enable</Nullable>
     <RootNamespace>XPrimeRay.ObserverInstrumentation</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../XPrimeRay.ObservationLayer/XPrimeRay.ObservationLayer.csproj" />
+  </ItemGroup>
 </Project>

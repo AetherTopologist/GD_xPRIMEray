@@ -15,5 +15,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="src/XPrimeRay.ObserverInstrumentation/XPrimeRay.ObserverInstrumentation.csproj" />
+    <ProjectReference Include="src/XPrimeRay.ObservationLayer/XPrimeRay.ObservationLayer.csproj" />
   </ItemGroup>
 </Project>

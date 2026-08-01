@@ -20,7 +20,8 @@ internal static class Program
             (nameof(TextureResourceTests), TextureResourceTests.Run),
             (nameof(ProbeRegionAnalyzerTests), ProbeRegionAnalyzerTests.Run),
             (nameof(ProbeRegionRefinementEngineTests), ProbeRegionRefinementEngineTests.Run),
-            (nameof(ProbeSnapshotLifecycleTests), ProbeSnapshotLifecycleTests.Run)
+            (nameof(ProbeSnapshotLifecycleTests), ProbeSnapshotLifecycleTests.Run),
+            (nameof(ObservationFrameAdapterTests), ObservationFrameAdapterTests.Run)
         };
 
         int failures = 0;

@@ -11,6 +11,7 @@ using System.Threading;
 using XPrimeRay.Perf; // adjust namespace new PerfScope.cs
 using XPrimeRay.ObserverInstrumentation.Abstractions;
 using XPrimeRay.ObserverInstrumentation.Runtime;
+using XPrimeRay.ObservationLayer;
 using RendererCore.Common;
 using RendererCore.SceneSnapshot;
 using RendererCore.Fields;
@@ -2255,6 +2256,7 @@ public partial class GrinFilmCamera : Node
 	private int _probeSnapshotLifecycleHeight = 0;
 	private ProbePolicy _probeSnapshotLifecyclePolicy;
 	private ProbeSnapshotLifecycleResult _lastProbeSnapshotLifecycleResult;
+	private bool _cathedralSealedObservationFrameDiagnosticEmitted = false;
 	private SelectedProbeTransportRequest _selectedProbeTransportRequest;
 	private bool _selectedProbeTransportPending = false;
 	private bool _selectedProbeTransportCompleted = false;
@@ -9720,6 +9722,7 @@ private sealed class OverlayRollingWindow
 		_probeSnapshotLifecycleInitialized = true;
 		_probeSnapshotLifecycleState = ProbeSnapshotLifecycleState.Capturing;
 		_probeSnapshotLifecycleReason = ProbeSnapshotLifecycleReason.None;
+		_cathedralSealedObservationFrameDiagnosticEmitted = false;
 		return true;
 	}
 
@@ -9784,6 +9787,64 @@ private sealed class OverlayRollingWindow
 			_probeSnapshotComplete = false;
 		}
 		PrintCathedralProbeSnapshotEvidenceOnce(result);
+		PrintCathedralSealedObservationFrameDiagnosticOnce(result);
+	}
+
+	private void PrintCathedralSealedObservationFrameDiagnosticOnce(ProbeSnapshotLifecycleResult result)
+	{
+		if (_cathedralSealedObservationFrameDiagnosticEmitted ||
+			result.State != ProbeSnapshotLifecycleState.Complete ||
+			result.UnprocessedPixelCount != 0)
+		{
+			return;
+		}
+		_cathedralSealedObservationFrameDiagnosticEmitted = true;
+		if (!SceneId.TryCreate("cathedral_probe_snapshot.v1", out SceneId sceneId))
+		{
+			GD.PushWarning("[CathedralProbe][SealedFrame] invalid_scene_id");
+			return;
+		}
+		var policy = new ObservationPolicyFingerprint(
+			baseStepsPerRay: result.PolicyMaxSteps,
+			baseStepLength: result.PolicyStepSize,
+			minStepLength: Math.Max(0.0001f, _rbr?.MinStepLength ?? result.PolicyStepSize),
+			maxStepLength: Math.Max(0.0001f, _rbr?.MaxStepLength ?? result.PolicyStepSize),
+			bendScale: _rbr?.BendScale ?? 0f,
+			fieldStrength: _rbr?.FieldStrength ?? 0f,
+			fieldSourceEpoch: _probeFrameContextKey.FieldSourceEpoch,
+			geometryEpoch: _probeFrameContextKey.GeometryEpoch,
+			boundaryLayerEpoch: _probeFrameContextKey.BoundaryLayerEpoch,
+			policyVersion: CathedralProbeRefinementPolicyVersion,
+			transportMode: "runtime_current");
+		string contextIdentity =
+			$"cameraOrigin={_probeFrameContextKey.CameraOriginHash:x8};" +
+			$"cameraBasis={_probeFrameContextKey.CameraBasisHash:x8};" +
+			$"fov={_probeFrameContextKey.FovDeg:0.######};" +
+			$"film={_probeFrameContextKey.FilmWidth}x{_probeFrameContextKey.FilmHeight};" +
+			$"fieldEpoch={_probeFrameContextKey.FieldSourceEpoch};" +
+			$"geometryEpoch={_probeFrameContextKey.GeometryEpoch};" +
+			$"boundaryEpoch={_probeFrameContextKey.BoundaryLayerEpoch}";
+		if (!CathedralProbeObservationFrameAdapter.TryCreateCompletedFrame(
+			result,
+			sceneId,
+			SceneClass.DiagnosticChamber,
+			_probeFrameGeneration,
+			_probeFrameGeneration,
+			policy,
+			contextIdentity,
+			new ReadOnlySpan<ProbeOutcomeCode>(_probeOutcomes, 0, result.TotalPixelCount),
+			new ReadOnlySpan<ushort>(_regionLabels, 0, result.TotalPixelCount),
+			new ReadOnlySpan<byte>(_probeRefinLevel, 0, result.TotalPixelCount),
+			out var frame,
+			out string reason))
+		{
+			GD.PushWarning($"[CathedralProbe][SealedFrame] {reason}");
+			return;
+		}
+		foreach (string line in CathedralProbeObservationFrameAdapter.BuildDiagnosticLines(frame))
+		{
+			GD.Print(line);
+		}
 	}
 
 	private ProbeSnapshotLifecycleResult BuildCurrentCathedralProbeSnapshotLifecycleResult(
