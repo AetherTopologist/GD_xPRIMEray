@@ -10,6 +10,8 @@
     <Compile Remove="src/XPrimeRay.Testbench.Cli/**/*.cs" />
     <Compile Remove="src/XPrimeRay.ObserverInstrumentation/**/*.cs" />
     <Compile Remove="src/XPrimeRay.ObserverInstrumentation.Tests/**/*.cs" />
+    <Compile Remove="src/XPrimeRay.ObservationLayer/**/*.cs" />
+    <Compile Remove="src/XPrimeRay.ObservationLayer.Tests/**/*.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="src/XPrimeRay.ObserverInstrumentation/XPrimeRay.ObserverInstrumentation.csproj" />
