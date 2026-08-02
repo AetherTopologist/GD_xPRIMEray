@@ -33,36 +33,36 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 10)
 
 [node name="GalleryCollision" type="Node3D" parent="."]
 
-[node name="Floor" type="StaticBody3D" parent="GalleryCollision"]
+[node name="Floor" type="StaticBody3D" parent="GalleryCollision" groups=["fixture_geometry", "raytrace_geometry"]]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="GalleryCollision/Floor"]
 shape = SubResource("BoxShape_floor")
 
-[node name="Ceiling" type="StaticBody3D" parent="GalleryCollision"]
+[node name="Ceiling" type="StaticBody3D" parent="GalleryCollision" groups=["fixture_geometry", "raytrace_geometry"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="GalleryCollision/Ceiling"]
 shape = SubResource("BoxShape_floor")
 
-[node name="BackWall" type="StaticBody3D" parent="GalleryCollision"]
+[node name="BackWall" type="StaticBody3D" parent="GalleryCollision" groups=["fixture_geometry", "raytrace_geometry"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, -8)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="GalleryCollision/BackWall"]
 shape = SubResource("BoxShape_wall")
 
-[node name="FrontWall" type="StaticBody3D" parent="GalleryCollision"]
+[node name="FrontWall" type="StaticBody3D" parent="GalleryCollision" groups=["fixture_geometry", "raytrace_geometry"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 11)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="GalleryCollision/FrontWall"]
 shape = SubResource("BoxShape_wall")
 
-[node name="LeftWall" type="StaticBody3D" parent="GalleryCollision"]
+[node name="LeftWall" type="StaticBody3D" parent="GalleryCollision" groups=["fixture_geometry", "raytrace_geometry"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 4, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="GalleryCollision/LeftWall"]
 shape = SubResource("BoxShape_side_wall")
 
-[node name="RightWall" type="StaticBody3D" parent="GalleryCollision"]
+[node name="RightWall" type="StaticBody3D" parent="GalleryCollision" groups=["fixture_geometry", "raytrace_geometry"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 4, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="GalleryCollision/RightWall"]
@@ -106,6 +106,7 @@ script = ExtResource("5_rbr")
 CameraPath = NodePath("../TransportChamberPlayer/Head/PlayerCamera")
 StepsPerRay = 80
 StepLength = 0.07
+CollisionMask = 1
 MinStepLength = 0.001
 MaxStepLength = 0.35
 LowCurvaturePerpAccel = 0.3
@@ -125,6 +126,8 @@ FilmResolutionScale = 0.25
 ShadingMode = 1
 SkyColor = Color(1, 0, 1, 1)
 Pass1DoHitTest = true
+SharedRbrCollisionMask = 1
+FixtureDebugSourceGroup = "fixture_geometry"
 FlipNormalToCamera = false
 UpdateEveryFrame = false
 UpdateEveryFrameBudgetMs = 80.0

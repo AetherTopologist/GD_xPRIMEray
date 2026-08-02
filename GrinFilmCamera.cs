@@ -15685,11 +15685,9 @@ private sealed class OverlayRollingWindow
 			// DECISION: throttle verbose field source logs to once per frame.
 			if (cfg.VerbosePerfLogs && (_rowCursor % filmH) == 0)
 				GD.Print($"fieldSnaps={fieldSnaps.Length} hasSources={hasSources}");
-			if (cfg.FixtureDebugHitColoringEnabled ||
-				cfg.FixtureDebugTraceEnabled ||
-				cfg.FixtureTransportClassificationEnabled ||
-				_renderHealthTestTrustEnforcementEnabled)
-				RefreshFixtureDebugSourceIds(cfg.FixtureDebugSourceGroup);
+			// Probe outcome and normal diagnostics classify surface identity before
+			// presentation, so refresh the collider-id cache for every film pass.
+			RefreshFixtureDebugSourceIds(cfg.FixtureDebugSourceGroup);
 
 
 			float beta = 0f;
