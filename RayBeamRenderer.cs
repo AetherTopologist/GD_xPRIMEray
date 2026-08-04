@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using RendererCore.Config;
 using RendererCore.Fields;
+using XPrimeRay.Diagnostics;
 
 public partial class RayBeamRenderer : Node3D
 {
@@ -40,6 +41,26 @@ public partial class RayBeamRenderer : Node3D
 	/// <summary>Clamp maximum step length.</summary>
 	// CONTROL FACTOR: Upper bound on adaptive step size; prevents too-coarse integration.
 	[Export] public float MaxStepLength = 0.5f;
+
+	[ExportGroup("Runtime Diagnostics")]
+	[Export] public DiagnosticVerbosityPreference DiagnosticsVerbosityPreference = DiagnosticVerbosityPreference.Auto;
+	[Export] public DiagnosticVerbosity DiagnosticsVerbosity = DiagnosticVerbosity.Summary;
+	[Export] public bool DiagnosticsTransportTraceOptIn = false;
+
+	private RuntimeDiagnosticPolicy _diagnostics = RuntimeDiagnosticPolicy.LiveDefault;
+
+	private bool ShouldLog(DiagnosticVerbosity verbosity, DiagnosticCategory category)
+	{
+		return _diagnostics.Allows(verbosity, category);
+	}
+
+	private void LogDiagnostic(DiagnosticVerbosity verbosity, DiagnosticCategory category, string message)
+	{
+		if (ShouldLog(verbosity, category))
+		{
+			GD.Print(message);
+		}
+	}
 	/// <summary>Adaptation strength for step sizing.</summary>
 	// CONTROL FACTOR: How strongly acceleration shortens steps; higher = more adaptation.
 	[Export] public float StepAdaptGain = 0.05f;
@@ -816,18 +837,21 @@ public partial class RayBeamRenderer : Node3D
 		for (int i = 0; i < _boundaryDebugExitCounts.Length; i++)
 			totalExits += _boundaryDebugExitCounts[i];
 
-		string suffix = string.IsNullOrWhiteSpace(label) ? "" : $" {label}";
-		GD.Print($"[BLV][Summary]{suffix} entries={totalEntries} exits={totalExits} impulses={_boundaryDebugImpulseCount} remaps={_boundaryDebugSceneTransformCount} layers={_boundaryLayerSnaps.Length}");
-		for (int i = 0; i < _boundaryLayerSnaps.Length; i++)
+		if (ShouldLog(DiagnosticVerbosity.Region, DiagnosticCategory.Boundary))
 		{
-			if (_boundaryDebugEntryCounts[i] == 0 && _boundaryDebugExitCounts[i] == 0)
-				continue;
-			string nodeName = string.IsNullOrEmpty(_boundaryLayerSnaps[i].NodeName) ? $"layer_{i}" : _boundaryLayerSnaps[i].NodeName;
-			GD.Print($"[BLV][Layer] layer={i} name='{nodeName}' entry={_boundaryDebugEntryCounts[i]} exit={_boundaryDebugExitCounts[i]}");
-		}
+			string suffix = string.IsNullOrWhiteSpace(label) ? "" : $" {label}";
+			GD.Print($"[BLV][Summary]{suffix} entries={totalEntries} exits={totalExits} impulses={_boundaryDebugImpulseCount} remaps={_boundaryDebugSceneTransformCount} layers={_boundaryLayerSnaps.Length}");
+			for (int i = 0; i < _boundaryLayerSnaps.Length; i++)
+			{
+				if (_boundaryDebugEntryCounts[i] == 0 && _boundaryDebugExitCounts[i] == 0)
+					continue;
+				string nodeName = string.IsNullOrEmpty(_boundaryLayerSnaps[i].NodeName) ? $"layer_{i}" : _boundaryLayerSnaps[i].NodeName;
+				GD.Print($"[BLV][Layer] layer={i} name='{nodeName}' entry={_boundaryDebugEntryCounts[i]} exit={_boundaryDebugExitCounts[i]}");
+			}
 
-		if (!_boundaryDebugHasEvents)
-			GD.Print($"[BLV][Summary]{suffix} no crossing events recorded.");
+			if (!_boundaryDebugHasEvents)
+				GD.Print($"[BLV][Summary]{suffix} no crossing events recorded.");
+		}
 
 		_boundaryDebugRunActive = false;
 	}
@@ -890,6 +914,13 @@ public partial class RayBeamRenderer : Node3D
 
 	public override async void _Ready()
 	{
+		_diagnostics = RuntimeDiagnosticPolicy.FromEnvironment(
+			RuntimeDiagnosticPolicy.Resolve(
+				DiagnosticsVerbosityPreference,
+				DiagnosticsVerbosity,
+				DiagnosticRuntimeMode.Live,
+				DiagnosticsTransportTraceOptIn).Verbosity,
+			DiagnosticsTransportTraceOptIn);
 		// DECISION: guard against double-init if _Ready runs again (scene reloads, etc.)
 		// EFFECT: skip all setup when multimesh is already valid and in the tree.
 		if (_mmi != null && IsInstanceValid(_mmi) && _mmi.IsInsideTree())
@@ -982,7 +1013,10 @@ public partial class RayBeamRenderer : Node3D
 			}
 		}
 
-		GD.Print($"[DBG] dbgMesh inTree={_dbgMeshInstance.IsInsideTree()} parent={_dbgMeshInstance.GetParent()?.Name} world={_dbgMeshInstance.GlobalTransform.Origin}");
+		if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
+		{
+			GD.Print($"[DBG] dbgMesh inTree={_dbgMeshInstance.IsInsideTree()} parent={_dbgMeshInstance.GetParent()?.Name} world={_dbgMeshInstance.GlobalTransform.Origin}");
+		}
 
 		var startupTree = GetTree();
 		if (!_lifecycleInTree || !IsInsideTree() || startupTree == null)
@@ -1007,7 +1041,10 @@ public partial class RayBeamRenderer : Node3D
 		var cam = GetCamera();
 		// DECISION: no camera means no rebuild.
 		if (cam == null) return;
-		GD.Print($"[DBG] camWorld={cam.GetWorld3D()?.GetRid()} dbgWorld={_dbgMeshInstance.GetWorld3D()?.GetRid()}");
+		if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render))
+		{
+			GD.Print($"[DBG] camWorld={cam.GetWorld3D()?.GetRid()} dbgWorld={_dbgMeshInstance.GetWorld3D()?.GetRid()}");
+		}
 
 		float beta = ReadFloat(cam, "Beta", 0f);
 		float gamma = ReadFloat(cam, "Gamma", 2f);
@@ -1705,9 +1742,12 @@ public partial class RayBeamRenderer : Node3D
 			return;
 		}
 
-		GD.Print("Rebuild ENTER");
-		GD.Print($"Rebuild on node: {GetPath()}  TerminateTrailOnHit={TerminateTrailOnHit} StopOnHit={StopOnHit} RequireHitToRender={RequireHitToRender}");
-		GD.Print($"READY node: {GetPath()}  Script={GetScript()}  TerminateTrailOnHit={TerminateTrailOnHit}");
+		if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
+		{
+			GD.Print("Rebuild ENTER");
+			GD.Print($"Rebuild on node: {GetPath()}  TerminateTrailOnHit={TerminateTrailOnHit} StopOnHit={StopOnHit} RequireHitToRender={RequireHitToRender}");
+			GD.Print($"READY node: {GetPath()}  Script={GetScript()}  TerminateTrailOnHit={TerminateTrailOnHit}");
+		}
 
 		// DECISION: prevent concurrent rebuilds.
 		if (_rebuildInProgress) return;
@@ -1734,7 +1774,8 @@ public partial class RayBeamRenderer : Node3D
 			ResetMetricTransportDiagnostics();
 
 			var fieldSources = GetTree().GetNodesInGroup("field_sources");
-			GD.Print("RayBeamRenderer: field sources in group = ", fieldSources.Count);
+			if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
+				GD.Print("RayBeamRenderer: field sources in group = ", fieldSources.Count);
 			FieldSourceSnap[] fieldSourceSnaps = SnapshotFieldSources(fieldSources);
 			bool hasSources = fieldSourceSnaps.Length > 0;
 			TransportModel rebuildTransportModel = hasSources ? ResolveActiveTransportModel(fieldSourceSnaps) : TransportModel.GRIN_Optical;
@@ -1743,7 +1784,8 @@ public partial class RayBeamRenderer : Node3D
 			var blvNodes = GetTree().GetNodesInGroup("boundary_layer_volumes");
 			_boundaryLayerSnaps = SnapshotBoundaryLayers(blvNodes);
 			_hasBoundaryLayers = _boundaryLayerSnaps.Length > 0;
-			GD.Print("RayBeamRenderer: boundary layers in group = ", blvNodes.Count, " snapped = ", _boundaryLayerSnaps.Length, " integrated = ", UseIntegratedField);
+			if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
+				GD.Print("RayBeamRenderer: boundary layers in group = ", blvNodes.Count, " snapped = ", _boundaryLayerSnaps.Length, " integrated = ", UseIntegratedField);
 
 			var emitters = GetTree().GetNodesInGroup("ray_emitters");
 			int emitterCount = emitters.Count;
@@ -1753,7 +1795,8 @@ public partial class RayBeamRenderer : Node3D
 				_mm.InstanceCount = 0;
 				return;
 			}
-			GD.Print("RayBeamRenderer: emitters in group = ", emitters.Count);
+			if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
+				GD.Print("RayBeamRenderer: emitters in group = ", emitters.Count);
 
 			int total = 0;
 			int capacity = total;
@@ -1789,7 +1832,8 @@ public partial class RayBeamRenderer : Node3D
 
 			_mm.InstanceCount = total;
 			_mm.VisibleInstanceCount = total; // default: show all until we decide otherwise
-			GD.Print($"RayBeamRenderer: total instances target = {total}");
+			if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
+				GD.Print($"RayBeamRenderer: total instances target = {total}");
 
 			Vector3 camRight = cam.GlobalTransform.Basis.X.Normalized();
 			Vector3 camUp = cam.GlobalTransform.Basis.Y.Normalized();
@@ -1946,12 +1990,15 @@ public partial class RayBeamRenderer : Node3D
 			if (rebuildTransportModel == TransportModel.Metric_NullGeodesic)
 			{
 				MetricTransportDiagnosticsSnapshot metricDiagnostics = GetMetricTransportDiagnosticsSnapshot();
-				GD.Print(
-					$"[Transport][MetricDiagSummary] metricLaw={metricDiagnostics.MetricSteeringLawToken} metricDeltaZeroCount={metricDiagnostics.MetricDeltaZeroCount} " +
-					$"metricDeltaNonzeroCount={metricDiagnostics.MetricDeltaNonzeroCount} metricFallbackCount={metricDiagnostics.MetricFallbackCount} " +
-					$"metricContributionRatio={metricDiagnostics.MetricContributionRatio:0.######} zeroReasons={metricDiagnostics.ZeroReasonSummary}");
+				if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Transport))
+				{
+					GD.Print(
+						$"[Transport][MetricDiagSummary] metricLaw={metricDiagnostics.MetricSteeringLawToken} metricDeltaZeroCount={metricDiagnostics.MetricDeltaZeroCount} " +
+						$"metricDeltaNonzeroCount={metricDiagnostics.MetricDeltaNonzeroCount} metricFallbackCount={metricDiagnostics.MetricFallbackCount} " +
+						$"metricContributionRatio={metricDiagnostics.MetricContributionRatio:0.######} zeroReasons={metricDiagnostics.ZeroReasonSummary}");
+				}
 			}
-			if (IsDerivativeAwareSteppingEnabled() && DerivativeAwareLogMetrics)
+			if (IsDerivativeAwareSteppingEnabled() && DerivativeAwareLogMetrics && ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Transport))
 			{
 				DerivativeAwareSteppingDiagnosticsSnapshot derivativeDiagnostics = GetDerivativeAwareSteppingDiagnosticsSnapshot();
 				GD.Print(
@@ -1985,7 +2032,7 @@ public partial class RayBeamRenderer : Node3D
 			_rebuildInProgress = false;
 		}
 
-		GD.Print("Rebuild EXIT");
+		LogDiagnostic(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle, "Rebuild EXIT");
 	}
 
 	//private void SetBillboardInstance(int index, Vector3 pos, Vector3 camRight, Vector3 camUp, Vector3 camForward, Color c)
@@ -4440,7 +4487,8 @@ public partial class RayBeamRenderer : Node3D
 					RecordBoundaryTransformPairedEgress(in layer, ref ledgerDelta);
 				}
 				if (layer.DebugLogCrossings && !_boundaryDebugRunActive)
-					GD.Print($"[BLV] entry event: layer={i} name='{layer.NodeName}' behavior={layer.Behavior} pos=({p.X:0.##},{p.Y:0.##},{p.Z:0.##})");
+					if (ShouldLog(DiagnosticVerbosity.TransportTrace, DiagnosticCategory.Boundary))
+						GD.Print($"[BLV] entry event: layer={i} name='{layer.NodeName}' behavior={layer.Behavior} pos=({p.X:0.##},{p.Y:0.##},{p.Z:0.##})");
 			}
 			if (doExit)
 			{
@@ -4473,7 +4521,8 @@ public partial class RayBeamRenderer : Node3D
 				RecordBoundaryValidationEvent(i, isEntry: false, isExit: true);
 				ledgerDelta.RecordEvent(i, LedgerCrossingKind.Exit, causedTransform);
 				if (layer.DebugLogCrossings && !_boundaryDebugRunActive)
-					GD.Print($"[BLV] exit event: layer={i} name='{layer.NodeName}' behavior={layer.Behavior} pos=({p.X:0.##},{p.Y:0.##},{p.Z:0.##})");
+					if (ShouldLog(DiagnosticVerbosity.TransportTrace, DiagnosticCategory.Boundary))
+						GD.Print($"[BLV] exit event: layer={i} name='{layer.NodeName}' behavior={layer.Behavior} pos=({p.X:0.##},{p.Y:0.##},{p.Z:0.##})");
 			}
 		}
 	}
@@ -4568,7 +4617,8 @@ public partial class RayBeamRenderer : Node3D
 
 		_lastLoggedTransportModel = active;
 		_hasLoggedTransportModel = true;
-		GD.Print($"[Transport] active={active}");
+		if (ShouldLog(DiagnosticVerbosity.Summary, DiagnosticCategory.Transport))
+			GD.Print($"[Transport Lens] active={active}");
 	}
 
 	private static bool TryGetAbsorbingSourceAtPoint(
@@ -5001,9 +5051,10 @@ public partial class RayBeamRenderer : Node3D
 		return evaluation.IsZero ? GetMetricDeltaZeroReasonToken(evaluation.ZeroReason) : "none";
 	}
 
-	private static bool ShouldLogMetricDiagnosticSamples()
+	private bool ShouldLogMetricDiagnosticSamples()
 	{
-		return HasRenderTestFlagForMetricComparisonOverride();
+		return HasRenderTestFlagForMetricComparisonOverride()
+			&& ShouldLog(DiagnosticVerbosity.PixelTrace, DiagnosticCategory.Transport);
 	}
 
 	private void RecordMetricDirectionDeltaEvaluation(in MetricDirectionDeltaEvaluation evaluation)
@@ -5927,30 +5978,35 @@ public partial class RayBeamRenderer : Node3D
 		if (!_loggedMetricSteeringLaw)
 		{
 			_loggedMetricSteeringLaw = true;
-			GD.Print(
-				$"[Transport][MetricLaw] active={GetMetricSteeringLawToken(metricLaw)} transport={TransportModel.Metric_NullGeodesic}");
+			if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Transport))
+				GD.Print(
+					$"[Transport][MetricLaw] active={GetMetricSteeringLawToken(metricLaw)} transport={TransportModel.Metric_NullGeodesic}");
 		}
 		if (!_loggedMetricWeakFieldMapping)
 		{
 			_loggedMetricWeakFieldMapping = true;
-			GD.Print(
-				$"[Transport] Metric_NullGeodesic weak-field scaffold active. " +
-				$"effectiveMetricScalar={weakFieldScalar:0.######} " +
-				$"(mapped={mappedWeakFieldScalar:0.######}, grinAccelMag={grinAccelMagnitude:0.######}, metricScalarOverride={metricScalarOverride:0.###}, " +
-				$"metricLaw={GetMetricSteeringLawToken(metricLaw)}, formula=weakFieldScalar*step*boundedLensingWeight).");
+			if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Transport))
+				GD.Print(
+					$"[Transport] Metric_NullGeodesic weak-field scaffold active. " +
+					$"effectiveMetricScalar={weakFieldScalar:0.######} " +
+					$"(mapped={mappedWeakFieldScalar:0.######}, grinAccelMag={grinAccelMagnitude:0.######}, metricScalarOverride={metricScalarOverride:0.###}, " +
+					$"metricLaw={GetMetricSteeringLawToken(metricLaw)}, formula=weakFieldScalar*step*boundedLensingWeight).");
 		}
 		if (!_loggedMetricScalarIngredients)
 		{
 			_loggedMetricScalarIngredients = true;
-			string sourceToken = metricInputs.HasEnabledSource ? metricInputs.SourceIndex.ToString(CultureInfo.InvariantCulture) : "none";
-			string betaMode = metricInputs.OverrideBetaScale ? "override" : "global";
-			GD.Print(
-				$"[Transport][MetricScalarMap] sourceIndex={sourceToken} amp={metricInputs.Amp:0.######} " +
-				$"betaScaleEff={metricInputs.BetaScaleEff:0.######} betaMode={betaMode} " +
-				$"bendScaleEff={metricInputs.BendScaleEff:0.######} fieldStrengthEff={metricInputs.FieldStrengthEff:0.######} " +
-				$"rOuter={metricInputs.ROuter:0.######} mappedWeakField={mappedWeakFieldScalar:0.######} " +
-				$"grinAccelMag={grinAccelMagnitude:0.######} effectiveMetricScalar={weakFieldScalar:0.######} " +
-				$"curveIndirect={metricInputs.CurveType} note=gamma/a/b/c/sigma/rInner/curve-shape only via grinFloorOrFallback");
+			if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Transport))
+			{
+				string sourceToken = metricInputs.HasEnabledSource ? metricInputs.SourceIndex.ToString(CultureInfo.InvariantCulture) : "none";
+				string betaMode = metricInputs.OverrideBetaScale ? "override" : "global";
+				GD.Print(
+					$"[Transport][MetricScalarMap] sourceIndex={sourceToken} amp={metricInputs.Amp:0.######} " +
+					$"betaScaleEff={metricInputs.BetaScaleEff:0.######} betaMode={betaMode} " +
+					$"bendScaleEff={metricInputs.BendScaleEff:0.######} fieldStrengthEff={metricInputs.FieldStrengthEff:0.######} " +
+					$"rOuter={metricInputs.ROuter:0.######} mappedWeakField={mappedWeakFieldScalar:0.######} " +
+					$"grinAccelMag={grinAccelMagnitude:0.######} effectiveMetricScalar={weakFieldScalar:0.######} " +
+					$"curveIndirect={metricInputs.CurveType} note=gamma/a/b/c/sigma/rInner/curve-shape only via grinFloorOrFallback");
+			}
 		}
 
 		if (metricEval.IsZero)
@@ -5959,13 +6015,16 @@ public partial class RayBeamRenderer : Node3D
 			if (!_loggedMetricStubFallback)
 			{
 				_loggedMetricStubFallback = true;
-				string radiusFlag = metricEval.RadiusBelowDiagnosticThreshold
-					? "r_lo"
-					: (metricEval.RadiusAboveDiagnosticThreshold ? "r_hi" : "r_ok");
-				GD.Print(
-					$"[Transport] Metric_NullGeodesic produced zero direction delta; using GRIN acceleration fallback. " +
-					$"reason={GetMetricDeltaZeroReasonToken(metricEval.ZeroReason)} radiusFlag={radiusFlag} " +
-					$"r={metricEval.Radius:0.######} bendPerp={metricEval.BendPerpMagnitude:0.######} dTheta={metricEval.DTheta:0.######}");
+				if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Transport))
+				{
+					string radiusFlag = metricEval.RadiusBelowDiagnosticThreshold
+						? "r_lo"
+						: (metricEval.RadiusAboveDiagnosticThreshold ? "r_hi" : "r_ok");
+					GD.Print(
+						$"[Transport] Metric_NullGeodesic produced zero direction delta; using GRIN acceleration fallback. " +
+						$"reason={GetMetricDeltaZeroReasonToken(metricEval.ZeroReason)} radiusFlag={radiusFlag} " +
+						$"r={metricEval.Radius:0.######} bendPerp={metricEval.BendPerpMagnitude:0.######} dTheta={metricEval.DTheta:0.######}");
+				}
 			}
 
 			return grinAccel;
@@ -5980,7 +6039,8 @@ public partial class RayBeamRenderer : Node3D
 			if (!_loggedMetricEquivalentFallback)
 			{
 				_loggedMetricEquivalentFallback = true;
-				GD.Print("[Transport] Metric_NullGeodesic produced non-finite equivalent acceleration; using GRIN fallback.");
+				if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Transport))
+					GD.Print("[Transport] Metric_NullGeodesic produced non-finite equivalent acceleration; using GRIN fallback.");
 			}
 			return grinAccel;
 		}
@@ -6002,7 +6062,8 @@ public partial class RayBeamRenderer : Node3D
 		if (!_loggedHybridStubFallback)
 		{
 			_loggedHybridStubFallback = true;
-			GD.Print("[Transport] Hybrid_Research stub active; falling back to GRIN_Optical transport.");
+			if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Transport))
+				GD.Print("[Transport] Hybrid_Research stub active; falling back to GRIN_Optical transport.");
 		}
 
 		return StepTransport_GRIN(p, center, beta, gamma, fieldSources, hasSources);
@@ -6363,7 +6424,8 @@ public partial class RayBeamRenderer : Node3D
 	// Debug Overlay Builder (uses _rayMeta + _samplePos + _hitPayload)
 	private void UpdateDebugOverlay(Camera3D cam, int raysWritten)
 	{
-		GD.Print($"[DBG] Overlay call: mode={DebugMode} raysWritten={raysWritten} dbgMeshNull={_dbgMeshInstance==null}");
+		if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render))
+			GD.Print($"[DBG] Overlay call: mode={DebugMode} raysWritten={raysWritten} dbgMeshNull={_dbgMeshInstance==null}");
 
 		// --- CAN'T-MISS sanity line (1m in front of camera) ---
 		var camXform = cam.GlobalTransform;
@@ -6372,7 +6434,7 @@ public partial class RayBeamRenderer : Node3D
 		DbgAddLine(p0, p1, new Color(1, 0, 0, 1));
 
 		// DECISION: throttle debug log to every 60 frames.
-		if (Engine.GetFramesDrawn() % 60 == 0)
+		if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render) && Engine.GetFramesDrawn() % 60 == 0)
 			GD.Print($"[DBG] UpdateDebugOverlay called. mode={DebugMode}");
 
 
@@ -6524,7 +6586,8 @@ public partial class RayBeamRenderer : Node3D
 		// DECISION: must have debug mesh buffers to draw anything.
 		if (_dbgImmediate == null || _dbgMeshInstance == null)
 		{
-			GD.Print($"[DBG] _dbgImmediate or _dbgMeshInstance is null");
+			if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render))
+				GD.Print($"[DBG] _dbgImmediate or _dbgMeshInstance is null");
 			return;
 		}
 
@@ -6532,7 +6595,8 @@ public partial class RayBeamRenderer : Node3D
 		// DECISION: no camera means no camera axes or consistent draw frame.
 		if (cam == null)
 		{
-			GD.Print($"[DBG] Cam is Null");
+			if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render))
+				GD.Print($"[DBG] Cam is Null");
 			return;
 		}
 
@@ -6556,7 +6620,8 @@ public partial class RayBeamRenderer : Node3D
 		// 2) Rays + hit normals
 		int rayCount = rayOffsets.Length;
 		int stride = Math.Max(1, everyNRays);
-		GD.Print($"[DBG] rayCount = {rayCount}");
+		if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render))
+			GD.Print($"[DBG] rayCount = {rayCount}");
 		// DECISION: iterate rays at the requested stride for performance.
 		for (int r = 0; r < rayCount; r += stride)
 		{

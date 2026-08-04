@@ -12,9 +12,13 @@
     <Compile Remove="src/XPrimeRay.ObserverInstrumentation.Tests/**/*.cs" />
     <Compile Remove="src/XPrimeRay.ObservationLayer/**/*.cs" />
     <Compile Remove="src/XPrimeRay.ObservationLayer.Tests/**/*.cs" />
+    <Compile Remove="src/XPrimeRay.Diagnostics/**/*.cs" />
+    <Compile Remove="src/XPrimeRay.Diagnostics.Tests/**/*.cs" />
+    <Compile Remove=".godot/**/*.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="src/XPrimeRay.ObserverInstrumentation/XPrimeRay.ObserverInstrumentation.csproj" />
     <ProjectReference Include="src/XPrimeRay.ObservationLayer/XPrimeRay.ObservationLayer.csproj" />
+    <ProjectReference Include="src/XPrimeRay.Diagnostics/XPrimeRay.Diagnostics.csproj" />
   </ItemGroup>
 </Project>

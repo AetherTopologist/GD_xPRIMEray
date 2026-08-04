@@ -12,6 +12,7 @@ using XPrimeRay.Perf; // adjust namespace new PerfScope.cs
 using XPrimeRay.ObserverInstrumentation.Abstractions;
 using XPrimeRay.ObserverInstrumentation.Runtime;
 using XPrimeRay.ObservationLayer;
+using XPrimeRay.Diagnostics;
 using RendererCore.Common;
 using RendererCore.SceneSnapshot;
 using RendererCore.Fields;
@@ -1261,7 +1262,8 @@ public partial class GrinFilmCamera : Node
 			_smartScaleRunOnceLatch = false;
 			if (!value) return;
 			_smartScaleRunRequested = true;
-			GD.Print("[SmartScale][Inspector] run-once requested.");
+			if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Performance))
+				GD.Print("[SmartScale][Inspector] run-once requested.");
 		}
 	}
 
@@ -1323,6 +1325,10 @@ public partial class GrinFilmCamera : Node
 	[Export(PropertyHint.Range, "1,256,1")] public int ThreadedPass2RowsPerChunk = 4;
 
 	[ExportSubgroup("Logging & Diagnostics")]
+	[Export] public DiagnosticVerbosityPreference DiagnosticsVerbosityPreference = DiagnosticVerbosityPreference.Auto;
+	[Export] public DiagnosticVerbosity DiagnosticsVerbosity = DiagnosticVerbosity.Summary;
+	[Export] public bool DiagnosticsTransportTraceOptIn = false;
+	[Export(PropertyHint.Range, "0,4096,1")] public int DiagnosticsSelectedPixelTraceLimit = 64;
 	/// <summary>Fetches collider names for debug output.</summary>
 	// CONTROL FACTOR: Fetch collider names; true adds lookup cost but improves debug readability.
 	[Export] public bool NeedColliderNames = false;
@@ -1374,6 +1380,71 @@ public partial class GrinFilmCamera : Node
 	[Export] public bool DebugSnapshotLog = true;
 	[Export(PropertyHint.Range, "0.05,10.0,0.05")] public float DebugSnapshotIntervalSec = 1.0f;
 	[Export] public bool DebugProbeLog = true;
+
+	private RuntimeDiagnosticPolicy _diagnostics = RuntimeDiagnosticPolicy.LiveDefault;
+	private readonly LiveDiagnosticAggregator _liveDiagnostics = new(TimeSpan.FromSeconds(1));
+	private OneShotDiagnosticGate _probeSnapshotLifecycleEvidenceGate;
+	private OneShotDiagnosticGate _cathedralSealedObservationFrameDiagnosticGate;
+
+	private bool ShouldLog(DiagnosticVerbosity verbosity, DiagnosticCategory category)
+	{
+		return _diagnostics.Allows(verbosity, category);
+	}
+
+	private void LogDiagnostic(DiagnosticVerbosity verbosity, DiagnosticCategory category, string message)
+	{
+		if (ShouldLog(verbosity, category))
+		{
+			GD.Print(message);
+		}
+	}
+
+	private RuntimeDiagnosticPolicy ResolveDiagnosticsForMode(bool updateEveryFrame)
+	{
+		DiagnosticRuntimeMode runtimeMode = updateEveryFrame
+			? DiagnosticRuntimeMode.Live
+			: DiagnosticRuntimeMode.Snapshot;
+		RuntimeDiagnosticPolicy resolved = RuntimeDiagnosticPolicy.Resolve(
+			DiagnosticsVerbosityPreference,
+			DiagnosticsVerbosity,
+			runtimeMode,
+			DiagnosticsTransportTraceOptIn,
+			DiagnosticsSelectedPixelTraceLimit);
+		return RuntimeDiagnosticPolicy.FromEnvironment(
+			resolved.Verbosity,
+			resolved.TransportTraceOptIn,
+			resolved.SelectedPixelTraceLimit);
+	}
+
+	public void RefreshDiagnosticsForTesting(bool updateEveryFrame)
+	{
+		_diagnostics = ResolveDiagnosticsForMode(updateEveryFrame);
+	}
+
+	public DiagnosticVerbosity GetEffectiveDiagnosticsVerbosityForTesting()
+	{
+		return _diagnostics.Verbosity;
+	}
+
+	public void RecordRuntimeWatchdogForTesting()
+	{
+		RecordRuntimeWatchdog();
+	}
+
+	public long GetRuntimeWatchdogCountForTesting()
+	{
+		return _liveDiagnostics.Counters.Watchdog;
+	}
+
+	private void RecordRuntimeWatchdog()
+	{
+		_liveDiagnostics.Counters.RecordWatchdog();
+	}
+
+	private void RecordRuntimeYield()
+	{
+		_liveDiagnostics.Counters.RecordYield();
+	}
 	[Export(PropertyHint.Range, "0.05,10.0,0.05")] public float DebugProbeIntervalSec = 1.0f;
 	[Export] public bool DebugGeomRejectSampleEnabled = false;
 	[Export(PropertyHint.Range, "1,10000,1")] public int DebugGeomRejectSampleEveryN = 200;
@@ -2241,7 +2312,6 @@ public partial class GrinFilmCamera : Node
 	private int _nextProbeSnapshotRequestId = 1;
 	private bool _probeSnapshotLifecycleActive = false;
 	private bool _probeSnapshotLifecycleInitialized = false;
-	private bool _probeSnapshotLifecycleEvidenceEmitted = false;
 	private int _probeSnapshotLifecycleRequestId = 0;
 	private int _probeSnapshotLifecycleGeneration = 0;
 	private int _probeSnapshotLifecycleBudgetFrames = CathedralProbeDefaultSnapshotLifecycleBudgetFrames;
@@ -2256,7 +2326,6 @@ public partial class GrinFilmCamera : Node
 	private int _probeSnapshotLifecycleHeight = 0;
 	private ProbePolicy _probeSnapshotLifecyclePolicy;
 	private ProbeSnapshotLifecycleResult _lastProbeSnapshotLifecycleResult;
-	private bool _cathedralSealedObservationFrameDiagnosticEmitted = false;
 	private SelectedProbeTransportRequest _selectedProbeTransportRequest;
 	private bool _selectedProbeTransportPending = false;
 	private bool _selectedProbeTransportCompleted = false;
@@ -3947,7 +4016,7 @@ private sealed class OverlayRollingWindow
 			if (!_rbrRefLoggedPathEmpty)
 			{
 				_rbrRefLoggedPathEmpty = true;
-				GD.Print("[RBRRef] path empty");
+				LogDiagnostic(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle, "[RBRRef] path empty");
 			}
 			if (TryAutoResolveRayBeamRenderer(out RayBeamRenderer autoRbr, out NodePath autoPath))
 			{
@@ -3955,14 +4024,15 @@ private sealed class OverlayRollingWindow
 				if (!_rbrRefLoggedAutoResolved)
 				{
 					_rbrRefLoggedAutoResolved = true;
-					GD.Print($"[RBRRef] auto-resolved name={autoRbr.Name} path={autoPath}");
+					if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
+						GD.Print($"[RBRRef] auto-resolved name={autoRbr.Name} path={autoPath}");
 				}
 				return;
 			}
 			if (!_rbrRefLoggedAutoResolveFailed)
 			{
 				_rbrRefLoggedAutoResolveFailed = true;
-				GD.Print("[RBRRef] auto-resolve failed");
+				LogDiagnostic(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle, "[RBRRef] auto-resolve failed");
 			}
 			_rbr = null;
 			return;
@@ -3974,7 +4044,8 @@ private sealed class OverlayRollingWindow
 			if (!_rbrRefLoggedResolveFailed)
 			{
 				_rbrRefLoggedResolveFailed = true;
-				GD.Print($"[RBRRef] resolve failed path={RayBeamRendererPath}");
+				if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
+					GD.Print($"[RBRRef] resolve failed path={RayBeamRendererPath}");
 			}
 			if (TryAutoResolveRayBeamRenderer(out RayBeamRenderer autoRbr, out NodePath autoPath))
 			{
@@ -3982,14 +4053,15 @@ private sealed class OverlayRollingWindow
 				if (!_rbrRefLoggedAutoResolved)
 				{
 					_rbrRefLoggedAutoResolved = true;
-					GD.Print($"[RBRRef] auto-resolved name={autoRbr.Name} path={autoPath}");
+					if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
+						GD.Print($"[RBRRef] auto-resolved name={autoRbr.Name} path={autoPath}");
 				}
 				return;
 			}
 			if (!_rbrRefLoggedAutoResolveFailed)
 			{
 				_rbrRefLoggedAutoResolveFailed = true;
-				GD.Print("[RBRRef] auto-resolve failed");
+				LogDiagnostic(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle, "[RBRRef] auto-resolve failed");
 			}
 			_rbr = null;
 			return;
@@ -4001,7 +4073,8 @@ private sealed class OverlayRollingWindow
 			if (!_rbrRefLoggedResolvedOk)
 			{
 				_rbrRefLoggedResolvedOk = true;
-				GD.Print($"[RBRRef] resolved ok name={rbr.Name}");
+				if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
+					GD.Print($"[RBRRef] resolved ok name={rbr.Name}");
 			}
 			return;
 		}
@@ -4009,7 +4082,7 @@ private sealed class OverlayRollingWindow
 		if (!_rbrRefLoggedWrongType)
 		{
 			_rbrRefLoggedWrongType = true;
-			GD.Print("[RBRRef] wrong type at path");
+			LogDiagnostic(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle, "[RBRRef] wrong type at path");
 		}
 		if (TryAutoResolveRayBeamRenderer(out RayBeamRenderer autoRbrWrongType, out NodePath autoPathWrongType))
 		{
@@ -4017,14 +4090,15 @@ private sealed class OverlayRollingWindow
 			if (!_rbrRefLoggedAutoResolved)
 			{
 				_rbrRefLoggedAutoResolved = true;
-				GD.Print($"[RBRRef] auto-resolved name={autoRbrWrongType.Name} path={autoPathWrongType}");
+				if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
+					GD.Print($"[RBRRef] auto-resolved name={autoRbrWrongType.Name} path={autoPathWrongType}");
 			}
 			return;
 		}
 		if (!_rbrRefLoggedAutoResolveFailed)
 		{
 			_rbrRefLoggedAutoResolveFailed = true;
-			GD.Print("[RBRRef] auto-resolve failed");
+			LogDiagnostic(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle, "[RBRRef] auto-resolve failed");
 		}
 		_rbr = null;
 	}
@@ -4032,7 +4106,9 @@ private sealed class OverlayRollingWindow
 	// ===== Core Update Loop =====
 	public override void _Ready()
 	{
-		GD.Print("✅ GrinFilmCamera READY: ", GetPath());
+		_diagnostics = ResolveDiagnosticsForMode(UpdateEveryFrame);
+		if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
+			GD.Print("✅ GrinFilmCamera READY: ", GetPath());
 
 		_cam = GetViewport().GetCamera3D();
 		// DECISION: abort if no active camera.
@@ -4046,10 +4122,14 @@ private sealed class OverlayRollingWindow
 		_lastCameraInstanceId = _cam.GetInstanceId();
 		_hasLastCameraInstanceId = true;
 
-		GD.Print($"[RBRRef][Startup] configured path={RayBeamRendererPath}");
+		if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
+			GD.Print($"[RBRRef][Startup] configured path={RayBeamRendererPath}");
 		ResolveRayBeamRendererReference();
-		GD.Print($"[RBRRef][Startup] resolved={_rbr != null}");
-		GD.Print("RayBeamRenderer found? ", _rbr != null);
+		if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
+		{
+			GD.Print($"[RBRRef][Startup] resolved={_rbr != null}");
+			GD.Print("RayBeamRenderer found? ", _rbr != null);
+		}
 		// DECISION: warn if RayBeamRenderer is missing, but continue so mirrors can update.
 		if (_rbr == null)
 		{
@@ -4081,9 +4161,12 @@ private sealed class OverlayRollingWindow
 		}
 		else if (RuntimeMacroSwitchingAllowed() && RuntimeMacroHotkeysEnabled)
 		{
-			GD.Print(
-				$"[RuntimeMacroMode] hotkeys cycle={RuntimeMacroCycleKey} accurate={RuntimeMacroAccurateKey} tight08={RuntimeMacroTight08Key} cheapMotion={RuntimeMacroCheapMotionKey} settleRefine={RuntimeMacroSettleRefineKey} " +
-				$"startupMode={GetRuntimeMacroModeLabel(RuntimeMacroSelectedMode)} applyOnReady={(RuntimeMacroApplyOnReady ? 1 : 0)}");
+			if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
+			{
+				GD.Print(
+					$"[RuntimeMacroMode] hotkeys cycle={RuntimeMacroCycleKey} accurate={RuntimeMacroAccurateKey} tight08={RuntimeMacroTight08Key} cheapMotion={RuntimeMacroCheapMotionKey} settleRefine={RuntimeMacroSettleRefineKey} " +
+					$"startupMode={GetRuntimeMacroModeLabel(RuntimeMacroSelectedMode)} applyOnReady={(RuntimeMacroApplyOnReady ? 1 : 0)}");
+			}
 		}
 
 		if (!IsProcessing() && !_warnedNotProcessing)
@@ -4094,7 +4177,8 @@ private sealed class OverlayRollingWindow
 		if (!UpdateEveryFrame && !_warnedNotProcessing)
 		{
 			_warnedNotProcessing = true;
-			GD.PrintErr("GrinFilmCamera: UpdateEveryFrame is false; FrameSnapshotBus will not update.");
+			if (ShouldLog(DiagnosticVerbosity.Summary, DiagnosticCategory.Lifecycle))
+				GD.Print("[Observation Plate] frame_bus=inactive reason=film_not_live");
 		}
 
     	// ⛔ Freeze beam rebuilds while film camera is active
@@ -4108,7 +4192,8 @@ private sealed class OverlayRollingWindow
 		LogEffectiveConfigIfChanged(in cfg);
 		_rangeFar = cfg.Film.MaxDistance;
 		_filmView = GetNodeOrNull<TextureRect>(FilmViewPath);
-		GD.Print("FilmView found? ", _filmView != null);
+		if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
+			GD.Print("FilmView found? ", _filmView != null);
 
 		// EFFECT: allocate film image/texture buffers as needed.
 		EnsureFilmImageSize(in cfg);
@@ -4147,7 +4232,7 @@ private sealed class OverlayRollingWindow
 		_overlayRect.TextureFilter = CanvasItem.TextureFilterEnum.Nearest;
 			layer.AddChild(_overlayRect);
 
-			GD.Print("GrinFilmCamera: No FilmViewPath set, created overlay TextureRect.");
+			LogDiagnostic(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle, "GrinFilmCamera: No FilmViewPath set, created overlay TextureRect.");
 		}
 		UpdateFilmOpacity();
 
@@ -4158,10 +4243,11 @@ private sealed class OverlayRollingWindow
 		{
 			RayBeamRenderer.SharedSnapshot snap = _rbr != null ? _rbr.GetSharedSnapshot() : default;
 			UpdateSharedSnapshotMirror(in snap, force: true);
-			GD.Print($"[RBRRef][Startup] HasRenderer(after mirror)={SharedRbrHasRenderer}");
+			if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
+				GD.Print($"[RBRRef][Startup] HasRenderer(after mirror)={SharedRbrHasRenderer}");
 		}
 
-		GD.Print("✅ GrinFilmCamera ready. Rendering film.");
+		LogDiagnostic(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle, "✅ GrinFilmCamera ready. Rendering film.");
 			_smartScaleEnableEdgeArmed = SmartScaleEnabled;
 			_smartScaleRunOnReadyDeferred = SmartScaleRunOnReady;
 			InitObserverInstrumentationAdapter();
@@ -4539,13 +4625,15 @@ private sealed class OverlayRollingWindow
 		{
 			_smartScaleRunOnReadyDeferred = false;
 			_smartScaleRunRequested = true;
-			GD.Print("[SmartScale][Inspector] run-on-ready requested.");
+			if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Performance))
+				GD.Print("[SmartScale][Inspector] run-on-ready requested.");
 		}
 
 		if (SmartScaleEnabled && !_smartScaleEnableEdgeArmed)
 		{
 			_smartScaleRunRequested = true;
-			GD.Print("[SmartScale][Inspector] enabled in inspector; scheduling SmartScale run.");
+			if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Performance))
+				GD.Print("[SmartScale][Inspector] enabled in inspector; scheduling SmartScale run.");
 		}
 		_smartScaleEnableEdgeArmed = SmartScaleEnabled;
 
@@ -4630,14 +4718,18 @@ private sealed class OverlayRollingWindow
 		}
 		if (Interlocked.CompareExchange(ref _renderStepActive, 0, 0) != 0)
 		{
-			GD.Print("[SmartScale][Inspector] waiting for active RenderStep to finish before run.");
+			if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Performance))
+				GD.Print("[SmartScale][Inspector] waiting for active RenderStep to finish before run.");
 			return;
 		}
 
 		if (_rowCursor != 0 || _pendingBandHasPass1)
 		{
-			GD.Print(
-				$"[SmartScale][Inspector] aborting current band for safe run boundary row={_rowCursor} pending_pass2={(_pendingBandHasPass1 ? 1 : 0)}.");
+			if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Performance))
+			{
+				GD.Print(
+					$"[SmartScale][Inspector] aborting current band for safe run boundary row={_rowCursor} pending_pass2={(_pendingBandHasPass1 ? 1 : 0)}.");
+			}
 			ResetFilmPassManual();
 		}
 
@@ -4662,8 +4754,11 @@ private sealed class OverlayRollingWindow
 		_smartScaleActiveProbeIndex = -1;
 		_smartScaleRunInProgress = true;
 
-		GD.Print(
-			$"[SmartScale][Inspector] begin goal={GetSmartScaleGoalToken()} budget_mode={GetSmartScaleBudgetModeToken()} budget_n={GetSmartScaleBudgetNResolved()} probes={_smartScaleProbePlan.Length}");
+		if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Performance))
+		{
+			GD.Print(
+				$"[SmartScale][Inspector] begin goal={GetSmartScaleGoalToken()} budget_mode={GetSmartScaleBudgetModeToken()} budget_n={GetSmartScaleBudgetNResolved()} probes={_smartScaleProbePlan.Length}");
+		}
 
 		if (_smartScaleProbePlan.Length == 0)
 		{
@@ -4696,8 +4791,11 @@ private sealed class OverlayRollingWindow
 
 		SmartScaleProbeConfig probe = _smartScaleProbePlan[probeIndex];
 		ApplySmartScaleProbeOverrides(in probe);
-		GD.Print(
-			$"[SmartScale][ProbeStart] probe={probe.ProbeId} summary={probe.Summary} budget_mode={GetSmartScaleBudgetModeToken()} budget_n={GetSmartScaleBudgetNResolved()}");
+		if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Performance))
+		{
+			GD.Print(
+				$"[SmartScale][ProbeStart] probe={probe.ProbeId} summary={probe.Summary} budget_mode={GetSmartScaleBudgetModeToken()} budget_n={GetSmartScaleBudgetNResolved()}");
+		}
 	}
 
 	private void ObserveSmartScaleProbeProgress()
@@ -4796,15 +4894,19 @@ private sealed class OverlayRollingWindow
 		};
 
 		_smartScaleProbeResults.Add(result);
-		GD.Print(
-			$"[SmartScale][ProbeResult] probe={probe.ProbeId} trust={(result.TrustKnown ? (result.Trusted ? 1 : 0) : -1)} trust_reason={result.TrustReason} " +
-			$"geomPixProcessedRaw={result.GeomPixProcessedRaw} geomRayTestsTotalRaw={result.GeomRayTestsTotalRaw} " +
-			$"budget_mode={GetSmartScaleBudgetModeToken()} budget_n={GetSmartScaleBudgetNResolved()} renderstep_calls={result.RenderStepCalls} rows_advanced_total={result.RowsAdvancedTotal}");
+		if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Performance))
+		{
+			GD.Print(
+				$"[SmartScale][ProbeResult] probe={probe.ProbeId} trust={(result.TrustKnown ? (result.Trusted ? 1 : 0) : -1)} trust_reason={result.TrustReason} " +
+				$"geomPixProcessedRaw={result.GeomPixProcessedRaw} geomRayTestsTotalRaw={result.GeomRayTestsTotalRaw} " +
+				$"budget_mode={GetSmartScaleBudgetModeToken()} budget_n={GetSmartScaleBudgetNResolved()} renderstep_calls={result.RenderStepCalls} rows_advanced_total={result.RowsAdvancedTotal}");
+		}
 
 		// Preserve harness behavior: baseline trusted in max_hits can early stop.
 		if (_smartScaleActiveProbeIndex == 0 && result.TrustKnown && result.Trusted)
 		{
-			GD.Print("[SmartScale][Decision] early_stop=1 reason=baseline_trusted");
+			if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Performance))
+				GD.Print("[SmartScale][Decision] early_stop=1 reason=baseline_trusted");
 			FinalizeSmartScaleRun();
 			return;
 		}
@@ -5269,7 +5371,8 @@ private sealed class OverlayRollingWindow
 			if (!_runtimeMacroAvailabilityWarned)
 			{
 				_runtimeMacroAvailabilityWarned = true;
-				GD.Print("[RuntimeMacroMode] switching_locked=1 reason=benchmark_or_render_test");
+				if (ShouldLog(DiagnosticVerbosity.Summary, DiagnosticCategory.Lifecycle))
+					GD.Print("[Transport Lens] runtime_mode_switching=locked reason=benchmark_or_render_test");
 			}
 			return false;
 		}
@@ -5295,7 +5398,8 @@ private sealed class OverlayRollingWindow
 		_runtimeMacroLastAppliedSummary = BuildRuntimeMacroAppliedSummary(mode);
 		ResetRenderHealthWindowForRunStart();
 		ResetRowCursor($"runtime_macro_{GetRuntimeMacroModeLabel(mode).ToLowerInvariant()}");
-		GD.Print($"[RuntimeMacroMode] reason={reason} {_runtimeMacroLastAppliedSummary}");
+		if (ShouldLog(DiagnosticVerbosity.Summary, DiagnosticCategory.Lifecycle))
+			GD.Print($"[Transport Lens] runtime_mode reason={reason} {_runtimeMacroLastAppliedSummary}");
 		return true;
 	}
 
@@ -7403,7 +7507,8 @@ private sealed class OverlayRollingWindow
 			if (!_adaptiveEnvelopePriorSnapshotUnavailableLoggedThisRun)
 			{
 				_adaptiveEnvelopePriorSnapshotUnavailableLoggedThisRun = true;
-				GD.Print("[AdaptiveEnvelope] prior_source=previous_pass fallback=neutral reason=snapshot_unavailable");
+				if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Performance))
+					GD.Print("[AdaptiveEnvelope] prior_source=previous_pass fallback=neutral reason=snapshot_unavailable");
 			}
 			return;
 		}
@@ -7414,7 +7519,8 @@ private sealed class OverlayRollingWindow
 			if (!_adaptiveEnvelopePriorInsufficientDataLoggedThisRun)
 			{
 				_adaptiveEnvelopePriorInsufficientDataLoggedThisRun = true;
-				GD.Print("[AdaptiveEnvelope] prior_source=previous_pass fallback=neutral reason=insufficient_prior_samples");
+				if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Performance))
+					GD.Print("[AdaptiveEnvelope] prior_source=previous_pass fallback=neutral reason=insufficient_prior_samples");
 			}
 		}
 	}
@@ -9588,7 +9694,7 @@ private sealed class OverlayRollingWindow
 		_probeSnapshotLifecycleProcessElapsed = 0;
 		_probeSnapshotLifecyclePhysicsElapsed = 0;
 		_probeSnapshotLifecycleInitialized = false;
-		_probeSnapshotLifecycleEvidenceEmitted = false;
+		_probeSnapshotLifecycleEvidenceGate.Reset();
 		_probeSnapshotLifecycleActive = true;
 		_probeSnapshotLifecycleReason = ProbeSnapshotLifecycleReason.None;
 		_probeSnapshotLifecycleState = ProbeSnapshotLifecycleState.Requested;
@@ -9722,7 +9828,7 @@ private sealed class OverlayRollingWindow
 		_probeSnapshotLifecycleInitialized = true;
 		_probeSnapshotLifecycleState = ProbeSnapshotLifecycleState.Capturing;
 		_probeSnapshotLifecycleReason = ProbeSnapshotLifecycleReason.None;
-		_cathedralSealedObservationFrameDiagnosticEmitted = false;
+		_cathedralSealedObservationFrameDiagnosticGate.Reset();
 		return true;
 	}
 
@@ -9792,13 +9898,15 @@ private sealed class OverlayRollingWindow
 
 	private void PrintCathedralSealedObservationFrameDiagnosticOnce(ProbeSnapshotLifecycleResult result)
 	{
-		if (_cathedralSealedObservationFrameDiagnosticEmitted ||
-			result.State != ProbeSnapshotLifecycleState.Complete ||
+		if (result.State != ProbeSnapshotLifecycleState.Complete ||
 			result.UnprocessedPixelCount != 0)
 		{
 			return;
 		}
-		_cathedralSealedObservationFrameDiagnosticEmitted = true;
+		if (!_cathedralSealedObservationFrameDiagnosticGate.TryClaim(_diagnostics, DiagnosticVerbosity.Frame, DiagnosticCategory.Probe))
+		{
+			return;
+		}
 		if (!SceneId.TryCreate("cathedral_probe_snapshot.v1", out SceneId sceneId))
 		{
 			GD.PushWarning("[CathedralProbe][SealedFrame] invalid_scene_id");
@@ -9951,38 +10059,40 @@ private sealed class OverlayRollingWindow
 
 	private void PrintCathedralProbeSnapshotEvidenceOnce(ProbeSnapshotLifecycleResult result)
 	{
-		if (_probeSnapshotLifecycleEvidenceEmitted)
+		if (!_probeSnapshotLifecycleEvidenceGate.TryClaim(_diagnostics, DiagnosticVerbosity.Frame, DiagnosticCategory.Probe))
 		{
 			return;
 		}
-		_probeSnapshotLifecycleEvidenceEmitted = true;
-		GD.Print("CATHEDRAL SNAPSHOT");
-		GD.Print($"request={result.RequestId}");
-		GD.Print($"state={SnapshotLifecycleStateToken(result.State)}");
-		GD.Print($"reason={SnapshotLifecycleReasonToken(result.Reason)}");
-		GD.Print($"dimensions={result.Width}x{result.Height}");
-		GD.Print($"processed={result.ProcessedPixelCount}");
-		GD.Print($"total={result.TotalPixelCount}");
-		GD.Print($"unprocessed={result.UnprocessedPixelCount}");
-		GD.Print($"contextMatch={(result.ContextMatched ? "true" : "false")}");
-		GD.Print($"dimensionsMatch={(result.DimensionsMatched ? "true" : "false")}");
-		GD.Print($"policy.maxSteps={result.PolicyMaxSteps}");
-		GD.Print($"policy.stepSize={result.PolicyStepSize:0.######}");
-		GD.Print($"refinementEligible={(result.RefinementEligible ? "true" : "false")}");
-		GD.Print("OUTCOMES");
-		GD.Print($"geometry={result.HitGeometryCount}");
-		GD.Print($"background={result.BackgroundResolvedCount}");
-		GD.Print($"maxSteps={result.MaxStepsExhaustedCount}");
-		GD.Print($"absorbed={result.StoppedEarlyAbsorbedCount}");
-		GD.Print($"fault={result.NumericalFailureCount}");
-		GD.Print($"invalid={result.InvalidCount}");
-		GD.Print($"unprocessed={result.UnprocessedPixelCount}");
-		GD.Print("REGIONS");
-		GD.Print($"available={(result.RegionAnalysisAvailable ? "true" : "false")}");
-		GD.Print($"count={result.RegionCount}");
-		GD.Print($"selectable={result.SelectableRegionCount}");
-		GD.Print($"largestId={result.LargestRegionId}");
-		GD.Print($"largestPixels={result.LargestRegionPixelCount}");
+
+		var sb = new StringBuilder();
+		sb.AppendLine("CATHEDRAL SNAPSHOT");
+		sb.AppendLine($"request={result.RequestId}");
+		sb.AppendLine($"state={SnapshotLifecycleStateToken(result.State)}");
+		sb.AppendLine($"reason={SnapshotLifecycleReasonToken(result.Reason)}");
+		sb.AppendLine($"dimensions={result.Width}x{result.Height}");
+		sb.AppendLine($"processed={result.ProcessedPixelCount}");
+		sb.AppendLine($"total={result.TotalPixelCount}");
+		sb.AppendLine($"unprocessed={result.UnprocessedPixelCount}");
+		sb.AppendLine($"contextMatch={(result.ContextMatched ? "true" : "false")}");
+		sb.AppendLine($"dimensionsMatch={(result.DimensionsMatched ? "true" : "false")}");
+		sb.AppendLine($"policy.maxSteps={result.PolicyMaxSteps}");
+		sb.AppendLine($"policy.stepSize={result.PolicyStepSize:0.######}");
+		sb.AppendLine($"refinementEligible={(result.RefinementEligible ? "true" : "false")}");
+		sb.AppendLine("OUTCOMES");
+		sb.AppendLine($"geometry={result.HitGeometryCount}");
+		sb.AppendLine($"background={result.BackgroundResolvedCount}");
+		sb.AppendLine($"maxSteps={result.MaxStepsExhaustedCount}");
+		sb.AppendLine($"absorbed={result.StoppedEarlyAbsorbedCount}");
+		sb.AppendLine($"fault={result.NumericalFailureCount}");
+		sb.AppendLine($"invalid={result.InvalidCount}");
+		sb.AppendLine($"unprocessed={result.UnprocessedPixelCount}");
+		sb.AppendLine("REGIONS");
+		sb.AppendLine($"available={(result.RegionAnalysisAvailable ? "true" : "false")}");
+		sb.AppendLine($"count={result.RegionCount}");
+		sb.AppendLine($"selectable={result.SelectableRegionCount}");
+		sb.AppendLine($"largestId={result.LargestRegionId}");
+		sb.Append($"largestPixels={result.LargestRegionPixelCount}");
+		GD.Print(sb.ToString());
 	}
 
 	private ProbePolicy BuildCathedralProbeRefinementPolicy(byte requestedRefinementLevel, int totalPixels)
@@ -10072,48 +10182,49 @@ private sealed class OverlayRollingWindow
 		PrintCathedralProbeRefinementEvidence(before, _probeFrameSummary, _lastProbeRefinementSummary);
 	}
 
-	private static void PrintCathedralProbeRefinementEvidence(
+	private void PrintCathedralProbeRefinementEvidence(
 		ProbeFrameSummary before,
 		ProbeFrameSummary after,
 		ProbeRefinementSummary summary)
 	{
+		if (!ShouldLog(DiagnosticVerbosity.Region, DiagnosticCategory.Probe))
+		{
+			return;
+		}
+
 		float reductionPct = summary.PreviousMaxStepsCount > 0
 			? (summary.ResolvedPixelCount * 100f) / summary.PreviousMaxStepsCount
 			: 0f;
-		GD.Print(
-			$"FRAME BEFORE total={before.TotalPixels} geometry={before.HitGeometryCount} background={before.BackgroundResolvedCount} " +
-			$"maxSteps={before.MaxStepsExhaustedCount} fault={before.NumericalFailureCount} invalid=0 " +
-			$"regions={before.RegionCount} largest={before.LargestRegionPixelCount}");
-		GD.Print(
-			$"FRAME AFTER total={after.TotalPixels} geometry={after.HitGeometryCount} background={after.BackgroundResolvedCount} " +
-			$"maxSteps={after.MaxStepsExhaustedCount} fault={after.NumericalFailureCount} invalid=0 " +
-			$"regions={after.RegionCount} largest={after.LargestRegionPixelCount}");
-		GD.Print("CATHEDRAL REFINEMENT");
-		GD.Print($"request={summary.RequestId}");
-		GD.Print($"sourceRegion={summary.SourceRegionId}");
-		GD.Print($"level={summary.RequestedRefinementLevel}");
-		GD.Print($"selected={summary.SelectedPixelCount}");
-		GD.Print($"applied={summary.AppliedPixelCount}");
-		GD.Print($"previousUnresolved={summary.PreviousMaxStepsCount}");
-		GD.Print($"resolved={summary.ResolvedPixelCount}");
-		GD.Print($"remaining={summary.RemainingMaxStepsCount}");
-		GD.Print($"reductionPct={reductionPct:0.###}");
-		GD.Print($"toGeometry={summary.BecameHitGeometryCount}");
-		GD.Print($"toBackground={summary.BecameBackgroundResolvedCount}");
-		GD.Print($"toAbsorbed={summary.BecameStoppedEarlyAbsorbedCount}");
-		GD.Print($"toFault={summary.BecameNumericalFailureCount}");
-		GD.Print($"toInvalid={summary.BecameInvalidCount}");
-		GD.Print($"childRegions={summary.ChildRegionCount}");
-		GD.Print($"largestChildId={summary.LargestChildRegionId}");
-		GD.Print($"largestChildPixels={summary.LargestChildRegionPixelCount}");
-		GD.Print($"contextMatch={(summary.ContextMatched ? "true" : "false")}");
-		GD.Print($"atomicApply={(summary.AppliedAtomically ? "true" : "false")}");
+		var sb = new StringBuilder();
+		sb.AppendLine($"FRAME BEFORE total={before.TotalPixels} geometry={before.HitGeometryCount} background={before.BackgroundResolvedCount} maxSteps={before.MaxStepsExhaustedCount} fault={before.NumericalFailureCount} invalid=0 regions={before.RegionCount} largest={before.LargestRegionPixelCount}");
+		sb.AppendLine($"FRAME AFTER total={after.TotalPixels} geometry={after.HitGeometryCount} background={after.BackgroundResolvedCount} maxSteps={after.MaxStepsExhaustedCount} fault={after.NumericalFailureCount} invalid=0 regions={after.RegionCount} largest={after.LargestRegionPixelCount}");
+		sb.AppendLine("CATHEDRAL REFINEMENT");
+		sb.AppendLine($"request={summary.RequestId}");
+		sb.AppendLine($"sourceRegion={summary.SourceRegionId}");
+		sb.AppendLine($"level={summary.RequestedRefinementLevel}");
+		sb.AppendLine($"selected={summary.SelectedPixelCount}");
+		sb.AppendLine($"applied={summary.AppliedPixelCount}");
+		sb.AppendLine($"previousUnresolved={summary.PreviousMaxStepsCount}");
+		sb.AppendLine($"resolved={summary.ResolvedPixelCount}");
+		sb.AppendLine($"remaining={summary.RemainingMaxStepsCount}");
+		sb.AppendLine($"reductionPct={reductionPct:0.###}");
+		sb.AppendLine($"toGeometry={summary.BecameHitGeometryCount}");
+		sb.AppendLine($"toBackground={summary.BecameBackgroundResolvedCount}");
+		sb.AppendLine($"toAbsorbed={summary.BecameStoppedEarlyAbsorbedCount}");
+		sb.AppendLine($"toFault={summary.BecameNumericalFailureCount}");
+		sb.AppendLine($"toInvalid={summary.BecameInvalidCount}");
+		sb.AppendLine($"childRegions={summary.ChildRegionCount}");
+		sb.AppendLine($"largestChildId={summary.LargestChildRegionId}");
+		sb.AppendLine($"largestChildPixels={summary.LargestChildRegionPixelCount}");
+		sb.AppendLine($"contextMatch={(summary.ContextMatched ? "true" : "false")}");
+		sb.AppendLine($"atomicApply={(summary.AppliedAtomically ? "true" : "false")}");
 		if (!summary.AppliedAtomically && !string.IsNullOrEmpty(summary.FailureReason))
 		{
-			GD.Print($"failure={summary.FailureReason}");
+			sb.AppendLine($"failure={summary.FailureReason}");
 		}
-		GD.Print($"policy.maxSteps={summary.PolicyMaxSteps}");
-		GD.Print($"policy.stepSize={summary.PolicyStepSize:0.######}");
+		sb.AppendLine($"policy.maxSteps={summary.PolicyMaxSteps}");
+		sb.Append($"policy.stepSize={summary.PolicyStepSize:0.######}");
+		GD.Print(sb.ToString());
 	}
 
 	private static float QuantizeFloat(float value, float scale)
@@ -10650,14 +10761,17 @@ private sealed class OverlayRollingWindow
 		{
 			GD.PushWarning($"[CathedralProbe][FrameSummary] unprocessed={_probeUnprocessedCount} after completed snapshot pass");
 		}
-		GD.Print(
-			$"[CathedralProbe][FrameSummary] total={_probeFrameSummary.TotalPixels} " +
-			$"hitGeometry={_probeFrameSummary.HitGeometryCount} backgroundResolved={_probeFrameSummary.BackgroundResolvedCount} " +
-			$"maxStepsExhausted={_probeFrameSummary.MaxStepsExhaustedCount} stoppedEarlyAbsorbed={_probeFrameSummary.StoppedEarlyAbsorbedCount} " +
-			$"numericalFailure={_probeFrameSummary.NumericalFailureCount} unprocessed={_probeUnprocessedCount} " +
-			$"regions={_probeFrameSummary.RegionCount} selectable={_probeFrameSummary.SelectableRegionCount} " +
-			$"largestRegionId={_probeFrameSummary.LargestRegionId} largestRegionPixels={_probeFrameSummary.LargestRegionPixelCount}");
-		if (_probeRegions.Count > 0)
+		if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Probe))
+		{
+			GD.Print(
+				$"[CathedralProbe][FrameSummary] total={_probeFrameSummary.TotalPixels} " +
+				$"hitGeometry={_probeFrameSummary.HitGeometryCount} backgroundResolved={_probeFrameSummary.BackgroundResolvedCount} " +
+				$"maxStepsExhausted={_probeFrameSummary.MaxStepsExhaustedCount} stoppedEarlyAbsorbed={_probeFrameSummary.StoppedEarlyAbsorbedCount} " +
+				$"numericalFailure={_probeFrameSummary.NumericalFailureCount} unprocessed={_probeUnprocessedCount} " +
+				$"regions={_probeFrameSummary.RegionCount} selectable={_probeFrameSummary.SelectableRegionCount} " +
+				$"largestRegionId={_probeFrameSummary.LargestRegionId} largestRegionPixels={_probeFrameSummary.LargestRegionPixelCount}");
+		}
+		if (_probeRegions.Count > 0 && ShouldLog(DiagnosticVerbosity.Region, DiagnosticCategory.Probe))
 		{
 			int topCount = Math.Min(5, _probeRegions.Count);
 			for (int i = 0; i < topCount; i++)
@@ -11440,7 +11554,8 @@ private sealed class OverlayRollingWindow
 		}
 
 		_lastLoggedHudMetadata = metadata;
-		GD.Print($"[HUDMeta] {metadata}");
+		if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
+			GD.Print($"[Observation Plate] metadata={metadata}");
 	}
 
 	private void MaybeLogHudRuntimeSummary()
@@ -11453,7 +11568,8 @@ private sealed class OverlayRollingWindow
 		}
 
 		_lastLoggedHudRuntimeSummary = summary;
-		GD.Print($"[RuntimeMode] {summary}");
+		if (ShouldLog(DiagnosticVerbosity.Summary, DiagnosticCategory.Lifecycle))
+			GD.Print($"[Observation Plate] state={summary}");
 	}
 
 	private string ResolveHudFixtureName()
@@ -14751,9 +14867,14 @@ private sealed class OverlayRollingWindow
 		}
 
 		_busLogTimerSec -= 1.0;
+		if (!ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
+		{
+			return;
+		}
 		var fieldsCount = snapshot.Fields?.Count ?? 0;
 		var gridOk = snapshot.CurvatureGrid != null ? "OK" : "NULL";
-		GD.Print($"[BUS SET] frameId={_frameId} grid={gridOk} fields={fieldsCount}");
+		if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
+			GD.Print($"[Observation Plate] bus frameId={_frameId} grid={gridOk} fields={fieldsCount}");
 	}
 
 	private void ThrottleSnapshotSummary(double delta, SceneSnapshot snapshot)
@@ -14765,7 +14886,48 @@ private sealed class OverlayRollingWindow
 		}
 
 		_snapshotLogTimerSec -= 1.0;
+		if (!ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
+		{
+			return;
+		}
 		GD.Print(snapshot.DebugSummary());
+	}
+
+	private void RecordLiveDiagnosticSummaryIfNeeded(
+		in EffectiveConfig cfg,
+		int filmW,
+		int filmH,
+		int rowsAdvanced,
+		int pixelsTraced,
+		double renderStepMilliseconds,
+		long physicsQueries)
+	{
+		if (!cfg.UpdateEveryFrame || !ShouldLog(DiagnosticVerbosity.Summary, DiagnosticCategory.Render))
+		{
+			return;
+		}
+
+		ref LiveDiagnosticCounters counters = ref _liveDiagnostics.Counters;
+		counters.Frames++;
+		counters.AddRenderStep(renderStepMilliseconds, rowsAdvanced, pixelsTraced, physicsQueries);
+		if (_liveDiagnostics.TryFlush(DateTime.UtcNow.Ticks, out LiveDiagnosticCounters snapshot))
+		{
+			double averageMs = snapshot.RenderSteps > 0
+				? snapshot.RenderStepMillisecondsTotal / snapshot.RenderSteps
+				: 0.0;
+			string geometry = snapshot.SemanticCountersAvailable ? snapshot.Geometry.ToString(CultureInfo.InvariantCulture) : "n/a";
+			string background = snapshot.SemanticCountersAvailable ? snapshot.Background.ToString(CultureInfo.InvariantCulture) : "n/a";
+			string maxSteps = snapshot.SemanticCountersAvailable ? snapshot.MaxSteps.ToString(CultureInfo.InvariantCulture) : "n/a";
+			string absorbed = snapshot.SemanticCountersAvailable ? snapshot.Absorbed.ToString(CultureInfo.InvariantCulture) : "n/a";
+			string fault = snapshot.SemanticCountersAvailable ? snapshot.Fault.ToString(CultureInfo.InvariantCulture) : "n/a";
+			string invalid = snapshot.SemanticCountersAvailable ? snapshot.Invalid.ToString(CultureInfo.InvariantCulture) : "n/a";
+			GD.Print(
+				$"[LiveSummary] mode=LIVE film={filmW}x{filmH} frames={snapshot.Frames} renderSteps={snapshot.RenderSteps} " +
+				$"rows={snapshot.RowsAdvanced} px={snapshot.PixelsTraced} geometry={geometry} background={background} " +
+				$"maxSteps={maxSteps} absorbed={absorbed} fault={fault} invalid={invalid} " +
+				$"renderMsAvg={averageMs:0.###} renderMsMax={snapshot.RenderStepMillisecondsMax:0.###} " +
+				$"physQ={snapshot.PhysicsQueries} blvRemaps={snapshot.BlvRemaps} watchdog={snapshot.Watchdog} yield={snapshot.Yield} warnings={snapshot.Warnings}");
+		}
 	}
 
 	public void RenderStep()
@@ -14785,6 +14947,7 @@ private sealed class OverlayRollingWindow
 		}
 
 		ResolveEffectiveConfig(out EffectiveConfig cfg);
+		_diagnostics = ResolveDiagnosticsForMode(cfg.UpdateEveryFrame);
 		long renderStepStartTimestamp = Stopwatch.GetTimestamp();
 		bool researchAppliedRayMarchClamp = false;
 		RayBeamRenderer.SharedSnapshot researchRestoreSnapshot = cfg.SharedRaySnapshot;
@@ -14980,6 +15143,7 @@ private sealed class OverlayRollingWindow
 			if (string.IsNullOrEmpty(reason)) return;
 			if (_budgetExitReasonsThisFrame.Contains(reason)) return;
 			_budgetExitReasonsThisFrame.Add(reason);
+			if (!ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render)) return;
 			long elapsedMs = renderStepWatch.ElapsedMilliseconds;
 			int rowsDoneThisStep = rowCursor >= startRow ? rowCursor - startRow : 0;
 			int pixelCountLocal = bandH > 0 && filmW > 0 ? bandH * filmW : 0;
@@ -15109,6 +15273,7 @@ private sealed class OverlayRollingWindow
 			void LogRenderPhase(string phase)
 			{
 				renderPhase = phase;
+				if (!ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render)) return;
 				GD.Print(
 					$"[RenderStep] phase={phase} frame={_frameIndex} row={_rowCursor} " +
 					$"attempts={_softGateAttemptsUsedThisFrame}/{pass2SoftGateMaxAttemptsPerFrameEffective} " +
@@ -15122,6 +15287,7 @@ private sealed class OverlayRollingWindow
 				// DECISION: emit a single definitive stop line for any budget/timeout stop.
 				if (renderStepStopLogged) return;
 				renderStepStopLogged = true;
+				if (!ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render)) return;
 				GD.PrintErr(
 					$"[RenderStep][STOP] reason={reason} phase={renderPhase} y=[{yStart},{yEnd}) rowCursor={_rowCursor} " +
 					$"elapsedMs={renderStepWatch.ElapsedMilliseconds} " +
@@ -15147,14 +15313,17 @@ private sealed class OverlayRollingWindow
 				long attemptsUsed = _softGateAttemptsUsedThisFrame;
 				long subdivUsed = _softGateSubdividedCallsUsedThisFrame;
 				string extraSuffix = string.IsNullOrEmpty(extraStats) ? "" : $" {extraStats}";
-				GD.Print(
-					$"[RenderStep][Finalize] reason={reason} phase={renderPhase} y=[{bandStart},{bandEnd}) " +
-					$"rowCursor={rowCursorBefore}->{nextRow} elapsedMs={renderStepWatch.ElapsedMilliseconds} " +
-					$"attempts={attemptsUsed}/{pass2SoftGateMaxAttemptsPerFrameEffective} " +
-					$"sub={subdivUsed}/{pass2SoftGateMaxSubdividedCallsPerFrameEffective} " +
-					$"hits={hitsInBand}{extraSuffix}");
+				if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render))
+				{
+					GD.Print(
+						$"[RenderStep][Finalize] reason={reason} phase={renderPhase} y=[{bandStart},{bandEnd}) " +
+						$"rowCursor={rowCursorBefore}->{nextRow} elapsedMs={renderStepWatch.ElapsedMilliseconds} " +
+						$"attempts={attemptsUsed}/{pass2SoftGateMaxAttemptsPerFrameEffective} " +
+						$"sub={subdivUsed}/{pass2SoftGateMaxSubdividedCallsPerFrameEffective} " +
+						$"hits={hitsInBand}{extraSuffix}");
+				}
 				
-				if (cfg.RenderStepBandLog) LogBandSummaryOnce(MapBandSummaryReason(reason));
+				if (cfg.RenderStepBandLog && ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render)) LogBandSummaryOnce(MapBandSummaryReason(reason));
 
 				_rowCursor = nextRow;
 				bandCommittedThisStep = true;
@@ -15216,7 +15385,8 @@ private sealed class OverlayRollingWindow
 				string reason = _pendingRowCursorResetReason;
 				_pendingRowCursorReset = false;
 				_pendingRowCursorResetReason = "";
-				GD.Print($"[RenderStep][DeferReset] apply reason={reason} after band y=[{bandStart},{bandEnd})");
+				if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render))
+					GD.Print($"[RenderStep][DeferReset] apply reason={reason} after band y=[{bandStart},{bandEnd})");
 				ResetRowCursor(reason);
 			}
 
@@ -15267,11 +15437,15 @@ private sealed class OverlayRollingWindow
 					: 0.0;
 				int rowEnd = Mathf.Clamp(budgetStopRowEnd, 0, _filmHeight);
 				int rowsDone = Mathf.Max(0, rowEnd - budgetStopRowStart);
-				GD.Print(
-					$"[RenderStep][Yield] reason={budgetStopReason} frame={_frameIndex} rowCursor={rowEnd} rowsDone={rowsDone} " +
-					$"pendingPass2={(pendingPass2 ? 1 : 0)} bandH={bandH} pass1RerunAvoided={(pass1SkippedThisStep ? 1 : 0)} " +
-					$"ms={renderStepWatch.ElapsedMilliseconds} p1ms={p1Ms:0.00} p2ms={p2Ms:0.00} " +
-					$"p2SegTestedStep={bandSegsTested} softGate{{attemptUsed={_softGateAttemptsUsedThisFrame} subdivUsed={_softGateSubdividedCallsUsedThisFrame}}}");
+				RecordRuntimeYield();
+				if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render))
+				{
+					GD.Print(
+						$"[RenderStep][Yield] reason={budgetStopReason} frame={_frameIndex} rowCursor={rowEnd} rowsDone={rowsDone} " +
+						$"pendingPass2={(pendingPass2 ? 1 : 0)} bandH={bandH} pass1RerunAvoided={(pass1SkippedThisStep ? 1 : 0)} " +
+						$"ms={renderStepWatch.ElapsedMilliseconds} p1ms={p1Ms:0.00} p2ms={p2Ms:0.00} " +
+						$"p2SegTestedStep={bandSegsTested} softGate{{attemptUsed={_softGateAttemptsUsedThisFrame} subdivUsed={_softGateSubdividedCallsUsedThisFrame}}}");
+				}
 			}
 
 			string MapBandSummaryReason(string reason)
@@ -15288,6 +15462,7 @@ private sealed class OverlayRollingWindow
 			{
 				if (bandSummaryLoggedThisBand) return;
 				bandSummaryLoggedThisBand = true;
+				if (!ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render)) return;
 				double avgStepsPerTracedPixel = bandTracedPixels > 0
 					? (double)pass1StepsIntegrated / bandTracedPixels
 					: 0.0;
@@ -15361,7 +15536,7 @@ private sealed class OverlayRollingWindow
 				LogBudgetExitOnce(reason, _rowCursor);
 				ForceAdvanceRowCursorOnStop("zero_hit_advance", yEnd);
 				ResetNoHitStall();
-				if (cfg.RenderStepBandLog) LogBandSummaryOnce(reasonDone);
+				if (cfg.RenderStepBandLog && ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render)) LogBandSummaryOnce(reasonDone);
 				return true;
 			}
 
@@ -15375,10 +15550,14 @@ private sealed class OverlayRollingWindow
 				}
 				if (_renderStepYieldLogsThisFrame >= 2) return;
 				_renderStepYieldLogsThisFrame++;
-				GD.Print(
-					$"[RenderStep][YieldAbort] reason={reason} startRow={startRow} endRow={endRow} " +
-					$"forcedAdvance={(forcedAdvance ? 1 : 0)} elapsedMs={renderStepWatch.ElapsedMilliseconds} " +
-					$"budgetStop={(budgetStop ? 1 : 0)} hitsInBand={hitsInBand}");
+				RecordRuntimeYield();
+				if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render))
+				{
+					GD.Print(
+						$"[RenderStep][YieldAbort] reason={reason} startRow={startRow} endRow={endRow} " +
+						$"forcedAdvance={(forcedAdvance ? 1 : 0)} elapsedMs={renderStepWatch.ElapsedMilliseconds} " +
+						$"budgetStop={(budgetStop ? 1 : 0)} hitsInBand={hitsInBand}");
+				}
 			}
 
 			void LogForcedAdvanceWarning(string reason, int endRow)
@@ -15391,9 +15570,12 @@ private sealed class OverlayRollingWindow
 				}
 				if (_renderStepForceAdvanceWarnsThisFrame >= 1) return;
 				_renderStepForceAdvanceWarnsThisFrame++;
-				GD.PrintErr(
-					$"[RenderStep][WARN] progress-guard forced advance reason={reason} startRow={startRow} endRow={endRow} " +
-					$"bandH={bandH} rowsPerFrame={rowsPerFrame} ms={renderStepWatch.ElapsedMilliseconds}");
+				if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render))
+				{
+					GD.PrintErr(
+						$"[RenderStep][WARN] progress-guard forced advance reason={reason} startRow={startRow} endRow={endRow} " +
+						$"bandH={bandH} rowsPerFrame={rowsPerFrame} ms={renderStepWatch.ElapsedMilliseconds}");
+				}
 			}
 
 			int ComputeAdvanceRows()
@@ -15440,7 +15622,7 @@ private sealed class OverlayRollingWindow
 					}
 					LogBudgetExitOnce("guard_progress", endRow);
 					LogForcedAdvanceWarning(reason, endRow);
-					if (cfg.RenderStepBandLog) LogBandSummaryOnce("guard");
+					if (cfg.RenderStepBandLog && ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render)) LogBandSummaryOnce("guard");
 				}
 
 				if (logAlways || forced)
@@ -15587,7 +15769,7 @@ private sealed class OverlayRollingWindow
 				/////////////////////////////
 			}
 
-			if (cfg.RenderStepPhaseLog)	LogRenderPhase("enter");
+			if (cfg.RenderStepPhaseLog && ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render))	LogRenderPhase("enter");
 
 			// DECISION: mark film resize in perf stats when enabled.
 			if (statsEnabled && resizedFilm)
@@ -15683,7 +15865,7 @@ private sealed class OverlayRollingWindow
 			}
 
 			// DECISION: throttle verbose field source logs to once per frame.
-			if (cfg.VerbosePerfLogs && (_rowCursor % filmH) == 0)
+			if (cfg.VerbosePerfLogs && ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Performance) && (_rowCursor % filmH) == 0)
 				GD.Print($"fieldSnaps={fieldSnaps.Length} hasSources={hasSources}");
 			// Probe outcome and normal diagnostics classify surface identity before
 			// presentation, so refresh the collider-id cache for every film pass.
@@ -15784,7 +15966,7 @@ private sealed class OverlayRollingWindow
 				// DECISION: avoid re-entering an incomplete band within the same frame.
 				_suppressStuckBandRepeatOnce = true;
 				LogBudgetExitOnce("guard_incomplete_band", _rowCursor);
-				if (cfg.RenderStepBandLog) LogBandSummaryOnce("guard");
+				if (cfg.RenderStepBandLog && ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render)) LogBandSummaryOnce("guard");
 				return;
 			}
 
@@ -15807,10 +15989,12 @@ private sealed class OverlayRollingWindow
 				_stuckBandEndRow = yEnd;
 				if (_stuckBandRepeats > StuckBandWatchdogMaxRepeats)
 				{
-					GD.PrintErr($"[RenderStep][WATCHDOG] stuckBand y=[{yStart},{yEnd}) repeats={_stuckBandRepeats} -> forceAdvance");
+					RecordRuntimeWatchdog();
+					if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render))
+						GD.PrintErr($"[RenderStep][WATCHDOG] stuckBand y=[{yStart},{yEnd}) repeats={_stuckBandRepeats} -> forceAdvance");
 					LogBudgetExitOnce("guard_stuck_band", _rowCursor);
 					ForceAdvanceRowCursorOnStop("watchdog_stuck_band", yEnd);
-					if (cfg.RenderStepBandLog) LogBandSummaryOnce("guard");
+					if (cfg.RenderStepBandLog && ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render)) LogBandSummaryOnce("guard");
 					ResetNoHitStall();
 					ApplyDeferredRowCursorResetIfNeeded(yStart, yEnd);
 					return;
@@ -16107,7 +16291,7 @@ private sealed class OverlayRollingWindow
 			{
 				pass1StartUsec = a0;
 				
-				if (cfg.RenderStepPhaseLog)	LogRenderPhase("pass1-start");
+				if (cfg.RenderStepPhaseLog && ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render))	LogRenderPhase("pass1-start");
 
 				PerfScope pass1Scope = default;
 				// DECISION: enable pass1 perf scope when frame perf is enabled.
@@ -16522,7 +16706,7 @@ private sealed class OverlayRollingWindow
 
 				// DECISION: dispose pass1 perf scope when enabled.
 				if (framePerfEnabled) pass1Scope.Dispose();
-				if (cfg.RenderStepPhaseLog)	LogRenderPhase("pass1-end");
+				if (cfg.RenderStepPhaseLog && ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render))	LogRenderPhase("pass1-end");
 
 				a1 = Time.GetTicksUsec(); // after wait
 				pass1EndUsec = a1;
@@ -16533,7 +16717,9 @@ private sealed class OverlayRollingWindow
 					_pendingBandRowStart = yStart;
 					_pendingBandRowCount = bandH;
 					_pendingBandHasPass1 = true;
-					GD.Print($"[RenderStep][Yield] reason=max_ms_after_pass1 frame={_frameIndex} rowStart={yStart} bandH={bandH} committed=0 pendingPass2=1 ms={renderStepWatch.ElapsedMilliseconds}");
+					RecordRuntimeYield();
+					if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render))
+						GD.Print($"[RenderStep][Yield] reason=max_ms_after_pass1 frame={_frameIndex} rowStart={yStart} bandH={bandH} committed=0 pendingPass2=1 ms={renderStepWatch.ElapsedMilliseconds}");
 					LogRenderStopOnce("max_ms_after_pass1");
 					FinalizeBandAndAdvance("max_ms_after_pass1", yStart, yEnd, bandHits, "pendingPass2=1");
 					ApplyDeferredRowCursorResetIfNeeded(yStart, yEnd);
@@ -16551,7 +16737,7 @@ private sealed class OverlayRollingWindow
 						LogRenderStopOnce(maxMsReason);
 						LogBudgetExitOnce(maxMsReason, _rowCursor);
 						ForceAdvanceRowCursorOnStop(maxMsReason, yEnd);
-						if (cfg.RenderStepBandLog) LogBandSummaryOnce("guard");
+						if (cfg.RenderStepBandLog && ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render)) LogBandSummaryOnce("guard");
 						ResetNoHitStall();
 						ApplyDeferredRowCursorResetIfNeeded(yStart, yEnd);
 						return;
@@ -16591,7 +16777,7 @@ private sealed class OverlayRollingWindow
 			// ---- PASS 2 (main thread): collisions + shading ----
 			// EFFECT: mark pass2 start time for budgets and logs.
 			pass2StartUsec = a1;
-			if (cfg.RenderStepPhaseLog) LogRenderPhase("pass2-start");
+			if (cfg.RenderStepPhaseLog && ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render)) LogRenderPhase("pass2-start");
 			bandAttemptedThisStep = true;
 			bandHits = 0;
 			bandTracedPixels = 0;
@@ -16642,7 +16828,7 @@ private sealed class OverlayRollingWindow
 			long pixelDeltaChanged = 0;
 			long pixelDeltaNewFilled = 0;
 			int softGateFrameId = (int)Engine.GetFramesDrawn();
-			if (cfg.RenderStepPhaseLog) LogRenderPhase("softgate-loop");
+			if (cfg.RenderStepPhaseLog && ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render)) LogRenderPhase("softgate-loop");
 
 			Pass2HitFlags pass2Flags = new Pass2HitFlags
 			{
@@ -17290,7 +17476,9 @@ private sealed class OverlayRollingWindow
 				if (bandPixelCountGuard <= 0) return;
 				if (pixelsVisitedThisBand <= bandPixelCountGuard + pixelLoopGuardSlack) return;
 				pixelLoopGuardTripped = true;
-				GD.Print($"[WATCHDOG] pixelLoopGuard tripped at row={y} band=[{yStart},{yEnd}) policy={broadphaseCfg.Policy} x={x} stride={stride}");
+				RecordRuntimeWatchdog();
+				if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render))
+					GD.Print($"[WATCHDOG] pixelLoopGuard tripped at row={y} band=[{yStart},{yEnd}) policy={broadphaseCfg.Policy} x={x} stride={stride}");
 					TriggerBudgetStop("guard_pixel_loop");
 					ForceAdvanceRowCursorOnStop("guard_pixel_loop", yEnd);
 				}
@@ -20736,6 +20924,7 @@ private sealed class OverlayRollingWindow
 										{
 											softGateLoopGuardTripped++;
 											softGateWatchdogTrippedThisPixel = true;
+											RecordRuntimeWatchdog();
 											SoftGateRecordSkip(SoftGateDecisionReason.Guard);
 											LogBudgetExitOnce("guard_softgate_watchdog", y);
 											if (softGateCfg.DisableOnOverload)
@@ -20743,7 +20932,7 @@ private sealed class OverlayRollingWindow
 												_softGateDisabledForPass = true;
 												DisableSoftGateThisFrame("softgate_watchdog");
 											}
-											if (softGateCfg.DebugEnabled && _softGateWatchdogLogsRemaining > 0)
+											if (softGateCfg.DebugEnabled && _softGateWatchdogLogsRemaining > 0 && ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render))
 											{
 												_softGateWatchdogLogsRemaining--;
 												GD.PrintErr($"[SoftGate][Watchdog] segIndex={si} elapsed={elapsedMs:0.00}ms sub={sub} segLen={segLen:0.###} guard=1");
@@ -22165,7 +22354,7 @@ private sealed class OverlayRollingWindow
 				LogRenderStopOnce(maxMsReason);
 				LogBudgetExitOnce(maxMsReason, _rowCursor);
 				ForceAdvanceRowCursorOnStop(maxMsReason, yEnd);
-				if (cfg.RenderStepBandLog) LogBandSummaryOnce("guard");
+				if (cfg.RenderStepBandLog && ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render)) LogBandSummaryOnce("guard");
 				ResetNoHitStall();
 				ApplyDeferredRowCursorResetIfNeeded(yStart, yEnd);
 				return;
@@ -22295,7 +22484,7 @@ private sealed class OverlayRollingWindow
 				ulong dbgOverlayStart = 0;
 				if (statsEnabled) dbgOverlayStart = Time.GetTicksUsec();
 
-				if (cfg.VerbosePerfLogs)
+				if (cfg.VerbosePerfLogs && ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Performance))
 					ValidateDebugOverlayData(cfg.DebugMaxFilmRays);
 
 				_filmOverlay.SetData(
@@ -22343,11 +22532,11 @@ private sealed class OverlayRollingWindow
 				// smooth
 				_rangeFar = Mathf.Lerp(_rangeFar, targetFar, cfg.AutoRangeSmoothing);
 			}
-			if (cfg.VerbosePerfLogs && _rowCursor == 0 && cfg.AutoRangeDepth)
+			if (cfg.VerbosePerfLogs && ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Performance) && _rowCursor == 0 && cfg.AutoRangeDepth)
 				GD.Print($"AutoRange Far={_rangeFar:0.###}  (MaxDistance export={cfg.Film.MaxDistance:0.###})");
 
 
-			if (cfg.VerbosePerfLogs)
+			if (cfg.VerbosePerfLogs && ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Performance))
 			{
 				double avgStepsPerTracedPixel = bandTracedPixels > 0
 					? (double)pass1StepsIntegrated / bandTracedPixels
@@ -22390,7 +22579,7 @@ private sealed class OverlayRollingWindow
 					LogRenderStopOnce(budgetStopReason);
 					if (!ForceAdvanceOnNoHit(budgetStopReason, "zero-hit-advance", true))
 					{
-						if (cfg.RenderStepBandLog) LogBandSummaryOnce("budget");
+						if (cfg.RenderStepBandLog && ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render)) LogBandSummaryOnce("budget");
 						MarkBandIncompleteThisFrame(budgetStopReason, yStart, yEnd);
 					}
 					return;
@@ -22432,7 +22621,7 @@ private sealed class OverlayRollingWindow
 				}
 				bandCommittedThisStep = bandAdvanced;
 				if (bandAdvanced)
-					if (cfg.RenderStepBandLog) LogBandSummaryOnce(bandHits == 0 ? "zero-hit-advance" : "normal");
+					if (cfg.RenderStepBandLog && ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render)) LogBandSummaryOnce(bandHits == 0 ? "zero-hit-advance" : "normal");
 				else
 					ForceAdvanceOnNoHit("guard_no_progress", "zero-hit-advance", false);
 				if (bandAdvanced) ResetNoHitStall();
@@ -22440,7 +22629,15 @@ private sealed class OverlayRollingWindow
 			ApplyDeferredRowCursorResetIfNeeded(yStart, yEnd);
 
 			ulong t1 = Time.GetTicksUsec();
-			if (cfg.VerbosePerfLogs)
+			RecordLiveDiagnosticSummaryIfNeeded(
+				in cfg,
+				filmW,
+				filmH,
+				bandCommittedThisStep ? Math.Max(0, yEnd - yStart) : 0,
+				pixelCount,
+				(t1 - t0) / 1000.0,
+				_framePerf.PhysicsQueries);
+			if (cfg.VerbosePerfLogs && ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Performance))
 			{
 				GD.Print($"RenderStep {(t1 - t0)/1000.0:0.00} ms  rows={bandH}  jobs={jobs}  hits={bandHits}");
 				GD.Print($"pass1={(a1-a0)/1000.0:0.00}ms  pass2={(b1-a1)/1000.0:0.00}ms  total={(b1-a0)/1000.0:0.00}ms");
@@ -22472,7 +22669,7 @@ private sealed class OverlayRollingWindow
 			{
 				int logEvery = Mathf.Max(1, cfg.FramePerfLogEveryNFrames);
 				bool shouldLogFramePerf = cfg.FramePerfVerbose || (_frameIndex % logEvery) == 0;
-				if (shouldLogFramePerf)
+				if (shouldLogFramePerf && ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Performance))
 				{
 					GD.Print("FramePerf: " + _framePerf.ToOneLineSummary());
 					double testedPerPixel = _framePerf.RaysTraced > 0
@@ -22498,8 +22695,8 @@ private sealed class OverlayRollingWindow
 				LogExperimentalSubtileSchedulerFrameSummaryIfNeeded();
 			if (_rowCursor == 0)
 				LogTilePrioritySimulationFrameSummaryIfNeeded();
-			if (cfg.RenderStepPhaseLog) LogRenderPhase("end");
-			if (softGateDebugEnabled && _rowCursor == 0)
+			if (cfg.RenderStepPhaseLog && ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render)) LogRenderPhase("end");
+			if (softGateDebugEnabled && ShouldLog(DiagnosticVerbosity.Region, DiagnosticCategory.Probe) && _rowCursor == 0)
 			{
 				string extraContext =
 					"px[traced=" + _softGateFrame.TracedPixels +
@@ -22601,7 +22798,9 @@ private sealed class OverlayRollingWindow
 
 			if (noHitBand && noRowAdvanceThisStep && _noHitBandStallSteps >= RenderHealthStallThreshold)
 			{
-				GD.PrintErr($"[WATCHDOG] no-hit band y=[{yStart},{yEnd}) repeats={_noHitBandStallSteps} -> forceAdvance");
+				RecordRuntimeWatchdog();
+				if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render))
+					GD.PrintErr($"[WATCHDOG] no-hit band y=[{yStart},{yEnd}) repeats={_noHitBandStallSteps} -> forceAdvance");
 				LogBudgetExitOnce("guard_no_hit_band", _rowCursor);
 				ForceAdvanceRowCursorOnStop("guard_no_hit_band", yEnd);
 				_noHitBandStallSteps = 0;
@@ -22636,7 +22835,9 @@ private sealed class OverlayRollingWindow
 				int forcedRow = filmHLocal > 0
 					? Math.Min(rowCursorEnd + advanceRows, filmHLocal)
 					: rowCursorEnd + advanceRows;
-				GD.PrintErr($"[RenderStep][WATCHDOG] noRowProgress processedPixels={processedPixelsThisStep} repeats={_noRowProgressRepeats} -> forceAdvance");
+				RecordRuntimeWatchdog();
+				if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render))
+					GD.PrintErr($"[RenderStep][WATCHDOG] noRowProgress processedPixels={processedPixelsThisStep} repeats={_noRowProgressRepeats} -> forceAdvance");
 				LogBudgetExitOnce("guard_no_row_progress", _rowCursor);
 				_rowCursor = forcedRow;
 				_noRowProgressRepeats = 0;
@@ -24508,7 +24709,8 @@ private sealed class OverlayRollingWindow
 		int prev = _rowCursor;
 		_rowCursor = 0;
 		ResetRefreshAuditTracking();
-		GD.Print($"[FrameReset] reason={reason} prevRow={prev} frame={_frameIndex}");
+		if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render))
+			GD.Print($"[Observation Plate] reset reason={reason} prevRow={prev} frame={_frameIndex}");
 	}
 
 	private void QuitTreeDeferred()
@@ -25563,6 +25765,10 @@ private sealed class OverlayRollingWindow
 		if (_hasEffectiveConfigHash && hash == _lastEffectiveConfigHash) return;
 		_lastEffectiveConfigHash = hash;
 		_hasEffectiveConfigHash = true;
+		if (!ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
+		{
+			return;
+		}
 
 		string broadphaseTag = string.IsNullOrEmpty(cfg.Broadphase.Reason) ? "resolved" : cfg.Broadphase.Reason;
 			GD.Print(
@@ -25626,6 +25832,10 @@ private sealed class OverlayRollingWindow
 		_lastResearchSummaryHash = hash;
 		_hasResearchSummaryHash = true;
 		_researchWasEnabledLastFrame = true;
+		if (!ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
+		{
+			return;
+		}
 
 		GD.Print(
 			$"[ResearchMode] tier={cfg.Research.ResearchTier} transport={cfg.Research.TransportModel} integrator={cfg.Research.IntegratorKind} " +
@@ -25679,6 +25889,10 @@ private sealed class OverlayRollingWindow
 		if (_hasSharedSnapshotHash && hash == _lastSharedSnapshotHash) return;
 		_lastSharedSnapshotHash = hash;
 		_hasSharedSnapshotHash = true;
+		if (!ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
+		{
+			return;
+		}
 
 		if (!snap.HasRenderer)
 		{
@@ -26119,6 +26333,11 @@ private sealed class OverlayRollingWindow
 		_testLastTrustGeomPixMet = testTrustGeomPixMet;
 		_testLastTrustRayTestsMet = testTrustGeomRayTestsMet;
 		_testLastTrustP2Met = totalPass2SampledSegments >= minP2;
+		if (!ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Performance))
+		{
+			return;
+		}
+
 		string presentCoverageStr = (_filmWidth > 0 && _filmHeight > 0) ? latest.PresentCoverageRatio.ToString("0.000") : "na";
 		string fullRefreshFramesStr = latest.FullRefreshMeasured && latest.FramesToFullRefresh > 0 ? latest.FramesToFullRefresh.ToString() : "na";
 		string fullRefreshMsStr = latest.FullRefreshMeasured && latest.TimeToFullRefreshMs > 0.0 ? latest.TimeToFullRefreshMs.ToString("0.00") : "na";
@@ -27309,7 +27528,8 @@ private sealed class OverlayRollingWindow
 
 	private void LogAutoBroadphaseFlip(string reason, int cooldown)
 	{
-		GD.Print($"[AutoBroadphase] policy={_autoBroadphasePolicy} reason={reason} cooldown={cooldown}");
+		if (ShouldLog(DiagnosticVerbosity.Summary, DiagnosticCategory.Render))
+			GD.Print($"[Transport Lens] broadphase_auto policy={_autoBroadphasePolicy} reason={reason} cooldown={cooldown}");
 	}
 
 	private BroadphasePolicyMode ResolveAutoBroadphasePolicy(out string reason)
@@ -27498,9 +27718,10 @@ private sealed class OverlayRollingWindow
 		string reasonTag = string.IsNullOrEmpty(sourceTag) ? "resolved" : sourceTag;
 		EffectiveBroadphaseReason = reasonTag;
 
-		GD.Print(
-			$"[BroadphaseEffective] mode={effMode} policy={effPolicy} " +
-			$"quick={effQuickRay} overlap={effOverlap} reason={reasonTag}");
+		if (ShouldLog(DiagnosticVerbosity.Summary, DiagnosticCategory.Render))
+			GD.Print(
+				$"[Transport Lens] broadphase mode={effMode} policy={effPolicy} " +
+				$"quick={effQuickRay} overlap={effOverlap} reason={reasonTag}");
 	}
 
 	private void MaybeWarnBroadphaseQuickRayCurved(float beta, float gamma, bool effQuickRay, bool useCameraPropsBetaGamma)
@@ -27513,7 +27734,8 @@ private sealed class OverlayRollingWindow
 		{
 			if (_broadphaseCurvedWarned) return;
 			_broadphaseCurvedWarned = true;
-			GD.Print("[Warn] Broadphase QuickRay may miss hits under curved marching; consider OverlapOnly/Both or disable broadphase.");
+			if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render))
+				GD.Print("[Warn] Broadphase QuickRay may miss hits under curved marching; consider OverlapOnly/Both or disable broadphase.");
 			return;
 		}
 
