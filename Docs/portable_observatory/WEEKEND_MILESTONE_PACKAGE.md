@@ -1,6 +1,6 @@
 ---
 po_doc_type: architecture
-title: Weekend Visual Milestone — Documentation Package
+title: Weekend Visual Milestone — Documentation Package (historical)
 status: partial
 engine_commit: "6e69d792"
 generated: false
@@ -8,11 +8,13 @@ generated: false
 
 # Weekend Visual Milestone — Documentation Package
 
-**Prepared:** 2026-08-01  
-**Verified against:** `6e69d792` (portable observation + sealed frames; lifecycle `ef29ff79`; refine `32aa9ab9` / `5b9df901`)  
-**Code changes:** none in this package (docs only).
+**Historical package note** (2026-08-01). Superseded for navigation by the Portable Observatory lane; retained for correction history.
 
-## Pages
+**Prepared:** 2026-08-01
+**Original verified against:** `6e69d792`
+**Ontology pass:** 2026-08-03 (`5ce15c13` HEAD at pass) — pages expanded and wired in `mkdocs.yml`.
+
+## Original five pages (still present)
 
 | # | Page | Path | Status |
 |---|------|------|--------|
@@ -20,7 +22,9 @@ generated: false
 | 2 | Reading the Outcome Plane | [learn/reading_outcome_plane.md](learn/reading_outcome_plane.md) | implemented |
 | 3 | Hermetic Normal Calibration | [experiments/hermetic_normal_calibration.md](experiments/hermetic_normal_calibration.md) | partial |
 | 4 | The Great Magenta Confusion | [learn/great_magenta_confusion.md](learn/great_magenta_confusion.md) | partial |
-| 5 | Tuning the Cathedral Probe | [experiments/tuning_the_cathedral_probe.md](experiments/tuning_the_cathedral_probe.md) | partial |
+| 5 | Tuning the Region Probe | [experiments/tuning_the_region_probe.md](experiments/tuning_the_region_probe.md) | partial |
+
+(Item 5 was originally titled “Tuning the Cathedral Probe”; public default is now **Region Probe**.)
 
 ## Implemented channel IDs (do not invent others as shipped)
 
@@ -28,14 +32,10 @@ generated: false
 - `cathedral.probe.region_label`
 - `cathedral.probe.refinement_level`
 
-## Planned (label clearly in all public figures)
+## Planned (label clearly)
 
-- Spatial field-strength / gradient channels  
-- Continuous final-step-count heatmap  
-- Path-length heatmap  
-- Portable raw normal / depth buffers  
-- Full Godot outcome/region overlay UX  
+See [Observation Channels](reference/observation_channels.md).
 
-## Nav hook (when wiring mkdocs)
+## Nav
 
-Add under `Portable Observatory` → Learn / Experiments as in the documentation architecture plan. Not applied to `mkdocs.yml` in this package.
+Portable Observatory is wired in `mkdocs.yml`. Landing: [index.md](index.md).

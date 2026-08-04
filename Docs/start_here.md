@@ -142,3 +142,15 @@ The 20-minute arc covers *perception → measurement → validation*. Two more c
 > *Observation precedes explanation. Plausible ≠ Correct.*
 
 Every page in this observatory is grounded in a specific experimental result. Where a claim is a hypothesis, it is labeled as such. Where an image is a visualization rather than a validation, the caption says so. The transport oracle does not assert physics beyond its implemented renderer and diagnostics.
+
+---
+
+## Portable Observatory (public ontology)
+
+For the curated GitHub Pages lane that separates **Display Modes** from sealed **Instruments**, start here:
+
+- [Portable Observatory](portable_observatory/index.md) — Scene → Transport Lens → Display Mode → Observation Plate → Inspector → Region Probe → Evidence
+- [Display Is Not Probe](portable_observatory/learn/display_is_not_probe.md)
+- [Public Vocabulary](portable_observatory/reference/public_vocabulary.md)
+
+Historical chapter tours (Atlas, Gallery, Glowing Heart) remain available; newer docs prefer public terms over bare film/Cathedral first-run language.

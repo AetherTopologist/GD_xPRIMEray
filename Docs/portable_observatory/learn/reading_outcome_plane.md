@@ -2,7 +2,7 @@
 po_doc_type: learn
 title: Reading the Outcome Plane
 status: implemented
-engine_commit: "6e69d792"
+engine_commit: "5ce15c13"
 scene_id: null
 scene_class: null
 instrument_tier: semantic
@@ -28,8 +28,8 @@ generated: false
     | Field | Value |
     |-------|-------|
     | Status | **implemented** (codes + plane + sealed channel) |
-    | Verified against | `6e69d792` |
-    | SceneId | any scene that emits Cathedral outcomes |
+    | Verified against | sealed path `6e69d792`; docs `5ce15c13` |
+    | SceneId | any scene that emits Region Probe outcomes |
     | Channel ID | `cathedral.probe.outcome` |
     | Dependencies | transport pass-1 / refine apply (not RGB) |
     | Units | `code` |
@@ -46,7 +46,7 @@ generated: false
 | `ProbeOutcomeCode` vocabulary | **implemented** |
 | Dense outcome plane + frame summary | **implemented** |
 | Sealed channel `cathedral.probe.outcome` | **implemented** |
-| Public multi-class film UI overlay | **partial** |
+| Public multi-class Observation Plate overlay | **partial** |
 | RGB as selection source | **forbidden** |
 
 ---
@@ -58,7 +58,7 @@ generated: false
 | `Unprocessed` | incomplete | Sample not written; plane not full-frame ready |
 | `HitGeometry` | surface | Geometry/matter contact under model |
 | `BackgroundResolved` | background | Completed non-surface termination |
-| `MaxStepsExhausted` | **unresolved-budget** | Stopped at ray step budget |
+| `MaxStepsExhausted` | **unresolved-budget** | Stopped at Transport Effort budget |
 | `StoppedEarlyAbsorbed` | **unresolved-secondary** | Early absorb/stop (not “resolved”) |
 | `NumericalFailure` | **fault** | Numerical guard |
 | `Invalid` | **invalid** | Invalid sample/context |
@@ -85,22 +85,22 @@ Example (synthetic teaching numbers, not a live run):
 
 Checks:
 
-1. Sum = total samples (e.g. 80×45 = 3600, 160×90 = 14400).  
-2. Unprocessed = 0 for “complete plane.”  
+1. Sum = total samples (e.g. 80×45 = 3600, 160×90 = 14400).
+2. Unprocessed = 0 for “complete plane.”
 3. Large BackgroundResolved is **allowed** and can coexist with a magenta-looking plate.
 
 ---
 
 ## What the plane is for
 
-- Region analysis (**unresolved-budget** components by default rules).  
-- Refinement targeting.  
-- Evidence export and host-neutral records.  
+- Region analysis (**Unresolved Regions** by default rules).
+- Region Refinement targeting.
+- Evidence export and host-neutral records.
 
 ## What the plane is not for
 
-- Declaring NormalRGB “wrong” without comparing to HitGeometry + normals.  
-- Selecting regions by picking pink pixels.  
+- Declaring NormalRGB “wrong” without comparing to HitGeometry + normals.
+- Selecting regions by picking pink pixels.
 - Proving wormholes from remaps alone.
 
 ---
@@ -117,6 +117,7 @@ Checks:
 ## Interpretation boundary
 
 !!! warning "Claim boundary"
-    Outcome-plane semantics outrank RGB.  
-    Deeper refinement = more attempt, not more truth.  
+    Outcome-plane semantics outrank RGB.
+    Deeper refinement = more Transport Effort, not more truth.
     BackgroundResolved is a completed class, not “empty universe.”
+    Semantic outcome classification under simulated transport—not physical wormhole proof.

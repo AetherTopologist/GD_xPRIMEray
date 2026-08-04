@@ -75,6 +75,7 @@ description: Curved-ray optical transport observatory — GRIN field integration
 | Entry | What you will find |
 |---|---|
 | [xPRIMEray Runtime](start_here.md) | Curved-ray observatory and diagnostics |
+| [Portable Observatory](portable_observatory/index.md) | Public ontology: Scene → Transport Lens → Plate → Evidence |
 | [Project Glowing Heart](xPRIMEray/project_glowing_heart_atlas_link.md) | Protocol and artifact trail |
 | [Observation Atlas](Observatory/Observation_Atlas/README.md) | Observer field guide, not a ranking |
 
@@ -255,7 +256,7 @@ Following scheduler decorrelation, a ReferenceTransportOracle ROI sweep identifi
 
 xPRIMEray uses a tiered transport hierarchy: Tier 0 GRIN ray integration → Tier 1 metric parameter extraction → Tier 2 Gordon Metric bridge → Tier 3 exotic metrics. The multi-scene wormhole system joins two causally isolated overspaces at the wormhole throat. The hermetic fixture rule (`escaped_no_hit = 0`) enforces complete pixel classification.
 
-→ [Architecture overview](architecture/overview.md) — pipeline, stored-hit system, domain emergence, Gordon metric math  
+→ [Architecture overview](architecture/overview.md) — pipeline, stored-hit system, domain emergence, Gordon metric math
 → [Architecture subsystems](architecture_overview.md) — subsystem contracts and data-flow diagrams
 
 ---
@@ -291,5 +292,5 @@ xPRIMEray uses a tiered transport hierarchy: Tier 0 GRIN ray integration → Tie
 
 [github.com/AetherTopologist/GD_xPRIMEray](https://github.com/AetherTopologist/GD_xPRIMEray)
 
-**License:** MIT — academic, commercial, and creative use welcome.  
+**License:** MIT — academic, commercial, and creative use welcome.
 **Citation templates:** [papers/shared_bibliography.bib](papers/shared_bibliography.bib)

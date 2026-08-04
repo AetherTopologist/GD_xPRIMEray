@@ -134,6 +134,44 @@ nav:
 
   - Start Here: start_here.md
 
+  - Portable Observatory:
+      - Home: portable_observatory/index.md
+      - Start Here: portable_observatory/start_here.md
+      - Learn:
+          - Display Is Not Probe: portable_observatory/learn/display_is_not_probe.md
+          - Anatomy of an Observation Frame: portable_observatory/learn/anatomy_of_observation_frame.md
+          - Reading the Outcome Plane: portable_observatory/learn/reading_outcome_plane.md
+          - The Great Magenta Confusion: portable_observatory/learn/great_magenta_confusion.md
+          - Snapshot Completeness vs Resolution: portable_observatory/learn/snapshot_completeness_vs_resolution.md
+      - Experiments:
+          - Hermetic Normal Calibration: portable_observatory/experiments/hermetic_normal_calibration.md
+          - Portal Seam: portable_observatory/experiments/portal_seam.md
+          - Tuning the Region Probe: portable_observatory/experiments/tuning_the_region_probe.md
+      - Reference:
+          - Public Vocabulary: portable_observatory/reference/public_vocabulary.md
+          - Observation Channels: portable_observatory/reference/observation_channels.md
+          - Display Modes: portable_observatory/reference/display_modes.md
+          - Controls: portable_observatory/reference/controls.md
+          - Claim Boundaries: portable_observatory/reference/claim_boundaries.md
+      - Architecture:
+          - Observation Layer: portable_observatory/architecture/observation_layer.md
+          - Sealed Frames: portable_observatory/architecture/sealed_frames.md
+          - Adapters: portable_observatory/architecture/adapters.md
+          - Diagnostics: portable_observatory/architecture/diagnostics.md
+          - Godot to Glowing Heart: portable_observatory/architecture/godot_to_glowing_heart.md
+      - Evidence:
+          - Evidence Doctrine: portable_observatory/evidence/evidence_doctrine.md
+          - Fixture vs Live Runtime: portable_observatory/evidence/fixture_vs_live_runtime.md
+          - Reading Qualification Runs: portable_observatory/evidence/reading_qualification_runs.md
+      - Research Notebook:
+          - Index: portable_observatory/notebook/index.md
+          - Hermetic Live Failure State: portable_observatory/notebook/hermetic_calibration_baseline_live_failure_state.md
+      - Development:
+          - Running the Observatory: portable_observatory/development/running_the_observatory.md
+          - Test Status: portable_observatory/development/test_status.md
+          - Commit Discipline: portable_observatory/development/commit_discipline.md
+          - Weekend Milestone Package (historical): portable_observatory/WEEKEND_MILESTONE_PACKAGE.md
+
   - MisterY Labs:
       - Inspiration Cards: MisterYLabs/INSPIRATION_CARD_FEATURE_LINKS.md
 
