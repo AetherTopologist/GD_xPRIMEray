@@ -43,8 +43,11 @@ P probe · J/K region · H shell · V walk/fly
 
 | Key | Public name | Note |
 |-----|-------------|------|
+| **L** or **T** | Plate / Transport Lens | Proposed mnemonic replacements for **G**; until the input map is updated, **G** is the active binding |
 | **O** | Orientation display | Proposed dedicated orientation cycle; until bound, use **N** |
 | **D** | Depth display | Proposed shortcut; until bound, use **N** |
+
+**Note on G:** The G binding is a legacy carry-over from the internal `GrinFilmCamera` implementation name. The public label is **Plate mode**—not "GrinFilmCamera key." **L** (Lens) or **T** (Transport Lens) are preferred successors when the input map allows rebinding.
 
 ---
 
