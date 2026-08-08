@@ -143,6 +143,7 @@ nav:
           - Reading the Outcome Plane: portable_observatory/learn/reading_outcome_plane.md
           - The Great Magenta Confusion: portable_observatory/learn/great_magenta_confusion.md
           - Snapshot Completeness vs Resolution: portable_observatory/learn/snapshot_completeness_vs_resolution.md
+          - Collider Contact Is Not Semantic Resolution: portable_observatory/learn/collider_contact_is_not_semantic_resolution.md
       - Experiments:
           - Hermetic Normal Calibration: portable_observatory/experiments/hermetic_normal_calibration.md
           - Portal Seam: portable_observatory/experiments/portal_seam.md

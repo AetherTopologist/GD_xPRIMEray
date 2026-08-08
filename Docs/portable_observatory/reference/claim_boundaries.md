@@ -17,6 +17,8 @@ Prefer cautious research language. Correct or qualify any wording that overclaim
 | Implication | Prefer instead |
 |-------------|----------------|
 | Magenta is an outcome | Magenta is a **legacy fallback/presentation color**; only `ProbeOutcomeCode` / sealed outcome is authoritative |
+| Nonzero film hits prove HitGeometry | Film hits are **pass-2 shading acceptance**; terminal class is pass-1 `ProbeOutcomeCode` |
+| MaxStepsExhausted means never touched geometry | Terminal budget class under policy; **historical contact may have occurred** |
 | Refinement guarantees truth | Deeper refinement = more **Transport Effort** under **numerical policy** |
 | Path length is proper time | Path length (when recorded) is **scene-length** proxy |
 | Step count is time or energy | Step count is **Transport Effort**, not time or energy |

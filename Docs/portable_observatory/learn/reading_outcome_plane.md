@@ -114,6 +114,10 @@ Checks:
 
 ---
 
+## Related doctrine
+
+- [Collider Contact Is Not Semantic Resolution](collider_contact_is_not_semantic_resolution.md) — terminal class ≠ historical physics contact; film hits ≠ outcome plane.
+
 ## Interpretation boundary
 
 !!! warning "Claim boundary"

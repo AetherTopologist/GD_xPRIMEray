@@ -139,6 +139,10 @@ Full legend: [Controls](../reference/controls.md).
 
 ---
 
+## Related
+
+- [Collider Contact Is Not Semantic Resolution](../learn/collider_contact_is_not_semantic_resolution.md) — MaxSteps can follow earlier contact when StopOnHit is false; film hit counters are pass-2.
+
 ## Interpretation boundary
 
 !!! warning "Claim boundary"

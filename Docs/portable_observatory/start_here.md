@@ -27,6 +27,7 @@ This is not a game walkthrough and not a claim that the engine proves general re
 | 3 | [The Great Magenta Confusion](learn/great_magenta_confusion.md) | Why plate magenta is not an outcome |
 | 4 | [Snapshot Completeness vs Resolution](learn/snapshot_completeness_vs_resolution.md) | Complete ≠ solved |
 | 5 | [Hermetic Normal Calibration](experiments/hermetic_normal_calibration.md) | Classroom for closure and orientation |
+| 6 | [Collider Contact Is Not Semantic Resolution](learn/collider_contact_is_not_semantic_resolution.md) | Why film hits ≠ MaxSteps plane |
 
 ## Operator path (live host)
 

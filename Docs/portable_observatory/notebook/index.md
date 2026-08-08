@@ -31,6 +31,12 @@ Each notebook entry should visibly include:
 |-------|------|--------|
 | [Hermetic Calibration Baseline — Live Failure State](hermetic_calibration_baseline_live_failure_state.md) | live failure / presentation evidence | partial |
 
+## Related research / doctrine notes
+
+| Note | Type | Status |
+|------|------|--------|
+| [Collider Contact Is Not Semantic Resolution](../learn/collider_contact_is_not_semantic_resolution.md) | classification-seam doctrine + audit summary | partial |
+
 ## Related curated lanes
 
 - [Hermetic Normal Calibration](../experiments/hermetic_normal_calibration.md)

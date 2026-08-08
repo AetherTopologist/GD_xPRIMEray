@@ -105,6 +105,7 @@ Until those channels ship, NormalRGB/Depth remain **host display paths**, not po
 | Frame anatomy | [Anatomy of an Observation Frame](learn/anatomy_of_observation_frame.md) |
 | Outcome codes | [Reading the Outcome Plane](learn/reading_outcome_plane.md) |
 | Magenta hazard | [The Great Magenta Confusion](learn/great_magenta_confusion.md) |
+| Contact ≠ resolution | [Collider Contact Is Not Semantic Resolution](learn/collider_contact_is_not_semantic_resolution.md) |
 | Closed-box calibration | [Hermetic Normal Calibration](experiments/hermetic_normal_calibration.md) |
 | Region effort | [Tuning the Region Probe](experiments/tuning_the_region_probe.md) |
 | Diagnostics levels | [Diagnostics](architecture/diagnostics.md) |

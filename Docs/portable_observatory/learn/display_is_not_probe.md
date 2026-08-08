@@ -102,6 +102,7 @@ Changing **Display Mode** must not change the outcome histogram. If it appears t
 ## See also
 
 - [The Great Magenta Confusion](great_magenta_confusion.md)
+- [Collider Contact Is Not Semantic Resolution](collider_contact_is_not_semantic_resolution.md)
 - [Reading the Outcome Plane](reading_outcome_plane.md)
 - [Public Vocabulary](../reference/public_vocabulary.md)
 - [Claim Boundaries](../reference/claim_boundaries.md)
