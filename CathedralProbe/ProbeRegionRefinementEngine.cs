@@ -126,7 +126,7 @@ public static class ProbeRegionRefinementEngine
 			SourceRegionId = sourceRegionId,
 			RequestedRefinementLevel = requestedRefinementLevel,
 			SelectedPixelCount = selectedPixelIndices.Length,
-			PolicyMaxSteps = policyMaxSteps,
+			PolicyMaxSteps = Math.Max(0, policyMaxSteps) + 1,
 			PolicyStepSize = policyStepSize,
 			ElapsedTicks = elapsedTicks,
 			ContextMatched = true,

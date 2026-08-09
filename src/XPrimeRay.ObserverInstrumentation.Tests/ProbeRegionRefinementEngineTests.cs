@@ -335,6 +335,7 @@ internal static class ProbeRegionRefinementEngineTests
 
 		Console.WriteLine($"  refinement allocation delta: {delta} bytes / warm apply");
 		TestAssert.True(summary.AppliedAtomically, "warm apply succeeded");
+		TestAssert.Equal(321, summary.PolicyMaxSteps, "refined StepsPerRay=320 produces 321 samples");
 		TestAssert.True(delta <= 2048, $"warm apply allocation bounded: {delta}");
 	}
 

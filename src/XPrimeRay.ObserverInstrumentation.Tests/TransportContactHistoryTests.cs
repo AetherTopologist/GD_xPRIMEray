@@ -52,9 +52,15 @@ internal static class TransportContactHistoryTests
         resized = new TransportContactHistoryPlaneLayout(160, 90);
         TestAssert.True(resized.IsFullFrameCapacity(160 * 90), "reallocated capacity");
 
-        TestAssert.True(TransportEffortValidity.TryNormalize(40, 80, false, out float effort), "effort valid");
-        TestAssert.NearlyEqual(0.5f, effort, 0.0001f, "effort ratio");
-        TestAssert.False(TransportEffortValidity.TryNormalize(40, 80, true, out _), "numerical effort unavailable");
+        int baseConfiguredSteps = 80;
+        int basePolicyMaxSteps = baseConfiguredSteps + 1;
+        TestAssert.Equal(81, basePolicyMaxSteps, "StepsPerRay=80 exposes 81 samples");
+        TestAssert.True(TransportEffortValidity.TryNormalize(81, basePolicyMaxSteps, false, out float exhaustedEffort), "exhausted effort valid");
+        TestAssert.NearlyEqual(1f, exhaustedEffort, 0.0001f, "exhausted effort is one");
+        TestAssert.True(TransportEffortValidity.TryNormalize(40, basePolicyMaxSteps, false, out float effort), "early effort valid");
+        TestAssert.True(effort < 1f, "early effort below one");
+        TestAssert.False(TransportEffortValidity.TryNormalize(40, basePolicyMaxSteps, true, out _), "numerical effort unavailable");
         TestAssert.False(TransportEffortValidity.TryNormalize(40, 0, false, out _), "zero budget effort unavailable");
+        TestAssert.Equal(321, 320 + 1, "refined StepsPerRay=320 exposes 321 samples");
     }
 }

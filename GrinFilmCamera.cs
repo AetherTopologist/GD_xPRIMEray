@@ -9864,7 +9864,7 @@ private sealed class OverlayRollingWindow
 			ContextMatched = true,
 			AppliedAtomically = false,
 			FailureReason = "pending_process_phase",
-			PolicyMaxSteps = policy.RefinedStepsPerRay,
+			PolicyMaxSteps = policy.RefinedStepsPerRay + 1,
 			PolicyStepSize = policy.RefinedStepLength
 		};
 		_lastProbeRefinementSummary = summary;
@@ -10269,7 +10269,7 @@ private sealed class OverlayRollingWindow
 			UnprocessedPixelCount = unprocessed,
 			ContextMatched = contextMatched,
 			DimensionsMatched = dimensionsMatched,
-			PolicyMaxSteps = _probeSnapshotLifecyclePolicy.BaseStepsPerRay,
+			PolicyMaxSteps = _probeSnapshotLifecyclePolicy.BaseStepsPerRay + 1,
 			PolicyStepSize = _probeSnapshotLifecyclePolicy.BaseStepLength,
 			HitGeometryCount = hitGeometry,
 			BackgroundResolvedCount = background,
@@ -10409,7 +10409,7 @@ private sealed class OverlayRollingWindow
 				request.PixelIndices.Length,
 				status != "context_key_mismatch",
 				status);
-			_lastProbeRefinementSummary.PolicyMaxSteps = request.Policy.RefinedStepsPerRay;
+			_lastProbeRefinementSummary.PolicyMaxSteps = request.Policy.RefinedStepsPerRay + 1;
 			_lastProbeRefinementSummary.PolicyStepSize = request.Policy.RefinedStepLength;
 			_lastProbeRefinementSummary.ElapsedTicks = elapsedTicks;
 			PrintCathedralProbeRefinementEvidence(request.FrameSummaryBefore, _probeFrameSummary, _lastProbeRefinementSummary);
@@ -10891,7 +10891,7 @@ private sealed class OverlayRollingWindow
 					NearestAcceptedNormalY = hitInfo.Normal.Y,
 					NearestAcceptedNormalZ = hitInfo.Normal.Z,
 					NormalValid = hitInfo.NormalValid,
-					PolicyMaxSteps = request.RefinedStepsPerRay,
+					PolicyMaxSteps = request.RefinedStepsPerRay + 1,
 					EffortValid = !hitInfo.HadNumericalFailure
 				};
 				completed++;
@@ -16810,7 +16810,7 @@ private sealed class OverlayRollingWindow
 					_pass1HitColliderId[pi] = hitInfo.ColliderId;
 					hitInfo.SurfaceClass = ClassifyProbeSurfaceClass(hitInfo.Found, hitInfo.ColliderId);
 					FillTransportContactHistoryBlock(x, y, stride, filmW, filmH, hitInfo, stepsIntegrated,
-						rayCfg.StepsPerRay, !hitInfo.HadNumericalFailure);
+						rayCfg.StepsPerRay + 1, !hitInfo.HadNumericalFailure);
 					ProbeOutcomeCode probeOutcome = ClassifyCathedralProbeOutcome(
 						hitInfo.HadNumericalFailure,
 						hitInfo.Found,

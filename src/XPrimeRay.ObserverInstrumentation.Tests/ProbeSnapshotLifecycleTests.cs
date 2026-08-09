@@ -200,11 +200,11 @@ internal static class ProbeSnapshotLifecycleTests
 	private static void FinalBandSealInvariant()
 	{
 		TestAssert.True(ProbeSnapshotLifecycleModel.CanSealSnapshot(3600, 0, false, 45, 45, true, ProbeSnapshotLifecycleState.Capturing, ProbeSnapshotLifecycleReason.None), "exact final band seals");
-		TestAssert.True(ProbeSnapshotLifecycleModel.CanSealSnapshot(3600, 0, false, 45, 45, true, ProbeSnapshotLifecycleState.Capturing, ProbeSnapshotLifecycleReason.None), "partial final band seals");
-		TestAssert.False(ProbeSnapshotLifecycleModel.CanSealSnapshot(3600, 80, false, 44, 45, true, ProbeSnapshotLifecycleState.Capturing, ProbeSnapshotLifecycleReason.None), "watchdog before final pixels yields");
-		TestAssert.False(ProbeSnapshotLifecycleModel.CanSealSnapshot(3600, 0, true, 45, 45, true, ProbeSnapshotLifecycleState.Capturing, ProbeSnapshotLifecycleReason.None), "pending pass cannot seal");
-		TestAssert.False(ProbeSnapshotLifecycleModel.CanSealSnapshot(3600, 0, false, 45, 45, false, ProbeSnapshotLifecycleState.Capturing, ProbeSnapshotLifecycleReason.None), "context mismatch cannot seal");
-		TestAssert.False(ProbeSnapshotLifecycleModel.CanSealSnapshot(3600, 0, false, 45, 45, true, ProbeSnapshotLifecycleState.Complete, ProbeSnapshotLifecycleReason.None), "repeated complete pump cannot reseal");
+		TestAssert.True(ProbeSnapshotLifecycleModel.CanSealSnapshot(10, 0, false, 3, 3, true, ProbeSnapshotLifecycleState.Capturing, ProbeSnapshotLifecycleReason.None), "partial final band seals");
+		TestAssert.False(ProbeSnapshotLifecycleModel.CanSealSnapshot(10, 1, false, 2, 3, true, ProbeSnapshotLifecycleState.Capturing, ProbeSnapshotLifecycleReason.None), "watchdog before final pixels yields");
+		TestAssert.False(ProbeSnapshotLifecycleModel.CanSealSnapshot(10, 0, true, 3, 3, true, ProbeSnapshotLifecycleState.Capturing, ProbeSnapshotLifecycleReason.None), "pending pass cannot seal");
+		TestAssert.False(ProbeSnapshotLifecycleModel.CanSealSnapshot(10, 0, false, 3, 3, false, ProbeSnapshotLifecycleState.Capturing, ProbeSnapshotLifecycleReason.None), "context mismatch cannot seal");
+		TestAssert.False(ProbeSnapshotLifecycleModel.CanSealSnapshot(10, 0, false, 3, 3, true, ProbeSnapshotLifecycleState.Complete, ProbeSnapshotLifecycleReason.None), "repeated complete pump cannot reseal");
 	}
 
 	private static ProbeSnapshotLifecycleResult CompleteResult()
