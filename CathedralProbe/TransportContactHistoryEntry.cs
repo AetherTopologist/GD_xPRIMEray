@@ -12,11 +12,14 @@ public readonly struct TransportContactHistoryEntry
 	public readonly float NearestAcceptedNormalY;
 	public readonly float NearestAcceptedNormalZ;
 	public readonly bool NormalValid;
+	public readonly int PolicyMaxSteps;
+	public readonly bool EffortValid;
 	public readonly ProbeOutcomeCode Outcome;
 
 	public TransportContactHistoryEntry(int pixelIndex, int contactCount, int firstContactStep, int lastContactStep,
 		int finalStepCount, bool hadAnyGeometryContact, bool hadAnyBackgroundContact, ulong nearestAcceptedColliderId,
-		float nearestAcceptedNormalX, float nearestAcceptedNormalY, float nearestAcceptedNormalZ, bool normalValid, ProbeOutcomeCode outcome)
+		float nearestAcceptedNormalX, float nearestAcceptedNormalY, float nearestAcceptedNormalZ, bool normalValid,
+		int policyMaxSteps, bool effortValid, ProbeOutcomeCode outcome)
 	{
 		PixelIndex = pixelIndex;
 		ContactCount = contactCount;
@@ -30,6 +33,8 @@ public readonly struct TransportContactHistoryEntry
 		NearestAcceptedNormalY = nearestAcceptedNormalY;
 		NearestAcceptedNormalZ = nearestAcceptedNormalZ;
 		NormalValid = normalValid;
+		PolicyMaxSteps = policyMaxSteps;
+		EffortValid = effortValid;
 		Outcome = outcome;
 	}
 }

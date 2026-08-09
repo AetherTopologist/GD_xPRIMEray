@@ -2273,6 +2273,9 @@ public partial class GrinFilmCamera : Node
 	private bool _hasLastCameraInstanceId = false;
 	private Camera3D _cam;
 	private bool _physicsRunsOnSeparateThread = false;
+	private bool _renderFrameQueuedForPhysics = false;
+	private bool _renderFrameExecutingFromPhysics = false;
+	private readonly ObservationAcquisitionOwnership _observationAcquisition = new();
 	private PhysicsDirectSpaceState3D _cachedRenderSpaceState;
 	private ulong _cachedRenderSpaceWorldId = 0;
 	private bool _hasCachedRenderSpaceWorldId = false;
@@ -2304,6 +2307,8 @@ public partial class GrinFilmCamera : Node
 	private ulong[] _transportNearestAcceptedColliderId = Array.Empty<ulong>();
 	private Vector3[] _transportNearestAcceptedNormal = Array.Empty<Vector3>();
 	private byte[] _transportNormalValid = Array.Empty<byte>();
+	private int[] _transportPolicyMaxSteps = Array.Empty<int>();
+	private byte[] _transportEffortValid = Array.Empty<byte>();
 	private ProbeOutcomeCode[] _probeOutcomes = Array.Empty<ProbeOutcomeCode>();
 	private byte[] _probeRefinLevel = Array.Empty<byte>();
 	private ushort[] _regionLabels = Array.Empty<ushort>();
@@ -2311,6 +2316,23 @@ public partial class GrinFilmCamera : Node
 	private ProbeFrameSummary _probeFrameSummary;
 	private int _probeUnprocessedCount = 0;
 	private const byte CathedralProbeRefinementPolicyVersion = 1;
+	private struct CathedralSnapshotAcquisitionContext
+	{
+		public bool IsValid;
+		public ProbeContextKey ContextKey;
+		public Transform3D CameraTransform;
+		public float CameraFov;
+		public int FilmWidth;
+		public int FilmHeight;
+		public float FieldStrength;
+		public RayBeamRenderer.FieldSourceSnap[] FieldSources;
+		public bool HasFieldSources;
+		public uint FieldSourceEpoch;
+		public uint GeometryEpoch;
+		public uint BoundaryEpoch;
+		public int StepsPerRay;
+		public float StepLength;
+	}
 	private int _probeFrameGeneration = 0;
 	private bool _probeSnapshotComplete = false;
 	private ProbeContextKey _probeFrameContextKey;
@@ -2328,13 +2350,17 @@ public partial class GrinFilmCamera : Node
 	private int _probeSnapshotLifecyclePhysicsStartFrame = 0;
 	private int _probeSnapshotLifecycleProcessElapsed = 0;
 	private int _probeSnapshotLifecyclePhysicsElapsed = 0;
+	private int _probeSnapshotLifecycleLastRowCursor = -1;
+	private int _probeSnapshotLifecycleNoProgressPumps = 0;
 	private ProbeSnapshotLifecycleState _probeSnapshotLifecycleState = ProbeSnapshotLifecycleState.Inactive;
 	private ProbeSnapshotLifecycleReason _probeSnapshotLifecycleReason = ProbeSnapshotLifecycleReason.None;
+	private ProbeSnapshotLifecycleReason _probeSnapshotContextInvalidationReason = ProbeSnapshotLifecycleReason.ContextChanged;
 	private ProbeContextKey _probeSnapshotLifecycleContextKey;
 	private int _probeSnapshotLifecycleWidth = 0;
 	private int _probeSnapshotLifecycleHeight = 0;
 	private ProbePolicy _probeSnapshotLifecyclePolicy;
 	private ProbeSnapshotLifecycleResult _lastProbeSnapshotLifecycleResult;
+	private CathedralSnapshotAcquisitionContext _cathedralSnapshotContext;
 	private SelectedProbeTransportRequest _selectedProbeTransportRequest;
 	private bool _selectedProbeTransportPending = false;
 	private bool _selectedProbeTransportCompleted = false;
@@ -4431,6 +4457,7 @@ private sealed class OverlayRollingWindow
 		return true;
 	}
 
+
 	private void LogRenderSpaceUnavailableOnce(string source, bool pass1ProbeRequested, string reason)
 	{
 		if (_renderSpaceUnavailableWarned)
@@ -4520,6 +4547,27 @@ private sealed class OverlayRollingWindow
 	{
 		RefreshCachedRenderSpaceState();
 		PumpCathedralProbeSnapshotLifecycle();
+		if (_observationAcquisition.Owner != ObservationAcquisitionOwner.Snapshot)
+			PumpSelectedProbeTransport();
+		if (_physicsRunsOnSeparateThread && _renderFrameQueuedForPhysics && UpdateEveryFrame &&
+			_observationAcquisition.Owner != ObservationAcquisitionOwner.Snapshot &&
+			!_renderFrameExecutingFromPhysics)
+		{
+			_renderFrameQueuedForPhysics = false;
+			_renderFrameExecutingFromPhysics = true;
+			if (_observationAcquisition.TryAcquire(ObservationAcquisitionOwner.Live))
+			{
+				try
+				{
+					RenderFrameBackend(delta);
+				}
+				finally
+				{
+					_observationAcquisition.Release(ObservationAcquisitionOwner.Live);
+				}
+			}
+			_renderFrameExecutingFromPhysics = false;
+		}
 	}
 
 		public override void _Process(double delta)
@@ -4534,8 +4582,8 @@ private sealed class OverlayRollingWindow
 			SyncAndApplyIfDirty("process");
 			// Keep broadphase controls in sync each frame so the inspector reflects effective state.
 			UpdateBroadphaseEffectiveState();
-			PumpSelectedProbeTransport();
-			PumpCathedralProbeRegionRefinementCompletion();
+			if (_observationAcquisition.Owner != ObservationAcquisitionOwner.Snapshot)
+				PumpCathedralProbeRegionRefinementCompletion();
 			PumpSmartScaleController();
 			if (!UpdateEveryFrame && ShouldEmitMetadataOnlyOverlay())
 			{
@@ -4549,7 +4597,17 @@ private sealed class OverlayRollingWindow
 			return;
 		}
 		_renderSpaceUnavailableWarned = false;
-		RenderFrameBackend(delta);
+		if (_physicsRunsOnSeparateThread)
+		{
+			if (_observationAcquisition.Owner == ObservationAcquisitionOwner.Idle)
+				_renderFrameQueuedForPhysics = true;
+			return;
+		}
+		if (_observationAcquisition.TryAcquire(ObservationAcquisitionOwner.Live))
+		{
+			try { RenderFrameBackend(delta); }
+			finally { _observationAcquisition.Release(ObservationAcquisitionOwner.Live); }
+		}
 	}
 
 	private void RenderFrameBackend(double delta)
@@ -7174,7 +7232,8 @@ private sealed class OverlayRollingWindow
 				_transportLastContactStep[i], _transportFinalStepCount[i], _transportHadAnyGeometryContact[i] != 0,
 				_transportHadAnyBackgroundContact[i] != 0, _transportNearestAcceptedColliderId[i],
 				_transportNearestAcceptedNormal[i].X, _transportNearestAcceptedNormal[i].Y,
-				_transportNearestAcceptedNormal[i].Z, _transportNormalValid[i] != 0, _probeOutcomes[i]);
+				_transportNearestAcceptedNormal[i].Z, _transportNormalValid[i] != 0, _transportPolicyMaxSteps[i],
+				_transportEffortValid[i] != 0, _probeOutcomes[i]);
 		}
 		return true;
 	}
@@ -7183,13 +7242,23 @@ private sealed class OverlayRollingWindow
 	{
 		if (!TryGetTransportContactHistoryForTesting(out TransportContactHistoryEntry[] entries))
 			return "transport_contact_history unavailable";
-		int zero = 0, one = 0, two = 0, many = 0, valid = 0, invalid = 0;
+		int zero = 0, one = 0, two = 0, many = 0, valid = 0, invalid = 0, both = 0, neither = 0;
+		List<int> firstContacts = new();
+		List<int> lastContacts = new();
+		List<int> finalSteps = new();
+		List<int> policySteps = new();
 		Dictionary<ProbeOutcomeCode, int> outcomeCounts = new();
 		Dictionary<string, int> crossTab = new();
 		Dictionary<string, int> normalClusters = new();
 		foreach (TransportContactHistoryEntry entry in entries)
 		{
 			if (entry.ContactCount == 0) zero++; else if (entry.ContactCount == 1) one++; else if (entry.ContactCount == 2) two++; else many++;
+			if (entry.FirstContactStep >= 0) firstContacts.Add(entry.FirstContactStep);
+			if (entry.LastContactStep >= 0) lastContacts.Add(entry.LastContactStep);
+			finalSteps.Add(entry.FinalStepCount);
+			policySteps.Add(entry.PolicyMaxSteps);
+			if (entry.HadAnyGeometryContact && entry.HadAnyBackgroundContact) both++;
+			if (!entry.HadAnyGeometryContact && !entry.HadAnyBackgroundContact) neither++;
 			outcomeCounts[entry.Outcome] = outcomeCounts.TryGetValue(entry.Outcome, out int oc) ? oc + 1 : 1;
 			string bucket = entry.ContactCount == 0 ? "zero" : entry.ContactCount == 1 ? "one" : "multi";
 			string key = $"{entry.Outcome}×{bucket}";
@@ -7209,7 +7278,25 @@ private sealed class OverlayRollingWindow
 		foreach (string key in crossTab.Keys.OrderBy(key => key, StringComparer.Ordinal)) summary.Append(' ').Append(key).Append('=').Append(crossTab[key]);
 		summary.Append(" normals:valid=").Append(valid).Append(" invalid=").Append(invalid).Append(" clusters:");
 		foreach (string key in normalClusters.Keys.OrderBy(key => key, StringComparer.Ordinal)) summary.Append(' ').Append(key).Append('=').Append(normalClusters[key]);
+		int effortInvalid = entries.Count(entry => !entry.EffortValid);
+		Node player = GetNodeOrNull("../TransportChamberPlayer");
+		ulong playerId = player?.GetInstanceId() ?? 0UL;
+		int playerFirstHitCount = playerId == 0UL ? 0 : entries.Count(entry => entry.NearestAcceptedColliderId == playerId);
+		summary.Append(" contactFlags:both=").Append(both).Append(" neither=").Append(neither);
+		summary.Append(" firstContact=").Append(FormatTransportHistoryStats(firstContacts));
+		summary.Append(" lastContact=").Append(FormatTransportHistoryStats(lastContacts));
+		summary.Append(" finalStep=").Append(FormatTransportHistoryStats(finalSteps));
+		summary.Append(" policyMaxStep=").Append(FormatTransportHistoryStats(policySteps));
+		summary.Append(" effortValid=").Append(entries.Length - effortInvalid).Append(" effortInvalid=").Append(effortInvalid).Append(" playerFirstHitCount=").Append(playerFirstHitCount);
 		return summary.ToString();
+	}
+
+	private static string FormatTransportHistoryStats(List<int> values)
+	{
+		if (values.Count == 0) return "n=0";
+		values.Sort();
+		int Percentile(double p) => values[Math.Clamp((int)Math.Ceiling(values.Count * p) - 1, 0, values.Count - 1)];
+		return $"n={values.Count},min={values[0]},mean={values.Average():0.##},p50={Percentile(0.50)},p90={Percentile(0.90)},p95={Percentile(0.95)},max={values[^1]}";
 	}
 
 	public bool TryGetColliderHitActivityForTesting(out ColliderHitActivityEntry[] entries)
@@ -9342,7 +9429,29 @@ private sealed class OverlayRollingWindow
 			_transportNearestAcceptedColliderId[i] = 0;
 			_transportNearestAcceptedNormal[i] = Vector3.Zero;
 			_transportNormalValid[i] = 0;
+			_transportPolicyMaxSteps[i] = 0;
+			_transportEffortValid[i] = 0;
 		}
+	}
+
+	private void EnsureTransportContactHistoryCapacity(int filmPixelCount)
+	{
+		int safeCount = Math.Max(0, filmPixelCount);
+		if (_transportContactCount.Length != safeCount) _transportContactCount = new int[safeCount];
+		bool firstAllocated = _transportFirstContactStep.Length != safeCount;
+		bool lastAllocated = _transportLastContactStep.Length != safeCount;
+		if (firstAllocated) _transportFirstContactStep = new int[safeCount];
+		if (lastAllocated) _transportLastContactStep = new int[safeCount];
+		if (_transportFinalStepCount.Length != safeCount) _transportFinalStepCount = new int[safeCount];
+		if (_transportHadAnyGeometryContact.Length != safeCount) _transportHadAnyGeometryContact = new byte[safeCount];
+		if (_transportHadAnyBackgroundContact.Length != safeCount) _transportHadAnyBackgroundContact = new byte[safeCount];
+		if (_transportNearestAcceptedColliderId.Length != safeCount) _transportNearestAcceptedColliderId = new ulong[safeCount];
+		if (_transportNearestAcceptedNormal.Length != safeCount) _transportNearestAcceptedNormal = new Vector3[safeCount];
+		if (_transportNormalValid.Length != safeCount) _transportNormalValid = new byte[safeCount];
+		if (_transportPolicyMaxSteps.Length != safeCount) _transportPolicyMaxSteps = new int[safeCount];
+		if (_transportEffortValid.Length != safeCount) _transportEffortValid = new byte[safeCount];
+		if (firstAllocated) Array.Fill(_transportFirstContactStep, -1);
+		if (lastAllocated) Array.Fill(_transportLastContactStep, -1);
 	}
 
 	private void EnsureCathedralProbeBufferCapacity(int pixelCount, bool resetIfAllocated)
@@ -9353,6 +9462,7 @@ private sealed class OverlayRollingWindow
 			_probeOutcomes = new ProbeOutcomeCode[safeCount];
 			_probeRefinLevel = new byte[safeCount];
 			_regionLabels = new ushort[safeCount];
+			EnsureTransportContactHistoryCapacity(safeCount);
 			ResetCathedralProbeBuffersForPass();
 			return;
 		}
@@ -9367,6 +9477,7 @@ private sealed class OverlayRollingWindow
 			_regionLabels = new ushort[safeCount];
 			resetIfAllocated = true;
 		}
+		EnsureTransportContactHistoryCapacity(safeCount);
 
 		if (resetIfAllocated)
 		{
@@ -9449,6 +9560,11 @@ private sealed class OverlayRollingWindow
 		out string reason)
 	{
 		reason = string.Empty;
+		if (_observationAcquisition.Owner == ObservationAcquisitionOwner.Snapshot)
+		{
+			reason = "snapshot_acquisition_owns_observation_planes";
+			return false;
+		}
 		if (_selectedProbeTransportPending)
 		{
 			reason = "selected_probe_transport_already_pending";
@@ -9694,6 +9810,14 @@ private sealed class OverlayRollingWindow
 			_lastProbeRefinementSummary = summary;
 			return false;
 		}
+		if (!_observationAcquisition.TryAcquire(ObservationAcquisitionOwner.RegionRefinement))
+		{
+			summary = ProbeRefinementSummary.Failure(
+				_nextProbeRefinementRequestId, regionId, requestedRefinementLevel, selected.Length, false,
+				"observation_acquisition_owned");
+			_lastProbeRefinementSummary = summary;
+			return false;
+		}
 
 		var results = new ProbeSelectedIndexResult[selected.Length];
 		int requestId = _nextProbeRefinementRequestId++;
@@ -9763,7 +9887,16 @@ private sealed class OverlayRollingWindow
 				ProbeSnapshotLifecycleState.Invalidated,
 				ProbeSnapshotLifecycleReason.RequestSuperseded,
 				contextMatched: false,
+				 dimensionsMatched: false);
+		}
+		if (!_observationAcquisition.TryAcquire(ObservationAcquisitionOwner.Snapshot))
+		{
+			result = BuildCurrentCathedralProbeSnapshotLifecycleResult(
+				ProbeSnapshotLifecycleState.Failed,
+				ProbeSnapshotLifecycleReason.RequestSuperseded,
+				contextMatched: false,
 				dimensionsMatched: false);
+			return false;
 		}
 
 		_probeSnapshotLifecycleRequestId = _nextProbeSnapshotRequestId++;
@@ -9773,6 +9906,8 @@ private sealed class OverlayRollingWindow
 		_probeSnapshotLifecyclePhysicsStartFrame = (int)Engine.GetPhysicsFrames();
 		_probeSnapshotLifecycleProcessElapsed = 0;
 		_probeSnapshotLifecyclePhysicsElapsed = 0;
+		_probeSnapshotLifecycleLastRowCursor = -1;
+		_probeSnapshotLifecycleNoProgressPumps = 0;
 		_probeSnapshotLifecycleInitialized = false;
 		_probeSnapshotLifecycleEvidenceGate.Reset();
 		_probeSnapshotLifecycleActive = true;
@@ -9782,6 +9917,7 @@ private sealed class OverlayRollingWindow
 		_probeSnapshotLifecycleWidth = 0;
 		_probeSnapshotLifecycleHeight = 0;
 		_probeSnapshotLifecyclePolicy = default;
+		_cathedralSnapshotContext = default;
 		result = BuildCurrentCathedralProbeSnapshotLifecycleResult(
 			ProbeSnapshotLifecycleState.Requested,
 			ProbeSnapshotLifecycleReason.None,
@@ -9789,6 +9925,7 @@ private sealed class OverlayRollingWindow
 			dimensionsMatched: true);
 		return true;
 	}
+
 
 	public bool TryGetCathedralProbeSnapshotLifecycleResult(out ProbeSnapshotLifecycleResult result)
 	{
@@ -9814,8 +9951,16 @@ private sealed class OverlayRollingWindow
 		}
 
 		_probeSnapshotLifecycleProcessElapsed = Math.Max(0, (int)Engine.GetProcessFrames() - _probeSnapshotLifecycleProcessStartFrame);
-		_probeSnapshotLifecyclePhysicsElapsed = Math.Max(0, (int)Engine.GetPhysicsFrames() - _probeSnapshotLifecyclePhysicsStartFrame);
-		if (_probeSnapshotLifecyclePhysicsElapsed > _probeSnapshotLifecycleBudgetFrames)
+		// Count acquisition pump opportunities, not the raw physics-thread counter.
+		// A watchdog-yielded band may occupy more than one engine physics tick while
+		// the immutable snapshot remains valid and owns the planes.
+		_probeSnapshotLifecyclePhysicsElapsed++;
+		if (_probeSnapshotLifecycleLastRowCursor == _rowCursor)
+			_probeSnapshotLifecycleNoProgressPumps++;
+		else
+			_probeSnapshotLifecycleNoProgressPumps = 0;
+		_probeSnapshotLifecycleLastRowCursor = _rowCursor;
+		if (_probeSnapshotLifecycleNoProgressPumps > _probeSnapshotLifecycleBudgetFrames)
 		{
 			CompleteCathedralProbeSnapshotLifecycle(
 				ProbeSnapshotLifecycleState.Incomplete,
@@ -9857,7 +10002,7 @@ private sealed class OverlayRollingWindow
 		{
 			CompleteCathedralProbeSnapshotLifecycle(
 				ProbeSnapshotLifecycleState.Invalidated,
-				contextMatched ? ProbeSnapshotLifecycleReason.DimensionsChanged : ProbeSnapshotLifecycleReason.ContextChanged,
+				_probeSnapshotContextInvalidationReason,
 				contextMatched,
 				dimensionsMatched);
 			return;
@@ -9885,6 +10030,25 @@ private sealed class OverlayRollingWindow
 			reason = "context_construction_failed";
 			return false;
 		}
+		RayBeamRenderer.FieldSourceSnap[] frozenFieldSources = GetFieldSourceSnaps(
+			in cfg, _frameIndex, out bool frozenHasSources, out _).ToArray();
+		_cathedralSnapshotContext = new CathedralSnapshotAcquisitionContext
+		{
+			IsValid = true,
+			ContextKey = contextKey,
+			CameraTransform = _cam.GlobalTransform,
+			CameraFov = _cam.Fov,
+			FilmWidth = _filmWidth,
+			FilmHeight = _filmHeight,
+			FieldStrength = cfg.RayMarch.FieldStrength,
+			FieldSources = frozenFieldSources,
+			HasFieldSources = frozenHasSources,
+			FieldSourceEpoch = HashNodeGroupForProbeContext("field_sources"),
+			GeometryEpoch = HashNodeGroupForProbeContext("raytrace_geometry", "fixture_geometry"),
+			BoundaryEpoch = HashNodeGroupForProbeContext("boundary_layer_volumes"),
+			StepsPerRay = cfg.RayMarch.StepsPerRay,
+			StepLength = cfg.RayMarch.StepLength
+		};
 
 		_probeSnapshotLifecycleContextKey = contextKey;
 		_probeSnapshotLifecycleWidth = _filmWidth;
@@ -9915,17 +10079,35 @@ private sealed class OverlayRollingWindow
 	private bool ValidateActiveCathedralProbeSnapshotContext(out bool contextMatched, out bool dimensionsMatched)
 	{
 		contextMatched = false;
+		_probeSnapshotContextInvalidationReason = ProbeSnapshotLifecycleReason.ContextChanged;
 		dimensionsMatched = _filmWidth == _probeSnapshotLifecycleWidth && _filmHeight == _probeSnapshotLifecycleHeight;
 		if (!dimensionsMatched)
 		{
+			_probeSnapshotContextInvalidationReason = ProbeSnapshotLifecycleReason.DimensionsChanged;
 			return false;
 		}
-		if (!TryBuildCurrentProbeContextKey(CathedralProbeRefinementPolicyVersion, out ProbeContextKey currentContext, out _))
+		if (!_cathedralSnapshotContext.IsValid)
 		{
+			_probeSnapshotContextInvalidationReason = ProbeSnapshotLifecycleReason.ContextConstructionFailed;
 			return false;
 		}
-		contextMatched = currentContext == _probeSnapshotLifecycleContextKey;
-		return contextMatched;
+		if (HashNodeGroupForProbeContext("raytrace_geometry", "fixture_geometry") != _cathedralSnapshotContext.GeometryEpoch)
+		{
+			_probeSnapshotContextInvalidationReason = ProbeSnapshotLifecycleReason.GeometryEpochChanged;
+			return false;
+		}
+		if (HashNodeGroupForProbeContext("field_sources") != _cathedralSnapshotContext.FieldSourceEpoch)
+		{
+			_probeSnapshotContextInvalidationReason = ProbeSnapshotLifecycleReason.FieldSourceEpochChanged;
+			return false;
+		}
+		if (HashNodeGroupForProbeContext("boundary_layer_volumes") != _cathedralSnapshotContext.BoundaryEpoch)
+		{
+			_probeSnapshotContextInvalidationReason = ProbeSnapshotLifecycleReason.BoundaryEpochChanged;
+			return false;
+		}
+		contextMatched = true;
+		return true;
 	}
 
 	private static ProbeSnapshotLifecycleReason MapSnapshotLifecycleReason(string reason)
@@ -9936,6 +10118,9 @@ private sealed class OverlayRollingWindow
 			"context_construction_failed" => ProbeSnapshotLifecycleReason.ContextConstructionFailed,
 			"dimensions_changed" => ProbeSnapshotLifecycleReason.DimensionsChanged,
 			"transport_rejected" => ProbeSnapshotLifecycleReason.TransportRejected,
+			"geometry_epoch_changed" => ProbeSnapshotLifecycleReason.GeometryEpochChanged,
+			"field_source_epoch_changed" => ProbeSnapshotLifecycleReason.FieldSourceEpochChanged,
+			"boundary_epoch_changed" => ProbeSnapshotLifecycleReason.BoundaryEpochChanged,
 			_ => ProbeSnapshotLifecycleReason.InternalValidationFailed,
 		};
 	}
@@ -9972,6 +10157,7 @@ private sealed class OverlayRollingWindow
 		{
 			_probeSnapshotComplete = false;
 		}
+		_observationAcquisition.Release(ObservationAcquisitionOwner.Snapshot);
 		PrintCathedralProbeSnapshotEvidenceOnce(result);
 		PrintCathedralSealedObservationFrameDiagnosticOnce(result);
 	}
@@ -10133,6 +10319,10 @@ private sealed class OverlayRollingWindow
 			ProbeSnapshotLifecycleReason.UnprocessedPixelsRemaining => "unprocessed_pixels_remaining",
 			ProbeSnapshotLifecycleReason.TimeoutOrFrameBudgetExhausted => "timeout_or_frame_budget_exhausted",
 			ProbeSnapshotLifecycleReason.InternalValidationFailed => "internal_validation_failed",
+			ProbeSnapshotLifecycleReason.GeometryEpochChanged => "geometry_epoch_changed",
+			ProbeSnapshotLifecycleReason.FieldSourceEpochChanged => "field_source_epoch_changed",
+			ProbeSnapshotLifecycleReason.BoundaryEpochChanged => "boundary_epoch_changed",
+			ProbeSnapshotLifecycleReason.PolicyChanged => "policy_changed",
 			_ => "unknown",
 		};
 	}
@@ -10223,6 +10413,7 @@ private sealed class OverlayRollingWindow
 			_lastProbeRefinementSummary.PolicyStepSize = request.Policy.RefinedStepLength;
 			_lastProbeRefinementSummary.ElapsedTicks = elapsedTicks;
 			PrintCathedralProbeRefinementEvidence(request.FrameSummaryBefore, _probeFrameSummary, _lastProbeRefinementSummary);
+			_observationAcquisition.Release(ObservationAcquisitionOwner.RegionRefinement);
 			return;
 		}
 		if (!TryBuildCurrentProbeContextKey(CathedralProbeRefinementPolicyVersion, out ProbeContextKey currentContext, out string reason))
@@ -10235,8 +10426,11 @@ private sealed class OverlayRollingWindow
 				false,
 				reason);
 			PrintCathedralProbeRefinementEvidence(request.FrameSummaryBefore, _probeFrameSummary, _lastProbeRefinementSummary);
+			_observationAcquisition.Release(ObservationAcquisitionOwner.RegionRefinement);
 			return;
 		}
+		for (int i = 0; i < completedCount && i < request.PixelIndices.Length; i++)
+			StoreTransportContactHistoryPixel(request.PixelIndices[i], request.Results[i]);
 
 		ProbeFrameSummary before = _probeFrameSummary;
 		_lastProbeRefinementSummary = ProbeRegionRefinementEngine.ApplySelectedRegionResults(
@@ -10260,6 +10454,7 @@ private sealed class OverlayRollingWindow
 			_probeRegions,
 			ref _probeFrameSummary);
 		PrintCathedralProbeRefinementEvidence(before, _probeFrameSummary, _lastProbeRefinementSummary);
+		_observationAcquisition.Release(ObservationAcquisitionOwner.RegionRefinement);
 	}
 
 	private void PrintCathedralProbeRefinementEvidence(
@@ -10695,7 +10890,9 @@ private sealed class OverlayRollingWindow
 					NearestAcceptedNormalX = hitInfo.Normal.X,
 					NearestAcceptedNormalY = hitInfo.Normal.Y,
 					NearestAcceptedNormalZ = hitInfo.Normal.Z,
-					NormalValid = hitInfo.NormalValid
+					NormalValid = hitInfo.NormalValid,
+					PolicyMaxSteps = request.RefinedStepsPerRay,
+					EffortValid = !hitInfo.HadNumericalFailure
 				};
 				completed++;
 			}
@@ -10786,8 +10983,17 @@ private sealed class OverlayRollingWindow
 		}
 
 		ProbeContextKey summaryContext = default;
-		bool hasSummaryContext = unprocessedCount == 0 &&
-			TryBuildCurrentProbeContextKey(CathedralProbeRefinementPolicyVersion, out summaryContext, out _);
+		bool hasSummaryContext;
+		if (_observationAcquisition.Owner == ObservationAcquisitionOwner.Snapshot && _cathedralSnapshotContext.IsValid)
+		{
+			summaryContext = _cathedralSnapshotContext.ContextKey;
+			hasSummaryContext = unprocessedCount == 0;
+		}
+		else
+		{
+			hasSummaryContext = unprocessedCount == 0 &&
+				TryBuildCurrentProbeContextKey(CathedralProbeRefinementPolicyVersion, out summaryContext, out _);
+		}
 
 		_probeFrameSummary = new ProbeFrameSummary
 		{
@@ -10807,6 +11013,15 @@ private sealed class OverlayRollingWindow
 			ContextKey = summaryContext
 		};
 		_probeSnapshotComplete = unprocessedCount == 0 && hasSummaryContext;
+		bool snapshotCanSeal = ProbeSnapshotLifecycleModel.CanSealSnapshot(
+			totalPixels,
+			unprocessedCount,
+			_pendingBandHasPass1 || _pendingBandRowStart >= 0,
+			_rowCursor,
+			filmH,
+			hasSummaryContext,
+			_probeSnapshotLifecycleState,
+			_probeSnapshotLifecycleReason);
 		if (_probeSnapshotComplete)
 		{
 			_probeFrameContextKey = summaryContext;
@@ -10815,7 +11030,8 @@ private sealed class OverlayRollingWindow
 				_probeSnapshotLifecycleInitialized &&
 				_probeSnapshotLifecycleWidth == filmW &&
 				_probeSnapshotLifecycleHeight == filmH &&
-				summaryContext == _probeSnapshotLifecycleContextKey &&
+					summaryContext == _probeSnapshotLifecycleContextKey &&
+					snapshotCanSeal &&
 				_probeFrameSummary.TotalPixels == totalPixels &&
 				_probeFrameSummary.TotalPixels ==
 					unprocessedCount +
@@ -15038,6 +15254,18 @@ private sealed class OverlayRollingWindow
 		}
 
 		ResolveEffectiveConfig(out EffectiveConfig cfg);
+		bool snapshotAcquisition = _observationAcquisition.Owner == ObservationAcquisitionOwner.Snapshot &&
+			_cathedralSnapshotContext.IsValid;
+		if (snapshotAcquisition)
+		{
+			// SNAPSHOT keeps the existing 120 ms boundary, but treats it as a yield so
+			// the frozen acquisition can resume on the next physics pump.
+			cfg.UpdateEveryFrame = true;
+			cfg.UpdateEveryFrameBudgetMs = 0f;
+			cfg.RayMarch.FieldStrength = _cathedralSnapshotContext.FieldStrength;
+			cfg.RayMarch.StepsPerRay = _cathedralSnapshotContext.StepsPerRay;
+			cfg.RayMarch.StepLength = _cathedralSnapshotContext.StepLength;
+		}
 		_diagnostics = ResolveDiagnosticsForMode(cfg.UpdateEveryFrame);
 		long renderStepStartTimestamp = Stopwatch.GetTimestamp();
 		bool researchAppliedRayMarchClamp = false;
@@ -15310,10 +15538,12 @@ private sealed class OverlayRollingWindow
 			// DECISION: wrap when we finished all rows.
 			if (_rowCursor >= _filmHeight)
 			{
-				if (!cfg.UpdateEveryFrame)
+				if (!cfg.UpdateEveryFrame || snapshotAcquisition)
 					FinalizeCathedralProbeSnapshotSummary(_filmWidth, _filmHeight);
 				ResetRowCursor("completed");
 				rowCursorResetThisStep = true;
+				if (snapshotAcquisition)
+					return;
 			}
 			if (rowCursorResetThisStep)
 			{
@@ -15418,6 +15648,8 @@ private sealed class OverlayRollingWindow
 
 				_rowCursor = nextRow;
 				bandCommittedThisStep = true;
+				if (snapshotAcquisition && bandEnd >= filmHLocal && nextRow == 0)
+					FinalizeCathedralProbeSnapshotSummary(_filmWidth, _filmHeight);
 				ResetNoHitStall();
 				if (_pendingBandHasPass1 && !preservePendingPass2)
 				{
@@ -15759,7 +15991,7 @@ private sealed class OverlayRollingWindow
 				{
 					softGateDisableLogged = true;
 					string sgReason = string.IsNullOrEmpty(softGateDisableReason) ? "overload" : softGateDisableReason;
-					GD.PrintErr(
+					if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render)) GD.PrintErr(
 						$"[SoftGate][Disable] reason={sgReason} frame={_frameIndex} row={_rowCursor} " +
 						$"attempts={_softGateAttemptsUsedThisFrame}/{pass2SoftGateMaxAttemptsPerFrameEffective} " +
 						$"sub={_softGateSubdividedCallsUsedThisFrame}/{pass2SoftGateMaxSubdividedCallsPerFrameEffective} " +
@@ -15776,7 +16008,7 @@ private sealed class OverlayRollingWindow
 					long qRayMiss = softGateDebugEnabled ? _softGateFrame.QRayMiss : 0;
 					int subCalls = statsEnabled ? _perfFrame.SubdividedRayCalls : 0;
 					int subSteps = statsEnabled ? _perfFrame.SubdividedRaySubsteps : 0;
-					GD.PrintErr(
+					if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render)) GD.PrintErr(
 						$"[RenderStep][Budget] reason={reason} frame={_frameIndex} row={_rowCursor} bandH={bandH} stride={stride} " +
 						$"elapsedMs={renderStepWatch.ElapsedMilliseconds} maxMs={effectiveMaxMs:0.###} " +
 						$"attempts={_softGateAttemptsUsedThisFrame}/{pass2SoftGateMaxAttemptsPerFrameEffective} " +
@@ -15785,7 +16017,7 @@ private sealed class OverlayRollingWindow
 						$"tracedPx={bandTracedPixels} segsTested={bandSegsTested} qRay={qRayCalls}/{qRayHit}/{qRayMiss} " +
 						$"physQ={bandPhysicsQueries} subCalls={subCalls} subSteps={subSteps}");
 				}
-				GD.PrintErr(
+				if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render)) GD.PrintErr(
 					$"[RenderStep][Abort] reason={reason} frame={_frameIndex} row={_rowCursor} " +
 					$"ms={renderStepWatch.ElapsedMilliseconds}");
 			}
@@ -15946,7 +16178,19 @@ private sealed class OverlayRollingWindow
 			int geomCountForScratch = geomEntitiesForStep?.Count ?? 0;
 			EnsureGeomScratchCapacity(Math.Max(256, geomCountForScratch));
 
-			var fieldSnaps = GetFieldSourceSnaps(in cfg, _frameIndex, out bool hasSources, out bool cacheRefreshed);
+			RayBeamRenderer.FieldSourceSnap[] fieldSnaps;
+			bool hasSources;
+			bool cacheRefreshed;
+			if (snapshotAcquisition)
+			{
+				fieldSnaps = _cathedralSnapshotContext.FieldSources ?? Array.Empty<RayBeamRenderer.FieldSourceSnap>();
+				hasSources = _cathedralSnapshotContext.HasFieldSources;
+				cacheRefreshed = false;
+			}
+			else
+			{
+				fieldSnaps = GetFieldSourceSnaps(in cfg, _frameIndex, out hasSources, out cacheRefreshed);
+			}
 			// DECISION: track cache hits/misses for field sources when caching is enabled.
 			if (framePerfEnabled && frameStart && cfg.UseFieldSourceCache)
 			{
@@ -15976,10 +16220,16 @@ private sealed class OverlayRollingWindow
 				_framePerf.PowFastPath = (gamma == -2f || gamma == -1f || gamma == 0f || gamma == 1f || gamma == 2f);
 
 			// CROSS-CLASS CONTRACT: RayBeamRenderer decides field center policy.
-			Vector3 center = rayCfg.FieldCenterIsCamera ? _cam.GlobalPosition : rayCfg.FieldCenter;
-			var basis = _cam.GlobalTransform.Basis;
+			Vector3 snapshotCameraOrigin = snapshotAcquisition
+				? _cathedralSnapshotContext.CameraTransform.Origin
+				: _cam.GlobalPosition;
+			Basis snapshotCameraBasis = snapshotAcquisition
+				? _cathedralSnapshotContext.CameraTransform.Basis
+				: _cam.GlobalTransform.Basis;
+			Vector3 center = rayCfg.FieldCenterIsCamera ? snapshotCameraOrigin : rayCfg.FieldCenter;
+			var basis = snapshotCameraBasis;
 
-			float fovRad = Mathf.DegToRad(_cam.Fov);
+			float fovRad = Mathf.DegToRad(snapshotAcquisition ? _cathedralSnapshotContext.CameraFov : _cam.Fov);
 			float tanHalf = Mathf.Tan(fovRad * 0.5f);
 			float aspect = (float)filmW / Mathf.Max(1f, filmH);
 
@@ -16260,23 +16510,6 @@ private sealed class OverlayRollingWindow
 			if (_pass1HitNormal.Length < pixelCount) _pass1HitNormal = new Vector3[pixelCount];
 			// DECISION: grow pass1 hit collider id buffer when needed.
 			if (_pass1HitColliderId.Length < pixelCount) _pass1HitColliderId = new ulong[pixelCount];
-			if (_transportContactCount.Length < pixelCount) _transportContactCount = new int[pixelCount];
-			if (_transportFirstContactStep.Length < pixelCount)
-			{
-				_transportFirstContactStep = new int[pixelCount];
-				Array.Fill(_transportFirstContactStep, -1);
-			}
-			if (_transportLastContactStep.Length < pixelCount)
-			{
-				_transportLastContactStep = new int[pixelCount];
-				Array.Fill(_transportLastContactStep, -1);
-			}
-			if (_transportFinalStepCount.Length < pixelCount) _transportFinalStepCount = new int[pixelCount];
-			if (_transportHadAnyGeometryContact.Length < pixelCount) _transportHadAnyGeometryContact = new byte[pixelCount];
-			if (_transportHadAnyBackgroundContact.Length < pixelCount) _transportHadAnyBackgroundContact = new byte[pixelCount];
-			if (_transportNearestAcceptedColliderId.Length < pixelCount) _transportNearestAcceptedColliderId = new ulong[pixelCount];
-			if (_transportNearestAcceptedNormal.Length < pixelCount) _transportNearestAcceptedNormal = new Vector3[pixelCount];
-			if (_transportNormalValid.Length < pixelCount) _transportNormalValid = new byte[pixelCount];
 
 			// Ultra-turbo / Cathedral fingerprint buffers (memristor experience cache)
 			if (_pixelCurvatureFingerprintStability.Length < pixelCount) _pixelCurvatureFingerprintStability = new float[pixelCount];
@@ -16336,11 +16569,13 @@ private sealed class OverlayRollingWindow
 
 			var basisLocal = basis; // capture for lambda
 			Camera3D pass1Cam = rbrCam;
-			Vector3 pass1CamPos = pass1Cam != null ? pass1Cam.GlobalPosition : Vector3.Zero;
+			Vector3 pass1CamPos = snapshotAcquisition
+				? _cathedralSnapshotContext.CameraTransform.Origin
+				: (pass1Cam != null ? pass1Cam.GlobalPosition : Vector3.Zero);
 			float pass1PxPerRad = 0f;
 			if (rayCfg.UseScreenSpaceCollisionCadence && pass1Cam != null)
 			{
-				float pass1FovY = Mathf.DegToRad(pass1Cam.Fov);
+				float pass1FovY = Mathf.DegToRad(snapshotAcquisition ? _cathedralSnapshotContext.CameraFov : pass1Cam.Fov);
 				var pass1Vp = pass1Cam.GetViewport();
 				float pass1VpHeight = pass1Vp != null ? pass1Vp.GetVisibleRect().Size.Y : 720f;
 				pass1VpHeight = Mathf.Max(1f, pass1VpHeight);
@@ -16574,7 +16809,8 @@ private sealed class OverlayRollingWindow
 					_pass1HitNormal[pi] = hitInfo.Normal;
 					_pass1HitColliderId[pi] = hitInfo.ColliderId;
 					hitInfo.SurfaceClass = ClassifyProbeSurfaceClass(hitInfo.Found, hitInfo.ColliderId);
-					FillTransportContactHistoryBlock(x, y, stride, filmW, filmH, hitInfo, stepsIntegrated);
+					FillTransportContactHistoryBlock(x, y, stride, filmW, filmH, hitInfo, stepsIntegrated,
+						rayCfg.StepsPerRay, !hitInfo.HadNumericalFailure);
 					ProbeOutcomeCode probeOutcome = ClassifyCathedralProbeOutcome(
 						hitInfo.HadNumericalFailure,
 						hitInfo.Found,
@@ -22710,6 +22946,11 @@ private sealed class OverlayRollingWindow
 					_pendingBandRowCount = 0;
 					_pendingBandHasPass1 = false;
 				}
+				if (snapshotAcquisition && yEnd >= filmH)
+				{
+					FinalizeCathedralProbeSnapshotSummary(_filmWidth, _filmHeight);
+					return;
+				}
 				// When completing a deferred pass2 band, _rowCursor was already advanced to yEnd
 				// by the prior pass1 FinalizeBandAndAdvance. EnsureForwardProgress would see
 				// startRow == endRow and incorrectly force an extra advance, skipping the next
@@ -24280,28 +24521,50 @@ private sealed class OverlayRollingWindow
 		return filled;
 	}
 
-	private int FillTransportContactHistoryBlock(int x, int y, int stride, int filmW, int filmH, in RayBeamRenderer.Pass1HitInfo hitInfo, int finalStepCount)
+	private int FillTransportContactHistoryBlock(int sourceX, int sourceY, int stride, int filmW, int filmH,
+		in RayBeamRenderer.Pass1HitInfo hitInfo, int finalStepCount, int policyMaxSteps, bool effortValid)
 	{
-		if (_transportContactCount.Length == 0) return 0;
+		if (_transportContactCount.Length < filmW * filmH) return 0;
 		int filled = 0;
-		int yMax = Math.Min(filmH, y + Math.Max(1, stride));
-		int xMax = Math.Min(filmW, x + Math.Max(1, stride));
-		for (int yy = y; yy < yMax; yy++)
-		for (int xx = x; xx < xMax; xx++)
+		int safeStride = Math.Max(1, stride);
+		int yMax = Math.Min(filmH, sourceY + safeStride);
+		int xMax = Math.Min(filmW, sourceX + safeStride);
+		for (int yy = sourceY; yy < yMax; yy++)
+		for (int xx = sourceX; xx < xMax; xx++)
 		{
-			int index = (yy * filmW) + xx;
-			_transportContactCount[index] = hitInfo.ContactCount;
-			_transportFirstContactStep[index] = hitInfo.FirstContactStep;
-			_transportLastContactStep[index] = hitInfo.LastContactStep;
-			_transportFinalStepCount[index] = finalStepCount;
-			_transportHadAnyGeometryContact[index] = (byte)(hitInfo.HadAnyGeometryContact ? 1 : 0);
-			_transportHadAnyBackgroundContact[index] = (byte)(hitInfo.HadAnyBackgroundContact ? 1 : 0);
-			_transportNearestAcceptedColliderId[index] = hitInfo.ColliderId;
-			_transportNearestAcceptedNormal[index] = hitInfo.Normal;
-			_transportNormalValid[index] = (byte)(hitInfo.NormalValid ? 1 : 0);
+			int destinationPixelIndex = (yy * filmW) + xx;
+			_transportContactCount[destinationPixelIndex] = hitInfo.ContactCount;
+			_transportFirstContactStep[destinationPixelIndex] = hitInfo.FirstContactStep;
+			_transportLastContactStep[destinationPixelIndex] = hitInfo.LastContactStep;
+			_transportFinalStepCount[destinationPixelIndex] = finalStepCount;
+			_transportHadAnyGeometryContact[destinationPixelIndex] = (byte)(hitInfo.HadAnyGeometryContact ? 1 : 0);
+			_transportHadAnyBackgroundContact[destinationPixelIndex] = (byte)(hitInfo.HadAnyBackgroundContact ? 1 : 0);
+			_transportNearestAcceptedColliderId[destinationPixelIndex] = hitInfo.ColliderId;
+			_transportNearestAcceptedNormal[destinationPixelIndex] = hitInfo.Normal;
+			_transportNormalValid[destinationPixelIndex] = (byte)(hitInfo.NormalValid ? 1 : 0);
+			_transportPolicyMaxSteps[destinationPixelIndex] = Math.Max(0, policyMaxSteps);
+			_transportEffortValid[destinationPixelIndex] = (byte)(effortValid ? 1 : 0);
 			filled++;
 		}
 		return filled;
+	}
+
+	private void StoreTransportContactHistoryPixel(int destinationPixelIndex, in ProbeSelectedIndexResult result)
+	{
+		if (destinationPixelIndex < 0 || destinationPixelIndex >= _transportContactCount.Length)
+			return;
+		_transportContactCount[destinationPixelIndex] = result.ContactCount;
+		_transportFirstContactStep[destinationPixelIndex] = result.FirstContactStep;
+		_transportLastContactStep[destinationPixelIndex] = result.LastContactStep;
+		_transportFinalStepCount[destinationPixelIndex] = result.FinalStepCount;
+		_transportHadAnyGeometryContact[destinationPixelIndex] = (byte)(result.HadAnyGeometryContact ? 1 : 0);
+		_transportHadAnyBackgroundContact[destinationPixelIndex] = (byte)(result.HadAnyBackgroundContact ? 1 : 0);
+		_transportNearestAcceptedColliderId[destinationPixelIndex] = result.NearestAcceptedColliderId;
+		_transportNearestAcceptedNormal[destinationPixelIndex] = new Vector3(
+			result.NearestAcceptedNormalX, result.NearestAcceptedNormalY, result.NearestAcceptedNormalZ);
+		_transportNormalValid[destinationPixelIndex] = (byte)(result.NormalValid ? 1 : 0);
+		_transportPolicyMaxSteps[destinationPixelIndex] = Math.Max(0, result.PolicyMaxSteps);
+		_transportEffortValid[destinationPixelIndex] = (byte)(result.EffortValid ? 1 : 0);
 	}
 
 	private static int FillVector3Block(Vector3[] values, int x, int y, int stride, int filmW, int filmH, Vector3 value)

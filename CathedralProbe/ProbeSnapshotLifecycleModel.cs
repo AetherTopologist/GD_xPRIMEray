@@ -67,4 +67,23 @@ public static class ProbeSnapshotLifecycleModel
 			result.RegionAnalysisAvailable &&
 			result.HistogramReconciles();
 	}
+
+	public static bool CanSealSnapshot(
+		int totalPixels,
+		int unprocessedPixels,
+		bool pendingBandWork,
+		int rowCursor,
+		int filmHeight,
+		bool contextMatched,
+		ProbeSnapshotLifecycleState state,
+		ProbeSnapshotLifecycleReason reason)
+	{
+		return state == ProbeSnapshotLifecycleState.Capturing &&
+			reason == ProbeSnapshotLifecycleReason.None &&
+			totalPixels > 0 &&
+			unprocessedPixels == 0 &&
+			!pendingBandWork &&
+			rowCursor >= filmHeight &&
+			contextMatched;
+	}
 }

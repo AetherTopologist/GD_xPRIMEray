@@ -14,4 +14,8 @@ public enum ProbeSnapshotLifecycleReason : byte
 	UnprocessedPixelsRemaining = 8,
 	TimeoutOrFrameBudgetExhausted = 9,
 	InternalValidationFailed = 10,
+	GeometryEpochChanged = 11,
+	FieldSourceEpochChanged = 12,
+	BoundaryEpochChanged = 13,
+	PolicyChanged = 14,
 }

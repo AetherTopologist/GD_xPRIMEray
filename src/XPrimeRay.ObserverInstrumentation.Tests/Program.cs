@@ -22,7 +22,8 @@ internal static class Program
             (nameof(ProbeRegionRefinementEngineTests), ProbeRegionRefinementEngineTests.Run),
             (nameof(ProbeSnapshotLifecycleTests), ProbeSnapshotLifecycleTests.Run),
             (nameof(ObservationFrameAdapterTests), ObservationFrameAdapterTests.Run)
-            ,(nameof(TransportContactHistoryTests), TransportContactHistoryTests.Run)
+			,(nameof(TransportContactHistoryTests), TransportContactHistoryTests.Run)
+			,(nameof(ObservationAcquisitionOwnershipTests), ObservationAcquisitionOwnershipTests.Run)
         };
 
         int failures = 0;

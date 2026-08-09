@@ -21,6 +21,7 @@ internal static class ProbeSnapshotLifecycleTests
 		DeterministicRepeatedLifecycle();
 		PreviousCompletedEvidenceNotMislabeledDuringNewCapture();
 		AtomicFinalizationModel();
+		FinalBandSealInvariant();
 	}
 
 	private static void ValidTransitions()
@@ -194,6 +195,16 @@ internal static class ProbeSnapshotLifecycleTests
 
 		var complete = CompleteResult();
 		TestAssert.True(ProbeSnapshotLifecycleModel.CanComplete(complete), "atomic complete accepted");
+	}
+
+	private static void FinalBandSealInvariant()
+	{
+		TestAssert.True(ProbeSnapshotLifecycleModel.CanSealSnapshot(3600, 0, false, 45, 45, true, ProbeSnapshotLifecycleState.Capturing, ProbeSnapshotLifecycleReason.None), "exact final band seals");
+		TestAssert.True(ProbeSnapshotLifecycleModel.CanSealSnapshot(3600, 0, false, 45, 45, true, ProbeSnapshotLifecycleState.Capturing, ProbeSnapshotLifecycleReason.None), "partial final band seals");
+		TestAssert.False(ProbeSnapshotLifecycleModel.CanSealSnapshot(3600, 80, false, 44, 45, true, ProbeSnapshotLifecycleState.Capturing, ProbeSnapshotLifecycleReason.None), "watchdog before final pixels yields");
+		TestAssert.False(ProbeSnapshotLifecycleModel.CanSealSnapshot(3600, 0, true, 45, 45, true, ProbeSnapshotLifecycleState.Capturing, ProbeSnapshotLifecycleReason.None), "pending pass cannot seal");
+		TestAssert.False(ProbeSnapshotLifecycleModel.CanSealSnapshot(3600, 0, false, 45, 45, false, ProbeSnapshotLifecycleState.Capturing, ProbeSnapshotLifecycleReason.None), "context mismatch cannot seal");
+		TestAssert.False(ProbeSnapshotLifecycleModel.CanSealSnapshot(3600, 0, false, 45, 45, true, ProbeSnapshotLifecycleState.Complete, ProbeSnapshotLifecycleReason.None), "repeated complete pump cannot reseal");
 	}
 
 	private static ProbeSnapshotLifecycleResult CompleteResult()

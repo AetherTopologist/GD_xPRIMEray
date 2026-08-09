@@ -21,4 +21,6 @@ public struct ProbeSelectedIndexResult
 	public float NearestAcceptedNormalY;
 	public float NearestAcceptedNormalZ;
 	public bool NormalValid;
+	public int PolicyMaxSteps;
+	public bool EffortValid;
 }

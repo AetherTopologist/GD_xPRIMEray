@@ -36,5 +36,25 @@ internal static class TransportContactHistoryTests
         TestAssert.Equal(count, replicatedCount, "stride count is copied");
         TestAssert.Equal(first, replicatedFirst, "stride first step is copied");
         TestAssert.Equal(last, replicatedLast, "stride last step is copied");
+
+        foreach ((int width, int height) in new[] { (80, 45), (160, 90), (37, 19) })
+        {
+            TransportContactHistoryPlaneLayout layout = new(width, height);
+            TestAssert.Equal(width * height, layout.Capacity, "full-frame capacity");
+            TestAssert.True(layout.IsFullFrameCapacity(layout.Capacity), "capacity accepted");
+            TestAssert.False(layout.IsFullFrameCapacity(layout.Capacity - 1), "band capacity rejected");
+            TestAssert.True(layout.TryGetDestinationIndex(width - 2, height - 2, 4, width - 1, height - 1, out int destination), "partial stride destination");
+            TestAssert.Equal((height - 1) * width + width - 1, destination, "partial stride index");
+        }
+
+        TransportContactHistoryPlaneLayout resized = new(80, 45);
+        TestAssert.True(resized.IsFullFrameCapacity(160 * 90), "larger capacity can cover the new layout");
+        resized = new TransportContactHistoryPlaneLayout(160, 90);
+        TestAssert.True(resized.IsFullFrameCapacity(160 * 90), "reallocated capacity");
+
+        TestAssert.True(TransportEffortValidity.TryNormalize(40, 80, false, out float effort), "effort valid");
+        TestAssert.NearlyEqual(0.5f, effort, 0.0001f, "effort ratio");
+        TestAssert.False(TransportEffortValidity.TryNormalize(40, 80, true, out _), "numerical effort unavailable");
+        TestAssert.False(TransportEffortValidity.TryNormalize(40, 0, false, out _), "zero budget effort unavailable");
     }
 }
