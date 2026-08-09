@@ -2295,6 +2295,15 @@ public partial class GrinFilmCamera : Node
 	private Vector3[] _pass1HitPos = Array.Empty<Vector3>();
 	private Vector3[] _pass1HitNormal = Array.Empty<Vector3>();
 	private ulong[] _pass1HitColliderId = Array.Empty<ulong>();
+	private int[] _transportContactCount = Array.Empty<int>();
+	private int[] _transportFirstContactStep = Array.Empty<int>();
+	private int[] _transportLastContactStep = Array.Empty<int>();
+	private int[] _transportFinalStepCount = Array.Empty<int>();
+	private byte[] _transportHadAnyGeometryContact = Array.Empty<byte>();
+	private byte[] _transportHadAnyBackgroundContact = Array.Empty<byte>();
+	private ulong[] _transportNearestAcceptedColliderId = Array.Empty<ulong>();
+	private Vector3[] _transportNearestAcceptedNormal = Array.Empty<Vector3>();
+	private byte[] _transportNormalValid = Array.Empty<byte>();
 	private ProbeOutcomeCode[] _probeOutcomes = Array.Empty<ProbeOutcomeCode>();
 	private byte[] _probeRefinLevel = Array.Empty<byte>();
 	private ushort[] _regionLabels = Array.Empty<ushort>();
@@ -7149,6 +7158,60 @@ private sealed class OverlayRollingWindow
 		return _filmWidth > 0 && _filmHeight > 0;
 	}
 
+	public bool TryGetTransportContactHistoryForTesting(out TransportContactHistoryEntry[] entries)
+	{
+		int pixelCount = Math.Max(0, _filmWidth) * Math.Max(0, _filmHeight);
+		if (pixelCount <= 0 || _transportContactCount.Length < pixelCount || _probeOutcomes.Length < pixelCount)
+		{
+			entries = Array.Empty<TransportContactHistoryEntry>();
+			return false;
+		}
+
+		entries = new TransportContactHistoryEntry[pixelCount];
+		for (int i = 0; i < pixelCount; i++)
+		{
+			entries[i] = new TransportContactHistoryEntry(i, _transportContactCount[i], _transportFirstContactStep[i],
+				_transportLastContactStep[i], _transportFinalStepCount[i], _transportHadAnyGeometryContact[i] != 0,
+				_transportHadAnyBackgroundContact[i] != 0, _transportNearestAcceptedColliderId[i],
+				_transportNearestAcceptedNormal[i].X, _transportNearestAcceptedNormal[i].Y,
+				_transportNearestAcceptedNormal[i].Z, _transportNormalValid[i] != 0, _probeOutcomes[i]);
+		}
+		return true;
+	}
+
+	public string BuildTransportContactHistorySummaryForTesting()
+	{
+		if (!TryGetTransportContactHistoryForTesting(out TransportContactHistoryEntry[] entries))
+			return "transport_contact_history unavailable";
+		int zero = 0, one = 0, two = 0, many = 0, valid = 0, invalid = 0;
+		Dictionary<ProbeOutcomeCode, int> outcomeCounts = new();
+		Dictionary<string, int> crossTab = new();
+		Dictionary<string, int> normalClusters = new();
+		foreach (TransportContactHistoryEntry entry in entries)
+		{
+			if (entry.ContactCount == 0) zero++; else if (entry.ContactCount == 1) one++; else if (entry.ContactCount == 2) two++; else many++;
+			outcomeCounts[entry.Outcome] = outcomeCounts.TryGetValue(entry.Outcome, out int oc) ? oc + 1 : 1;
+			string bucket = entry.ContactCount == 0 ? "zero" : entry.ContactCount == 1 ? "one" : "multi";
+			string key = $"{entry.Outcome}×{bucket}";
+			crossTab[key] = crossTab.TryGetValue(key, out int tc) ? tc + 1 : 1;
+			if (entry.HadAnyGeometryContact)
+			{
+				if (entry.NormalValid) valid++; else invalid++;
+				Vector3 n = new(entry.NearestAcceptedNormalX, entry.NearestAcceptedNormalY, entry.NearestAcceptedNormalZ);
+				string cluster = $"({Mathf.Round(n.X * 10f) / 10f:0.0},{Mathf.Round(n.Y * 10f) / 10f:0.0},{Mathf.Round(n.Z * 10f) / 10f:0.0})";
+				normalClusters[cluster] = normalClusters.TryGetValue(cluster, out int nc) ? nc + 1 : 1;
+			}
+		}
+		StringBuilder summary = new();
+		summary.Append("pixels=").Append(entries.Length).Append(" contactCount:0=").Append(zero).Append(" 1=").Append(one).Append(" 2=").Append(two).Append(" 3+=").Append(many).Append(" outcomes:");
+		foreach (ProbeOutcomeCode code in Enum.GetValues<ProbeOutcomeCode>()) summary.Append(' ').Append(code).Append('=').Append(outcomeCounts.TryGetValue(code, out int count) ? count : 0);
+		summary.Append(" cross-tab:");
+		foreach (string key in crossTab.Keys.OrderBy(key => key, StringComparer.Ordinal)) summary.Append(' ').Append(key).Append('=').Append(crossTab[key]);
+		summary.Append(" normals:valid=").Append(valid).Append(" invalid=").Append(invalid).Append(" clusters:");
+		foreach (string key in normalClusters.Keys.OrderBy(key => key, StringComparer.Ordinal)) summary.Append(' ').Append(key).Append('=').Append(normalClusters[key]);
+		return summary.ToString();
+	}
+
 	public bool TryGetColliderHitActivityForTesting(out ColliderHitActivityEntry[] entries)
 	{
 		if (_pass1HitColliderId == null || _pass1HitColliderId.Length == 0)
@@ -9245,6 +9308,7 @@ private sealed class OverlayRollingWindow
 
 	private void ResetCathedralProbeBuffersForPass()
 	{
+		ResetTransportContactHistoryBuffers();
 		if (_probeOutcomes.Length > 0)
 		{
 			Array.Fill(_probeOutcomes, ProbeOutcomeCode.Unprocessed);
@@ -9263,6 +9327,22 @@ private sealed class OverlayRollingWindow
 		_probeSnapshotComplete = false;
 		_probeFrameContextKey = default;
 		_activeRegionProbeRefinementRequest = null;
+	}
+
+	private void ResetTransportContactHistoryBuffers()
+	{
+		for (int i = 0; i < _transportContactCount.Length; i++)
+		{
+			_transportContactCount[i] = 0;
+			_transportFirstContactStep[i] = -1;
+			_transportLastContactStep[i] = -1;
+			_transportFinalStepCount[i] = 0;
+			_transportHadAnyGeometryContact[i] = 0;
+			_transportHadAnyBackgroundContact[i] = 0;
+			_transportNearestAcceptedColliderId[i] = 0;
+			_transportNearestAcceptedNormal[i] = Vector3.Zero;
+			_transportNormalValid[i] = 0;
+		}
 	}
 
 	private void EnsureCathedralProbeBufferCapacity(int pixelCount, bool resetIfAllocated)
@@ -10587,7 +10667,8 @@ private sealed class OverlayRollingWindow
 					out _,
 					out _,
 					FrameSnapshotBus.CurrentSnapshot?.CurvatureGrid,
-					null);
+					null,
+					ClassifyProbeColliderForPass1);
 
 				hitInfo.SurfaceClass = ClassifyProbeSurfaceClass(hitInfo.Found, hitInfo.ColliderId);
 				request.Results[i] = new ProbeSelectedIndexResult
@@ -10604,7 +10685,17 @@ private sealed class OverlayRollingWindow
 					HadNumericalFailure = hitInfo.HadNumericalFailure,
 					Found = hitInfo.Found,
 					MaxStepsReached = maxStepsReached,
-					StoppedEarly = stoppedEarly
+					StoppedEarly = stoppedEarly,
+					ContactCount = hitInfo.ContactCount,
+					FirstContactStep = hitInfo.FirstContactStep,
+					LastContactStep = hitInfo.LastContactStep,
+					HadAnyGeometryContact = hitInfo.HadAnyGeometryContact,
+					HadAnyBackgroundContact = hitInfo.HadAnyBackgroundContact,
+					NearestAcceptedColliderId = hitInfo.ColliderId,
+					NearestAcceptedNormalX = hitInfo.Normal.X,
+					NearestAcceptedNormalY = hitInfo.Normal.Y,
+					NearestAcceptedNormalZ = hitInfo.Normal.Z,
+					NormalValid = hitInfo.NormalValid
 				};
 				completed++;
 			}
@@ -16169,6 +16260,23 @@ private sealed class OverlayRollingWindow
 			if (_pass1HitNormal.Length < pixelCount) _pass1HitNormal = new Vector3[pixelCount];
 			// DECISION: grow pass1 hit collider id buffer when needed.
 			if (_pass1HitColliderId.Length < pixelCount) _pass1HitColliderId = new ulong[pixelCount];
+			if (_transportContactCount.Length < pixelCount) _transportContactCount = new int[pixelCount];
+			if (_transportFirstContactStep.Length < pixelCount)
+			{
+				_transportFirstContactStep = new int[pixelCount];
+				Array.Fill(_transportFirstContactStep, -1);
+			}
+			if (_transportLastContactStep.Length < pixelCount)
+			{
+				_transportLastContactStep = new int[pixelCount];
+				Array.Fill(_transportLastContactStep, -1);
+			}
+			if (_transportFinalStepCount.Length < pixelCount) _transportFinalStepCount = new int[pixelCount];
+			if (_transportHadAnyGeometryContact.Length < pixelCount) _transportHadAnyGeometryContact = new byte[pixelCount];
+			if (_transportHadAnyBackgroundContact.Length < pixelCount) _transportHadAnyBackgroundContact = new byte[pixelCount];
+			if (_transportNearestAcceptedColliderId.Length < pixelCount) _transportNearestAcceptedColliderId = new ulong[pixelCount];
+			if (_transportNearestAcceptedNormal.Length < pixelCount) _transportNearestAcceptedNormal = new Vector3[pixelCount];
+			if (_transportNormalValid.Length < pixelCount) _transportNormalValid = new byte[pixelCount];
 
 			// Ultra-turbo / Cathedral fingerprint buffers (memristor experience cache)
 			if (_pixelCurvatureFingerprintStability.Length < pixelCount) _pixelCurvatureFingerprintStability = new float[pixelCount];
@@ -16412,7 +16520,8 @@ private sealed class OverlayRollingWindow
 							out float telemetryTurnSum,
 							out float telemetryTurnMax,
 							curvatureGridForPass1,
-							fieldGridForPass1
+							fieldGridForPass1,
+							ClassifyProbeColliderForPass1
 						);
 
 					// DECISION: accumulate perf counters only when enabled.
@@ -16465,6 +16574,7 @@ private sealed class OverlayRollingWindow
 					_pass1HitNormal[pi] = hitInfo.Normal;
 					_pass1HitColliderId[pi] = hitInfo.ColliderId;
 					hitInfo.SurfaceClass = ClassifyProbeSurfaceClass(hitInfo.Found, hitInfo.ColliderId);
+					FillTransportContactHistoryBlock(x, y, stride, filmW, filmH, hitInfo, stepsIntegrated);
 					ProbeOutcomeCode probeOutcome = ClassifyCathedralProbeOutcome(
 						hitInfo.HadNumericalFailure,
 						hitInfo.Found,
@@ -23335,6 +23445,11 @@ private sealed class OverlayRollingWindow
 		return ProbeSurfaceClass.Background;
 	}
 
+	private ProbeSurfaceClass ClassifyProbeColliderForPass1(ulong colliderId)
+	{
+		return ClassifyProbeSurfaceClass(true, colliderId);
+	}
+
 	private string ClassifyFixtureTransportKind(
 		bool hadHit,
 		bool absorbedByInnerRadius,
@@ -24162,6 +24277,30 @@ private sealed class OverlayRollingWindow
 			}
 		}
 
+		return filled;
+	}
+
+	private int FillTransportContactHistoryBlock(int x, int y, int stride, int filmW, int filmH, in RayBeamRenderer.Pass1HitInfo hitInfo, int finalStepCount)
+	{
+		if (_transportContactCount.Length == 0) return 0;
+		int filled = 0;
+		int yMax = Math.Min(filmH, y + Math.Max(1, stride));
+		int xMax = Math.Min(filmW, x + Math.Max(1, stride));
+		for (int yy = y; yy < yMax; yy++)
+		for (int xx = x; xx < xMax; xx++)
+		{
+			int index = (yy * filmW) + xx;
+			_transportContactCount[index] = hitInfo.ContactCount;
+			_transportFirstContactStep[index] = hitInfo.FirstContactStep;
+			_transportLastContactStep[index] = hitInfo.LastContactStep;
+			_transportFinalStepCount[index] = finalStepCount;
+			_transportHadAnyGeometryContact[index] = (byte)(hitInfo.HadAnyGeometryContact ? 1 : 0);
+			_transportHadAnyBackgroundContact[index] = (byte)(hitInfo.HadAnyBackgroundContact ? 1 : 0);
+			_transportNearestAcceptedColliderId[index] = hitInfo.ColliderId;
+			_transportNearestAcceptedNormal[index] = hitInfo.Normal;
+			_transportNormalValid[index] = (byte)(hitInfo.NormalValid ? 1 : 0);
+			filled++;
+		}
 		return filled;
 	}
 

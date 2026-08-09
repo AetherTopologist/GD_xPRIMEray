@@ -11,4 +11,14 @@ public struct ProbeSelectedIndexResult
 	public bool Found;
 	public bool MaxStepsReached;
 	public bool StoppedEarly;
+	public int ContactCount;
+	public int FirstContactStep;
+	public int LastContactStep;
+	public bool HadAnyGeometryContact;
+	public bool HadAnyBackgroundContact;
+	public ulong NearestAcceptedColliderId;
+	public float NearestAcceptedNormalX;
+	public float NearestAcceptedNormalY;
+	public float NearestAcceptedNormalZ;
+	public bool NormalValid;
 }

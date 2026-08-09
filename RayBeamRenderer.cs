@@ -640,7 +640,15 @@ public partial class RayBeamRenderer : Node3D
 		public int PrimitiveOrShapeId;
 		public ProbeSurfaceClass SurfaceClass;
 		public bool HadNumericalFailure;
+		public int ContactCount;
+		public int FirstContactStep;
+		public int LastContactStep;
+		public bool HadAnyGeometryContact;
+		public bool HadAnyBackgroundContact;
+		public bool NormalValid;
 	}
+
+	public delegate ProbeSurfaceClass Pass1ContactClassifier(ulong colliderId);
 
 	public readonly struct LedgerContinuationSummary
 	{
@@ -3484,7 +3492,8 @@ public partial class RayBeamRenderer : Node3D
 		out float turnSum,
 		out float turnMax,
 		CurvatureBoundGrid curvatureGrid,
-		FieldGrid3D fieldGrid = null)
+		FieldGrid3D fieldGrid = null,
+		Pass1ContactClassifier contactClassifier = null)
 	{
 		// CROSS-CLASS CONTRACT: GrinFilmCamera calls this to build segments + optional pass-1 hit probes.
 		// ASSUMPTION: origin/dir/bendDir are in world space; dir normalized.
@@ -3537,7 +3546,13 @@ public partial class RayBeamRenderer : Node3D
 			ColliderId = 0,
 			PrimitiveOrShapeId = -1,
 			SurfaceClass = ProbeSurfaceClass.None,
-			HadNumericalFailure = false
+			HadNumericalFailure = false,
+			ContactCount = 0,
+			FirstContactStep = -1,
+			LastContactStep = -1,
+			HadAnyGeometryContact = false,
+			HadAnyBackgroundContact = false,
+			NormalValid = false
 		};
 		stoppedEarly = false;
 		maxStepsReached = false;
@@ -3920,36 +3935,50 @@ public partial class RayBeamRenderer : Node3D
 						continue;
 					}
 					// DECISION: process hit results only when raycast hits something.
-					if (hit0.Count > 0)
-					{
-						pass1ProbeHits++;
-						Vector3 hp = (Vector3)hit0["position"];
-						Vector3 hn = (Vector3)hit0["normal"];
-						float segLen = (seg.B - seg.A).Length();
-						float d = seg.TraveledB - segLen + (hp - seg.A).Length();
-						// DECISION: keep nearest hit encountered so far.
-						if (!hitInfo.Found || d < hitInfo.Distance)
+						if (hit0.Count > 0)
 						{
-							hitInfo.Found = true;
-							hitInfo.Distance = d;
-							hitInfo.Position = hp;
-							hitInfo.Normal = hn;
-							// DECISION: collider_id may be absent; only read when present.
-							if (hit0.ContainsKey("collider_id"))
-								hitInfo.ColliderId = (ulong)(long)hit0["collider_id"];
-							hitInfo.PrimitiveOrShapeId = ExtractPrimitiveOrShapeId(hit0);
-						}
-						// DECISION: remember first segment index that hit.
-						if (hitSegIndex < 0)
-							hitSegIndex = segIndex;
+							pass1ProbeHits++;
+							Vector3 hp = (Vector3)hit0["position"];
+							Vector3 hn = (Vector3)hit0["normal"];
+							ulong contactColliderId = hit0.ContainsKey("collider_id") ? (ulong)(long)hit0["collider_id"] : 0UL;
+							ProbeSurfaceClass contactSurface = contactClassifier != null
+								? contactClassifier(contactColliderId)
+								: ProbeSurfaceClass.Unknown;
+							TransportContactHistoryAccumulator.RecordContact(
+								ref hitInfo.ContactCount,
+								ref hitInfo.FirstContactStep,
+								ref hitInfo.LastContactStep,
+								ref hitInfo.HadAnyGeometryContact,
+								ref hitInfo.HadAnyBackgroundContact,
+								stepsIntegrated,
+								contactSurface);
+							bool normalValid = IsFinite(hn) && hn.LengthSquared() > 1e-10f;
+							float segLen = (seg.B - seg.A).Length();
+							float d = seg.TraveledB - segLen + (hp - seg.A).Length();
+							// DECISION: keep nearest hit encountered so far.
+							if (!hitInfo.Found || d < hitInfo.Distance)
+							{
+								hitInfo.Found = true;
+								hitInfo.Distance = d;
+								hitInfo.Position = hp;
+								hitInfo.Normal = hn;
+								// DECISION: collider_id may be absent; only read when present.
+								if (hit0.ContainsKey("collider_id"))
+									hitInfo.ColliderId = contactColliderId;
+								hitInfo.PrimitiveOrShapeId = ExtractPrimitiveOrShapeId(hit0);
+								hitInfo.NormalValid = normalValid;
+							}
+							// DECISION: remember first segment index that hit.
+							if (hitSegIndex < 0)
+								hitSegIndex = segIndex;
 
-						// DECISION: optionally stop building segments on first hit.
-						if (stopOnHit)
-						{
-							stoppedEarly = true;
-							break;
+							// DECISION: optionally stop building segments on first hit.
+							if (stopOnHit)
+							{
+								stoppedEarly = true;
+								break;
+							}
 						}
-					}
 				}
 			}
 
