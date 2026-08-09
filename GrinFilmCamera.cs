@@ -2309,6 +2309,16 @@ public partial class GrinFilmCamera : Node
 	private byte[] _transportNormalValid = Array.Empty<byte>();
 	private int[] _transportPolicyMaxSteps = Array.Empty<int>();
 	private byte[] _transportEffortValid = Array.Empty<byte>();
+	private ProbeOutcomeCode[] _sealedProbeViewOutcomes = Array.Empty<ProbeOutcomeCode>();
+	private int[] _sealedProbeViewContactCounts = Array.Empty<int>();
+	private int[] _sealedProbeViewFinalStepCounts = Array.Empty<int>();
+	private int[] _sealedProbeViewPolicyMaxSteps = Array.Empty<int>();
+	private byte[] _sealedProbeViewEffortValid = Array.Empty<byte>();
+	private bool _sealedProbeViewAvailable = false;
+	private int _sealedProbeViewGeneration = 0;
+	private ProbeContextKey _sealedProbeViewContextKey;
+	private ProbeViewMode _probeViewMode = ProbeViewMode.Outcome;
+	private Label _probeViewHud;
 	private ProbeOutcomeCode[] _probeOutcomes = Array.Empty<ProbeOutcomeCode>();
 	private byte[] _probeRefinLevel = Array.Empty<byte>();
 	private ushort[] _regionLabels = Array.Empty<ushort>();
@@ -4269,6 +4279,8 @@ private sealed class OverlayRollingWindow
 
 			LogDiagnostic(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle, "GrinFilmCamera: No FilmViewPath set, created overlay TextureRect.");
 		}
+		EnsureProbeViewHud();
+		UpdateProbeViewHud();
 		UpdateFilmOpacity();
 
 		_filmOverlay = GetNodeOrNull<FilmOverlay2D>(FilmOverlayPath);
@@ -4726,7 +4738,19 @@ private sealed class OverlayRollingWindow
 
 	public override void _UnhandledInput(InputEvent e)
 	{
-		if (!RuntimeMacroHotkeysEnabled || e is not InputEventKey keyEvent || !keyEvent.Pressed || keyEvent.Echo)
+		if (e is not InputEventKey keyEvent || !keyEvent.Pressed || keyEvent.Echo)
+			return;
+
+		if (keyEvent.Keycode == Key.Q && !keyEvent.CtrlPressed && !keyEvent.AltPressed)
+		{
+			SetProbeView(keyEvent.ShiftPressed
+				? ProbeViewCycle.Previous(_probeViewMode)
+				: ProbeViewCycle.Next(_probeViewMode));
+			GetViewport()?.SetInputAsHandled();
+			return;
+		}
+
+		if (!RuntimeMacroHotkeysEnabled)
 			return;
 
 		RuntimeMacroMode requestedMode;
@@ -4762,6 +4786,85 @@ private sealed class OverlayRollingWindow
 		{
 			GetViewport()?.SetInputAsHandled();
 		}
+	}
+
+	public ProbeViewMode CurrentProbeView => _probeViewMode;
+	public bool ProbeViewAvailable => _sealedProbeViewAvailable;
+	public int SealedProbeViewGeneration => _sealedProbeViewGeneration;
+
+	public void SetProbeView(ProbeViewMode mode)
+	{
+		_probeViewMode = mode;
+		UpdateProbeViewHud();
+		if (!_sealedProbeViewAvailable)
+			return;
+
+		ApplyProbeViewToPlate();
+	}
+
+	private void EnsureProbeViewHud()
+	{
+		if (_probeViewHud != null && GodotObject.IsInstanceValid(_probeViewHud))
+			return;
+
+		CanvasLayer layer = new() { Layer = 12 };
+		AddChild(layer);
+		_probeViewHud = new Label
+		{
+			Position = new Vector2(18f, 92f),
+			MouseFilter = Control.MouseFilterEnum.Ignore,
+			Text = "Q probe"
+		};
+		_probeViewHud.AddThemeColorOverride("font_color", new Color(0.92f, 0.97f, 1f, 0.96f));
+		_probeViewHud.AddThemeColorOverride("font_shadow_color", new Color(0f, 0f, 0f, 0.8f));
+		_probeViewHud.AddThemeConstantOverride("shadow_offset_x", 2);
+		_probeViewHud.AddThemeConstantOverride("shadow_offset_y", 2);
+		layer.AddChild(_probeViewHud);
+	}
+
+	private void UpdateProbeViewHud()
+	{
+		if (_probeViewHud == null || !GodotObject.IsInstanceValid(_probeViewHud))
+			return;
+
+		if (!_sealedProbeViewAvailable)
+		{
+			_probeViewHud.Text = "Q probe\nProbe View unavailable\nComplete SNAPSHOT required";
+			return;
+		}
+
+		StringBuilder legend = new();
+		foreach (ProbeViewLegendEntry entry in ProbeViewMapper.Legend(_probeViewMode))
+		{
+			if (legend.Length > 0) legend.Append("  ");
+			legend.Append(entry.Label);
+		}
+		_probeViewHud.Text =
+			$"Q probe\nProbe View: {ProbeViewMapper.DisplayName(_probeViewMode)}\n" +
+			$"{ProbeViewMapper.Description(_probeViewMode)}\nLegend: {legend}";
+	}
+
+	private void ApplyProbeViewToPlate()
+	{
+		if (!_sealedProbeViewAvailable || _img == null || _tex == null)
+			return;
+
+		for (int y = 0; y < _filmHeight; y++)
+		{
+			for (int x = 0; x < _filmWidth; x++)
+			{
+				int index = (y * _filmWidth) + x;
+				ProbeViewColor color = ProbeViewMapper.Map(
+					_probeViewMode,
+					_sealedProbeViewOutcomes[index],
+					_sealedProbeViewContactCounts[index],
+					_sealedProbeViewFinalStepCounts[index],
+					_sealedProbeViewPolicyMaxSteps[index],
+					_sealedProbeViewEffortValid[index] != 0);
+				_img.SetPixel(x, y, new Color(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f));
+			}
+		}
+		_tex.Update(_img);
 	}
 
 	private bool IsSmartScaleSafeBoundary()
@@ -9395,6 +9498,9 @@ private sealed class OverlayRollingWindow
 
 	private void ResetCathedralProbeBuffersForPass()
 	{
+		_sealedProbeViewAvailable = false;
+		_sealedProbeViewGeneration = 0;
+		_sealedProbeViewContextKey = default;
 		ResetTransportContactHistoryBuffers();
 		if (_probeOutcomes.Length > 0)
 		{
@@ -11026,6 +11132,8 @@ private sealed class OverlayRollingWindow
 		{
 			_probeFrameContextKey = summaryContext;
 			_probeFrameGeneration++;
+			if (_probeSnapshotLifecycleActive)
+				CaptureSealedProbeViewSources(totalPixels, summaryContext, _probeFrameGeneration);
 			if (_probeSnapshotLifecycleActive &&
 				_probeSnapshotLifecycleInitialized &&
 				_probeSnapshotLifecycleWidth == filmW &&
@@ -11090,6 +11198,25 @@ private sealed class OverlayRollingWindow
 					$"maxSteps={region.CountMaxStepsExhausted} selectable={region.IsPrimarilyMaxStepsExhausted}");
 			}
 		}
+	}
+
+	private void CaptureSealedProbeViewSources(int totalPixels, in ProbeContextKey contextKey, int generation)
+	{
+		_sealedProbeViewOutcomes = new ProbeOutcomeCode[totalPixels];
+		_sealedProbeViewContactCounts = new int[totalPixels];
+		_sealedProbeViewFinalStepCounts = new int[totalPixels];
+		_sealedProbeViewPolicyMaxSteps = new int[totalPixels];
+		_sealedProbeViewEffortValid = new byte[totalPixels];
+		Array.Copy(_probeOutcomes, _sealedProbeViewOutcomes, totalPixels);
+		Array.Copy(_transportContactCount, _sealedProbeViewContactCounts, totalPixels);
+		Array.Copy(_transportFinalStepCount, _sealedProbeViewFinalStepCounts, totalPixels);
+		Array.Copy(_transportPolicyMaxSteps, _sealedProbeViewPolicyMaxSteps, totalPixels);
+		Array.Copy(_transportEffortValid, _sealedProbeViewEffortValid, totalPixels);
+		_sealedProbeViewContextKey = contextKey;
+		_sealedProbeViewGeneration = generation;
+		_sealedProbeViewAvailable = true;
+		UpdateProbeViewHud();
+		GD.Print($"[ProbeView] sealed generation={generation} pixels={totalPixels} context={contextKey.GetHashCode():x8}");
 	}
 
 	private void CountCathedralProbeOutcomes(

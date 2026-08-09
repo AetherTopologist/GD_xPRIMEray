@@ -24,6 +24,7 @@ internal static class Program
             (nameof(ObservationFrameAdapterTests), ObservationFrameAdapterTests.Run)
 			,(nameof(TransportContactHistoryTests), TransportContactHistoryTests.Run)
 			,(nameof(ObservationAcquisitionOwnershipTests), ObservationAcquisitionOwnershipTests.Run)
+			,(nameof(ProbeViewTests), ProbeViewTests.Run)
         };
 
         int failures = 0;
