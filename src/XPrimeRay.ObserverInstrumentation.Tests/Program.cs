@@ -25,6 +25,7 @@ internal static class Program
 			,(nameof(TransportContactHistoryTests), TransportContactHistoryTests.Run)
 			,(nameof(ObservationAcquisitionOwnershipTests), ObservationAcquisitionOwnershipTests.Run)
 			,(nameof(ProbeViewTests), ProbeViewTests.Run)
+			,(nameof(PortableProbeCaptureBundleTests), PortableProbeCaptureBundleTests.Run)
         };
 
         int failures = 0;

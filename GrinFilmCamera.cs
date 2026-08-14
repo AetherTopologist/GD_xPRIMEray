@@ -4794,6 +4794,99 @@ private sealed class OverlayRollingWindow
 	public bool ProbeViewAvailable => _sealedProbeViewAvailable;
 	public int SealedProbeViewGeneration => _sealedProbeViewGeneration;
 
+	public bool TryCapturePortableObservatoryBundle(
+		string outputDirectory,
+		string runId,
+		string semanticSceneId,
+		string godotScenePath,
+		string engineCommit,
+		string acquisitionLineage,
+		out string reason)
+	{
+		reason = string.Empty;
+		int totalPixels = _sealedProbeViewWidth > 0 && _sealedProbeViewHeight > 0
+			? _sealedProbeViewWidth * _sealedProbeViewHeight
+			: 0;
+		bool formallyComplete = _lastProbeSnapshotLifecycleResult.State == ProbeSnapshotLifecycleState.Complete &&
+			_lastProbeSnapshotLifecycleResult.UnprocessedPixelCount == 0 &&
+			_lastProbeSnapshotLifecycleResult.ContextMatched &&
+			_lastProbeSnapshotLifecycleResult.DimensionsMatched;
+		if (!ProbeViewMapper.IsSealedStorageValid(
+			_sealedProbeViewAvailable,
+			_sealedProbeViewWidth,
+			_sealedProbeViewHeight,
+			totalPixels,
+			_sealedProbeViewOutcomes.Length,
+			_sealedProbeViewContactCounts.Length,
+			_sealedProbeViewFinalStepCounts.Length,
+			_sealedProbeViewPolicyMaxSteps.Length,
+			_sealedProbeViewEffortValid.Length))
+		{
+			reason = "sealed_probe_view_storage_invalid";
+			return false;
+		}
+		if (!formallyComplete)
+		{
+			reason = "snapshot_not_formally_complete";
+			return false;
+		}
+
+		Transform3D transform = _cathedralSnapshotContext.CameraTransform;
+		Basis basis = transform.Basis;
+		float[] cameraTransform =
+		{
+			transform.Origin.X, transform.Origin.Y, transform.Origin.Z,
+			basis.X.X, basis.Y.X, basis.Z.X,
+			basis.X.Y, basis.Y.Y, basis.Z.Y,
+			basis.X.Z, basis.Y.Z, basis.Z.Z
+		};
+		PortableProbeCaptureInput input = new()
+		{
+			RunId = runId,
+			OutputDirectory = outputDirectory,
+			SemanticSceneId = semanticSceneId,
+			GodotScenePath = godotScenePath,
+			EngineCommit = engineCommit,
+			AcquisitionLineage = acquisitionLineage,
+			LifecycleComplete = formallyComplete,
+			SealedAuthorityAvailable = _sealedProbeViewAvailable,
+			Generation = _sealedProbeViewGeneration,
+			ContextKey = _sealedProbeViewContextKey,
+			CameraTransform = cameraTransform,
+			Width = _sealedProbeViewWidth,
+			Height = _sealedProbeViewHeight,
+			UnprocessedCount = _lastProbeSnapshotLifecycleResult.UnprocessedPixelCount,
+			StepsPerRay = _cathedralSnapshotContext.StepsPerRay,
+			StepLength = _cathedralSnapshotContext.StepLength,
+			FieldStrength = _cathedralSnapshotContext.FieldStrength,
+			Outcomes = (ProbeOutcomeCode[])_sealedProbeViewOutcomes.Clone(),
+			ContactCounts = (int[])_sealedProbeViewContactCounts.Clone(),
+			FinalStepCounts = (int[])_sealedProbeViewFinalStepCounts.Clone(),
+			PolicyMaxSteps = (int[])_sealedProbeViewPolicyMaxSteps.Clone(),
+			EffortValid = (byte[])_sealedProbeViewEffortValid.Clone()
+		};
+		if (!PortableProbeCaptureBundle.TryWrite(input, out _, out reason))
+			return false;
+		return true;
+	}
+
+	public string CapturePortableObservatoryBundle(
+		string outputDirectory,
+		string runId,
+		string semanticSceneId,
+		string godotScenePath,
+		string engineCommit,
+		string acquisitionLineage)
+	{
+		return TryCapturePortableObservatoryBundle(
+			outputDirectory, runId, semanticSceneId, godotScenePath, engineCommit, acquisitionLineage, out string reason)
+			? string.Empty
+			: reason;
+	}
+
+	public bool RequestCathedralProbeSnapshot(int budget) => TryRequestCathedralProbeSnapshot(budget, out _);
+	public bool CathedralProbeSnapshotIsTerminal => !_probeSnapshotLifecycleActive && _lastProbeSnapshotLifecycleResult.IsTerminal;
+
 	public void SetProbeView(ProbeViewMode mode)
 	{
 		_probeViewMode = mode;
