@@ -4,6 +4,12 @@ internal static class ProbeViewTests
 {
 	public static void Run()
 	{
+		TestAssert.False(FieldStructureVisibilityPolicy.ResolveToggleTarget(new[] { true, true }), "all visible toggles hidden");
+		TestAssert.True(FieldStructureVisibilityPolicy.ResolveToggleTarget(new[] { false, false }), "all hidden toggles visible");
+		TestAssert.True(FieldStructureVisibilityPolicy.ResolveToggleTarget(new[] { true, false }), "mixed states normalize visible");
+		TestAssert.False(FieldStructureVisibilityPolicy.ResolveToggleTarget(new[] { true, true }), "normalized visible toggles hidden");
+		TestAssert.False(FieldStructureVisibilityPolicy.ResolveToggleTarget(Array.Empty<bool>()), "no eligible sources remain hidden");
+
 		TestAssert.Equal(ProbeViewMode.ContactEvents, ProbeViewCycle.Next(ProbeViewMode.Outcome), "Q next outcome");
 		TestAssert.Equal(ProbeViewMode.TransportEffort, ProbeViewCycle.Next(ProbeViewMode.ContactEvents), "Q next contacts");
 		TestAssert.Equal(ProbeViewMode.Outcome, ProbeViewCycle.Next(ProbeViewMode.TransportEffort), "Q wraps outcome");

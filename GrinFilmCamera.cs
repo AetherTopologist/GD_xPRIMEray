@@ -2321,6 +2321,8 @@ public partial class GrinFilmCamera : Node
 	private ProbeContextKey _sealedProbeViewContextKey;
 	private ProbeViewMode _probeViewMode = ProbeViewMode.Outcome;
 	private Label _probeViewHud;
+	private bool _fieldStructureStatusKnown;
+	private bool _fieldStructureVisible;
 	private ProbeOutcomeCode[] _probeOutcomes = Array.Empty<ProbeOutcomeCode>();
 	private byte[] _probeRefinLevel = Array.Empty<byte>();
 	private ushort[] _regionLabels = Array.Empty<ushort>();
@@ -4752,6 +4754,13 @@ private sealed class OverlayRollingWindow
 			return;
 		}
 
+		if (keyEvent.Keycode == Key.H && !keyEvent.CtrlPressed && !keyEvent.AltPressed)
+		{
+			ToggleFieldStructureVisibility();
+			GetViewport()?.SetInputAsHandled();
+			return;
+		}
+
 		if (!RuntimeMacroHotkeysEnabled)
 			return;
 
@@ -4922,9 +4931,14 @@ private sealed class OverlayRollingWindow
 		if (_probeViewHud == null || !GodotObject.IsInstanceValid(_probeViewHud))
 			return;
 
+		string fieldStructureStatus = $"H field structure\nField Structure: {(IsFieldStructureVisibleForHud() ? "ON" : "OFF")}";
+		string fieldStructureDescription = IsFieldStructureVisibleForHud()
+			? "\nouter / inner limits · density direction"
+			: string.Empty;
+
 		if (!_sealedProbeViewAvailable)
 		{
-			_probeViewHud.Text = "Q probe\nProbe View unavailable\nComplete SNAPSHOT required";
+			_probeViewHud.Text = $"Q probe\n{fieldStructureStatus}{fieldStructureDescription}\nProbe View unavailable\nComplete SNAPSHOT required";
 			return;
 		}
 
@@ -4935,8 +4949,65 @@ private sealed class OverlayRollingWindow
 			legend.Append(entry.Label);
 		}
 		_probeViewHud.Text =
-			$"Q probe\nProbe View: {ProbeViewMapper.DisplayName(_probeViewMode)}\n" +
+			$"Q probe\n{fieldStructureStatus}{fieldStructureDescription}\n" +
+			$"Probe View: {ProbeViewMapper.DisplayName(_probeViewMode)}\n" +
 			$"{ProbeViewMapper.Description(_probeViewMode)}\nLegend: {legend}";
+	}
+
+	private List<FieldSource3D> GetRuntimeFieldSources()
+	{
+		List<FieldSource3D> sources = new();
+		Godot.Collections.Array<Node> nodes = GetTree()?.GetNodesInGroup("field_sources");
+		if (nodes == null)
+			return sources;
+
+		foreach (Node node in nodes)
+		{
+			if (node is FieldSource3D source && GodotObject.IsInstanceValid(source))
+				sources.Add(source);
+		}
+		return sources;
+	}
+
+	private bool IsFieldStructureVisibleForHud()
+	{
+		if (_fieldStructureStatusKnown)
+			return _fieldStructureVisible;
+
+		List<FieldSource3D> sources = GetRuntimeFieldSources();
+		bool foundEligible = false;
+		foreach (FieldSource3D source in sources)
+		{
+			if (!source.DebugVizEnabled)
+				continue;
+			foundEligible = true;
+			if (!source.DebugVizInGame)
+				return false;
+		}
+		return foundEligible;
+	}
+
+	private void ToggleFieldStructureVisibility()
+	{
+		List<FieldSource3D> sources = GetRuntimeFieldSources();
+		List<bool> eligibleStates = new();
+		foreach (FieldSource3D source in sources)
+		{
+			if (source.DebugVizEnabled)
+				eligibleStates.Add(source.DebugVizInGame);
+		}
+
+		bool targetVisible = FieldStructureVisibilityPolicy.ResolveToggleTarget(
+			System.Runtime.InteropServices.CollectionsMarshal.AsSpan(eligibleStates));
+		foreach (FieldSource3D source in sources)
+		{
+			// DebugVizEnabled remains authored/configured; only the in-game gate is toggled.
+			source.DebugVizInGame = targetVisible;
+		}
+
+		_fieldStructureVisible = targetVisible;
+		_fieldStructureStatusKnown = true;
+		UpdateProbeViewHud();
 	}
 
 	private void ApplyProbeViewToPlate()
