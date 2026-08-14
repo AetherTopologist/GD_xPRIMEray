@@ -37,6 +37,23 @@ public static class ProbeViewMapper
 		return complete && totalPixels > 0 && unprocessed == 0 && sourceLength >= totalPixels;
 	}
 
+	public static bool IsSealedStorageValid(
+		bool available,
+		int width,
+		int height,
+		int totalPixels,
+		int outcomesLength,
+		int contactCountsLength,
+		int finalStepsLength,
+		int policyMaxStepsLength,
+		int effortValidLength)
+	{
+		return available && width > 0 && height > 0 && totalPixels == width * height &&
+			outcomesLength >= totalPixels && contactCountsLength >= totalPixels &&
+			finalStepsLength >= totalPixels && policyMaxStepsLength >= totalPixels &&
+			effortValidLength >= totalPixels;
+	}
+
 	public static ProbeViewColor Map(
 		ProbeViewMode mode,
 		ProbeOutcomeCode outcome,

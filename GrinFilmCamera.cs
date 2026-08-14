@@ -2315,6 +2315,8 @@ public partial class GrinFilmCamera : Node
 	private int[] _sealedProbeViewPolicyMaxSteps = Array.Empty<int>();
 	private byte[] _sealedProbeViewEffortValid = Array.Empty<byte>();
 	private bool _sealedProbeViewAvailable = false;
+	private int _sealedProbeViewWidth = 0;
+	private int _sealedProbeViewHeight = 0;
 	private int _sealedProbeViewGeneration = 0;
 	private ProbeContextKey _sealedProbeViewContextKey;
 	private ProbeViewMode _probeViewMode = ProbeViewMode.Outcome;
@@ -4846,14 +4848,28 @@ private sealed class OverlayRollingWindow
 
 	private void ApplyProbeViewToPlate()
 	{
-		if (!_sealedProbeViewAvailable || _img == null || _tex == null)
+		int sealedPixelCount = _sealedProbeViewWidth > 0 && _sealedProbeViewHeight > 0
+			? _sealedProbeViewWidth * _sealedProbeViewHeight
+			: 0;
+		if (!ProbeViewMapper.IsSealedStorageValid(
+			_sealedProbeViewAvailable,
+			_sealedProbeViewWidth,
+			_sealedProbeViewHeight,
+			sealedPixelCount,
+			_sealedProbeViewOutcomes.Length,
+			_sealedProbeViewContactCounts.Length,
+			_sealedProbeViewFinalStepCounts.Length,
+			_sealedProbeViewPolicyMaxSteps.Length,
+			_sealedProbeViewEffortValid.Length) ||
+			_img == null || _tex == null ||
+			_img.GetWidth() != _sealedProbeViewWidth || _img.GetHeight() != _sealedProbeViewHeight)
 			return;
 
-		for (int y = 0; y < _filmHeight; y++)
+		for (int y = 0; y < _sealedProbeViewHeight; y++)
 		{
-			for (int x = 0; x < _filmWidth; x++)
+			for (int x = 0; x < _sealedProbeViewWidth; x++)
 			{
-				int index = (y * _filmWidth) + x;
+				int index = (y * _sealedProbeViewWidth) + x;
 				ProbeViewColor color = ProbeViewMapper.Map(
 					_probeViewMode,
 					_sealedProbeViewOutcomes[index],
@@ -9499,6 +9515,8 @@ private sealed class OverlayRollingWindow
 	private void ResetCathedralProbeBuffersForPass()
 	{
 		_sealedProbeViewAvailable = false;
+		_sealedProbeViewWidth = 0;
+		_sealedProbeViewHeight = 0;
 		_sealedProbeViewGeneration = 0;
 		_sealedProbeViewContextKey = default;
 		ResetTransportContactHistoryBuffers();
@@ -11132,8 +11150,6 @@ private sealed class OverlayRollingWindow
 		{
 			_probeFrameContextKey = summaryContext;
 			_probeFrameGeneration++;
-			if (_probeSnapshotLifecycleActive)
-				CaptureSealedProbeViewSources(totalPixels, summaryContext, _probeFrameGeneration);
 			if (_probeSnapshotLifecycleActive &&
 				_probeSnapshotLifecycleInitialized &&
 				_probeSnapshotLifecycleWidth == filmW &&
@@ -11155,6 +11171,8 @@ private sealed class OverlayRollingWindow
 					ProbeSnapshotLifecycleReason.None,
 					contextMatched: true,
 					dimensionsMatched: true);
+				if (_lastProbeSnapshotLifecycleResult.State == ProbeSnapshotLifecycleState.Complete)
+					CaptureSealedProbeViewSources(filmW, filmH, totalPixels, summaryContext, _probeFrameGeneration);
 			}
 		}
 		else
@@ -11200,7 +11218,7 @@ private sealed class OverlayRollingWindow
 		}
 	}
 
-	private void CaptureSealedProbeViewSources(int totalPixels, in ProbeContextKey contextKey, int generation)
+	private void CaptureSealedProbeViewSources(int width, int height, int totalPixels, in ProbeContextKey contextKey, int generation)
 	{
 		_sealedProbeViewOutcomes = new ProbeOutcomeCode[totalPixels];
 		_sealedProbeViewContactCounts = new int[totalPixels];
@@ -11212,6 +11230,8 @@ private sealed class OverlayRollingWindow
 		Array.Copy(_transportFinalStepCount, _sealedProbeViewFinalStepCounts, totalPixels);
 		Array.Copy(_transportPolicyMaxSteps, _sealedProbeViewPolicyMaxSteps, totalPixels);
 		Array.Copy(_transportEffortValid, _sealedProbeViewEffortValid, totalPixels);
+		_sealedProbeViewWidth = width;
+		_sealedProbeViewHeight = height;
 		_sealedProbeViewContextKey = contextKey;
 		_sealedProbeViewGeneration = generation;
 		_sealedProbeViewAvailable = true;

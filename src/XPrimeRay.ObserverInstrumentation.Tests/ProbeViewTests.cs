@@ -7,6 +7,8 @@ internal static class ProbeViewTests
 		TestAssert.Equal(ProbeViewMode.ContactEvents, ProbeViewCycle.Next(ProbeViewMode.Outcome), "Q next outcome");
 		TestAssert.Equal(ProbeViewMode.TransportEffort, ProbeViewCycle.Next(ProbeViewMode.ContactEvents), "Q next contacts");
 		TestAssert.Equal(ProbeViewMode.Outcome, ProbeViewCycle.Next(ProbeViewMode.TransportEffort), "Q wraps outcome");
+		TestAssert.Equal(ProbeViewMode.Outcome, ProbeViewCycle.Previous(ProbeViewMode.ContactEvents), "Shift+Q contacts");
+		TestAssert.Equal(ProbeViewMode.ContactEvents, ProbeViewCycle.Previous(ProbeViewMode.TransportEffort), "Shift+Q effort");
 		TestAssert.Equal(ProbeViewMode.TransportEffort, ProbeViewCycle.Previous(ProbeViewMode.Outcome), "Shift+Q reverse");
 
 		ProbeViewColor[] outcomeColors = Enum.GetValues<ProbeOutcomeCode>()
@@ -15,10 +17,18 @@ internal static class ProbeViewTests
 		TestAssert.Equal(7, outcomeColors.Distinct().Count(), "outcome colors distinct");
 
 		TestAssert.False(ProbeViewMapper.MapContactEvents(0).Equals(ProbeViewMapper.MapContactEvents(1)), "zero contacts distinct");
+		TestAssert.False(ProbeViewMapper.MapContactEvents(1).Equals(ProbeViewMapper.MapContactEvents(2)), "one contact distinct");
+		TestAssert.False(ProbeViewMapper.MapContactEvents(2).Equals(ProbeViewMapper.MapContactEvents(3)), "two contacts distinct");
 		TestAssert.Equal(ProbeViewMapper.MapContactEvents(3), ProbeViewMapper.MapContactEvents(4), "3+ bucket");
+		TestAssert.Equal(ProbeViewMapper.MapContactEvents(3), ProbeViewMapper.MapContactEvents(99), "all 3+ values consistent");
 		TestAssert.True(ProbeViewMapper.IsAvailable(true, 0, 4, 4), "complete snapshot available");
+		TestAssert.False(ProbeViewMapper.IsAvailable(true, 0, 4, 3), "short source rejected");
 		TestAssert.False(ProbeViewMapper.IsAvailable(false, 0, 4, 4), "incomplete snapshot rejected");
 		TestAssert.False(ProbeViewMapper.IsAvailable(true, 1, 4, 4), "unprocessed snapshot rejected");
+		TestAssert.True(ProbeViewMapper.IsSealedStorageValid(true, 2, 2, 4, 4, 4, 4, 4, 4), "exact sealed dimensions accepted");
+		TestAssert.False(ProbeViewMapper.IsSealedStorageValid(false, 2, 2, 4, 4, 4, 4, 4, 4), "unavailable sealed source rejected");
+		TestAssert.False(ProbeViewMapper.IsSealedStorageValid(true, 2, 2, 4, 3, 4, 4, 4, 4), "sealed dimension mismatch rejected");
+		TestAssert.False(ProbeViewMapper.IsSealedStorageValid(true, 2, 2, 4, 4, 4, 4, 4, 3), "sealed effort source mismatch rejected");
 
 		ProbeViewColor effortZero = ProbeViewMapper.MapTransportEffort(0, 81, true);
 		ProbeViewColor effortPartial = ProbeViewMapper.MapTransportEffort(40, 81, true);
@@ -41,6 +51,7 @@ internal static class ProbeViewTests
 		TestAssert.Equal(17, generation, "mapping preserves generation");
 		TestAssert.True(outcomes.SequenceEqual(outcomesBefore), "mapping does not mutate outcomes");
 		TestAssert.True(contacts.SequenceEqual(contactsBefore), "mapping does not mutate contacts");
+		TestAssert.True(ProbeViewMapper.IsAvailable(true, 0, 4, 4), "formally complete snapshot remains view authority");
 
 		TestAssert.Equal("Outcome", ProbeViewMapper.DisplayName(ProbeViewMode.Outcome), "outcome public name");
 		TestAssert.Equal("Contact Events", ProbeViewMapper.DisplayName(ProbeViewMode.ContactEvents), "contact public name");

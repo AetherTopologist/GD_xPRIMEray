@@ -205,6 +205,7 @@ internal static class ProbeSnapshotLifecycleTests
 		TestAssert.False(ProbeSnapshotLifecycleModel.CanSealSnapshot(10, 0, true, 3, 3, true, ProbeSnapshotLifecycleState.Capturing, ProbeSnapshotLifecycleReason.None), "pending pass cannot seal");
 		TestAssert.False(ProbeSnapshotLifecycleModel.CanSealSnapshot(10, 0, false, 3, 3, false, ProbeSnapshotLifecycleState.Capturing, ProbeSnapshotLifecycleReason.None), "context mismatch cannot seal");
 		TestAssert.False(ProbeSnapshotLifecycleModel.CanSealSnapshot(10, 0, false, 3, 3, true, ProbeSnapshotLifecycleState.Complete, ProbeSnapshotLifecycleReason.None), "repeated complete pump cannot reseal");
+		TestAssert.False(ProbeViewMapper.IsAvailable(false, 0, 10, 10), "non-sealable snapshot cannot become Probe View authority");
 	}
 
 	private static ProbeSnapshotLifecycleResult CompleteResult()
