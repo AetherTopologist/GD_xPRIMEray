@@ -4754,7 +4754,7 @@ private sealed class OverlayRollingWindow
 			return;
 		}
 
-		if (keyEvent.Keycode == Key.H && !keyEvent.CtrlPressed && !keyEvent.AltPressed)
+		if (keyEvent.Keycode == Key.F && !keyEvent.CtrlPressed && !keyEvent.AltPressed)
 		{
 			ToggleFieldStructureVisibility();
 			GetViewport()?.SetInputAsHandled();
@@ -4931,7 +4931,7 @@ private sealed class OverlayRollingWindow
 		if (_probeViewHud == null || !GodotObject.IsInstanceValid(_probeViewHud))
 			return;
 
-		string fieldStructureStatus = $"H field structure\nField Structure: {(IsFieldStructureVisibleForHud() ? "ON" : "OFF")}";
+		string fieldStructureStatus = $"F field structure\nField Structure: {(IsFieldStructureVisibleForHud() ? "ON" : "OFF")}";
 		string fieldStructureDescription = IsFieldStructureVisibleForHud()
 			? "\nouter / inner limits · density direction"
 			: string.Empty;
