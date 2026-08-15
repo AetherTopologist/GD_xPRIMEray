@@ -10,6 +10,7 @@ const OVERLAY_BASE_ALPHA := 0.35
 const SNAPSHOT_DURATION_S := 0.6
 const SNAPSHOT_MAX_RENDER_STEPS := 12
 const SNAPSHOT_STALE_DISTANCE := 0.5
+const CATHEDRAL_SNAPSHOT_BUDGET_FRAMES := 240
 const SHADING_DEPTH := 0
 const SHADING_NORMAL_RGB := 1
 const SHADING_NDOTV := 2
@@ -40,6 +41,8 @@ var _snapshot_forced_stale := false
 var _input_enabled := true
 var _render_requested := false
 var _shading_mode := SHADING_NORMAL_RGB
+var _formal_snapshot_requested := false
+var _formal_snapshot_terminal_handled := false
 
 @onready var _film_camera: Node = get_node_or_null(film_camera_path)
 @onready var _film_plate: Control = get_node_or_null(film_plate_path)
@@ -84,6 +87,9 @@ func _process(delta: float) -> void:
 
 func _physics_process(delta: float) -> void:
 	if _mode == FilmMode.SNAPSHOT:
+		if _formal_snapshot_requested:
+			_update_formal_snapshot_status()
+			return
 		_update_snapshot_timer(delta)
 	_run_render_step_if_requested()
 	if _mode == FilmMode.SNAPSHOT:
@@ -123,6 +129,15 @@ func cycle_shading_mode() -> void:
 
 
 func set_mode(mode: FilmMode) -> void:
+	if mode == _mode and mode == FilmMode.SNAPSHOT:
+		return
+	var entering_snapshot := mode == FilmMode.SNAPSHOT and _mode != FilmMode.SNAPSHOT
+	if _mode == FilmMode.SNAPSHOT and mode != FilmMode.SNAPSHOT:
+		if _film_camera != null and _film_camera.has_method("InvalidateCathedralProbeSnapshotForContextChange"):
+			# Leaving one-shot SNAPSHOT abandons its authority before LIVE/OFF resumes.
+			_film_camera.call("InvalidateCathedralProbeSnapshotForContextChange")
+		_formal_snapshot_requested = false
+		_formal_snapshot_terminal_handled = false
 	_mode = mode
 	match _mode:
 		FilmMode.OFF:
@@ -140,8 +155,12 @@ func set_mode(mode: FilmMode) -> void:
 			_snapshot_origin = _player.global_position if _player != null else Vector3.ZERO
 			_snapshot_forced_stale = false
 			_restart_film_pass()
-			_set_film_visible(true)
-			_set_film_compute(true)
+			_set_film_visible(false)
+			_set_film_compute(false)
+			_formal_snapshot_requested = entering_snapshot and _film_camera != null and _film_camera.has_method("RequestCathedralProbeSnapshot")
+			_formal_snapshot_terminal_handled = false
+			if _formal_snapshot_requested:
+				_film_camera.call("RequestCathedralProbeSnapshot", CATHEDRAL_SNAPSHOT_BUDGET_FRAMES)
 		FilmMode.LIVE:
 			_apply_quality_preview()
 			_snapshot_timer = 0.0
@@ -208,6 +227,8 @@ func IsComputeActive() -> bool:
 
 
 func NotifyCameraTransformJump() -> void:
+	if _film_camera != null and _film_camera.has_method("InvalidateCathedralProbeSnapshotForContextChange"):
+		_film_camera.call("InvalidateCathedralProbeSnapshotForContextChange")
 	match _mode:
 		FilmMode.LIVE:
 			_restart_film_pass()
@@ -218,6 +239,8 @@ func NotifyCameraTransformJump() -> void:
 
 
 func NotifyFieldStrengthChanged() -> void:
+	if _film_camera != null and _film_camera.has_method("InvalidateCathedralProbeSnapshotForContextChange"):
+		_film_camera.call("InvalidateCathedralProbeSnapshotForContextChange")
 	match _mode:
 		FilmMode.LIVE:
 			_restart_film_pass()
@@ -300,6 +323,9 @@ func _set_film_visible(visible: bool) -> void:
 func _update_status() -> void:
 	if _status_label == null:
 		return
+	if _mode == FilmMode.SNAPSHOT and _formal_snapshot_requested:
+		_update_formal_snapshot_status()
+		return
 	var mode_name := GetModeName()
 	var state := ""
 	if _mode == FilmMode.SNAPSHOT and _player != null:
@@ -317,6 +343,33 @@ func _update_status() -> void:
 		opacity_text,
 		GetShadingModeName(),
 	]
+
+
+func _update_formal_snapshot_status() -> void:
+	if _status_label == null or _film_camera == null:
+		return
+	var state := str(_film_camera.get("CathedralSnapshotLifecycleStateName"))
+	var reason := str(_film_camera.get("CathedralSnapshotLifecycleReasonName"))
+	var processed := int(_film_camera.get("CathedralSnapshotProcessedPixelCount"))
+	var total := int(_film_camera.get("CathedralSnapshotTotalPixelCount"))
+	var generation := int(_film_camera.get("CathedralSnapshotGeneration"))
+	var terminal := bool(_film_camera.get("CathedralProbeSnapshotIsTerminal"))
+	if terminal:
+		if bool(_film_camera.get("ProbeViewAvailable")):
+			_set_film_visible(true)
+			if not _formal_snapshot_terminal_handled:
+				_formal_snapshot_terminal_handled = true
+				_film_camera.call("SetProbeView", int(_film_camera.get("CurrentProbeView")))
+			_status_label.text = "Film: SNAPSHOT | Snapshot: COMPLETE · generation %d | %s | Opacity: %s | Shading: %s" % [
+				generation, _quality_name, GetOpacityPercent(), GetShadingModeName()]
+		else:
+			_set_film_visible(false)
+			_status_label.text = "Film: SNAPSHOT | Snapshot: %s · %s | %s | Opacity: %s | Shading: %s" % [
+				state.to_upper(), reason, _quality_name, GetOpacityPercent(), GetShadingModeName()]
+		return
+	_set_film_visible(false)
+	_status_label.text = "Film: SNAPSHOT | Snapshot: %s %d / %d | %s | Opacity: %s | Shading: %s" % [
+		state.to_upper(), processed, total, _quality_name, GetOpacityPercent(), GetShadingModeName()]
 
 
 func _get_shading_mode_label(shading_mode: int) -> String:

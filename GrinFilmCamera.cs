@@ -4895,6 +4895,55 @@ private sealed class OverlayRollingWindow
 
 	public bool RequestCathedralProbeSnapshot(int budget) => TryRequestCathedralProbeSnapshot(budget, out _);
 	public bool CathedralProbeSnapshotIsTerminal => !_probeSnapshotLifecycleActive && _lastProbeSnapshotLifecycleResult.IsTerminal;
+	public bool CathedralSnapshotLifecycleActive => _probeSnapshotLifecycleActive;
+	public string CathedralSnapshotLifecycleStateName => SnapshotLifecycleStateToken(
+		_probeSnapshotLifecycleActive ? _probeSnapshotLifecycleState : _lastProbeSnapshotLifecycleResult.State);
+	public string CathedralSnapshotLifecycleReasonName => SnapshotLifecycleReasonToken(
+		_probeSnapshotLifecycleActive ? _probeSnapshotLifecycleReason : _lastProbeSnapshotLifecycleResult.Reason);
+	public int CathedralSnapshotProcessedPixelCount => _probeSnapshotLifecycleActive
+		? BuildCurrentCathedralProbeSnapshotLifecycleResult(
+			_probeSnapshotLifecycleState,
+			_probeSnapshotLifecycleReason,
+			contextMatched: true,
+			dimensionsMatched: true).ProcessedPixelCount
+		: _lastProbeSnapshotLifecycleResult.ProcessedPixelCount;
+	public int CathedralSnapshotTotalPixelCount => _probeSnapshotLifecycleActive
+		? BuildCurrentCathedralProbeSnapshotLifecycleResult(
+			_probeSnapshotLifecycleState,
+			_probeSnapshotLifecycleReason,
+			contextMatched: true,
+			dimensionsMatched: true).TotalPixelCount
+		: _lastProbeSnapshotLifecycleResult.TotalPixelCount;
+	public int CathedralSnapshotGeneration => _probeSnapshotLifecycleGeneration;
+
+	/// <summary>
+	/// Invalidates formal observation authority when the visible scene context changes.
+	/// Presentation-only field structure toggles intentionally do not call this method.
+	/// </summary>
+	public void InvalidateCathedralProbeSnapshotForContextChange()
+	{
+		if (_probeSnapshotLifecycleActive)
+		{
+			CompleteCathedralProbeSnapshotLifecycle(
+				ProbeSnapshotLifecycleState.Invalidated,
+				ProbeSnapshotLifecycleReason.ContextChanged,
+				contextMatched: false,
+				dimensionsMatched: true);
+		}
+		else if (_sealedProbeViewAvailable || _probeSnapshotComplete)
+		{
+			_lastProbeSnapshotLifecycleResult = BuildCurrentCathedralProbeSnapshotLifecycleResult(
+				ProbeSnapshotLifecycleState.Invalidated,
+				ProbeSnapshotLifecycleReason.ContextChanged,
+				contextMatched: false,
+				dimensionsMatched: true);
+			_probeSnapshotLifecycleState = ProbeSnapshotLifecycleState.Invalidated;
+			_probeSnapshotLifecycleReason = ProbeSnapshotLifecycleReason.ContextChanged;
+		}
+
+		ResetCathedralProbeBuffersForPass();
+		UpdateProbeViewHud();
+	}
 
 	public void SetProbeView(ProbeViewMode mode)
 	{
@@ -10206,6 +10255,9 @@ private sealed class OverlayRollingWindow
 		_probeSnapshotLifecycleHeight = 0;
 		_probeSnapshotLifecyclePolicy = default;
 		_cathedralSnapshotContext = default;
+		// A new formal request immediately withdraws any prior sealed authority.
+		// The next safe physics pump will initialize and freeze the new context.
+		ResetCathedralProbeBuffersForPass();
 		result = BuildCurrentCathedralProbeSnapshotLifecycleResult(
 			ProbeSnapshotLifecycleState.Requested,
 			ProbeSnapshotLifecycleReason.None,
