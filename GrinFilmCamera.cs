@@ -15914,18 +15914,24 @@ private sealed class OverlayRollingWindow
 					$"ms={renderStepWatch.ElapsedMilliseconds}");
 			}
 
-			void LogRenderStopOnce(string reason)
+			void LogRenderStopOnce(string reason, bool isError = true)
 			{
 				// DECISION: emit a single definitive stop line for any budget/timeout stop.
+				// isError=true  → true abort (UpdateEveryFrame disabled or hard watchdog)
+				// isError=false → cooperative yield (LIVE or SNAPSHOT budget; rendering continues next frame)
 				if (renderStepStopLogged) return;
 				renderStepStopLogged = true;
 				if (!ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render)) return;
-				GD.PrintErr(
+				string msg =
 					$"[RenderStep][STOP] reason={reason} phase={renderPhase} y=[{yStart},{yEnd}) rowCursor={_rowCursor} " +
 					$"elapsedMs={renderStepWatch.ElapsedMilliseconds} " +
 					$"attempts={_softGateAttemptsUsedThisFrame}/{pass2SoftGateMaxAttemptsPerFrameEffective} " +
 					$"sub={_softGateSubdividedCallsUsedThisFrame}/{pass2SoftGateMaxSubdividedCallsPerFrameEffective} " +
-					$"hits={bandHits}");
+					$"hits={bandHits}";
+				if (isError)
+					GD.PrintErr(msg);
+				else
+					GD.Print(msg);
 			}
 
 			void FinalizeBandAndAdvance(string reason, int bandStart, int bandEnd, int hitsInBand, string extraStats)
@@ -16049,7 +16055,7 @@ private sealed class OverlayRollingWindow
 					budgetStopRowEnd = budgetStopRowCursor;
 				}
 				LogBudgetExitOnce(reason, budgetStopRowCursor);
-				LogRenderStopOnce(reason);
+				LogRenderStopOnce(reason, isError: false);
 			}
 
 			void LogBudgetStopOnce()
@@ -17389,7 +17395,7 @@ private sealed class OverlayRollingWindow
 					RecordRuntimeYield();
 					if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render))
 						GD.Print($"[RenderStep][Yield] reason=max_ms_after_pass1 frame={_frameIndex} rowStart={yStart} bandH={bandH} committed=0 pendingPass2=1 ms={renderStepWatch.ElapsedMilliseconds}");
-					LogRenderStopOnce("max_ms_after_pass1");
+					LogRenderStopOnce("max_ms_after_pass1", isError: false);
 					FinalizeBandAndAdvance("max_ms_after_pass1", yStart, yEnd, bandHits, "pendingPass2=1");
 					ApplyDeferredRowCursorResetIfNeeded(yStart, yEnd);
 					return;
@@ -23245,7 +23251,7 @@ private sealed class OverlayRollingWindow
 				}
 				else if (isTimeBudget && !bandCompletedThisStep)
 				{
-					LogRenderStopOnce(budgetStopReason);
+					LogRenderStopOnce(budgetStopReason, isError: false);
 					if (!ForceAdvanceOnNoHit(budgetStopReason, "zero-hit-advance", true))
 					{
 						if (cfg.RenderStepBandLog && ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Render)) LogBandSummaryOnce("budget");
