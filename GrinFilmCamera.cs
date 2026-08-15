@@ -16548,9 +16548,21 @@ private sealed class OverlayRollingWindow
 			yStart = _rowCursor;
 			int baseRowsPerFrame = Mathf.Clamp(filmCfg.RowsPerFrame, Mathf.Max(1, cfg.MinRowsPerFrame), filmH);
 			int maxRowsPerFrame = Mathf.Clamp(cfg.MaxRowsPerFrameCap, Mathf.Max(1, cfg.MinRowsPerFrame), filmH);
-			// DECISION: disable adaptive rows when target ms <= 0 or no prior adaptive state.
-			if (cfg.TargetMsPerFrame <= 0 || _adaptiveRowsPerFrame <= 0)
+			// LIVE starts at the configured minimum so the first work unit is
+			// proactive. Starting at RowsPerFrame would discover the budget by
+			// crossing it before the controller has any timing sample.
+			bool liveAdaptiveRows = cfg.UpdateEveryFrame && !snapshotAcquisition && cfg.TargetMsPerFrame > 0;
+			if (!liveAdaptiveRows)
+			{
 				_adaptiveRowsPerFrame = baseRowsPerFrame;
+			}
+			else if (_adaptiveRowsPerFrame <= 0)
+			{
+				_adaptiveRowsPerFrame = Mathf.Clamp(
+					Mathf.Max(1, cfg.MinRowsPerFrame),
+					1,
+					Math.Min(baseRowsPerFrame, maxRowsPerFrame));
+			}
 			rowsPerFrame = Mathf.Clamp(_adaptiveRowsPerFrame, Mathf.Max(1, cfg.MinRowsPerFrame), maxRowsPerFrame);
 			// DECISION: keep adaptive state in sync.
 			if (rowsPerFrame != _adaptiveRowsPerFrame)
@@ -23038,7 +23050,7 @@ private sealed class OverlayRollingWindow
 				if (pass2HitResolveUsecAccum > 0) _perfFrame.AddPass2HitResolveUsec((ulong)pass2HitResolveUsecAccum);
 				if (pass2SoftGateUsecAccum > 0) _perfFrame.AddPass2SoftGateUsec((ulong)pass2SoftGateUsecAccum);
 			}
-			if (TargetMsPerFrame > 0)
+			if (!snapshotAcquisition && cfg.UpdateEveryFrame && TargetMsPerFrame > 0)
 			{
 				double elapsedMs = (b1 - a0) / 1000.0;
 				if (elapsedMs > 0.01)
