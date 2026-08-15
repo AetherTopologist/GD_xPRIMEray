@@ -5,7 +5,6 @@ signal loco_mode_changed(mode_name: String)
 enum LocomotionMode { WALK, FLY }
 
 const WALK_SPEED := 5.0
-const FLY_VERTICAL_SPEED := 4.0
 const SPRINT_MULTIPLIER := 2.0
 const GRAVITY := 9.8
 const MOUSE_SENSITIVITY := 0.0025
@@ -49,22 +48,31 @@ func _physics_process(delta: float) -> void:
 			elif velocity.y < 0.0:
 				velocity.y = 0.0
 		LocomotionMode.FLY:
-			var vertical := 0.0
-			if Input.is_action_pressed("move_up"):
-				vertical += FLY_VERTICAL_SPEED
-			if Input.is_action_pressed("move_down"):
-				vertical -= FLY_VERTICAL_SPEED
-			velocity.y = vertical
+			# Fly is fully view-relative: camera pitch controls climb/descent.
+			# There are intentionally no dedicated rise/fall actions in this mode.
+			velocity = Vector3.ZERO
 
 	var input_dir := Vector3.ZERO
-	if Input.is_action_pressed("move_forward"):
-		input_dir -= basis.z
-	if Input.is_action_pressed("move_backward"):
-		input_dir += basis.z
-	if Input.is_action_pressed("move_left"):
-		input_dir -= basis.x
-	if Input.is_action_pressed("move_right"):
-		input_dir += basis.x
+	if _loco_mode == LocomotionMode.FLY:
+		var view_forward := -_camera.global_transform.basis.z
+		var view_right := _camera.global_transform.basis.x
+		if Input.is_action_pressed("move_forward"):
+			input_dir += view_forward
+		if Input.is_action_pressed("move_backward"):
+			input_dir -= view_forward
+		if Input.is_action_pressed("move_left"):
+			input_dir -= view_right
+		if Input.is_action_pressed("move_right"):
+			input_dir += view_right
+	else:
+		if Input.is_action_pressed("move_forward"):
+			input_dir -= basis.z
+		if Input.is_action_pressed("move_backward"):
+			input_dir += basis.z
+		if Input.is_action_pressed("move_left"):
+			input_dir -= basis.x
+		if Input.is_action_pressed("move_right"):
+			input_dir += basis.x
 
 	var speed := WALK_SPEED
 	if Input.is_action_pressed("move_sprint"):
@@ -73,10 +81,14 @@ func _physics_process(delta: float) -> void:
 	if input_dir.length_squared() > 0.0:
 		input_dir = input_dir.normalized()
 		velocity.x = input_dir.x * speed
+		velocity.y = input_dir.y * speed if _loco_mode == LocomotionMode.FLY else velocity.y
 		velocity.z = input_dir.z * speed
 	else:
-		velocity.x = move_toward(velocity.x, 0.0, speed)
-		velocity.z = move_toward(velocity.z, 0.0, speed)
+		if _loco_mode == LocomotionMode.FLY:
+			velocity = velocity.move_toward(Vector3.ZERO, speed)
+		else:
+			velocity.x = move_toward(velocity.x, 0.0, speed)
+			velocity.z = move_toward(velocity.z, 0.0, speed)
 
 	move_and_slide()
 
