@@ -18,6 +18,8 @@ This page is retained as the technical index into `misterylabs_artifacts/` and t
 
 The full manifest is at `misterylabs_artifacts/manifest.json`.
 
+**Artifact 001 (design, not yet a composed master):** the first public Cathedral Probe sequence — F, H, G, Q triad — is specified in [Artifact 001 — Cathedral Probe Art Direction](artifact_001_cathedral_probe_art_direction.md). Stills and compositor recipe live under `Docs/assets/observatory/artifact_001/`. Do not promote it to the lobby until a hashed 26s reel exists.
+
 ---
 
 ## Tier 1 — Homepage Candidates

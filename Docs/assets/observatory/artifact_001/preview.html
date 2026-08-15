@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Artifact 001 — Cathedral Probe · Art Direction Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;1,8..60,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="hero.css">
+  <style>
+    :root {
+      --ink: #e8e8ea;
+      --muted: #9a9aa3;
+      --quiet: #6e6e78;
+      --bg: #07070b;
+      --panel: #101018;
+      --line: rgba(180, 170, 220, 0.22);
+      --amber: #e89a30;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "IBM Plex Sans", sans-serif;
+      font-weight: 400;
+    }
+    body { padding: 2.2rem 1.4rem 4rem; }
+    main { max-width: 1120px; margin: 0 auto; }
+    h1, h2, h3 { font-weight: 300; letter-spacing: 0.04em; }
+    h1 { font-size: 1.85rem; margin: 0 0 0.35rem; }
+    h2 {
+      font-size: 1.05rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 0.4rem;
+      margin: 2.6rem 0 1rem;
+    }
+    .kicker {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--quiet);
+    }
+    .lede {
+      font-family: "Source Serif 4", serif;
+      font-style: italic;
+      font-size: 1.25rem;
+      color: #cfcfd6;
+      margin: 0.4rem 0 0.8rem;
+    }
+    .note { color: var(--muted); font-size: 0.92rem; line-height: 1.55; max-width: 46rem; }
+    .mono { font-family: "IBM Plex Mono", monospace; font-size: 0.78rem; color: var(--muted); }
+    .card {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      background: #050508;
+      border: 1px solid var(--line);
+      overflow: hidden;
+    }
+    .card img.fill {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .card img.plate {
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      display: block;
+    }
+    .ov {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      pointer-events: none;
+      padding: 1.4rem 3.4% 0.85rem;
+      background: linear-gradient(180deg, rgba(7,7,11,0) 0%, rgba(7,7,11,0.78) 42%, rgba(7,7,11,0.88) 100%);
+    }
+    .ov .key {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: clamp(10px, 1.5vw, 15px);
+      letter-spacing: 0.18em;
+      color: rgba(255,255,255,0.92);
+    }
+    .ov .line {
+      font-family: "Source Serif 4", serif;
+      font-size: clamp(12px, 1.8vw, 18px);
+      color: rgba(255,255,255,0.88);
+    }
+    .ov .quiet {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: clamp(9px, 1.2vw, 12px);
+      color: rgba(255,255,255,0.55);
+    }
+    .center-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 0.55rem;
+      background: #07070b;
+    }
+    .center-card .k { letter-spacing: 0.32em; font-size: 0.7rem; color: rgba(255,255,255,0.45); }
+    .center-card h3 {
+      font-family: "Source Serif 4", serif;
+      font-size: clamp(1.4rem, 4vw, 2.4rem);
+      letter-spacing: 0.08em;
+      margin: 0.2rem 0;
+    }
+    .center-card .sub {
+      font-family: "Source Serif 4", serif;
+      font-style: italic;
+      font-size: clamp(0.95rem, 2vw, 1.25rem);
+      opacity: 0.8;
+    }
+    .center-card .idline {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.55);
+      margin-top: 0.6rem;
+    }
+    .center-card .bounds {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.62rem;
+      line-height: 1.45;
+      color: rgba(255,255,255,0.42);
+      max-width: 36rem;
+      margin-top: 0.7rem;
+    }
+    .shots { display: grid; gap: 1.1rem; }
+    .shot-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.72rem;
+      color: var(--quiet);
+      margin-bottom: 0.35rem;
+    }
+    .shot-meta strong { color: var(--ink); font-weight: 500; }
+    .amber { color: var(--amber); }
+    .social {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.5rem;
+    }
+    .social .card { min-height: 0; }
+    .thumb {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      aspect-ratio: 16 / 9;
+      border: 1px solid var(--line);
+      overflow: hidden;
+      background: #050508;
+    }
+    .thumb__left { position: relative; }
+    .thumb__left img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    .thumb__bar {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      background: rgba(7,7,11,0.72);
+      padding: 0.55rem 0.75rem 0.6rem;
+    }
+    .thumb__bar .t {
+      font-family: "Source Serif 4", serif;
+      letter-spacing: 0.08em;
+      font-size: 1.05rem;
+    }
+    .thumb__bar .s {
+      font-family: "Source Serif 4", serif;
+      font-style: italic;
+      font-size: 0.82rem;
+      opacity: 0.75;
+    }
+    .thumb__right { display: grid; grid-template-rows: 1fr 1fr; }
+    .thumb__right img { width: 100%; height: 100%; object-fit: cover; }
+    .cues {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 2px;
+      background: rgba(128,128,128,0.18);
+    }
+    .cue {
+      background: var(--panel);
+      padding: 0.55rem 0.45rem;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.62rem;
+      line-height: 1.35;
+      color: var(--muted);
+    }
+    .cue b { display: block; color: var(--ink); font-weight: 500; margin-bottom: 0.2rem; }
+    .bounds-box {
+      border-left: 3px solid rgba(232,154,48,0.55);
+      padding: 0.7rem 0.9rem;
+      background: rgba(232,154,48,0.05);
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+    .xp-cathedral-hero { margin-top: 0; }
+    .xp-cathedral-triptych img { border: 1px solid var(--line); }
+    @media (max-width: 800px) {
+      .social { grid-template-columns: 1fr 1fr; }
+      .cues { grid-template-columns: 1fr 1fr; }
+      .thumb { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <p class="kicker">Artifact 001 · Approval preview</p>
+  <h1>THE CATHEDRAL PROBE</h1>
+  <p class="lede">Same window. Different light.</p>
+  <p class="note">
+    Built only from the Codex run7 stills. No generated Probe Views.
+    Title and end cards are type on black. The plate is the stained glass.
+    Open this file locally to approve the first-release cut.
+  </p>
+  <p class="mono">26.0 s canonical · 9.5 s teaser · 1920×1080 · 30 fps · nearest-neighbor plates</p>
+
+  <h2>Title card · 0.00–2.40</h2>
+  <div class="card center-card">
+    <div class="k">ARTIFACT 001</div>
+    <h3>THE CATHEDRAL PROBE</h3>
+    <div class="sub">Same window. Different light.</div>
+  </div>
+
+  <h2>Canonical reel · 26.0 s</h2>
+  <div class="shots">
+
+    <section>
+      <div class="shot-meta"><strong>1 · 2.40–5.60 · establish.png</strong><span>instrument · +2% push · dissolve 8f</span></div>
+      <div class="card">
+        <img class="fill" src="stills/establish.png" alt="Gallery control. Cartesian room, two discs, Field Structure off.">
+        <div class="ov"><span class="line">Gallery</span></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="shot-meta"><strong>2 · 5.60–9.20 · hermetic_field_structure.png</strong><span>instrument · hold then +1% · dissolve 6f</span></div>
+      <div class="card">
+        <img class="fill" src="stills/hermetic_field_structure.png" alt="Hermetic field. Cartesian room withdrawn.">
+        <div class="ov">
+          <span class="key">F  Field Structure</span>
+          <span class="key">H  Hermetic</span>
+          <span class="line">Same window.</span>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="shot-meta"><strong>3 · 9.20–11.60 · snapshot_complete.png</strong><span>instrument · hard hold · G lock</span></div>
+      <div class="card">
+        <img class="fill" src="stills/snapshot_complete.png" alt="Complete SNAPSHOT. Outcome already selected.">
+        <div class="ov">
+          <span class="key">G  Complete SNAPSHOT</span>
+          <span class="quiet">14400 / 14400  ·  generation 1</span>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="shot-meta"><strong>4 · 11.60–14.40 · outcome_display.png</strong><span class="amber">plate · hard hold · same PNG as shot 3 in the HUD pair</span></div>
+      <div class="card">
+        <img class="plate" src="stills/outcome_display.png" alt="Uniform MaxStepsExhausted amber plate.">
+        <div class="ov">
+          <span class="key">Q  Outcome</span>
+          <span class="line">Terminal semantic outcome</span>
+          <span class="quiet">MaxStepsExhausted</span>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="shot-meta"><strong>5 · 14.40–19.20 · contact_events_display.png</strong><span>plate · +4% push · the window</span></div>
+      <div class="card">
+        <img class="plate" src="stills/contact_events_display.png" alt="Contact Events plate. Concentric accepted-contact bands.">
+        <div class="ov">
+          <span class="key">Q  Contact Events</span>
+          <span class="line">Same frame. Same transport. Different questions.</span>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="shot-meta"><strong>6 · 19.20–22.00 · transport_effort_display.png</strong><span>plate · hard hold · effort = 1.0</span></div>
+      <div class="card">
+        <img class="plate" src="stills/transport_effort_display.png" alt="Uniform Transport Effort plate.">
+        <div class="ov">
+          <span class="key">Q  Transport Effort</span>
+          <span class="line">Numerical step budget used · not time · not field strength</span>
+          <span class="quiet">effort = 1.0</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <h2>End card · 22.00–26.00</h2>
+  <div class="card center-card">
+    <div class="sub">Render the path. Inspect the journey.</div>
+    <div class="sub">One recorded observation. Three illuminations.</div>
+    <div class="idline">14400 / 14400  ·  generation 1  ·  Hermetic  ·  Field Structure ON</div>
+    <div class="bounds">
+      No optical closure from this bundle alone.<br>
+      Contact Events are not a unique-surface census.<br>
+      Transport Effort is not time, energy, or field magnitude.<br>
+      Color is presentation mapping, not measurement authority.<br>
+      No UAP validation.
+    </div>
+  </div>
+
+  <h2>GitHub Pages hero</h2>
+  <p class="note">Sits above the existing three research cards. Do not replace them. Do not ship until a hashed master exists.</p>
+  <div class="xp-cathedral-hero">
+    <img class="xp-cathedral-hero__plate" src="stills/contact_events_display.png" alt="">
+    <div class="xp-cathedral-hero__shade" aria-hidden="true"></div>
+    <div class="xp-cathedral-hero__copy">
+      <div class="xp-cathedral-hero__kicker">Artifact 001</div>
+      <div class="xp-cathedral-hero__title">THE CATHEDRAL PROBE</div>
+      <p class="xp-cathedral-hero__line">Same window. Different light.</p>
+      <div class="xp-cathedral-hero__stat">14400 / 14400 Complete · generation 1</div>
+      <p class="xp-cathedral-hero__hook">Hermetic withdraws the Cartesian room. One sealed plate. Three questions.</p>
+      <p class="xp-cathedral-hero__note">Color is presentation mapping, not measurement authority. No optical closure. No UAP validation.</p>
+    </div>
+  </div>
+  <div class="xp-cathedral-triptych">
+    <figure>
+      <img src="stills/establish.png" alt="">
+      <figcaption>Explore — Gallery. Field Structure off.</figcaption>
+    </figure>
+    <figure>
+      <img src="stills/hermetic_field_structure.png" alt="">
+      <figcaption>Freeze — F + H. The room withdraws.</figcaption>
+    </figure>
+    <figure>
+      <img src="stills/outcome.png" alt="">
+      <figcaption>Interrogate — G, then Q. Same generation.</figcaption>
+    </figure>
+  </div>
+
+  <h2>Social teaser · 9.5 s</h2>
+  <div class="social">
+    <div>
+      <div class="shot-meta"><strong>0.0</strong><span>0.8s</span></div>
+      <div class="card center-card"><h3 style="font-size:1rem">THE CATHEDRAL PROBE</h3></div>
+    </div>
+    <div>
+      <div class="shot-meta"><strong>0.8</strong><span>1.6s</span></div>
+      <div class="card"><img class="fill" src="stills/establish.png" alt=""></div>
+    </div>
+    <div>
+      <div class="shot-meta"><strong>2.4</strong><span>2.0s</span></div>
+      <div class="card">
+        <img class="fill" src="stills/hermetic_field_structure.png" alt="">
+        <div class="ov"><span class="line">Same window.</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="shot-meta"><strong>4.4</strong><span>4.0s</span></div>
+      <div class="card">
+        <img class="plate" src="stills/contact_events_display.png" alt="">
+        <div class="ov"><span class="line">Different light.</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="shot-meta"><strong>8.4</strong><span>1.1s</span></div>
+      <div class="card center-card"><div class="sub" style="font-size:0.95rem">Render the path.</div></div>
+    </div>
+  </div>
+
+  <h2>Thumbnail</h2>
+  <div class="thumb">
+    <div class="thumb__left">
+      <img src="stills/contact_events_display.png" alt="Contact Events plate as the window.">
+      <div class="thumb__bar">
+        <div class="t">THE CATHEDRAL PROBE</div>
+        <div class="s">Same window. Different light.</div>
+      </div>
+    </div>
+    <div class="thumb__right">
+      <img src="stills/establish.png" alt="Gallery before.">
+      <img src="stills/hermetic_field_structure.png" alt="Hermetic after.">
+    </div>
+  </div>
+
+  <h2>Music cue map</h2>
+  <div class="cues">
+    <div class="cue"><b>0.4</b>glass partial −22</div>
+    <div class="cue"><b>2.4</b>room tone under Gallery</div>
+    <div class="cue"><b>5.6</b>tone exits — the withdraw</div>
+    <div class="cue"><b>9.2</b>G lock click + fifth</div>
+    <div class="cue"><b>11.6</b>hold. no swell</div>
+    <div class="cue"><b>14.4</b>Q tick + stacked fifth</div>
+    <div class="cue"><b>19.2</b>collapse to one pitch</div>
+    <div class="cue"><b>22.8</b>decaying glass, then silence</div>
+  </div>
+  <p class="note">No choir. No organ. No vocal. Ship silent if the cue is not ready.</p>
+
+  <h2>Claim boundaries</h2>
+  <div class="bounds-box">
+    No optical closure is established by this bundle alone.<br>
+    Contact Events are not a unique-surface census.<br>
+    Transport Effort is not time, energy, or field magnitude.<br>
+    HitGeometry cannot be inferred from Contact Events.<br>
+    Color is presentation mapping, not measurement authority.<br>
+    No UAP validation is claimed.
+  </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,306 @@
+{
+  "artifact": "001",
+  "title": "THE CATHEDRAL PROBE",
+  "specimen": "artifact001_run7",
+  "canonical_duration_s": 26.0,
+  "fps": 30,
+  "canvas": { "width": 1920, "height": 1080, "color": "#07070B" },
+  "pixel_scale": "nearest-neighbor",
+  "color_management": "rec709-passthrough",
+  "forbidden": [
+    "bilinear_or_bicubic_upscale",
+    "ai_upscale",
+    "lut_grade",
+    "bloom",
+    "film_grain",
+    "inpaint",
+    "generated_probe_views",
+    "crossfade_outcome_to_contact_events",
+    "animate_rings_expanding",
+    "religious_ornament",
+    "cyberpunk_ui",
+    "uap_language",
+    "numbers_not_in_run_summary"
+  ],
+  "claim_boundaries": [
+    "No optical closure is established by this bundle alone.",
+    "Contact Events are not a unique-surface census.",
+    "Transport Effort is not time, energy, or field magnitude.",
+    "HitGeometry cannot be inferred from Contact Events.",
+    "Color is presentation mapping, not measurement authority.",
+    "No UAP validation is claimed."
+  ],
+  "identity": {
+    "scene_id": "portable_observatory.gallery.v1",
+    "preset": "Hermetic",
+    "field_structure": "ON",
+    "generation": 1,
+    "width": 160,
+    "height": 90,
+    "total_pixels": 14400,
+    "unprocessed": 0,
+    "lifecycle": "Complete",
+    "outcomes": { "MaxStepsExhausted": 14400 },
+    "contact_events": { "0": 1670, "1": 7165, "2": 3254, "3+": 2311 },
+    "effort": { "min": 1.0, "mean": 1.0, "max": 1.0, "valid": 14400 },
+    "context_sha256": "0e0fa0c905982fd6934f1990efe0ba68d121443bc83c8b58ef8f32e3f9b3d57c"
+  },
+  "sources": [
+    {
+      "id": "establish",
+      "file": "stills/establish.png",
+      "system": "instrument",
+      "width": 1152,
+      "height": 648,
+      "sha256": "d4e5ff64bea74c89e1041408edf01a64025518fefc7e756094c589c04f44d157"
+    },
+    {
+      "id": "hermetic",
+      "file": "stills/hermetic_field_structure.png",
+      "system": "instrument",
+      "width": 1152,
+      "height": 648,
+      "sha256": "b5ab26855498b73e5feb5092780f596efe40104cc37e0f971917d467d5981b8c"
+    },
+    {
+      "id": "snapshot_complete",
+      "file": "stills/snapshot_complete.png",
+      "system": "instrument",
+      "width": 1152,
+      "height": 648,
+      "sha256": "b01ce7301599cf85cb97a22ba3301560d32310246d2e6de77060df1c6aee4983",
+      "note": "Byte-identical to outcome.png. Same sealed generation. Do not treat as a different picture."
+    },
+    {
+      "id": "outcome_hud",
+      "file": "stills/outcome.png",
+      "system": "instrument",
+      "width": 1152,
+      "height": 648,
+      "sha256": "b01ce7301599cf85cb97a22ba3301560d32310246d2e6de77060df1c6aee4983",
+      "identical_to": "snapshot_complete"
+    },
+    {
+      "id": "contact_hud",
+      "file": "stills/contact_events.png",
+      "system": "instrument",
+      "width": 1152,
+      "height": 648,
+      "sha256": "e1279adfddd1006abbaf3ec43c6d26d9dc4f471b1fc1af95700aae3495419f56"
+    },
+    {
+      "id": "effort_hud",
+      "file": "stills/transport_effort.png",
+      "system": "instrument",
+      "width": 1152,
+      "height": 648,
+      "sha256": "23d2e958717fc0d56b15566ba77df9f6fb696747d6d7bee04ed554dd3ab16644"
+    },
+    {
+      "id": "outcome_plate",
+      "file": "stills/outcome_display.png",
+      "system": "plate",
+      "width": 160,
+      "height": 90,
+      "sha256": "b83cb40a056b7cdfb8cf4d697fe420169e4afb1d3a041d9d1d1b769a42e57c3c",
+      "map_color": { "r": 232, "g": 154, "b": 48, "name": "MaxStepsExhausted" }
+    },
+    {
+      "id": "contact_plate",
+      "file": "stills/contact_events_display.png",
+      "system": "plate",
+      "width": 160,
+      "height": 90,
+      "sha256": "e1db7b243f35bf62f4617038f8541ae9819f2da4c8312f20afbfc4d30f5c5ee4"
+    },
+    {
+      "id": "effort_plate",
+      "file": "stills/transport_effort_display.png",
+      "system": "plate",
+      "width": 160,
+      "height": 90,
+      "sha256": "1923196589a76504c00ba728ec1be1dcc1a09c919529af69c18e610c4bee6559",
+      "map_note": "Uniform effort = 1.0"
+    }
+  ],
+  "type": {
+    "key": { "family": "IBM Plex Mono", "size_px": 22, "tracking_em": 0.18, "color": "#EBEBEBEB" },
+    "line": { "family": "Source Serif 4", "size_px": 28, "weight": 400, "color": "#E0E0E0E0" },
+    "quiet": { "family": "IBM Plex Mono", "size_px": 16, "color": "#8C8C8C8C" },
+    "safe": { "left_px": 64, "bottom_px": 28, "bar_height_px": 88, "bar": "linear #07070B 0% → 78–88%" },
+    "fade_in_frames": 12,
+    "fade_out_frames": 8,
+    "delay_frames": 10
+  },
+  "edl": [
+    {
+      "id": "title",
+      "t_in": 0.0,
+      "duration": 2.4,
+      "frames": 72,
+      "source": null,
+      "card": "title",
+      "motion": "none",
+      "transition_in": { "type": "none", "frames": 0 },
+      "overlays": ["title_kicker", "title_name", "title_line"]
+    },
+    {
+      "id": "establish",
+      "t_in": 2.4,
+      "duration": 3.2,
+      "frames": 96,
+      "source": "establish",
+      "motion": { "type": "push", "zoom": 1.02, "sample": "nearest" },
+      "transition_in": { "type": "dissolve", "frames": 8 },
+      "overlays": ["gallery"]
+    },
+    {
+      "id": "hermetic",
+      "t_in": 5.6,
+      "duration": 3.6,
+      "frames": 108,
+      "source": "hermetic",
+      "motion": { "type": "hold_then_push", "hold_s": 1.2, "zoom": 1.01, "sample": "nearest" },
+      "transition_in": { "type": "dissolve", "frames": 6 },
+      "overlays": ["key_f", "key_h", "same_window"]
+    },
+    {
+      "id": "seal",
+      "t_in": 9.2,
+      "duration": 2.4,
+      "frames": 72,
+      "source": "snapshot_complete",
+      "motion": "none",
+      "transition_in": { "type": "cut", "frames": 2 },
+      "overlays": ["key_g", "coverage"],
+      "audio": "g_lock_click"
+    },
+    {
+      "id": "outcome",
+      "t_in": 11.6,
+      "duration": 2.8,
+      "frames": 84,
+      "source": "outcome_plate",
+      "motion": "none",
+      "transition_in": { "type": "cut", "frames": 0, "note": "same sealed plate as seal; change sentence only" },
+      "overlays": ["key_q_outcome", "outcome_desc", "outcome_value"]
+    },
+    {
+      "id": "contact",
+      "t_in": 14.4,
+      "duration": 4.8,
+      "frames": 144,
+      "source": "contact_plate",
+      "optional_head_flash": { "source": "contact_hud", "frames": 3 },
+      "motion": { "type": "push", "zoom": 1.04, "sample": "nearest" },
+      "transition_in": { "type": "cut", "frames": 4 },
+      "overlays": ["key_q_contact", "same_frame"],
+      "audio": "q_tick",
+      "legend_optional": [
+        { "label": "0", "rgb": [24, 48, 92] },
+        { "label": "1", "rgb": [56, 128, 190] },
+        { "label": "2", "rgb": [80, 190, 168] },
+        { "label": "3+", "rgb": [236, 154, 48] }
+      ]
+    },
+    {
+      "id": "effort",
+      "t_in": 19.2,
+      "duration": 2.8,
+      "frames": 84,
+      "source": "effort_plate",
+      "motion": "none",
+      "transition_in": { "type": "cut", "frames": 4 },
+      "overlays": ["key_q_effort", "effort_desc", "effort_value"],
+      "audio": "q_tick"
+    },
+    {
+      "id": "end",
+      "t_in": 22.0,
+      "duration": 4.0,
+      "frames": 120,
+      "source": null,
+      "card": "end",
+      "motion": "none",
+      "transition_in": { "type": "fade_black", "frames": 10 },
+      "overlays": ["end_couplet", "end_identity", "end_boundaries", "end_wordmark"]
+    }
+  ],
+  "overlays": {
+    "title_kicker": { "text": "ARTIFACT 001", "role": "quiet", "align": "center", "appear_frame": 8 },
+    "title_name": { "text": "THE CATHEDRAL PROBE", "role": "title", "align": "center" },
+    "title_line": { "text": "Same window. Different light.", "role": "line", "align": "center" },
+    "gallery": { "text": "Gallery", "role": "line" },
+    "key_f": { "text": "F  Field Structure", "role": "key" },
+    "key_h": { "text": "H  Hermetic", "role": "key" },
+    "same_window": { "text": "Same window.", "role": "line" },
+    "key_g": { "text": "G  Complete SNAPSHOT", "role": "key" },
+    "coverage": { "text": "14400 / 14400  ·  generation 1", "role": "quiet" },
+    "key_q_outcome": { "text": "Q  Outcome", "role": "key" },
+    "outcome_desc": { "text": "Terminal semantic outcome", "role": "line" },
+    "outcome_value": { "text": "MaxStepsExhausted", "role": "quiet" },
+    "key_q_contact": { "text": "Q  Contact Events", "role": "key" },
+    "same_frame": { "text": "Same frame. Same transport. Different questions.", "role": "line" },
+    "key_q_effort": { "text": "Q  Transport Effort", "role": "key" },
+    "effort_desc": { "text": "Numerical step budget used · not time · not field strength", "role": "line" },
+    "effort_value": { "text": "effort = 1.0", "role": "quiet" },
+    "end_couplet": {
+      "text": "Render the path. Inspect the journey.\nOne recorded observation. Three illuminations.",
+      "role": "line",
+      "align": "center"
+    },
+    "end_identity": {
+      "text": "14400 / 14400  ·  generation 1  ·  Hermetic  ·  Field Structure ON",
+      "role": "quiet",
+      "align": "center"
+    },
+    "end_boundaries": {
+      "text": "No optical closure from this bundle alone.\nContact Events are not a unique-surface census.\nTransport Effort is not time, energy, or field magnitude.\nColor is presentation mapping, not measurement authority.\nNo UAP validation.",
+      "role": "quiet",
+      "align": "center"
+    },
+    "end_wordmark": { "file": "../../../xPRIMEray_Logo_Research.png", "max_px": 72, "align": "center", "opacity": 0.7 }
+  },
+  "teaser_edl": [
+    { "id": "S0", "t_in": 0.0, "duration": 0.8, "card": "title", "overlays": ["title_name"] },
+    { "id": "S1", "t_in": 0.8, "duration": 1.6, "source": "establish", "transition_in": { "type": "cut", "frames": 0 } },
+    { "id": "S2", "t_in": 2.4, "duration": 2.0, "source": "hermetic", "transition_in": { "type": "dissolve", "frames": 6 }, "overlays": ["same_window"] },
+    { "id": "S3", "t_in": 4.4, "duration": 4.0, "source": "contact_plate", "motion": { "type": "push", "zoom": 1.04, "sample": "nearest" }, "transition_in": { "type": "cut", "frames": 4 }, "overlays": ["title_line"] },
+    { "id": "S4", "t_in": 8.4, "duration": 1.1, "card": "end", "overlays": ["end_couplet_short"] }
+  ],
+  "teaser_overlays": {
+    "end_couplet_short": { "text": "Render the path.", "role": "line", "align": "center" }
+  },
+  "audio": {
+    "integrated_lufs_canonical": -16,
+    "integrated_lufs_teaser": -14,
+    "true_peak_dbtp": -1.5,
+    "legal_if_silent": true,
+    "cues": [
+      { "t": 0.4, "id": "glass_partial", "lufs_short": -22 },
+      { "t": 2.4, "id": "room_tone", "lufs_short": -28 },
+      { "t": 5.6, "id": "room_tone_exit", "fade_s": 0.4 },
+      { "t": 6.2, "id": "sparse_sine", "lufs_short": -26 },
+      { "t": 9.2, "id": "g_lock_click", "peak_db": -16, "plus": "held_fifth" },
+      { "t": 14.4, "id": "q_tick", "plus": "stacked_fifth" },
+      { "t": 19.2, "id": "q_tick", "plus": "collapse_to_one_pitch" },
+      { "t": 22.0, "id": "tone_exit", "fade_s": 0.6 },
+      { "t": 22.8, "id": "decaying_glass", "duration_s": 2.4 }
+    ],
+    "forbidden": ["choir", "pipe_organ", "vocal", "epic_trailer_bed", "4_4_march_under_rings"]
+  },
+  "outputs": [
+    { "id": "canonical", "file": "artifact001_canonical_26s.mp4", "duration_s": 26.0, "frames": 780 },
+    { "id": "teaser", "file": "artifact001_teaser_95s.mp4", "duration_s": 9.5 },
+    { "id": "teaser_1x1", "file": "artifact001_teaser_1x1.mp4", "crop": "center 1080x1080 of teaser" },
+    { "id": "teaser_9x16", "file": "artifact001_teaser_9x16.mp4", "crop": "center 1080x1920 of teaser" },
+    { "id": "thumb_1920", "file": "artifact001_thumb_1920.png" },
+    { "id": "thumb_1280", "file": "artifact001_thumb_1280.png" },
+    { "id": "edit_manifest", "file": "artifact001_edit_manifest.json" }
+  ],
+  "ffmpeg_notes": {
+    "plate_scale": "ffmpeg -sws_flags neighbor -i stills/contact_events_display.png -vf scale=1920:1080:flags=neighbor",
+    "viewport_scale": "ffmpeg -sws_flags neighbor -i stills/establish.png -vf scale=1920:1080:flags=neighbor",
+    "concat_must_be": "780 frames at 30 fps for canonical"
+  }
+}
