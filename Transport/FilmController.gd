@@ -133,6 +133,8 @@ func set_mode(mode: FilmMode) -> void:
 		return
 	var entering_snapshot := mode == FilmMode.SNAPSHOT and _mode != FilmMode.SNAPSHOT
 	if _mode == FilmMode.SNAPSHOT and mode != FilmMode.SNAPSHOT:
+		if _player != null and _player.has_method("SetPoseHeld"):
+			_player.call("SetPoseHeld", false)
 		if _film_camera != null and _film_camera.has_method("InvalidateCathedralProbeSnapshotForContextChange"):
 			# Leaving one-shot SNAPSHOT abandons its authority before LIVE/OFF resumes.
 			_film_camera.call("InvalidateCathedralProbeSnapshotForContextChange")
@@ -148,6 +150,8 @@ func set_mode(mode: FilmMode) -> void:
 			_set_film_compute(false)
 			_set_film_visible(false)
 		FilmMode.SNAPSHOT:
+			if _player != null and _player.has_method("SetPoseHeld"):
+				_player.call("SetPoseHeld", true)
 			_apply_quality_interactive()
 			_snapshot_timer = SNAPSHOT_DURATION_S
 			_snapshot_end_msec = 0
@@ -360,7 +364,7 @@ func _update_formal_snapshot_status() -> void:
 			if not _formal_snapshot_terminal_handled:
 				_formal_snapshot_terminal_handled = true
 				_film_camera.call("SetProbeView", int(_film_camera.get("CurrentProbeView")))
-			_status_label.text = "Film: SNAPSHOT | Snapshot: COMPLETE · generation %d | %s | Opacity: %s | Shading: %s" % [
+			_status_label.text = "Film: SNAPSHOT · POSE HELD | Snapshot: COMPLETE · generation %d | %s | Opacity: %s | Shading: %s" % [
 				generation, _quality_name, GetOpacityPercent(), GetShadingModeName()]
 		else:
 			_set_film_visible(false)
@@ -368,7 +372,7 @@ func _update_formal_snapshot_status() -> void:
 				state.to_upper(), reason, _quality_name, GetOpacityPercent(), GetShadingModeName()]
 		return
 	_set_film_visible(false)
-	_status_label.text = "Film: SNAPSHOT | Snapshot: %s %d / %d | %s | Opacity: %s | Shading: %s" % [
+	_status_label.text = "Film: SNAPSHOT · POSE HELD | Snapshot: %s %d / %d | %s | Opacity: %s | Shading: %s" % [
 		state.to_upper(), processed, total, _quality_name, GetOpacityPercent(), GetShadingModeName()]
 
 

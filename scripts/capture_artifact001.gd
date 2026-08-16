@@ -17,6 +17,7 @@ var start_context := ""
 var replay_invocations := 0
 var query_dataset_sha := ""
 var query_count := 0
+var sealed_pose: Transform3D
 
 func _initialize() -> void:
 	output_dir = OS.get_environment("ARTIFACT001_OUTPUT")
@@ -41,10 +42,22 @@ func _initialize() -> void:
 	await _capture_stage("establish.png", "Gallery", false)
 	_send_key(KEY_F)
 	await _settle(8)
+	if not _all_field_sources_runtime_visible():
+		# The normal routed event can arrive before the C# node's first input pump
+		# on a cold Mono startup. A second routed F is still deterministic because
+		# the aggregate toggle target is "all visible" whenever any source is off.
+		_send_key(KEY_F)
+		await _settle(8)
 	_assert(_all_field_sources_runtime_visible(), "F did not enable all field structures")
+	_send_key(KEY_E)
+	await _settle(10)
+	_assert(field_dial.call("GetExperimentName") == "Hermetic", "E did not select Hermetic experiment")
+	var experiment_pose: Transform3D = player.global_transform
 	_send_key(KEY_H)
 	await _settle(10)
-	_assert(field_dial.call("GetDisplayPresetName") == "Hermetic", "H did not select Hermetic")
+	_assert(field_dial.call("GetExperimentName") == "Hermetic", "H changed the experiment")
+	_assert(field_dial.call("GetPresentationName") == "Hermetic", "H did not select Hermetic presentation")
+	_assert(player.global_transform.is_equal_approx(experiment_pose), "H changed observer pose")
 	_assert(_all_field_sources_runtime_visible(), "Field Structure did not remain enabled after H")
 	await _capture_stage("hermetic_field_structure.png", "Hermetic", false)
 
@@ -64,7 +77,21 @@ func _initialize() -> void:
 	print("ARTIFACT001 CONTACT_REPLAY authority=%s queries=%d dataset_sha=%s invocations=%d" % [film.get("CathedralContactAuthorityToken"), query_count, query_dataset_sha, replay_invocations])
 	start_generation = int(film.get("SealedProbeViewGeneration"))
 	start_context = _context_token()
+	sealed_pose = player.global_transform
+	_assert(bool(player.call("IsPoseHeld")), "formal SNAPSHOT did not hold observer pose")
 	await _capture_stage("snapshot_complete.png", "Hermetic", true)
+	_send_key(KEY_H)
+	await _settle(4)
+	_assert(field_dial.call("GetExperimentName") == "Hermetic", "H changed experiment after seal")
+	_assert(int(film.get("SealedProbeViewGeneration")) == start_generation, "H invalidated sealed generation")
+	_assert(player.global_transform.is_equal_approx(sealed_pose), "H moved sealed observer")
+	_send_key(KEY_H)
+	await _settle(4)
+	_send_key(KEY_F)
+	await _settle(4)
+	_assert(int(film.get("SealedProbeViewGeneration")) == start_generation, "F invalidated sealed generation")
+	_send_key(KEY_F)
+	await _settle(4)
 
 	await _capture_stage("outcome.png", "Hermetic", true)
 	_send_key(KEY_Q)
@@ -114,6 +141,8 @@ func _capture_stage(file_name: String, context_name: String, sealed_expected: bo
 func _wait_for_complete() -> void:
 	for _i in range(1200):
 		await process_frame
+		if str(film.get("CathedralSnapshotLifecycleStateName")) in ["requested", "waiting_for_physics", "capturing"]:
+			_assert(bool(player.call("IsPoseHeld")), "observer pose released during formal acquisition")
 		if bool(film.get("ProbeViewAvailable")) and str(film.get("CathedralSnapshotLifecycleStateName")) == "complete":
 			return
 	_fail("formal Snapshot timeout state=%s reason=%s processed=%d/%d" % [
@@ -125,6 +154,8 @@ func _assert_same_acquisition(view_name: String) -> void:
 	_assert(_context_token() == start_context, view_name + " changed context identity")
 	_assert(int(film.get("CathedralSnapshotProcessedPixelCount")) == int(film.get("CathedralSnapshotTotalPixelCount")), view_name + " changed coverage")
 	_assert(str(film.get("CathedralSnapshotLifecycleStateName")) == "complete", view_name + " changed lifecycle state")
+	_assert(int(film.get("CathedralContactReplayInvocationCount")) == replay_invocations, view_name + " invoked replay")
+	_assert(player.global_transform.is_equal_approx(sealed_pose), view_name + " changed observer pose")
 
 func _write_artifact_manifest() -> void:
 	var manifest_path := output_dir.path_join("portable_bundle").path_join("manifest.json")

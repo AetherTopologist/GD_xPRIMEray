@@ -16,6 +16,7 @@ const PITCH_MAX := 1.4
 
 var _pitch := 0.0
 var _input_enabled := true
+var _pose_held := false
 var _loco_mode: LocomotionMode = LocomotionMode.WALK
 
 
@@ -24,7 +25,7 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not _input_enabled:
+	if not _input_enabled or _pose_held:
 		return
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
@@ -37,7 +38,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if not _input_enabled:
+	if not _input_enabled or _pose_held:
 		velocity = Vector3.ZERO
 		return
 
@@ -110,6 +111,16 @@ func SetInputEnabled(enabled: bool, release_mouse := true) -> void:
 		film_controller.call("SetInputEnabled", enabled)
 	if get_parent() != null and get_parent().has_method("SetHudVisibleForGameplay"):
 		get_parent().call("SetHudVisibleForGameplay", enabled)
+
+
+func SetPoseHeld(held: bool) -> void:
+	_pose_held = held
+	if held:
+		velocity = Vector3.ZERO
+
+
+func IsPoseHeld() -> bool:
+	return _pose_held
 
 
 func ApplyCameraTransform(camera_transform: Transform3D) -> void:
