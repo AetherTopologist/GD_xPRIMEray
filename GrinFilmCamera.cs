@@ -2357,6 +2357,10 @@ public partial class GrinFilmCamera : Node
 	private int _nextProbeSnapshotRequestId = 1;
 	private bool _probeSnapshotLifecycleActive = false;
 	private bool _probeSnapshotLifecycleInitialized = false;
+	private bool _cathedralContactReplayPending;
+	private bool _cathedralContactReplayComplete;
+	private int _cathedralContactReplayInvocationCount;
+	private const string CathedralContactAuthorityTokenValue = "GodotPhysics/DeterministicReplay-v1";
 	private int _probeSnapshotLifecycleRequestId = 0;
 	private int _probeSnapshotLifecycleGeneration = 0;
 	private int _probeSnapshotLifecycleBudgetFrames = CathedralProbeDefaultSnapshotLifecycleBudgetFrames;
@@ -4562,6 +4566,41 @@ private sealed class OverlayRollingWindow
 	public override void _PhysicsProcess(double delta)
 	{
 		RefreshCachedRenderSpaceState();
+		if (_cathedralContactReplayPending && _probeSnapshotLifecycleActive)
+		{
+			if (!ValidateActiveCathedralProbeSnapshotContext(out bool replayContextMatched, out bool replayDimensionsMatched))
+			{
+				CompleteCathedralProbeSnapshotLifecycle(
+					ProbeSnapshotLifecycleState.Invalidated,
+					_probeSnapshotContextInvalidationReason,
+					replayContextMatched,
+					replayDimensionsMatched);
+				return;
+			}
+			if (!TryResolveRenderSpaceState(out PhysicsDirectSpaceState3D replaySpace, out _))
+			{
+				// Replay is deliberately kept in the safe physics pump. Do not
+				// restart the transport pass while the space is unavailable.
+				return;
+			}
+
+			if (!ReplayCathedralContactHistory(replaySpace, out string replayReason))
+			{
+				_cathedralContactReplayPending = false;
+				CompleteCathedralProbeSnapshotLifecycle(
+					ProbeSnapshotLifecycleState.Failed,
+					ProbeSnapshotLifecycleReason.InternalValidationFailed,
+					contextMatched: true,
+					dimensionsMatched: true);
+				GD.PushError($"[CathedralProbe][ContactReplay] failed reason={replayReason}");
+				return;
+			}
+
+			_cathedralContactReplayPending = false;
+			_cathedralContactReplayComplete = true;
+			FinalizeCathedralProbeSnapshotSummary(_filmWidth, _filmHeight);
+			return;
+		}
 		PumpCathedralProbeSnapshotLifecycle();
 		if (_observationAcquisition.Owner != ObservationAcquisitionOwner.Snapshot)
 			PumpSelectedProbeTransport();
@@ -4872,7 +4911,15 @@ private sealed class OverlayRollingWindow
 			ContactCounts = (int[])_sealedProbeViewContactCounts.Clone(),
 			FinalStepCounts = (int[])_sealedProbeViewFinalStepCounts.Clone(),
 			PolicyMaxSteps = (int[])_sealedProbeViewPolicyMaxSteps.Clone(),
-			EffortValid = (byte[])_sealedProbeViewEffortValid.Clone()
+			EffortValid = (byte[])_sealedProbeViewEffortValid.Clone(),
+			ContactAuthorityToken = CathedralContactAuthorityTokenValue,
+			RuntimeProvenance = new Dictionary<string, string>
+			{
+				["runtime"] = "godot4-mono",
+				["physics_backend"] = ProjectSettings.GetSetting("physics/3d/physics_engine").ToString(),
+				["renderer_backend"] = ProjectSettings.GetSetting("renderer/rendering_method").ToString(),
+				["capture_authority"] = CathedralContactAuthorityTokenValue
+			}
 		};
 		if (!PortableProbeCaptureBundle.TryWrite(input, out _, out reason))
 			return false;
@@ -4915,6 +4962,12 @@ private sealed class OverlayRollingWindow
 			dimensionsMatched: true).TotalPixelCount
 		: _lastProbeSnapshotLifecycleResult.TotalPixelCount;
 	public int CathedralSnapshotGeneration => _probeSnapshotLifecycleGeneration;
+	public bool CathedralContactReplayComplete => _cathedralContactReplayComplete &&
+		_lastProbeSnapshotLifecycleResult.State == ProbeSnapshotLifecycleState.Complete;
+	public int CathedralContactReplayInvocationCount => _cathedralContactReplayInvocationCount;
+	public string CathedralContactAuthorityToken => CathedralContactAuthorityTokenValue;
+	public int CathedralProbeQueryCount => _rbr?.GetFormalProbeQueriesCanonical().Length ?? 0;
+	public string CathedralProbeQueryDatasetSha256 => _rbr?.GetFormalProbeQueryDatasetSha256() ?? string.Empty;
 
 	/// <summary>
 	/// Invalidates formal observation authority when the visible scene context changes.
@@ -10353,6 +10406,134 @@ private sealed class OverlayRollingWindow
 		RenderStep();
 	}
 
+	private bool ReplayCathedralContactHistory(
+		PhysicsDirectSpaceState3D space,
+		out string reason)
+	{
+		reason = string.Empty;
+		if (space == null || !GodotObject.IsInstanceValid(space) || _rbr == null)
+		{
+			reason = "physics_space_unavailable";
+			return false;
+		}
+
+		int totalPixels = _filmWidth * _filmHeight;
+		if (totalPixels <= 0 ||
+			_transportContactCount.Length < totalPixels ||
+			_transportFirstContactStep.Length < totalPixels ||
+			_transportLastContactStep.Length < totalPixels ||
+			_transportHadAnyGeometryContact.Length < totalPixels ||
+			_transportHadAnyBackgroundContact.Length < totalPixels ||
+			_transportNearestAcceptedColliderId.Length < totalPixels ||
+			_transportNearestAcceptedNormal.Length < totalPixels ||
+			_transportNormalValid.Length < totalPixels)
+		{
+			reason = "history_capacity_exceeded";
+			return false;
+		}
+
+		RayBeamRenderer.FormalProbeQuery[] queries = _rbr.GetFormalProbeQueriesCanonical();
+		if (queries.Length == 0)
+		{
+			reason = "empty_formal_query_dataset";
+			return false;
+		}
+
+		ResetCathedralContactHistoryForReplay(totalPixels);
+		bool[] geometryContact = new bool[totalPixels];
+		bool[] backgroundContact = new bool[totalPixels];
+		float[] nearestDistance = new float[totalPixels];
+		Array.Fill(nearestDistance, float.PositiveInfinity);
+
+		PhysicsRayQueryParameters3D query = new();
+		try
+		{
+			for (int queryIndex = 0; queryIndex < queries.Length; queryIndex++)
+			{
+				RayBeamRenderer.FormalProbeQuery recorded = queries[queryIndex];
+				if (recorded.PixelIndex < 0 || recorded.PixelIndex >= totalPixels)
+				{
+					reason = "query_pixel_out_of_range";
+					return false;
+				}
+
+				query.From = recorded.From;
+				query.To = recorded.To;
+				query.CollisionMask = recorded.CollisionMask;
+				query.CollideWithBodies = recorded.CollideWithBodies;
+				query.CollideWithAreas = recorded.CollideWithAreas;
+				query.HitFromInside = recorded.HitFromInside;
+				query.HitBackFaces = recorded.HitBackFaces;
+
+				Godot.Collections.Dictionary hit = space.IntersectRay(query);
+				if (hit.Count == 0)
+					continue;
+				if (!hit.ContainsKey("position") || !hit.ContainsKey("normal"))
+				{
+					reason = "replay_hit_missing_geometry";
+					return false;
+				}
+
+				Vector3 hitPosition = (Vector3)hit["position"];
+				Vector3 hitNormal = (Vector3)hit["normal"];
+				ulong colliderId = hit.ContainsKey("collider_id")
+					? (ulong)(long)hit["collider_id"]
+					: 0UL;
+				ProbeSurfaceClass surface = ClassifyProbeColliderForPass1(colliderId);
+				int pixel = recorded.PixelIndex;
+				bool geometry = geometryContact[pixel];
+				bool background = backgroundContact[pixel];
+				TransportContactHistoryAccumulator.RecordContact(
+					ref _transportContactCount[pixel],
+					ref _transportFirstContactStep[pixel],
+					ref _transportLastContactStep[pixel],
+					ref geometry,
+					ref background,
+					recorded.ProbeStep,
+					surface);
+				geometryContact[pixel] = geometry;
+				backgroundContact[pixel] = background;
+
+				bool normalValid = float.IsFinite(hitNormal.X) && float.IsFinite(hitNormal.Y) &&
+					float.IsFinite(hitNormal.Z) && hitNormal.LengthSquared() > 1e-10f;
+				float segmentLength = (recorded.To - recorded.From).Length();
+				float distance = recorded.TraveledB - segmentLength +
+					(hitPosition - recorded.From).Length();
+				if (distance < nearestDistance[pixel])
+				{
+					nearestDistance[pixel] = distance;
+					_transportNearestAcceptedColliderId[pixel] = colliderId;
+					_transportNearestAcceptedNormal[pixel] = hitNormal;
+					_transportNormalValid[pixel] = (byte)(normalValid ? 1 : 0);
+				}
+			}
+
+			for (int pixel = 0; pixel < totalPixels; pixel++)
+			{
+				_transportHadAnyGeometryContact[pixel] = (byte)(geometryContact[pixel] ? 1 : 0);
+				_transportHadAnyBackgroundContact[pixel] = (byte)(backgroundContact[pixel] ? 1 : 0);
+			}
+			_cathedralContactReplayInvocationCount++;
+			return true;
+		}
+		finally
+		{
+			query.Dispose();
+		}
+	}
+
+	private void ResetCathedralContactHistoryForReplay(int totalPixels)
+	{
+		Array.Clear(_transportContactCount, 0, totalPixels);
+		Array.Fill(_transportFirstContactStep, -1, 0, totalPixels);
+		Array.Fill(_transportLastContactStep, -1, 0, totalPixels);
+		Array.Clear(_transportHadAnyGeometryContact, 0, totalPixels);
+		Array.Clear(_transportHadAnyBackgroundContact, 0, totalPixels);
+		Array.Clear(_transportNearestAcceptedColliderId, 0, totalPixels);
+		Array.Clear(_transportNearestAcceptedNormal, 0, totalPixels);
+		Array.Clear(_transportNormalValid, 0, totalPixels);
+	}
+
 	private bool InitializeCathedralProbeSnapshotLifecycle(out string reason)
 	{
 		reason = string.Empty;
@@ -10408,6 +10589,10 @@ private sealed class OverlayRollingWindow
 		ResetCathedralProbeBuffersForPass();
 		_probeSnapshotComplete = false;
 		_probeFrameContextKey = default;
+		_cathedralContactReplayPending = false;
+		_cathedralContactReplayComplete = false;
+		_cathedralContactReplayInvocationCount = 0;
+		_rbr?.BeginFormalProbeQueryCapture();
 		UpdateEveryFrame = false;
 		_probeSnapshotLifecycleInitialized = true;
 		_probeSnapshotLifecycleState = ProbeSnapshotLifecycleState.Capturing;
@@ -10493,6 +10678,8 @@ private sealed class OverlayRollingWindow
 		_probeSnapshotLifecycleReason = result.Reason;
 		_probeSnapshotLifecycleActive = false;
 		_probeSnapshotLifecycleInitialized = false;
+		_cathedralContactReplayPending = false;
+		_rbr?.EndFormalProbeQueryCapture();
 		if (result.State != ProbeSnapshotLifecycleState.Complete)
 		{
 			_probeSnapshotComplete = false;
@@ -11353,6 +11540,21 @@ private sealed class OverlayRollingWindow
 			ContextKey = summaryContext
 		};
 		_probeSnapshotComplete = unprocessedCount == 0 && hasSummaryContext;
+		if (_probeSnapshotLifecycleActive &&
+			_probeSnapshotLifecycleInitialized &&
+			_probeSnapshotComplete &&
+			!_cathedralContactReplayComplete)
+		{
+			// Transport coverage is complete, but contact history is not formally
+			// sealed until the frozen pass-1 questions have been replayed serially
+			// from the safe physics pump.
+			_rbr?.EndFormalProbeQueryCapture();
+			_cathedralContactReplayPending = true;
+			_probeSnapshotComplete = false;
+			_probeSnapshotLifecycleState = ProbeSnapshotLifecycleState.Capturing;
+			_probeSnapshotLifecycleReason = ProbeSnapshotLifecycleReason.None;
+			return;
+		}
 		bool snapshotCanSeal = ProbeSnapshotLifecycleModel.CanSealSnapshot(
 			totalPixels,
 			unprocessedCount,
@@ -17137,7 +17339,8 @@ private sealed class OverlayRollingWindow
 							out float telemetryTurnMax,
 							curvatureGridForPass1,
 							fieldGridForPass1,
-							ClassifyProbeColliderForPass1
+							ClassifyProbeColliderForPass1,
+							y * filmW + x
 						);
 
 					// DECISION: accumulate perf counters only when enabled.

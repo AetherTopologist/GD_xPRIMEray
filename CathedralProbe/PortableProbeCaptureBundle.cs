@@ -35,6 +35,8 @@ public sealed class PortableProbeCaptureInput
 	public required int[] FinalStepCounts { get; init; }
 	public required int[] PolicyMaxSteps { get; init; }
 	public required byte[] EffortValid { get; init; }
+	public string ContactAuthorityToken { get; init; } = "legacy";
+	public Dictionary<string, string> RuntimeProvenance { get; init; } = new();
 }
 
 public sealed class PortableProbeCaptureResult
@@ -219,6 +221,12 @@ public static class PortableProbeCaptureBundle
 			["engine"] = new Dictionary<string, object> { ["engine_commit"] = input.EngineCommit, ["runtime"] = "godot4-mono" },
 			["scene"] = new Dictionary<string, object> { ["semantic_scene_id"] = input.SemanticSceneId, ["godot_scene_path"] = input.GodotScenePath },
 			["artifact_class"] = ArtifactClass,
+			["authority"] = new Dictionary<string, object>
+			{
+				["contact_events"] = input.ContactAuthorityToken,
+				["spatial_authority"] = "not_xprimeray_spatial_kernel"
+			},
+			["runtime_provenance"] = input.RuntimeProvenance,
 			["acquisition"] = new Dictionary<string, object>
 			{
 				["state"] = "Complete", ["generation"] = input.Generation, ["width"] = input.Width, ["height"] = input.Height,

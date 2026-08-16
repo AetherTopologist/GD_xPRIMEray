@@ -14,6 +14,9 @@ var output_dir := "/tmp/artifact001"
 var sequence: Array[Dictionary] = []
 var start_generation := 0
 var start_context := ""
+var replay_invocations := 0
+var query_dataset_sha := ""
+var query_count := 0
 
 func _initialize() -> void:
 	output_dir = OS.get_environment("ARTIFACT001_OUTPUT")
@@ -52,6 +55,13 @@ func _initialize() -> void:
 	_assert(bool(film.get("ProbeViewAvailable")), "sealed Probe View authority unavailable")
 	_assert(int(film.get("CathedralSnapshotProcessedPixelCount")) == int(film.get("CathedralSnapshotTotalPixelCount")), "snapshot coverage incomplete")
 	_assert(int(film.get("CathedralSnapshotTotalPixelCount")) > 0, "snapshot has no pixels")
+	_assert(bool(film.get("CathedralContactReplayComplete")), "contact replay did not complete")
+	replay_invocations = int(film.get("CathedralContactReplayInvocationCount"))
+	_assert(replay_invocations == 1, "expected one contact replay, got %d" % replay_invocations)
+	query_dataset_sha = str(film.get("CathedralProbeQueryDatasetSha256"))
+	query_count = int(film.get("CathedralProbeQueryCount"))
+	_assert(query_count == 388800, "unexpected formal query count: %d" % query_count)
+	print("ARTIFACT001 CONTACT_REPLAY authority=%s queries=%d dataset_sha=%s invocations=%d" % [film.get("CathedralContactAuthorityToken"), query_count, query_dataset_sha, replay_invocations])
 	start_generation = int(film.get("SealedProbeViewGeneration"))
 	start_context = _context_token()
 	await _capture_stage("snapshot_complete.png", "Hermetic", true)
@@ -129,6 +139,10 @@ func _write_artifact_manifest() -> void:
 	proof["q_refinements"] = 0
 	proof["q_snapshot_requests"] = 0
 	proof["q_source_arrays_mutated"] = false
+	proof["contact_replay_invocations"] = replay_invocations
+	proof["contact_query_dataset_sha256"] = query_dataset_sha
+	proof["contact_query_count"] = query_count
+	proof["contact_authority"] = str(film.get("CathedralContactAuthorityToken"))
 	manifest["artifact_001"] = {
 		"recipe": "Gallery launch → F ON → H Hermetic → G formal SNAPSHOT → Q triad",
 		"field_structure": "ON",
@@ -137,6 +151,11 @@ func _write_artifact_manifest() -> void:
 		"unprocessed": int(film.get("CathedralSnapshotTotalPixelCount")) - int(film.get("CathedralSnapshotProcessedPixelCount")),
 		"sequence": sequence,
 		"portable_bundle_dir": "portable_bundle/",
+		"contact_authority": str(film.get("CathedralContactAuthorityToken")),
+		"contact_replay_complete": bool(film.get("CathedralContactReplayComplete")),
+		"contact_replay_invocations": replay_invocations,
+		"contact_query_dataset_sha256": query_dataset_sha,
+		"contact_query_count": query_count,
 		"sequence_note": "establish.png is the pre-transition Gallery control; all Hermetic acquisition/view captures share one camera pose and dimensions."
 	}
 	var file := FileAccess.open(output_dir.path_join("manifest.json"), FileAccess.WRITE)

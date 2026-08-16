@@ -2,6 +2,8 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
+using System.Security.Cryptography;
 using RendererCore.Config;
 using RendererCore.Fields;
 using XPrimeRay.Diagnostics;
@@ -646,6 +648,115 @@ public partial class RayBeamRenderer : Node3D
 		public bool HadAnyGeometryContact;
 		public bool HadAnyBackgroundContact;
 		public bool NormalValid;
+	}
+
+	public readonly struct FormalProbeQuery
+	{
+		public readonly int PixelIndex;
+		public readonly int ProbeStep;
+		public readonly Vector3 From;
+		public readonly Vector3 To;
+		public readonly float TraveledB;
+		public readonly uint CollisionMask;
+		public readonly bool CollideWithBodies;
+		public readonly bool CollideWithAreas;
+		public readonly bool HitFromInside;
+		public readonly bool HitBackFaces;
+
+		public FormalProbeQuery(int pixelIndex, int probeStep, in RaySeg segment, PhysicsRayQueryParameters3D query)
+		{
+			PixelIndex = pixelIndex;
+			ProbeStep = probeStep;
+			From = segment.A;
+			To = segment.B;
+			TraveledB = segment.TraveledB;
+			CollisionMask = query.CollisionMask;
+			CollideWithBodies = query.CollideWithBodies;
+			CollideWithAreas = query.CollideWithAreas;
+			HitFromInside = query.HitFromInside;
+			HitBackFaces = query.HitBackFaces;
+		}
+	}
+
+	private readonly List<FormalProbeQuery> _formalProbeQueries = new();
+	private readonly object _formalProbeQueryLock = new();
+	private bool _formalProbeQueryCaptureEnabled;
+	public bool FormalProbeQueryCaptureEnabled => _formalProbeQueryCaptureEnabled;
+
+	public void BeginFormalProbeQueryCapture()
+	{
+		lock (_formalProbeQueryLock)
+		{
+			_formalProbeQueries.Clear();
+			_formalProbeQueryCaptureEnabled = true;
+		}
+	}
+
+	public void EndFormalProbeQueryCapture()
+	{
+		_formalProbeQueryCaptureEnabled = false;
+	}
+
+	public FormalProbeQuery[] GetFormalProbeQueriesCanonical()
+	{
+		FormalProbeQuery[] queries;
+		lock (_formalProbeQueryLock)
+			queries = _formalProbeQueries.ToArray();
+		Array.Sort(queries, (a, b) =>
+		{
+			int compare = a.PixelIndex.CompareTo(b.PixelIndex);
+			if (compare != 0) return compare;
+			compare = a.ProbeStep.CompareTo(b.ProbeStep);
+			return compare != 0 ? compare : CompareFormalQuery(a, b);
+		});
+		return queries;
+	}
+
+	private static int CompareFormalQuery(in FormalProbeQuery a, in FormalProbeQuery b)
+	{
+		int compare = BitConverter.SingleToUInt32Bits(a.From.X).CompareTo(BitConverter.SingleToUInt32Bits(b.From.X));
+		if (compare != 0) return compare;
+		compare = BitConverter.SingleToUInt32Bits(a.From.Y).CompareTo(BitConverter.SingleToUInt32Bits(b.From.Y));
+		if (compare != 0) return compare;
+		compare = BitConverter.SingleToUInt32Bits(a.From.Z).CompareTo(BitConverter.SingleToUInt32Bits(b.From.Z));
+		if (compare != 0) return compare;
+		compare = BitConverter.SingleToUInt32Bits(a.To.X).CompareTo(BitConverter.SingleToUInt32Bits(b.To.X));
+		if (compare != 0) return compare;
+		compare = BitConverter.SingleToUInt32Bits(a.To.Y).CompareTo(BitConverter.SingleToUInt32Bits(b.To.Y));
+		if (compare != 0) return compare;
+		compare = BitConverter.SingleToUInt32Bits(a.To.Z).CompareTo(BitConverter.SingleToUInt32Bits(b.To.Z));
+		if (compare != 0) return compare;
+		compare = BitConverter.SingleToUInt32Bits(a.TraveledB).CompareTo(BitConverter.SingleToUInt32Bits(b.TraveledB));
+		if (compare != 0) return compare;
+		compare = a.CollisionMask.CompareTo(b.CollisionMask);
+		if (compare != 0) return compare;
+		compare = a.CollideWithBodies.CompareTo(b.CollideWithBodies);
+		if (compare != 0) return compare;
+		compare = a.CollideWithAreas.CompareTo(b.CollideWithAreas);
+		if (compare != 0) return compare;
+		compare = a.HitFromInside.CompareTo(b.HitFromInside);
+		if (compare != 0) return compare;
+		return a.HitBackFaces.CompareTo(b.HitBackFaces);
+	}
+
+	public string GetFormalProbeQueryDatasetSha256()
+	{
+		using MemoryStream stream = new();
+		using BinaryWriter writer = new(stream);
+		foreach (FormalProbeQuery query in GetFormalProbeQueriesCanonical())
+		{
+			writer.Write(query.PixelIndex);
+			writer.Write(query.ProbeStep);
+			writer.Write(query.From.X); writer.Write(query.From.Y); writer.Write(query.From.Z);
+			writer.Write(query.To.X); writer.Write(query.To.Y); writer.Write(query.To.Z);
+			writer.Write(query.TraveledB);
+			writer.Write(query.CollisionMask);
+			writer.Write(query.CollideWithBodies); writer.Write(query.CollideWithAreas);
+			writer.Write(query.HitFromInside); writer.Write(query.HitBackFaces);
+		}
+		writer.Flush();
+		using SHA256 sha = SHA256.Create();
+		return Convert.ToHexString(sha.ComputeHash(stream.ToArray())).ToLowerInvariant();
 	}
 
 	public delegate ProbeSurfaceClass Pass1ContactClassifier(ulong colliderId);
@@ -3493,7 +3604,8 @@ public partial class RayBeamRenderer : Node3D
 		out float turnMax,
 		CurvatureBoundGrid curvatureGrid,
 		FieldGrid3D fieldGrid = null,
-		Pass1ContactClassifier contactClassifier = null)
+		Pass1ContactClassifier contactClassifier = null,
+		int formalProbePixelIndex = -1)
 	{
 		// CROSS-CLASS CONTRACT: GrinFilmCamera calls this to build segments + optional pass-1 hit probes.
 		// ASSUMPTION: origin/dir/bendDir are in world space; dir normalized.
@@ -3920,6 +4032,11 @@ public partial class RayBeamRenderer : Node3D
 					pass1Raycasts++;
 					quickRayParams.From = seg.A;
 					quickRayParams.To = seg.B;
+					if (_formalProbeQueryCaptureEnabled && formalProbePixelIndex >= 0)
+					{
+						lock (_formalProbeQueryLock)
+							_formalProbeQueries.Add(new FormalProbeQuery(formalProbePixelIndex, stepsIntegrated, in seg, quickRayParams));
+					}
 					if (!TryIntersectRayWithGuard(
 						space,
 						quickRayParams,
