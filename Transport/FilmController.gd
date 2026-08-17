@@ -239,6 +239,7 @@ func NotifyCameraTransformJump() -> void:
 			_set_film_compute(true)
 		FilmMode.SNAPSHOT:
 			_snapshot_forced_stale = true
+			_release_snapshot_pose_after_invalidation()
 	_update_status()
 
 
@@ -251,7 +252,13 @@ func NotifyFieldStrengthChanged() -> void:
 			_set_film_compute(true)
 		FilmMode.SNAPSHOT:
 			_snapshot_forced_stale = true
+			_release_snapshot_pose_after_invalidation()
 	_update_status()
+
+
+func _release_snapshot_pose_after_invalidation() -> void:
+	if _player != null and _player.has_method("SetPoseHeld"):
+		_player.call("SetPoseHeld", false)
 
 
 func _apply_quality_preview() -> void:
@@ -368,8 +375,9 @@ func _update_formal_snapshot_status() -> void:
 				generation, _quality_name, GetOpacityPercent(), GetShadingModeName()]
 		else:
 			_set_film_visible(false)
-			_status_label.text = "Film: SNAPSHOT | Snapshot: %s · %s | %s | Opacity: %s | Shading: %s" % [
-				state.to_upper(), reason, _quality_name, GetOpacityPercent(), GetShadingModeName()]
+			var invalidation_hint := " · press G to recommit" if state == "invalidated" else ""
+			_status_label.text = "Film: SNAPSHOT · Snapshot: %s · %s%s | %s | Opacity: %s | Shading: %s" % [
+				state.to_upper(), reason, invalidation_hint, _quality_name, GetOpacityPercent(), GetShadingModeName()]
 		return
 	_set_film_visible(false)
 	_status_label.text = "Film: SNAPSHOT · POSE HELD | Snapshot: %s %d / %d | %s | Opacity: %s | Shading: %s" % [

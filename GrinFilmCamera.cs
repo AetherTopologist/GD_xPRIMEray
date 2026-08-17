@@ -2321,6 +2321,7 @@ public partial class GrinFilmCamera : Node
 	private ProbeContextKey _sealedProbeViewContextKey;
 	private ProbeViewMode _probeViewMode = ProbeViewMode.Outcome;
 	private Label _probeViewHud;
+	private ColorRect _probeViewHudBackdrop;
 	private bool _fieldStructureStatusKnown;
 	private bool _fieldStructureVisible;
 	private ProbeOutcomeCode[] _probeOutcomes = Array.Empty<ProbeOutcomeCode>();
@@ -5015,12 +5016,23 @@ private sealed class OverlayRollingWindow
 
 		CanvasLayer layer = new() { Layer = 12 };
 		AddChild(layer);
+		_probeViewHudBackdrop = new ColorRect
+		{
+			Position = new Vector2(380f, 12f),
+			Size = new Vector2(390f, 208f),
+			Color = new Color(0.015f, 0.025f, 0.045f, 0.86f),
+			MouseFilter = Control.MouseFilterEnum.Ignore
+		};
+		layer.AddChild(_probeViewHudBackdrop);
 		_probeViewHud = new Label
 		{
-			Position = new Vector2(18f, 92f),
+			Position = new Vector2(394f, 24f),
+			Size = new Vector2(362f, 182f),
+			AutowrapMode = TextServer.AutowrapMode.WordSmart,
 			MouseFilter = Control.MouseFilterEnum.Ignore,
 			Text = "Q probe"
 		};
+		_probeViewHud.AddThemeFontSizeOverride("font_size", 13);
 		_probeViewHud.AddThemeColorOverride("font_color", new Color(0.92f, 0.97f, 1f, 0.96f));
 		_probeViewHud.AddThemeColorOverride("font_shadow_color", new Color(0f, 0f, 0f, 0.8f));
 		_probeViewHud.AddThemeConstantOverride("shadow_offset_x", 2);

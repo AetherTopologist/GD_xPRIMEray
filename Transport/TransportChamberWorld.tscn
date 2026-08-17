@@ -184,11 +184,19 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
+[node name="FilmModuleBackdrop" type="ColorRect" parent="CanvasLayer/HUDRoot"]
+offset_left = 8.0
+offset_top = 182.0
+offset_right = 358.0
+offset_bottom = 492.0
+mouse_filter = 2
+color = Color(0.015, 0.025, 0.045, 0.72)
+
 [node name="FilmModule" type="VBoxContainer" parent="CanvasLayer/HUDRoot"]
 offset_left = 12.0
-offset_top = 80.0
+offset_top = 190.0
 offset_right = 352.0
-offset_bottom = 372.0
+offset_bottom = 482.0
 mouse_filter = 2
 theme_override_constants/separation = 6
 
@@ -196,7 +204,7 @@ theme_override_constants/separation = 6
 layout_mode = 2
 mouse_filter = 2
 text = "Film: OFF | Preview 80x45 | Opacity: Hidden | Shading: Geometric Normal Debug"
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 14
 autowrap_mode = 3
 
 [node name="FilmPlate" type="Control" parent="CanvasLayer/HUDRoot/FilmModule"]
@@ -269,8 +277,8 @@ theme_override_font_sizes/font_size = 11
 [node name="FilmBoundaryLabel" type="Label" parent="CanvasLayer/HUDRoot/FilmModule"]
 layout_mode = 2
 mouse_filter = 2
-text = "Exploratory GrinFilm · geometry fixed · not OI evidence
-Magenta = no hit · RGB = geometric face normal"
+text = "Observation Plate · transport presentation
+RGB is presentation only · not semantic authority"
 theme_override_font_sizes/font_size = 12
 autowrap_mode = 3
 
@@ -324,8 +332,9 @@ theme_override_constants/separation = 4
 [node name="ObserverStatusLabel" type="Label" parent="CanvasLayer/HUDRoot/ObserverModule"]
 layout_mode = 2
 mouse_filter = 2
-text = "Walk | V fly | G film | N shading
-[ ] opacity | , . field | 0 straight | 1 full | H hermetic
+text = "Walk | V fly | mouse look
+E experiment | H Hermetic presentation | F field structure
+G SNAPSHOT | Q probe views | N shading | [ ] opacity
 Tab telemetry | Esc Observatory"
 theme_override_font_sizes/font_size = 12
 autowrap_mode = 3

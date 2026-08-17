@@ -20,13 +20,24 @@ func _initialize() -> void:
 
 	_send_key(KEY_F)
 	await _settle(4)
-	_assert(field_dial.call("GetDisplayPresetName") == "Gallery", "F preserves Gallery")
+	_assert(field_dial.call("GetExperimentName") == "Gallery", "F preserves Gallery experiment")
 	_assert(_all_field_sources_visible(), "F enables all field structures")
 
 	_send_key(KEY_H)
 	await _settle(8)
-	_assert(field_dial.call("GetDisplayPresetName") == "Hermetic", "H selects Hermetic")
+	_assert(field_dial.call("GetExperimentName") == "Gallery", "H does not change experiment")
+	_assert(field_dial.call("GetPresentationName") == "Hermetic", "H selects Hermetic presentation")
 	_assert(not bool(film.get("ProbeViewAvailable")), "Hermetic starts without sealed authority")
+
+	_send_key(KEY_E)
+	await _settle(8)
+	_assert(field_dial.call("GetExperimentName") == "Hermetic", "E selects Hermetic experiment")
+	_assert(field_dial.call("GetPresentationName") == "Gallery", "E resets presentation baseline")
+	_assert(not bool(film.get("ProbeViewAvailable")), "E leaves no stale sealed authority")
+	_send_key(KEY_H)
+	await _settle(4)
+	_assert(field_dial.call("GetExperimentName") == "Hermetic", "H preserves Hermetic experiment")
+	_assert(field_dial.call("GetPresentationName") == "Hermetic", "H selects Hermetic presentation")
 
 	_send_key(KEY_G)
 	await _settle(2)
@@ -49,12 +60,23 @@ func _initialize() -> void:
 	_send_key(KEY_Q)
 	await _settle(2)
 	_assert(int(film.get("CurrentProbeView")) == 2, "Q maps Contact Events to Effort")
+	# Shift+Q is represented as a modified Q event by the routed input path.
+	var reverse := InputEventKey.new()
+	reverse.keycode = KEY_Q
+	reverse.physical_keycode = KEY_Q
+	reverse.pressed = true
+	reverse.echo = false
+	reverse.shift_pressed = true
+	Input.parse_input_event(reverse)
+	await _settle(2)
+	_assert(int(film.get("CurrentProbeView")) == 1, "Shift+Q maps Effort back to Contact Events")
 	_assert(int(film.get("SealedProbeViewGeneration")) == generation, "Q preserves generation")
 
-	_send_key(KEY_H)
+	_send_key(KEY_E)
 	await _settle(6)
-	_assert(not bool(film.get("ProbeViewAvailable")), "H invalidates sealed authority")
-	_assert(str(film.get("CathedralSnapshotLifecycleStateName")) == "invalidated", "H invalidation state")
+	_assert(not bool(film.get("ProbeViewAvailable")), "E invalidates sealed authority")
+	_assert(str(film.get("CathedralSnapshotLifecycleStateName")) == "invalidated", "E invalidation state")
+	_assert(not bool(chamber.get_node("TransportChamberPlayer").call("IsPoseHeld")), "E releases held pose")
 
 	_send_key(KEY_G)
 	await _settle(4)

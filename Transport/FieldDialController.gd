@@ -200,7 +200,11 @@ func _set_experiment(experiment: String, invalidate_film: bool) -> void:
 		_player.call("ApplyCameraTransform", _hermetic_camera_transform if hermetic_active else _gallery_camera_transform)
 	if invalidate_film and _film_controller != null and _film_controller.has_method("NotifyCameraTransformJump"):
 		_film_controller.call("NotifyCameraTransformJump")
-	_set_presentation(_hermetic_presentation if invalidate_film else false)
+	# Experiment selection is an authoritative context transition.  Always
+	# return presentation to the Gallery baseline so E/H/E cannot leave the
+	# Gallery experiment wearing Hermetic presentation state.  H remains the
+	# explicit, presentation-only opt-in.
+	_set_presentation(false)
 	_update_display()
 
 

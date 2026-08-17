@@ -175,7 +175,7 @@ func _write_artifact_manifest() -> void:
 	proof["contact_query_count"] = query_count
 	proof["contact_authority"] = str(film.get("CathedralContactAuthorityToken"))
 	manifest["artifact_001"] = {
-		"recipe": "Gallery launch → F ON → H Hermetic → G formal SNAPSHOT → Q triad",
+		"recipe": "Gallery launch → F ON → E Hermetic experiment → H Hermetic presentation → G formal SNAPSHOT → Q triad",
 		"field_structure": "ON",
 		"preset": "Hermetic",
 		"snapshot_state": str(film.get("CathedralSnapshotLifecycleStateName")),
@@ -257,7 +257,7 @@ func _all_field_sources_runtime_visible() -> bool:
 	return eligible > 0
 
 func _context_token() -> String:
-	return "%s:%s:%s:%s" % [film.get("SealedProbeViewGeneration"), film.get("CathedralSnapshotGeneration"), film.get("CathedralSnapshotTotalPixelCount"), field_dial.call("GetDisplayPresetName")]
+	return "%s:%s:%s:%s" % [film.get("SealedProbeViewGeneration"), film.get("CathedralSnapshotGeneration"), film.get("CathedralSnapshotTotalPixelCount"), field_dial.call("GetExperimentName")]
 
 func _camera_transform_values() -> Array[float]:
 	var basis: Basis = player.get_camera().global_transform.basis
