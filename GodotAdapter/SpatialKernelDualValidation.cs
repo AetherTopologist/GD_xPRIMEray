@@ -33,7 +33,8 @@ public static class SpatialKernelDualValidator
         Godot.Node sceneRoot,
         RayBeamRenderer.FormalProbeQuery[] queries,
         int[] godotContactCounts,
-        int totalPixels)
+        int totalPixels,
+        bool[]? godotQueryHits = null)
     {
         if (sceneRoot == null) throw new ArgumentNullException(nameof(sceneRoot));
         if (queries == null) throw new ArgumentNullException(nameof(queries));
@@ -41,18 +42,40 @@ public static class SpatialKernelDualValidator
         if (totalPixels < 0 || godotContactCounts.Length < totalPixels)
             throw new InvalidDataException("Godot contact channel is shorter than the film.");
         FrozenGeometrySnapshot snapshot = SpatialSnapshotBuilder.BuildFromGodotScene(sceneRoot);
+        return Evaluate(snapshot, queries, godotContactCounts, totalPixels, godotQueryHits);
+    }
+
+    public static SpatialKernelDualValidationResult Evaluate(
+        FrozenGeometrySnapshot snapshot,
+        RayBeamRenderer.FormalProbeQuery[] queries,
+        int[] godotContactCounts,
+        int totalPixels,
+        bool[]? godotQueryHits = null)
+    {
+        ArgumentNullException.ThrowIfNull(snapshot);
+        ArgumentNullException.ThrowIfNull(queries);
+        ArgumentNullException.ThrowIfNull(godotContactCounts);
+        if (totalPixels < 0 || godotContactCounts.Length < totalPixels)
+            throw new InvalidDataException("Godot contact channel is shorter than the film.");
+        if (godotQueryHits != null && godotQueryHits.Length != queries.Length)
+            throw new InvalidDataException("Godot query-hit channel does not match the formal query dataset.");
         LinearScanSpatialQuery query = new(snapshot);
         int[] linearCounts = new int[totalPixels];
         int mismatchPixels = 0;
+        int mismatchQueries = 0;
         string firstMismatch = "none";
         System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
-        foreach (RayBeamRenderer.FormalProbeQuery recorded in queries)
+        for (int queryIndex = 0; queryIndex < queries.Length; queryIndex++)
         {
+            RayBeamRenderer.FormalProbeQuery recorded = queries[queryIndex];
             if (recorded.PixelIndex < 0 || recorded.PixelIndex >= totalPixels)
                 throw new InvalidDataException($"formal query pixel out of range: {recorded.PixelIndex}");
-            if (query.IntersectsSegment(ToNumerics(recorded.From), ToNumerics(recorded.To), recorded.CollisionMask, out _))
+            bool linearHit = query.IntersectsSegment(ToNumerics(recorded.From), ToNumerics(recorded.To), recorded.CollisionMask, out _);
+            if (linearHit)
                 linearCounts[recorded.PixelIndex]++;
+            if (godotQueryHits != null && linearHit != godotQueryHits[queryIndex])
+                mismatchQueries++;
         }
         stopwatch.Stop();
 
@@ -79,7 +102,7 @@ public static class SpatialKernelDualValidator
             GodotContactHistogram = FormatHistogram(godotContactCounts, totalPixels),
             LinearContactHistogram = FormatHistogram(linearCounts, totalPixels),
             MismatchPixelCount = mismatchPixels,
-            MismatchQueryCount = -1,
+            MismatchQueryCount = godotQueryHits == null ? -1 : mismatchQueries,
             FirstMismatch = firstMismatch,
             PrimitiveTestCount = query.PrimitiveTestCount,
             ElapsedMilliseconds = stopwatch.Elapsed.TotalMilliseconds,

@@ -2363,6 +2363,9 @@ public partial class GrinFilmCamera : Node
 	private int _cathedralContactReplayInvocationCount;
 	private const string CathedralContactAuthorityTokenValue = "GodotPhysics/DeterministicReplay-v1";
 	private GodotAdapter.SpatialKernelDualValidationResult _lastSpatialKernelDualValidation;
+	private XPrimeRay.Spatial.FrozenGeometrySnapshot _cathedralSpatialSnapshot;
+	private bool[] _cathedralGodotReplayQueryHits;
+	private string _spatialKernelDiagnosticFailure = string.Empty;
 	private int _probeSnapshotLifecycleRequestId = 0;
 	private int _probeSnapshotLifecycleGeneration = 0;
 	private int _probeSnapshotLifecycleBudgetFrames = CathedralProbeDefaultSnapshotLifecycleBudgetFrames;
@@ -10477,6 +10480,7 @@ private sealed class OverlayRollingWindow
 		}
 
 		ResetCathedralContactHistoryForReplay(totalPixels);
+		bool[] godotQueryHits = new bool[queries.Length];
 		bool[] geometryContact = new bool[totalPixels];
 		bool[] backgroundContact = new bool[totalPixels];
 		float[] nearestDistance = new float[totalPixels];
@@ -10505,6 +10509,7 @@ private sealed class OverlayRollingWindow
 				Godot.Collections.Dictionary hit = space.IntersectRay(query);
 				if (hit.Count == 0)
 					continue;
+				godotQueryHits[queryIndex] = true;
 				if (!hit.ContainsKey("position") || !hit.ContainsKey("normal"))
 				{
 					reason = "replay_hit_missing_geometry";
@@ -10551,6 +10556,7 @@ private sealed class OverlayRollingWindow
 				_transportHadAnyBackgroundContact[pixel] = (byte)(backgroundContact[pixel] ? 1 : 0);
 			}
 			_cathedralContactReplayInvocationCount++;
+			_cathedralGodotReplayQueryHits = godotQueryHits;
 			return true;
 		}
 		finally
@@ -10565,11 +10571,16 @@ private sealed class OverlayRollingWindow
 		try
 		{
 			RayBeamRenderer.FormalProbeQuery[] queries = _rbr?.GetFormalProbeQueriesCanonical() ?? Array.Empty<RayBeamRenderer.FormalProbeQuery>();
+			if (_cathedralSpatialSnapshot == null)
+				throw new InvalidOperationException(_spatialKernelDiagnosticFailure.Length == 0
+					? "frozen_geometry_snapshot_unavailable"
+					: _spatialKernelDiagnosticFailure);
 			_lastSpatialKernelDualValidation = GodotAdapter.SpatialKernelDualValidator.Evaluate(
-				GetTree().Root,
+				_cathedralSpatialSnapshot,
 				queries,
 				_transportContactCount,
-				_filmWidth * _filmHeight);
+				_filmWidth * _filmHeight,
+				_cathedralGodotReplayQueryHits);
 			GodotAdapter.SpatialKernelDualValidationResult result = _lastSpatialKernelDualValidation;
 			string level = result.MismatchPixelCount == 0 ? "PASS" : "MISMATCH";
 			GD.Print(
@@ -10584,6 +10595,7 @@ private sealed class OverlayRollingWindow
 		}
 		catch (Exception exception)
 		{
+			_spatialKernelDiagnosticFailure = $"{exception.GetType().Name}:{exception.Message}";
 			GD.PushWarning($"[SpatialKernel][DualValidation] unavailable reason={exception.GetType().Name}:{exception.Message}");
 		}
 	}
@@ -10658,6 +10670,18 @@ private sealed class OverlayRollingWindow
 		_cathedralContactReplayPending = false;
 		_cathedralContactReplayComplete = false;
 		_cathedralContactReplayInvocationCount = 0;
+		_cathedralGodotReplayQueryHits = null;
+		_cathedralSpatialSnapshot = null;
+		_spatialKernelDiagnosticFailure = string.Empty;
+		try
+		{
+			_cathedralSpatialSnapshot = GodotAdapter.SpatialSnapshotBuilder.BuildFromGodotScene(GetTree().Root);
+		}
+		catch (Exception exception)
+		{
+			_spatialKernelDiagnosticFailure = $"{exception.GetType().Name}:{exception.Message}";
+			GD.PushWarning($"[SpatialKernel][Snapshot] unavailable reason={_spatialKernelDiagnosticFailure}");
+		}
 		_rbr?.BeginFormalProbeQueryCapture();
 		UpdateEveryFrame = false;
 		_probeSnapshotLifecycleInitialized = true;
