@@ -11,12 +11,16 @@ public static class SpatialKernelTests
     {
         SameGeometryHasSameSnapshotHash();
         PrimitivePermutationHasSameSnapshotHash();
+        DuplicateCanonicalIdRejected();
         ProcessStableCanonicalBytes();
         SpatialAuthorityContextIsDeterministic();
         InsideSegment();
         FaceTouch();
+        EndOnFace();
         EdgeTouch();
         CornerTouch();
+        GrazingTangent();
+        ParallelSlab();
         ZeroLengthInsideAndOutside();
         TransformedBox();
         NearestPrimitive();
@@ -40,12 +44,22 @@ public static class SpatialKernelTests
         Assert(Snapshot(a, b).GeometrySnapshotSha256 == Snapshot(b, a).GeometrySnapshotSha256, "permuted primitive order hash");
     }
 
+    private static void DuplicateCanonicalIdRejected()
+    {
+        FrozenOrientedBox box = Box("/World/Duplicate", Vector3.Zero);
+        bool rejected = false;
+        try { _ = Snapshot(box, box); }
+        catch (ArgumentException) { rejected = true; }
+        Assert(rejected, "duplicate canonical ID rejected");
+    }
+
     private static void ProcessStableCanonicalBytes()
     {
         FrozenGeometrySnapshot snapshot = Snapshot(Box("/World/Wall", Vector3.Zero));
         string a = Convert.ToHexString(SHA256.HashData(FrozenGeometrySnapshotCanonicalSerializer.Serialize(snapshot)));
         string b = Convert.ToHexString(SHA256.HashData(FrozenGeometrySnapshotCanonicalSerializer.Serialize(snapshot)));
         Assert(a == b, "canonical serialization repeat");
+        Assert(a == "2CCDB17B271350D160F1CB953C89D552D34D215733E03EFCEBF37E45EE89D341", "pinned little-endian canonical fixture");
     }
 
     private static void SpatialAuthorityContextIsDeterministic()
@@ -66,8 +80,15 @@ public static class SpatialKernelTests
     }
 
     private static void FaceTouch() => AssertHit(new Vector3(-2, 0, 0), new Vector3(-1, 0, 0), 1f, "face touch");
+    private static void EndOnFace() => AssertHit(new Vector3(-2, 0, 0), new Vector3(1, 0, 0), 1f / 3f, "end on face");
     private static void EdgeTouch() => AssertHit(new Vector3(-2, 1, 0), new Vector3(0, 1, 0), 0.5f, "edge touch");
     private static void CornerTouch() => AssertHit(new Vector3(-2, 1, 1), new Vector3(0, 1, 1), 0.5f, "corner touch");
+    private static void GrazingTangent() => AssertHit(new Vector3(-2, 1, 0), new Vector3(2, 1, 0), 0.25f, "grazing tangent");
+    private static void ParallelSlab()
+    {
+        LinearScanSpatialQuery query = new(Snapshot(Box("/World/Box", Vector3.Zero)));
+        Assert(!query.IntersectsSegment(new Vector3(-2, 2, 0), new Vector3(2, 2, 0), 1, out _), "parallel outside slab");
+    }
 
     private static void ZeroLengthInsideAndOutside()
     {

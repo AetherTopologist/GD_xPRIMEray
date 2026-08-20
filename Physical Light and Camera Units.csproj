@@ -15,6 +15,7 @@
     <Compile Remove="src/XPrimeRay.Diagnostics/**/*.cs" />
     <Compile Remove="src/XPrimeRay.Diagnostics.Tests/**/*.cs" />
     <Compile Remove="src/XPrimeRay.Spatial/**/*.cs" />
+    <Compile Remove="src/XPrimeRay.Spatial.Tests/**/*.cs" />
     <Compile Remove=".godot/**/*.cs" />
     <Compile Remove=".godot/mono/temp/**/*.cs" />
   </ItemGroup>

@@ -69,6 +69,13 @@ public sealed class LinearScanSpatialQuery : IPass1SpatialQuery
 
 public static class OrientedBoxIntersection
 {
+    /// <summary>
+    /// finite-segment-oriented-box-slab-v0:
+    /// finite inclusive [0,1] segment; exact floating-point arithmetic; no
+    /// added epsilon; grazing/tangent and endpoint touches are hits; parallel
+    /// slabs use an exact-zero direction test; a start-inside segment returns
+    /// t=0; equal-t nearest results are resolved by canonical primitive ID.
+    /// </summary>
     public static bool TryIntersectSegment(FrozenOrientedBox box, Vector3 from, Vector3 to, out SurfaceHit hit)
     {
         Vector3 localFrom = Vector3.Transform(from, box.LocalFromWorld);

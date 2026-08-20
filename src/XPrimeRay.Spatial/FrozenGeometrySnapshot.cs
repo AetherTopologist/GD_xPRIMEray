@@ -1,3 +1,4 @@
+using System.Buffers.Binary;
 using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
@@ -79,7 +80,7 @@ public sealed class FrozenOrientedBox
 
 public sealed class FrozenGeometrySnapshot
 {
-    public const string SchemaVersion = "FrozenGeometrySnapshot-v1";
+    public const string SchemaVersion = "FrozenGeometrySnapshot-v2-le";
     public IReadOnlyList<FrozenOrientedBox> Primitives { get; }
     public string GeometrySnapshotSha256 { get; }
     public int PrimitiveCount => Primitives.Count;
@@ -103,21 +104,19 @@ public static class FrozenGeometrySnapshotCanonicalSerializer
     {
         ArgumentNullException.ThrowIfNull(snapshot);
         using MemoryStream stream = new();
-        using BinaryWriter writer = new(stream, Encoding.UTF8, leaveOpen: true);
-        WriteString(writer, FrozenGeometrySnapshot.SchemaVersion);
-        writer.Write(snapshot.PrimitiveCount);
+        WriteString(stream, FrozenGeometrySnapshot.SchemaVersion);
+        WriteInt32(stream, snapshot.PrimitiveCount);
         foreach (FrozenOrientedBox primitive in snapshot.Primitives)
         {
-            WriteString(writer, primitive.CanonicalPrimitiveId);
-            writer.Write((byte)primitive.SurfaceClass);
-            writer.Write(primitive.CollisionLayer);
-            writer.Write((uint)primitive.Flags);
-            WriteVector(writer, primitive.HalfExtents);
-            WriteAabb(writer, primitive.WorldBounds);
-            WriteMatrix(writer, primitive.WorldFromLocal);
-            WriteMatrix(writer, primitive.LocalFromWorld);
+            WriteString(stream, primitive.CanonicalPrimitiveId);
+            stream.WriteByte((byte)primitive.SurfaceClass);
+            WriteUInt32(stream, primitive.CollisionLayer);
+            WriteUInt32(stream, (uint)primitive.Flags);
+            WriteVector(stream, primitive.HalfExtents);
+            WriteAabb(stream, primitive.WorldBounds);
+            WriteMatrix(stream, primitive.WorldFromLocal);
+            WriteMatrix(stream, primitive.LocalFromWorld);
         }
-        writer.Flush();
         return stream.ToArray();
     }
 
@@ -126,29 +125,45 @@ public static class FrozenGeometrySnapshotCanonicalSerializer
         return Convert.ToHexString(SHA256.HashData(Serialize(snapshot))).ToLowerInvariant();
     }
 
-    private static void WriteString(BinaryWriter writer, string value)
+    private static void WriteString(Stream stream, string value)
     {
         byte[] bytes = Encoding.UTF8.GetBytes(value);
-        writer.Write(bytes.Length);
-        writer.Write(bytes);
+        WriteInt32(stream, bytes.Length);
+        stream.Write(bytes);
     }
 
-    private static void WriteVector(BinaryWriter writer, Vector3 value)
+    private static void WriteVector(Stream stream, Vector3 value)
     {
-        writer.Write(value.X); writer.Write(value.Y); writer.Write(value.Z);
+        WriteSingle(stream, value.X); WriteSingle(stream, value.Y); WriteSingle(stream, value.Z);
     }
 
-    private static void WriteAabb(BinaryWriter writer, Aabb3 value)
+    private static void WriteAabb(Stream stream, Aabb3 value)
     {
-        WriteVector(writer, value.Min);
-        WriteVector(writer, value.Max);
+        WriteVector(stream, value.Min);
+        WriteVector(stream, value.Max);
     }
 
-    private static void WriteMatrix(BinaryWriter writer, Matrix4x4 value)
+    private static void WriteMatrix(Stream stream, Matrix4x4 value)
     {
-        writer.Write(value.M11); writer.Write(value.M12); writer.Write(value.M13); writer.Write(value.M14);
-        writer.Write(value.M21); writer.Write(value.M22); writer.Write(value.M23); writer.Write(value.M24);
-        writer.Write(value.M31); writer.Write(value.M32); writer.Write(value.M33); writer.Write(value.M34);
-        writer.Write(value.M41); writer.Write(value.M42); writer.Write(value.M43); writer.Write(value.M44);
+        WriteSingle(stream, value.M11); WriteSingle(stream, value.M12); WriteSingle(stream, value.M13); WriteSingle(stream, value.M14);
+        WriteSingle(stream, value.M21); WriteSingle(stream, value.M22); WriteSingle(stream, value.M23); WriteSingle(stream, value.M24);
+        WriteSingle(stream, value.M31); WriteSingle(stream, value.M32); WriteSingle(stream, value.M33); WriteSingle(stream, value.M34);
+        WriteSingle(stream, value.M41); WriteSingle(stream, value.M42); WriteSingle(stream, value.M43); WriteSingle(stream, value.M44);
     }
+
+    private static void WriteInt32(Stream stream, int value)
+    {
+        Span<byte> bytes = stackalloc byte[4];
+        BinaryPrimitives.WriteInt32LittleEndian(bytes, value);
+        stream.Write(bytes);
+    }
+
+    private static void WriteUInt32(Stream stream, uint value)
+    {
+        Span<byte> bytes = stackalloc byte[4];
+        BinaryPrimitives.WriteUInt32LittleEndian(bytes, value);
+        stream.Write(bytes);
+    }
+
+    private static void WriteSingle(Stream stream, float value) => WriteInt32(stream, BitConverter.SingleToInt32Bits(value));
 }

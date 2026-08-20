@@ -71,7 +71,7 @@ public static class SpatialSnapshotBuilder
             if (owner != null && owner.CollisionLayer != 0)
             {
                 string ownerPath = owner.GetPath().ToString();
-				if (ownerPath.Contains("TransportChamberPlayer", StringComparison.Ordinal))
+				if (owner.IsInGroup("spatial_kernel_excluded"))
 					return;
                 records.Add(new ShapeRecord(
                     shape,

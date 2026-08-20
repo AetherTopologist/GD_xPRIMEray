@@ -1,3 +1,4 @@
+using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -31,19 +32,19 @@ public sealed class SpatialAuthorityContext
     {
         ArgumentNullException.ThrowIfNull(context);
         using MemoryStream stream = new();
-        using BinaryWriter writer = new(stream, Encoding.UTF8, leaveOpen: true);
-        WriteString(writer, SchemaVersion);
-        WriteString(writer, context.GeometrySnapshotSha256);
-        WriteString(writer, context.SpatialKernelVersion);
-        WriteString(writer, context.IntersectionPolicyVersion);
-        writer.Flush();
+        WriteString(stream, SchemaVersion);
+        WriteString(stream, context.GeometrySnapshotSha256);
+        WriteString(stream, context.SpatialKernelVersion);
+        WriteString(stream, context.IntersectionPolicyVersion);
         return stream.ToArray();
     }
 
-    private static void WriteString(BinaryWriter writer, string value)
+    private static void WriteString(Stream stream, string value)
     {
         byte[] bytes = Encoding.UTF8.GetBytes(value);
-        writer.Write(bytes.Length);
-        writer.Write(bytes);
+        Span<byte> length = stackalloc byte[4];
+        BinaryPrimitives.WriteInt32LittleEndian(length, bytes.Length);
+        stream.Write(length);
+        stream.Write(bytes);
     }
 }
