@@ -6,6 +6,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{80A1D4DB-B7B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XPrimeRay.Core", "src\XPrimeRay.Core\XPrimeRay.Core.csproj", "{5CCBD102-8E05-4515-881D-F276651F99CE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XPrimeRay.Spatial", "src\XPrimeRay.Spatial\XPrimeRay.Spatial.csproj", "{B6C7D8E9-1021-4A32-B543-C6D7E8F90123}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XPrimeRay.Testbench.Cli", "src\XPrimeRay.Testbench.Cli\XPrimeRay.Testbench.Cli.csproj", "{5D354FA4-1E12-4120-A7D1-7BECF716AF99}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XPrimeRay.ObserverInstrumentation", "src\XPrimeRay.ObserverInstrumentation\XPrimeRay.ObserverInstrumentation.csproj", "{7413C6DE-D798-40E3-9D88-EE9D788C665A}"
@@ -39,6 +41,12 @@ Global
 		{5CCBD102-8E05-4515-881D-F276651F99CE}.ExportDebug|Any CPU.Build.0 = Debug|Any CPU
 		{5CCBD102-8E05-4515-881D-F276651F99CE}.ExportRelease|Any CPU.ActiveCfg = Release|Any CPU
 		{5CCBD102-8E05-4515-881D-F276651F99CE}.ExportRelease|Any CPU.Build.0 = Release|Any CPU
+		{B6C7D8E9-1021-4A32-B543-C6D7E8F90123}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6C7D8E9-1021-4A32-B543-C6D7E8F90123}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6C7D8E9-1021-4A32-B543-C6D7E8F90123}.ExportDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6C7D8E9-1021-4A32-B543-C6D7E8F90123}.ExportDebug|Any CPU.Build.0 = Debug|Any CPU
+		{B6C7D8E9-1021-4A32-B543-C6D7E8F90123}.ExportRelease|Any CPU.ActiveCfg = Release|Any CPU
+		{B6C7D8E9-1021-4A32-B543-C6D7E8F90123}.ExportRelease|Any CPU.Build.0 = Release|Any CPU
 		{5D354FA4-1E12-4120-A7D1-7BECF716AF99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5D354FA4-1E12-4120-A7D1-7BECF716AF99}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D354FA4-1E12-4120-A7D1-7BECF716AF99}.ExportDebug|Any CPU.ActiveCfg = Debug|Any CPU

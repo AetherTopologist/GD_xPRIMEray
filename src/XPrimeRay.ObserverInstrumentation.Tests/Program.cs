@@ -27,6 +27,7 @@ internal static class Program
 			,(nameof(ProbeViewTests), ProbeViewTests.Run)
 			,(nameof(PortableProbeCaptureBundleTests), PortableProbeCaptureBundleTests.Run)
 			,(nameof(DeterministicContactReplayTests), DeterministicContactReplayTests.Run)
+			,(nameof(SpatialKernelTests), SpatialKernelTests.Run)
         };
 
         int failures = 0;

@@ -14,11 +14,14 @@
     <Compile Remove="src/XPrimeRay.ObservationLayer.Tests/**/*.cs" />
     <Compile Remove="src/XPrimeRay.Diagnostics/**/*.cs" />
     <Compile Remove="src/XPrimeRay.Diagnostics.Tests/**/*.cs" />
+    <Compile Remove="src/XPrimeRay.Spatial/**/*.cs" />
     <Compile Remove=".godot/**/*.cs" />
+    <Compile Remove=".godot/mono/temp/**/*.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="src/XPrimeRay.ObserverInstrumentation/XPrimeRay.ObserverInstrumentation.csproj" />
     <ProjectReference Include="src/XPrimeRay.ObservationLayer/XPrimeRay.ObservationLayer.csproj" />
     <ProjectReference Include="src/XPrimeRay.Diagnostics/XPrimeRay.Diagnostics.csproj" />
+    <ProjectReference Include="src/XPrimeRay.Spatial/XPrimeRay.Spatial.csproj" />
   </ItemGroup>
 </Project>

@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="../XPrimeRay.ObserverInstrumentation/XPrimeRay.ObserverInstrumentation.csproj" />
     <ProjectReference Include="../XPrimeRay.ObservationLayer/XPrimeRay.ObservationLayer.csproj" />
+    <ProjectReference Include="../XPrimeRay.Spatial/XPrimeRay.Spatial.csproj" />
     <Compile Include="../../CathedralProbe/*.cs" Link="CathedralProbe/%(Filename)%(Extension)" />
   </ItemGroup>
 </Project>
