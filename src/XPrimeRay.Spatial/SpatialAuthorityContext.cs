@@ -48,3 +48,78 @@ public sealed class SpatialAuthorityContext
         stream.Write(bytes);
     }
 }
+
+public readonly record struct SpatialContactComparison(
+    int ContactCountMismatchPixels,
+    int SurfaceSemanticMismatchPixels,
+    int TotalAuthorityMismatchPixels);
+
+public static class SpatialContactComparer
+{
+    public static SpatialContactComparison Compare(
+        int[] authorityCounts,
+        int[] candidateCounts,
+        byte[] authorityGeometry,
+        byte[] authorityBackground,
+        byte[] candidateGeometry,
+        byte[] candidateBackground)
+    {
+        ArgumentNullException.ThrowIfNull(authorityCounts);
+        ArgumentNullException.ThrowIfNull(candidateCounts);
+        ArgumentNullException.ThrowIfNull(authorityGeometry);
+        ArgumentNullException.ThrowIfNull(authorityBackground);
+        ArgumentNullException.ThrowIfNull(candidateGeometry);
+        ArgumentNullException.ThrowIfNull(candidateBackground);
+        int count = authorityCounts.Length;
+        if (candidateCounts.Length < count || authorityGeometry.Length < count || authorityBackground.Length < count ||
+            candidateGeometry.Length < count || candidateBackground.Length < count)
+            throw new ArgumentException("Contact comparison channels must have equal or greater capacity.");
+        int countMismatch = 0;
+        int semanticMismatch = 0;
+        int totalMismatch = 0;
+        for (int i = 0; i < count; i++)
+        {
+            bool countDiff = authorityCounts[i] != candidateCounts[i];
+            bool semanticDiff = authorityGeometry[i] != candidateGeometry[i] || authorityBackground[i] != candidateBackground[i];
+            if (countDiff) countMismatch++;
+            if (semanticDiff) semanticMismatch++;
+            if (countDiff || semanticDiff) totalMismatch++;
+        }
+        return new SpatialContactComparison(countMismatch, semanticMismatch, totalMismatch);
+    }
+}
+
+public static class SpatialAuthorityPromotionGate
+{
+    public static bool CanPromote(
+        FrozenGeometrySnapshot snapshot,
+        SpatialAuthorityContext authorityContext,
+        bool dualValidationPresent,
+        string validationContextSha256,
+        int contactCountMismatchPixels,
+        int surfaceSemanticMismatchPixels,
+        bool supportedGeometry,
+        string diagnosticFailure,
+        out string reason)
+    {
+        if (snapshot == null) { reason = "snapshot_missing"; return false; }
+        if (authorityContext == null) { reason = "spatial_context_missing"; return false; }
+        if (!dualValidationPresent) { reason = "dual_validation_missing"; return false; }
+        if (!supportedGeometry) { reason = "unsupported_geometry"; return false; }
+        if (!string.IsNullOrEmpty(diagnosticFailure)) { reason = "spatial_diagnostic_failure"; return false; }
+        if (!string.Equals(authorityContext.GeometrySnapshotSha256, snapshot.GeometrySnapshotSha256, StringComparison.Ordinal))
+        {
+            reason = "frozen_geometry_drifted";
+            return false;
+        }
+        if (!string.Equals(authorityContext.CanonicalSha256, validationContextSha256, StringComparison.Ordinal))
+        {
+            reason = "spatial_context_drifted";
+            return false;
+        }
+        if (contactCountMismatchPixels != 0) { reason = "contact_count_mismatch"; return false; }
+        if (surfaceSemanticMismatchPixels != 0) { reason = "surface_semantic_mismatch"; return false; }
+        reason = "qualified";
+        return true;
+    }
+}

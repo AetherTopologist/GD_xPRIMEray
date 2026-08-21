@@ -18,6 +18,9 @@ public sealed class SpatialKernelDualValidationResult
     public required string GodotContactHistogram { get; init; }
     public required string LinearContactHistogram { get; init; }
     public required int MismatchPixelCount { get; init; }
+    public required int ContactCountMismatchPixelCount { get; init; }
+    public required int SurfaceSemanticMismatchPixelCount { get; init; }
+    public required int TotalAuthorityMismatchPixelCount { get; init; }
     public required int MismatchQueryCount { get; init; }
     public required string FirstMismatch { get; init; }
     public required long PrimitiveTestCount { get; init; }
@@ -34,15 +37,19 @@ public static class SpatialKernelDualValidator
         RayBeamRenderer.FormalProbeQuery[] queries,
         int[] godotContactCounts,
         int totalPixels,
-        bool[]? godotQueryHits = null)
+        bool[]? godotQueryHits = null,
+        byte[]? godotHadAnyGeometryContact = null,
+        byte[]? godotHadAnyBackgroundContact = null,
+        string sourceGroup = "fixture_source",
+        string backgroundGroup = "fixture_background")
     {
         if (sceneRoot == null) throw new ArgumentNullException(nameof(sceneRoot));
         if (queries == null) throw new ArgumentNullException(nameof(queries));
         if (godotContactCounts == null) throw new ArgumentNullException(nameof(godotContactCounts));
         if (totalPixels < 0 || godotContactCounts.Length < totalPixels)
             throw new InvalidDataException("Godot contact channel is shorter than the film.");
-        FrozenGeometrySnapshot snapshot = SpatialSnapshotBuilder.BuildFromGodotScene(sceneRoot);
-        return Evaluate(snapshot, queries, godotContactCounts, totalPixels, godotQueryHits);
+        FrozenGeometrySnapshot snapshot = SpatialSnapshotBuilder.BuildFromGodotScene(sceneRoot, sourceGroup, backgroundGroup);
+        return Evaluate(snapshot, queries, godotContactCounts, totalPixels, godotQueryHits, godotHadAnyGeometryContact, godotHadAnyBackgroundContact);
     }
 
     public static SpatialKernelDualValidationResult Evaluate(
@@ -50,7 +57,9 @@ public static class SpatialKernelDualValidator
         RayBeamRenderer.FormalProbeQuery[] queries,
         int[] godotContactCounts,
         int totalPixels,
-        bool[]? godotQueryHits = null)
+        bool[]? godotQueryHits = null,
+        byte[]? godotHadAnyGeometryContact = null,
+        byte[]? godotHadAnyBackgroundContact = null)
     {
         ArgumentNullException.ThrowIfNull(snapshot);
         ArgumentNullException.ThrowIfNull(queries);
@@ -59,9 +68,17 @@ public static class SpatialKernelDualValidator
             throw new InvalidDataException("Godot contact channel is shorter than the film.");
         if (godotQueryHits != null && godotQueryHits.Length != queries.Length)
             throw new InvalidDataException("Godot query-hit channel does not match the formal query dataset.");
+        if (godotHadAnyGeometryContact != null && godotHadAnyGeometryContact.Length < totalPixels)
+            throw new InvalidDataException("Godot geometry-contact channel is shorter than the film.");
+        if (godotHadAnyBackgroundContact != null && godotHadAnyBackgroundContact.Length < totalPixels)
+            throw new InvalidDataException("Godot background-contact channel is shorter than the film.");
         LinearScanSpatialQuery query = new(snapshot);
         int[] linearCounts = new int[totalPixels];
-        int mismatchPixels = 0;
+        byte[] linearGeometry = new byte[totalPixels];
+        byte[] linearBackground = new byte[totalPixels];
+        int countMismatchPixels = 0;
+        int semanticMismatchPixels = 0;
+        int totalMismatchPixels = 0;
         int mismatchQueries = 0;
         string firstMismatch = "none";
         System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -71,9 +88,13 @@ public static class SpatialKernelDualValidator
             RayBeamRenderer.FormalProbeQuery recorded = queries[queryIndex];
             if (recorded.PixelIndex < 0 || recorded.PixelIndex >= totalPixels)
                 throw new InvalidDataException($"formal query pixel out of range: {recorded.PixelIndex}");
-            bool linearHit = query.IntersectsSegment(ToNumerics(recorded.From), ToNumerics(recorded.To), recorded.CollisionMask, out _);
+            bool linearHit = query.IntersectsSegment(ToNumerics(recorded.From), ToNumerics(recorded.To), recorded.CollisionMask, out SurfaceHit surfaceHit);
             if (linearHit)
+            {
                 linearCounts[recorded.PixelIndex]++;
+                if (surfaceHit.SurfaceClass == SpatialSurfaceClass.Geometry) linearGeometry[recorded.PixelIndex] = 1;
+                if (surfaceHit.SurfaceClass == SpatialSurfaceClass.Background) linearBackground[recorded.PixelIndex] = 1;
+            }
             if (godotQueryHits != null && linearHit != godotQueryHits[queryIndex])
                 mismatchQueries++;
         }
@@ -82,12 +103,15 @@ public static class SpatialKernelDualValidator
         for (int pixel = 0; pixel < totalPixels; pixel++)
         {
             int godot = pixel < godotContactCounts.Length ? godotContactCounts[pixel] : -1;
-            if (godot == linearCounts[pixel]) continue;
-            mismatchPixels++;
-            if (firstMismatch == "none")
-                firstMismatch = $"pixel={pixel} godot={godot} linear={linearCounts[pixel]}";
+            bool countMismatch = godot != linearCounts[pixel];
+            bool semanticMismatch = godotHadAnyGeometryContact != null && godotHadAnyBackgroundContact != null &&
+                (godotHadAnyGeometryContact[pixel] != linearGeometry[pixel] || godotHadAnyBackgroundContact[pixel] != linearBackground[pixel]);
+            if (countMismatch) countMismatchPixels++;
+            if (semanticMismatch) semanticMismatchPixels++;
+            if (countMismatch || semanticMismatch) totalMismatchPixels++;
+            if ((countMismatch || semanticMismatch) && firstMismatch == "none")
+                firstMismatch = $"pixel={pixel} count={godot}->{linearCounts[pixel]} geometry={godotHadAnyGeometryContact?[pixel] ?? (byte)255}->{linearGeometry[pixel]} background={godotHadAnyBackgroundContact?[pixel] ?? (byte)255}->{linearBackground[pixel]}";
         }
-
         return new SpatialKernelDualValidationResult
         {
             GeometrySnapshotSha256 = snapshot.GeometrySnapshotSha256,
@@ -101,7 +125,10 @@ public static class SpatialKernelDualValidator
                 LinearScanSpatialQuery.IntersectionPolicyVersion).CanonicalSha256,
             GodotContactHistogram = FormatHistogram(godotContactCounts, totalPixels),
             LinearContactHistogram = FormatHistogram(linearCounts, totalPixels),
-            MismatchPixelCount = mismatchPixels,
+            MismatchPixelCount = totalMismatchPixels,
+            ContactCountMismatchPixelCount = countMismatchPixels,
+            SurfaceSemanticMismatchPixelCount = semanticMismatchPixels,
+            TotalAuthorityMismatchPixelCount = totalMismatchPixels,
             MismatchQueryCount = godotQueryHits == null ? -1 : mismatchQueries,
             FirstMismatch = firstMismatch,
             PrimitiveTestCount = query.PrimitiveTestCount,

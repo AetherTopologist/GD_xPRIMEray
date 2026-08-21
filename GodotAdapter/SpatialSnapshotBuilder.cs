@@ -18,12 +18,17 @@ public static class SpatialSnapshotBuilder
 {
     public const string SchemaVersion = FrozenGeometrySnapshot.SchemaVersion;
 
-    public static FrozenGeometrySnapshot BuildFromGodotScene(Node root)
+    public static FrozenGeometrySnapshot BuildFromGodotScene(
+        Node root,
+        string sourceGroup = "fixture_source",
+        string backgroundGroup = "fixture_background")
     {
         Node sceneRoot = root?.GetTree()?.CurrentScene ?? root
             ?? throw new InvalidOperationException("A scene root is required.");
         List<ShapeRecord> records = new();
-        CollectShapes(sceneRoot, records);
+        bool hasExplicitBackground = !string.IsNullOrWhiteSpace(backgroundGroup) &&
+            sceneRoot.GetTree().GetNodesInGroup(backgroundGroup).Count > 0;
+        CollectShapes(sceneRoot, records, sourceGroup, backgroundGroup, hasExplicitBackground);
 
         var ordered = records
             .GroupBy(r => r.OwnerPath, StringComparer.Ordinal)
@@ -51,7 +56,7 @@ public static class SpatialSnapshotBuilder
                 : FrozenPrimitiveFlags.CollideWithBodies;
             primitives.Add(new FrozenOrientedBox(
                 canonicalId,
-                SpatialSurfaceClass.Geometry,
+                record.SurfaceClass,
                 worldFromLocal,
                 localFromWorld,
                 halfExtents,
@@ -63,7 +68,12 @@ public static class SpatialSnapshotBuilder
         return new FrozenGeometrySnapshot(primitives);
     }
 
-    private static void CollectShapes(Node node, List<ShapeRecord> records)
+    private static void CollectShapes(
+        Node node,
+        List<ShapeRecord> records,
+        string sourceGroup,
+        string backgroundGroup,
+        bool hasExplicitBackground)
     {
         if (node is CollisionShape3D shape && shape.Shape != null)
         {
@@ -73,18 +83,26 @@ public static class SpatialSnapshotBuilder
                 string ownerPath = owner.GetPath().ToString();
 				if (owner.IsInGroup("spatial_kernel_excluded"))
 					return;
+				SpatialSurfaceClass surfaceClass;
+				if (!string.IsNullOrWhiteSpace(sourceGroup) && owner.IsInGroup(sourceGroup))
+					surfaceClass = SpatialSurfaceClass.Geometry;
+				else if (!string.IsNullOrWhiteSpace(backgroundGroup) && owner.IsInGroup(backgroundGroup))
+					surfaceClass = SpatialSurfaceClass.Background;
+				else
+					surfaceClass = hasExplicitBackground ? SpatialSurfaceClass.Unknown : SpatialSurfaceClass.Background;
                 records.Add(new ShapeRecord(
                     shape,
                     owner,
                     ownerPath,
                     shape.GetPath().ToString(),
-                    false,
+					surfaceClass,
+					false,
                     0));
             }
         }
 
         foreach (Node child in node.GetChildren())
-            CollectShapes(child, records);
+            CollectShapes(child, records, sourceGroup, backgroundGroup, hasExplicitBackground);
     }
 
     private static CollisionObject3D? FindCollisionOwner(Node node)
@@ -131,6 +149,7 @@ public static class SpatialSnapshotBuilder
         CollisionObject3D Owner,
         string OwnerPath,
         string ShapePath,
+        SpatialSurfaceClass SurfaceClass,
         bool Excluded,
         int ShapeOrdinal);
 }
