@@ -109,6 +109,9 @@ public static class SpatialKernelTests
         Assert(!SpatialAuthorityPromotionGate.CanPromote(snapshot, context, true, context.CanonicalSha256, 1, 0, true, "", out _), "count mismatch blocks promotion");
         Assert(!SpatialAuthorityPromotionGate.CanPromote(snapshot, context, true, context.CanonicalSha256, 0, 1, true, "", out _), "semantic mismatch blocks promotion");
         Assert(!SpatialAuthorityPromotionGate.CanPromote(snapshot, context, false, context.CanonicalSha256, 0, 0, true, "", out _), "missing validation blocks promotion");
+        Assert(!SpatialAuthorityPromotionGate.CanPromote(snapshot, context, true, context.CanonicalSha256, 0, 0, false, "", out string unsupportedReason) && unsupportedReason == "unsupported_geometry", "unsupported geometry blocks promotion");
+        Assert(!SpatialAuthorityPromotionGate.CanPromote(snapshot, context, true, context.CanonicalSha256, 0, 0, true, "diagnostic_failed", out string diagnosticReason) && diagnosticReason == "spatial_diagnostic_failure", "diagnostic failure blocks promotion");
+        Assert(!SpatialAuthorityPromotionGate.CanPromote(snapshot, context, true, "stale-context", 0, 0, true, "", out string staleContextReason) && staleContextReason == "spatial_context_drifted", "stale context blocks promotion");
     }
 
     private static void InsideSegment()

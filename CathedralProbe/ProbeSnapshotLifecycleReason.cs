@@ -18,4 +18,5 @@ public enum ProbeSnapshotLifecycleReason : byte
 	FieldSourceEpochChanged = 12,
 	BoundaryEpochChanged = 13,
 	PolicyChanged = 14,
+	SpatialAuthorityPromotionFailed = 15,
 }
