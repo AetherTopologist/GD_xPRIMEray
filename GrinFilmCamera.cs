@@ -1380,9 +1380,21 @@ public partial class GrinFilmCamera : Node
 	[Export] public bool DebugSnapshotLog = true;
 	[Export(PropertyHint.Range, "0.05,10.0,0.05")] public float DebugSnapshotIntervalSec = 1.0f;
 	[Export] public bool DebugProbeLog = true;
+	/// <summary>Writes diagnostic-only health breadcrumbs outside artifact authority.</summary>
+	[Export] public bool RuntimeHealthWatchdogEnabled = true;
+	[Export] public bool RuntimeHealthDevelopmentSafe = false;
+	[Export(PropertyHint.Range, "0.1,60.0,0.1")] public float RuntimeHealthHeartbeatSeconds = 1.0f;
+	[Export] public string RuntimeHealthOutputDirectory = "";
+	[Export(PropertyHint.Range, "0,64,1")] public int RuntimeHealthMaxWorkerCount = 0;
+	[Export(PropertyHint.Range, "0,65536,1")] public int RuntimeHealthWorkingSetWarningMiB = 0;
+	[Export(PropertyHint.Range, "0,65536,1")] public int RuntimeHealthWorkingSetAbortMiB = 0;
+	[Export(PropertyHint.Range, "0,65536,1")] public int RuntimeHealthPrivateMemoryAbortMiB = 0;
 
 	private RuntimeDiagnosticPolicy _diagnostics = RuntimeDiagnosticPolicy.LiveDefault;
 	private readonly LiveDiagnosticAggregator _liveDiagnostics = new(TimeSpan.FromSeconds(1));
+	private RuntimeHealthWatchdog _runtimeHealth;
+	private string _runtimeHealthLastCompletedWorkUnit = "startup";
+	public string RuntimeHealthRunId => _runtimeHealth?.RunId ?? string.Empty;
 	private OneShotDiagnosticGate _probeSnapshotLifecycleEvidenceGate;
 	private OneShotDiagnosticGate _cathedralSealedObservationFrameDiagnosticGate;
 
@@ -3791,8 +3803,38 @@ private sealed class OverlayRollingWindow
 			local.QuickRayParams = null;
 	}
 
+	private void InitializeRuntimeHealthWatchdog()
+	{
+		if (!RuntimeHealthWatchdogEnabled)
+			return;
+		try
+		{
+			string outputDirectory = RuntimeHealthOutputDirectory.Trim();
+			if (outputDirectory.Length == 0)
+				outputDirectory = ProjectSettings.GlobalizePath("user://runtime_health");
+			_runtimeHealth = new RuntimeHealthWatchdog(new RuntimeHealthWatchdogOptions(
+				outputDirectory,
+				TimeSpan.FromSeconds(Math.Max(0.1f, RuntimeHealthHeartbeatSeconds)),
+				RuntimeHealthDevelopmentSafe,
+				RuntimeHealthMaxWorkerCount,
+				MiB(RuntimeHealthWorkingSetWarningMiB),
+				MiB(RuntimeHealthWorkingSetAbortMiB),
+				MiB(RuntimeHealthPrivateMemoryAbortMiB)));
+			if (_runtimeHealth.AbnormalPreviousRun)
+				GD.PushWarning("[RuntimeHealth] ABNORMAL_PREVIOUS_RUN");
+		}
+		catch (Exception exception)
+		{
+			GD.PushWarning($"[RuntimeHealth] unavailable reason={exception.GetType().Name}");
+		}
+	}
+
+	private static long MiB(int value) => value <= 0 ? 0 : (long)value * 1024L * 1024L;
+
 	public override void _ExitTree()
 	{
+		_runtimeHealth?.CompleteRun("process_exit");
+		_runtimeHealth?.Dispose();
 		_quickRayParams?.Dispose();
 		_quickRayParams = null;
 		_overlapQuery?.Dispose();
@@ -4166,6 +4208,7 @@ private sealed class OverlayRollingWindow
 	public override void _Ready()
 	{
 		_diagnostics = ResolveDiagnosticsForMode(UpdateEveryFrame);
+		InitializeRuntimeHealthWatchdog();
 		if (ShouldLog(DiagnosticVerbosity.Frame, DiagnosticCategory.Lifecycle))
 			GD.Print("✅ GrinFilmCamera READY: ", GetPath());
 
@@ -4569,9 +4612,66 @@ private sealed class OverlayRollingWindow
 		}
 	}
 
+	private string RuntimeHealthContextIdentity()
+	{
+		ProbeContextKey key = _cathedralSnapshotContext.IsValid
+			? _cathedralSnapshotContext.ContextKey
+			: _probeSnapshotLifecycleContextKey;
+		if (key.FilmWidth == 0 || key.FilmHeight == 0)
+			return string.Empty;
+		return Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(ProbeContextCanonicalSerializer.Serialize(in key))).ToLowerInvariant();
+	}
+
+	private void RecordRuntimeHealthHeartbeat(string phase)
+	{
+		if (_runtimeHealth == null)
+			return;
+		int workers = 1;
+		if (UseThreadedBands) workers = Math.Max(workers, ThreadedBandWorkerCount);
+		if (UseThreadedPass2CandidateEval) workers = Math.Max(workers, ThreadedPass2CandidateWorkers);
+		if (UseThreadedPass2QueryResolve) workers = Math.Max(workers, ThreadedPass2QueryWorkers);
+		if (UseThreadedPass2LocalAccumulation) workers = Math.Max(workers, ThreadedPass2WorkerCount);
+		_runtimeHealth.Heartbeat(
+			phase,
+			_rbr?.GetFormalProbeQueriesCanonical().Length ?? 0,
+			_lastSpatialKernelDualValidation?.PrimitiveTestCount ?? 0,
+			_lastSpatialKernelDualValidation?.BvhNodeTestCount ?? 0,
+			_probeSnapshotLifecycleGeneration,
+			RuntimeHealthContextIdentity(),
+			_runtimeHealthLastCompletedWorkUnit,
+			workers);
+	}
+
+	private bool RuntimeHealthLimitExceeded()
+	{
+		if (_runtimeHealth == null || !_probeSnapshotLifecycleActive)
+			return false;
+		int workers = 1;
+		if (UseThreadedBands)
+			workers = Math.Max(workers, ThreadedBandWorkerCount);
+		if (UseThreadedPass2CandidateEval)
+			workers = Math.Max(workers, ThreadedPass2CandidateWorkers);
+		if (UseThreadedPass2QueryResolve)
+			workers = Math.Max(workers, ThreadedPass2QueryWorkers);
+		if (UseThreadedPass2LocalAccumulation)
+			workers = Math.Max(workers, ThreadedPass2WorkerCount);
+		RuntimeHealthLimits limits = _runtimeHealth.CheckLimits(workers);
+		if (!limits.Abort)
+			return false;
+		CompleteCathedralProbeSnapshotLifecycle(
+			ProbeSnapshotLifecycleState.Failed,
+			ProbeSnapshotLifecycleReason.ResourceLimitExceeded,
+			contextMatched: true,
+			dimensionsMatched: true);
+		return true;
+	}
+
 	public override void _PhysicsProcess(double delta)
 	{
 		RefreshCachedRenderSpaceState();
+		if (RuntimeHealthLimitExceeded())
+			return;
+		RecordRuntimeHealthHeartbeat("physics_pump");
 		if (_cathedralContactReplayPending && _probeSnapshotLifecycleActive)
 		{
 			if (!ValidateActiveCathedralProbeSnapshotContext(out bool replayContextMatched, out bool replayDimensionsMatched))
@@ -10516,6 +10616,8 @@ private sealed class OverlayRollingWindow
 		_probeSnapshotLifecycleState = ProbeSnapshotLifecycleState.Capturing;
 		_probeSnapshotLifecycleReason = ProbeSnapshotLifecycleReason.None;
 		RenderStep();
+		_runtimeHealthLastCompletedWorkUnit = $"snapshot-band-row-{_rowCursor}";
+		RecordRuntimeHealthHeartbeat("snapshot");
 	}
 
 	private bool ReplayCathedralContactHistory(
@@ -10732,6 +10834,10 @@ private sealed class OverlayRollingWindow
 		};
 
 		_probeSnapshotLifecycleContextKey = contextKey;
+		_runtimeHealth?.BeginAcquisition(
+			$"snapshot-{_probeSnapshotLifecycleRequestId}",
+			_probeSnapshotLifecycleGeneration,
+			Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(ProbeContextCanonicalSerializer.Serialize(in contextKey))).ToLowerInvariant());
 		_probeSnapshotLifecycleWidth = _filmWidth;
 		_probeSnapshotLifecycleHeight = _filmHeight;
 		_probeSnapshotLifecyclePolicy = new ProbePolicy(
@@ -10864,6 +10970,11 @@ private sealed class OverlayRollingWindow
 		{
 			_probeSnapshotComplete = false;
 		}
+		_runtimeHealthLastCompletedWorkUnit = result.State == ProbeSnapshotLifecycleState.Complete ? "snapshot-complete" : "snapshot-terminal";
+		if (result.State == ProbeSnapshotLifecycleState.Complete)
+			_runtimeHealth?.CompleteAcquisition(_probeSnapshotLifecycleGeneration, RuntimeHealthContextIdentity(), _runtimeHealthLastCompletedWorkUnit);
+		else
+			_runtimeHealth?.AbortAcquisition(_probeSnapshotLifecycleGeneration, RuntimeHealthContextIdentity(), SnapshotLifecycleReasonToken(result.Reason));
 		_observationAcquisition.Release(ObservationAcquisitionOwner.Snapshot);
 		PrintCathedralProbeSnapshotEvidenceOnce(result);
 		PrintCathedralSealedObservationFrameDiagnosticOnce(result);
@@ -11031,6 +11142,7 @@ private sealed class OverlayRollingWindow
 			ProbeSnapshotLifecycleReason.BoundaryEpochChanged => "boundary_epoch_changed",
 			ProbeSnapshotLifecycleReason.PolicyChanged => "policy_changed",
 			ProbeSnapshotLifecycleReason.SpatialAuthorityPromotionFailed => "spatial_authority_promotion_failed",
+			ProbeSnapshotLifecycleReason.ResourceLimitExceeded => "resource_limit_exceeded",
 			_ => "unknown",
 		};
 	}
