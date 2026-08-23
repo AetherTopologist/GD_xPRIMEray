@@ -10,6 +10,7 @@ internal static class RuntimeHealthWatchdogTests
         WritesRunAndHeartbeatRecords();
         DisposeCompletesRunWhenNeeded();
         DetectsIncompletePriorRun();
+        DetectsIncompletePriorRunWithTornFinalLine();
         DevelopmentSafeLimitsAreOptIn();
     }
 
@@ -50,11 +51,21 @@ internal static class RuntimeHealthWatchdogTests
         Assert.True(File.ReadAllText(Path.Combine(directory, "runtime_health.ndjson")).Contains("RUN_COMPLETE", StringComparison.Ordinal), "dispose completes run");
     }
 
+    private static void DetectsIncompletePriorRunWithTornFinalLine()
+    {
+        string directory = NewDirectory();
+        string path = Path.Combine(directory, "runtime_health.ndjson");
+        File.WriteAllText(path, "{\"event\":\"RUN_START\",\"run_id\":\"crashed\"}\n{\"event\":\"heartbeat\"");
+        using var watchdog = new RuntimeHealthWatchdog(new RuntimeHealthWatchdogOptions(directory, TimeSpan.FromSeconds(1)));
+        Assert.True(watchdog.AbnormalPreviousRun, "torn final line preserves abnormal evidence");
+    }
+
     private static void DevelopmentSafeLimitsAreOptIn()
     {
         string directory = NewDirectory();
         using var disabled = new RuntimeHealthWatchdog(new RuntimeHealthWatchdogOptions(directory, TimeSpan.FromSeconds(1), DevelopmentSafe: false, MaxWorkerCount: 1));
         Assert.False(disabled.CheckLimits(2).Abort, "limits disabled by default");
+        Assert.True(disabled.ConfiguredLimitsIgnored, "inactive limits are reported");
         string safeDirectory = NewDirectory();
         using var enabled = new RuntimeHealthWatchdog(new RuntimeHealthWatchdogOptions(safeDirectory, TimeSpan.FromSeconds(1), DevelopmentSafe: true, MaxWorkerCount: 1));
         Assert.True(enabled.CheckLimits(2).Abort, "worker limit abort");

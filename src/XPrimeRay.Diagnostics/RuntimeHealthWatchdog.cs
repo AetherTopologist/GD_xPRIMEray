@@ -31,6 +31,7 @@ public sealed class RuntimeHealthWatchdog : IDisposable
     private readonly object _gate = new();
     private readonly StreamWriter? _ndjson;
     private readonly StreamWriter? _csv;
+    private readonly Process? _process;
     private readonly Stopwatch _clock = Stopwatch.StartNew();
     private DateTime _lastHeartbeatUtc = DateTime.MinValue;
     private bool _runComplete;
@@ -39,6 +40,7 @@ public sealed class RuntimeHealthWatchdog : IDisposable
     public string RunId { get; }
     public string? CurrentAcquisitionId { get; private set; }
     public bool AbnormalPreviousRun { get; }
+    public bool ConfiguredLimitsIgnored { get; }
     public string OutputDirectory => _options.OutputDirectory;
 
     public RuntimeHealthWatchdog(RuntimeHealthWatchdogOptions options)
@@ -50,6 +52,10 @@ public sealed class RuntimeHealthWatchdog : IDisposable
                 : options.HeartbeatInterval
         };
         RunId = Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture);
+        try { _process = Process.GetCurrentProcess(); } catch { _process = null; }
+        ConfiguredLimitsIgnored = !_options.DevelopmentSafe &&
+            (_options.MaxWorkerCount > 0 || _options.WorkingSetWarningBytes > 0 ||
+             _options.WorkingSetAbortBytes > 0 || _options.PrivateMemoryAbortBytes > 0);
 
         try
         {
@@ -70,6 +76,8 @@ public sealed class RuntimeHealthWatchdog : IDisposable
                 _csv.WriteLine("timestamp_utc,event,run_id,acquisition_id,phase,elapsed_ms,working_set_bytes,private_memory_bytes,gc_heap_bytes,gc_allocated_bytes,thread_count,worker_count,query_count,primitive_tests,node_tests,generation,context_identity,last_completed_work_unit,status,reason");
             if (AbnormalPreviousRun)
                 Append("ABNORMAL_PREVIOUS_RUN", phase: "startup", status: "warning", reason: "RUN_START without RUN_COMPLETE");
+            if (ConfiguredLimitsIgnored)
+                Append("CONFIG_WARNING", phase: "startup", status: "warning", reason: "DevelopmentSafe=false; configured health limits are inactive");
             Append("RUN_START", phase: "startup", status: "started");
         }
         catch
@@ -119,13 +127,13 @@ public sealed class RuntimeHealthWatchdog : IDisposable
         if (!_options.DevelopmentSafe)
             return new RuntimeHealthLimits(false, false, string.Empty, workerCount, metrics.WorkingSetBytes, metrics.PrivateMemoryBytes);
 
-        bool workerWarning = _options.MaxWorkerCount > 0 && workerCount > _options.MaxWorkerCount;
+        bool workerOverLimit = _options.MaxWorkerCount > 0 && workerCount > _options.MaxWorkerCount;
         bool memoryWarning = _options.WorkingSetWarningBytes > 0 && metrics.WorkingSetBytes >= _options.WorkingSetWarningBytes;
         bool abort = (_options.WorkingSetAbortBytes > 0 && metrics.WorkingSetBytes >= _options.WorkingSetAbortBytes) ||
-            (_options.PrivateMemoryAbortBytes > 0 && metrics.PrivateMemoryBytes >= _options.PrivateMemoryAbortBytes) || workerWarning;
-        bool warning = workerWarning || memoryWarning;
+            (_options.PrivateMemoryAbortBytes > 0 && metrics.PrivateMemoryBytes >= _options.PrivateMemoryAbortBytes) || workerOverLimit;
+        bool warning = workerOverLimit || memoryWarning;
         string reason = abort
-            ? (workerWarning ? "worker_limit" : metrics.WorkingSetBytes >= _options.WorkingSetAbortBytes ? "working_set_limit" : "private_memory_limit")
+            ? (workerOverLimit ? "worker_limit" : metrics.WorkingSetBytes >= _options.WorkingSetAbortBytes ? "working_set_limit" : "private_memory_limit")
             : memoryWarning ? "working_set_warning" : string.Empty;
         if (warning)
             Append("RESOURCE_WARNING", "snapshot", status: abort ? "abort" : "warning", reason: reason);
@@ -151,6 +159,7 @@ public sealed class RuntimeHealthWatchdog : IDisposable
             _disposed = true;
             _ndjson?.Dispose();
             _csv?.Dispose();
+            _process?.Dispose();
         }
     }
 
@@ -218,11 +227,19 @@ public sealed class RuntimeHealthWatchdog : IDisposable
         {
             foreach (string line in File.ReadLines(path))
             {
-                using JsonDocument json = JsonDocument.Parse(line);
-                string runId = json.RootElement.TryGetProperty("run_id", out var id) ? id.GetString() ?? "" : "";
-                string eventName = json.RootElement.TryGetProperty("event", out var evt) ? evt.GetString() ?? "" : "";
-                if (eventName == "RUN_START") starts.Add(runId);
-                if (eventName == "RUN_COMPLETE") completes.Add(runId);
+                try
+                {
+                    using JsonDocument json = JsonDocument.Parse(line);
+                    string runId = json.RootElement.TryGetProperty("run_id", out var id) ? id.GetString() ?? "" : "";
+                    string eventName = json.RootElement.TryGetProperty("event", out var evt) ? evt.GetString() ?? "" : "";
+                    if (eventName == "RUN_START") starts.Add(runId);
+                    if (eventName == "RUN_COMPLETE") completes.Add(runId);
+                }
+                catch
+                {
+                    // A torn final line must not erase evidence from earlier records.
+                    return starts.Any(id => !string.IsNullOrEmpty(id) && !completes.Contains(id));
+                }
             }
         }
         catch { return false; }
@@ -231,12 +248,13 @@ public sealed class RuntimeHealthWatchdog : IDisposable
 
     private readonly record struct ProcessMetrics(long WorkingSetBytes, long PrivateMemoryBytes, long GcHeapBytes, long GcAllocatedBytes, int ThreadCount);
 
-    private static ProcessMetrics ReadMetrics()
+    private ProcessMetrics ReadMetrics()
     {
         try
         {
-            using Process process = Process.GetCurrentProcess();
-            return new ProcessMetrics(process.WorkingSet64, process.PrivateMemorySize64, GC.GetTotalMemory(false), GC.GetTotalAllocatedBytes(false), process.Threads.Count);
+            if (_process == null)
+                throw new InvalidOperationException("process_metrics_unavailable");
+            return new ProcessMetrics(_process.WorkingSet64, _process.PrivateMemorySize64, GC.GetTotalMemory(false), GC.GetTotalAllocatedBytes(false), _process.Threads.Count);
         }
         catch
         {

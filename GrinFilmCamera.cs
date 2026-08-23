@@ -1385,6 +1385,7 @@ public partial class GrinFilmCamera : Node
 	[Export] public bool RuntimeHealthDevelopmentSafe = false;
 	[Export(PropertyHint.Range, "0.1,60.0,0.1")] public float RuntimeHealthHeartbeatSeconds = 1.0f;
 	[Export] public string RuntimeHealthOutputDirectory = "";
+	/// <summary>DevelopmentSafe hard-abort limit for configured worker count; zero disables it.</summary>
 	[Export(PropertyHint.Range, "0,64,1")] public int RuntimeHealthMaxWorkerCount = 0;
 	[Export(PropertyHint.Range, "0,65536,1")] public int RuntimeHealthWorkingSetWarningMiB = 0;
 	[Export(PropertyHint.Range, "0,65536,1")] public int RuntimeHealthWorkingSetAbortMiB = 0;
@@ -3820,6 +3821,8 @@ private sealed class OverlayRollingWindow
 				MiB(RuntimeHealthWorkingSetWarningMiB),
 				MiB(RuntimeHealthWorkingSetAbortMiB),
 				MiB(RuntimeHealthPrivateMemoryAbortMiB)));
+			if (_runtimeHealth.ConfiguredLimitsIgnored)
+				GD.PushWarning("[RuntimeHealth] configured limits are inactive because DevelopmentSafe=false");
 			if (_runtimeHealth.AbnormalPreviousRun)
 				GD.PushWarning("[RuntimeHealth] ABNORMAL_PREVIOUS_RUN");
 		}
