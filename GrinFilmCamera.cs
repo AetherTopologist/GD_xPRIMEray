@@ -10666,7 +10666,14 @@ private sealed class OverlayRollingWindow
 				$"semanticMismatchPixels={result.SurfaceSemanticMismatchPixelCount} totalMismatchPixels={result.TotalAuthorityMismatchPixelCount} " +
 				$"mismatchQueries={result.MismatchQueryCount} first={result.FirstMismatch} " +
 				$"godotHist={result.GodotContactHistogram} linearHist={result.LinearContactHistogram} " +
-				$"primitiveTests={result.PrimitiveTestCount} elapsedMs={result.ElapsedMilliseconds:0.###}");
+				$"primitiveTests={result.PrimitiveTestCount} elapsedMs={result.ElapsedMilliseconds:0.###} " +
+				$"bvhToken={XPrimeRay.Spatial.SpatialBvhQuery.AuthorityTokenValue} bvhSha={result.BvhContactCountSha256} " +
+				$"bvhQueryMismatch={result.BvhMismatchQueryCount} bvhHitMismatch={result.BvhHitMismatchQueryCount} " +
+				$"bvhPrimitiveMismatch={result.BvhPrimitiveIdentityMismatchQueryCount} bvhSurfaceMismatch={result.BvhSurfaceSemanticMismatchQueryCount} " +
+				$"bvhTMismatch={result.BvhSegmentTMismatchQueryCount} bvhPixelMismatch={result.BvhTotalMismatchPixelCount} " +
+				$"bvhNodeTests={result.BvhNodeTestCount} bvhPrimitiveTests={result.BvhPrimitiveTestCount} " +
+				$"bvhBuildMs={result.BvhBuildElapsedMilliseconds:0.###} bvhElapsedMs={result.BvhElapsedMilliseconds:0.###} " +
+				$"bvhNodes={result.BvhNodeCount} bvhLeaves={result.BvhLeafCount} bvhDepth={result.BvhMaxDepth} bvhBuildSha={result.BvhBuildSha256}");
 		}
 		catch (Exception exception)
 		{

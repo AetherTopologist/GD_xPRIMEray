@@ -31,6 +31,8 @@ public static class SpatialKernelTests
         EqualDistanceTieBreak();
         ExcludedPrimitive();
         RepeatedQueriesStable();
+        BvhBuildAndQueryParity();
+        BvhScalingBenchmark();
         Console.WriteLine("PASS SpatialKernelTests");
     }
 
@@ -176,6 +178,57 @@ public static class SpatialKernelTests
         {
             Assert(query.IntersectsSegment(new Vector3(-2, 0, 0), new Vector3(2, 0, 0), 1, out SurfaceHit hit), "repeat query hit");
             Assert(hit.SegmentT == 0.25f, "repeat query result");
+        }
+    }
+
+    private static void BvhBuildAndQueryParity()
+    {
+        FrozenOrientedBox[] boxes = Enumerable.Range(0, 17)
+            .Select(i => Box($"/World/Box{i:D3}", new Vector3((i % 5) * 3f, (i / 5) * 2f, 0f)))
+            .ToArray();
+        FrozenGeometrySnapshot snapshot = Snapshot(boxes);
+        FrozenGeometrySnapshot permuted = Snapshot(boxes.Reverse().ToArray());
+        SpatialBvhQuery bvh = new(snapshot);
+        SpatialBvhQuery bvhPermuted = new(permuted);
+        Assert(bvh.BuildSha256 == bvhPermuted.BuildSha256, "BVH fingerprint is input-order independent");
+        LinearScanSpatialQuery linear = new(snapshot);
+        for (int i = 0; i < 40; i++)
+        {
+            Vector3 from = new(-5f + i * 0.2f, -3f + i * 0.11f, -2f);
+            Vector3 to = new(16f - i * 0.1f, 8f - i * 0.07f, 2f);
+            bool linearHit = linear.IntersectsSegment(from, to, 1, out SurfaceHit linearResult);
+            bool bvhHit = bvh.IntersectsSegment(from, to, 1, out SurfaceHit bvhResult);
+            Assert(linearHit == bvhHit, "BVH hit parity");
+            if (linearHit)
+            {
+                Assert(linearResult.CanonicalPrimitiveId == bvhResult.CanonicalPrimitiveId, "BVH primitive parity");
+                Assert(linearResult.SurfaceClass == bvhResult.SurfaceClass, "BVH surface parity");
+                Assert(linearResult.SegmentT == bvhResult.SegmentT, "BVH SegmentT parity");
+            }
+        }
+        Assert(bvh.PrimitiveTestCount < linear.PrimitiveTestCount, "BVH reduces primitive tests");
+    }
+
+    private static void BvhScalingBenchmark()
+    {
+        foreach (int size in new[] { 12, 64, 256, 1024, 4096, 10000 })
+        {
+            FrozenGeometrySnapshot snapshot = Snapshot(Enumerable.Range(0, size)
+                .Select(i => Box($"/Bench/Box{i:D5}", new Vector3((i % 100) * 3f, (i / 100) * 3f, 0f)))
+                .ToArray());
+            SpatialBvhQuery bvh = new(snapshot);
+            LinearScanSpatialQuery linear = new(snapshot);
+            Vector3 from = new(-4f, -4f, 0f);
+            Vector3 to = new(304f, MathF.Max(4f, ((size - 1) / 100) * 3f + 4f), 0f);
+            const int queryCount = 128;
+            var linearTimer = System.Diagnostics.Stopwatch.StartNew();
+            for (int i = 0; i < queryCount; i++) linear.IntersectsSegment(from, to, 1, out _);
+            linearTimer.Stop();
+            var bvhTimer = System.Diagnostics.Stopwatch.StartNew();
+            for (int i = 0; i < queryCount; i++) bvh.IntersectsSegment(from, to, 1, out _);
+            bvhTimer.Stop();
+            Console.WriteLine($"BVH_BENCH size={size} buildMs={bvh.BuildElapsedMilliseconds:0.###} linearMs={linearTimer.Elapsed.TotalMilliseconds:0.###} bvhMs={bvhTimer.Elapsed.TotalMilliseconds:0.###} linearPrim={linear.PrimitiveTestCount} bvhNodes={bvh.NodeTestCount} bvhPrim={bvh.PrimitiveTestCount} depth={bvh.MaxDepth}");
+            Assert(bvh.PrimitiveTestCount <= linear.PrimitiveTestCount, "BVH benchmark primitive tests do not increase");
         }
     }
 

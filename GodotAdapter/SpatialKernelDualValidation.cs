@@ -26,6 +26,23 @@ public sealed class SpatialKernelDualValidationResult
     public required long PrimitiveTestCount { get; init; }
     public required double ElapsedMilliseconds { get; init; }
     public required int[] LinearContactCounts { get; init; }
+    public required string BvhContactCountSha256 { get; init; }
+    public required int BvhHitMismatchQueryCount { get; init; }
+    public required int BvhPrimitiveIdentityMismatchQueryCount { get; init; }
+    public required int BvhSurfaceSemanticMismatchQueryCount { get; init; }
+    public required int BvhSegmentTMismatchQueryCount { get; init; }
+    public required int BvhMismatchQueryCount { get; init; }
+    public required int BvhContactCountMismatchPixelCount { get; init; }
+    public required int BvhSurfaceSemanticMismatchPixelCount { get; init; }
+    public required int BvhTotalMismatchPixelCount { get; init; }
+    public required long BvhPrimitiveTestCount { get; init; }
+    public required long BvhNodeTestCount { get; init; }
+    public required double BvhElapsedMilliseconds { get; init; }
+    public required double BvhBuildElapsedMilliseconds { get; init; }
+    public required int BvhNodeCount { get; init; }
+    public required int BvhLeafCount { get; init; }
+    public required int BvhMaxDepth { get; init; }
+    public required string BvhBuildSha256 { get; init; }
 }
 
 public static class SpatialKernelDualValidator
@@ -73,22 +90,34 @@ public static class SpatialKernelDualValidator
         if (godotHadAnyBackgroundContact != null && godotHadAnyBackgroundContact.Length < totalPixels)
             throw new InvalidDataException("Godot background-contact channel is shorter than the film.");
         LinearScanSpatialQuery query = new(snapshot);
+        SpatialBvhQuery bvh = new(snapshot);
         int[] linearCounts = new int[totalPixels];
         byte[] linearGeometry = new byte[totalPixels];
         byte[] linearBackground = new byte[totalPixels];
+        int[] bvhCounts = new int[totalPixels];
+        byte[] bvhGeometry = new byte[totalPixels];
+        byte[] bvhBackground = new byte[totalPixels];
         int countMismatchPixels = 0;
         int semanticMismatchPixels = 0;
         int totalMismatchPixels = 0;
         int mismatchQueries = 0;
         string firstMismatch = "none";
-        System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        int bvhHitMismatches = 0;
+        int bvhPrimitiveMismatches = 0;
+        int bvhSurfaceMismatches = 0;
+        int bvhSegmentTMismatches = 0;
+        int bvhMismatchQueries = 0;
+        long linearTicks = 0;
+        long bvhTicks = 0;
 
         for (int queryIndex = 0; queryIndex < queries.Length; queryIndex++)
         {
             RayBeamRenderer.FormalProbeQuery recorded = queries[queryIndex];
             if (recorded.PixelIndex < 0 || recorded.PixelIndex >= totalPixels)
                 throw new InvalidDataException($"formal query pixel out of range: {recorded.PixelIndex}");
+            long linearStart = System.Diagnostics.Stopwatch.GetTimestamp();
             bool linearHit = query.IntersectsSegment(ToNumerics(recorded.From), ToNumerics(recorded.To), recorded.CollisionMask, out SurfaceHit surfaceHit);
+            linearTicks += System.Diagnostics.Stopwatch.GetTimestamp() - linearStart;
             if (linearHit)
             {
                 linearCounts[recorded.PixelIndex]++;
@@ -97,9 +126,29 @@ public static class SpatialKernelDualValidator
             }
             if (godotQueryHits != null && linearHit != godotQueryHits[queryIndex])
                 mismatchQueries++;
-        }
-        stopwatch.Stop();
 
+            long bvhStart = System.Diagnostics.Stopwatch.GetTimestamp();
+            bool bvhHit = bvh.IntersectsSegment(ToNumerics(recorded.From), ToNumerics(recorded.To), recorded.CollisionMask, out SurfaceHit bvhResult);
+            bvhTicks += System.Diagnostics.Stopwatch.GetTimestamp() - bvhStart;
+            if (bvhHit)
+            {
+                bvhCounts[recorded.PixelIndex]++;
+                if (bvhResult.SurfaceClass == SpatialSurfaceClass.Geometry) bvhGeometry[recorded.PixelIndex] = 1;
+                if (bvhResult.SurfaceClass == SpatialSurfaceClass.Background) bvhBackground[recorded.PixelIndex] = 1;
+            }
+            bool bvhQueryMismatch = linearHit != bvhHit;
+            if (bvhQueryMismatch) bvhHitMismatches++;
+            else if (linearHit)
+            {
+                if (!string.Equals(surfaceHit.CanonicalPrimitiveId, bvhResult.CanonicalPrimitiveId, StringComparison.Ordinal)) { bvhPrimitiveMismatches++; bvhQueryMismatch = true; }
+                if (surfaceHit.SurfaceClass != bvhResult.SurfaceClass) { bvhSurfaceMismatches++; bvhQueryMismatch = true; }
+                if (surfaceHit.SegmentT != bvhResult.SegmentT) { bvhSegmentTMismatches++; bvhQueryMismatch = true; }
+            }
+            if (bvhQueryMismatch) bvhMismatchQueries++;
+        }
+        int bvhCountMismatchPixels = 0;
+        int bvhSemanticMismatchPixels = 0;
+        int bvhTotalMismatchPixels = 0;
         for (int pixel = 0; pixel < totalPixels; pixel++)
         {
             int godot = pixel < godotContactCounts.Length ? godotContactCounts[pixel] : -1;
@@ -111,6 +160,11 @@ public static class SpatialKernelDualValidator
             if (countMismatch || semanticMismatch) totalMismatchPixels++;
             if ((countMismatch || semanticMismatch) && firstMismatch == "none")
                 firstMismatch = $"pixel={pixel} count={godot}->{linearCounts[pixel]} geometry={godotHadAnyGeometryContact?[pixel] ?? (byte)255}->{linearGeometry[pixel]} background={godotHadAnyBackgroundContact?[pixel] ?? (byte)255}->{linearBackground[pixel]}";
+            bool bvhCountMismatch = linearCounts[pixel] != bvhCounts[pixel];
+            bool bvhSemanticMismatch = linearGeometry[pixel] != bvhGeometry[pixel] || linearBackground[pixel] != bvhBackground[pixel];
+            if (bvhCountMismatch) bvhCountMismatchPixels++;
+            if (bvhSemanticMismatch) bvhSemanticMismatchPixels++;
+            if (bvhCountMismatch || bvhSemanticMismatch) bvhTotalMismatchPixels++;
         }
         return new SpatialKernelDualValidationResult
         {
@@ -132,8 +186,25 @@ public static class SpatialKernelDualValidator
             MismatchQueryCount = godotQueryHits == null ? -1 : mismatchQueries,
             FirstMismatch = firstMismatch,
             PrimitiveTestCount = query.PrimitiveTestCount,
-            ElapsedMilliseconds = stopwatch.Elapsed.TotalMilliseconds,
-            LinearContactCounts = linearCounts
+            ElapsedMilliseconds = TicksToMilliseconds(linearTicks),
+            LinearContactCounts = linearCounts,
+            BvhContactCountSha256 = HashInt32(bvhCounts, totalPixels),
+            BvhHitMismatchQueryCount = bvhHitMismatches,
+            BvhPrimitiveIdentityMismatchQueryCount = bvhPrimitiveMismatches,
+            BvhSurfaceSemanticMismatchQueryCount = bvhSurfaceMismatches,
+            BvhSegmentTMismatchQueryCount = bvhSegmentTMismatches,
+            BvhMismatchQueryCount = bvhMismatchQueries,
+            BvhContactCountMismatchPixelCount = bvhCountMismatchPixels,
+            BvhSurfaceSemanticMismatchPixelCount = bvhSemanticMismatchPixels,
+            BvhTotalMismatchPixelCount = bvhTotalMismatchPixels,
+            BvhPrimitiveTestCount = bvh.PrimitiveTestCount,
+            BvhNodeTestCount = bvh.NodeTestCount,
+            BvhElapsedMilliseconds = TicksToMilliseconds(bvhTicks),
+            BvhBuildElapsedMilliseconds = bvh.BuildElapsedMilliseconds,
+            BvhNodeCount = bvh.NodeCount,
+            BvhLeafCount = bvh.LeafCount,
+            BvhMaxDepth = bvh.MaxDepth,
+            BvhBuildSha256 = bvh.BuildSha256
         };
     }
 
@@ -154,6 +225,8 @@ public static class SpatialKernelDualValidator
     }
 
     private static Vector3 ToNumerics(Godot.Vector3 value) => new(value.X, value.Y, value.Z);
+
+    private static double TicksToMilliseconds(long ticks) => ticks * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
 
     private static string HashInt32(int[] values, int count)
     {
