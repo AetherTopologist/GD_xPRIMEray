@@ -15,6 +15,7 @@ public sealed class SpatialKernelDualValidationResult
     public required string GodotContactCountSha256 { get; init; }
     public required string LinearContactCountSha256 { get; init; }
     public required string SpatialAuthorityContextSha256 { get; init; }
+    public required string BvhSpatialAuthorityContextSha256 { get; init; }
     public required string GodotContactHistogram { get; init; }
     public required string LinearContactHistogram { get; init; }
     public required int MismatchPixelCount { get; init; }
@@ -177,6 +178,12 @@ public static class SpatialKernelDualValidator
                 snapshot.GeometrySnapshotSha256,
                 LinearScanSpatialQuery.AuthorityTokenValue,
                 LinearScanSpatialQuery.IntersectionPolicyVersion).CanonicalSha256,
+            BvhSpatialAuthorityContextSha256 = new BvhSpatialAuthorityContext(
+                snapshot.GeometrySnapshotSha256,
+                SpatialBvhQuery.AuthorityTokenValue,
+                LinearScanSpatialQuery.IntersectionPolicyVersion,
+                SpatialBvhQuery.BuildPolicyVersion,
+                bvh.BuildSha256).CanonicalSha256,
             GodotContactHistogram = FormatHistogram(godotContactCounts, totalPixels),
             LinearContactHistogram = FormatHistogram(linearCounts, totalPixels),
             MismatchPixelCount = totalMismatchPixels,

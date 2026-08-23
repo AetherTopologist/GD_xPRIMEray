@@ -155,6 +155,17 @@ public static class PortableProbeCaptureBundle
 		reason = string.Empty;
 		if (!input.LifecycleComplete) { reason = "lifecycle_not_complete"; return false; }
 		if (!input.SealedAuthorityAvailable) { reason = "sealed_authority_unavailable"; return false; }
+		if (string.IsNullOrWhiteSpace(input.ContactAuthorityToken) || input.ContactAuthorityToken == "legacy") { reason = "contact_authority_token_missing"; return false; }
+		if (!input.RuntimeProvenance.TryGetValue("capture_authority", out string? provenanceAuthority))
+		{
+			reason = "capture_authority_provenance_missing";
+			return false;
+		}
+		if (!string.Equals(provenanceAuthority, input.ContactAuthorityToken, StringComparison.Ordinal))
+		{
+			reason = "contact_authority_token_mismatch";
+			return false;
+		}
 		if (input.Width <= 0 || input.Height <= 0) { reason = "invalid_sealed_dimensions"; return false; }
 		int total = input.Width * input.Height;
 		if (input.UnprocessedCount != 0) { reason = "unprocessed_pixels_remaining"; return false; }

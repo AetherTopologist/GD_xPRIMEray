@@ -2374,10 +2374,11 @@ public partial class GrinFilmCamera : Node
 	private bool _cathedralContactReplayPending;
 	private bool _cathedralContactReplayComplete;
 	private int _cathedralContactReplayInvocationCount;
-	private const string CathedralContactAuthorityTokenValue = XPrimeRay.Spatial.LinearScanSpatialQuery.AuthorityTokenValue;
 	private GodotAdapter.SpatialKernelDualValidationResult _lastSpatialKernelDualValidation;
 	private XPrimeRay.Spatial.FrozenGeometrySnapshot _cathedralSpatialSnapshot;
 	private XPrimeRay.Spatial.SpatialAuthorityContext _cathedralSpatialAuthorityContext;
+	private XPrimeRay.Spatial.BvhSpatialAuthorityContext _cathedralBvhSpatialAuthorityContext;
+	private XPrimeRay.Spatial.IPass1SpatialQuery _cathedralFormalSpatialQuery;
 	private bool[] _cathedralGodotReplayQueryHits;
 	private string _spatialKernelDiagnosticFailure = string.Empty;
 	private int _probeSnapshotLifecycleRequestId = 0;
@@ -5022,13 +5023,13 @@ private sealed class OverlayRollingWindow
 			FinalStepCounts = (int[])_sealedProbeViewFinalStepCounts.Clone(),
 			PolicyMaxSteps = (int[])_sealedProbeViewPolicyMaxSteps.Clone(),
 			EffortValid = (byte[])_sealedProbeViewEffortValid.Clone(),
-			ContactAuthorityToken = CathedralContactAuthorityTokenValue,
+			ContactAuthorityToken = CathedralFormalAuthorityToken,
 			RuntimeProvenance = new Dictionary<string, string>
 			{
 				["runtime"] = "godot4-mono",
 				["physics_backend"] = ProjectSettings.GetSetting("physics/3d/physics_engine").ToString(),
 				["renderer_backend"] = ProjectSettings.GetSetting("renderer/rendering_method").ToString(),
-				["capture_authority"] = CathedralContactAuthorityTokenValue,
+				["capture_authority"] = CathedralFormalAuthorityToken,
 				["spatial_kernel_authority"] = CathedralSpatialKernelAuthorityToken,
 				["spatial_kernel_intersection_policy"] = XPrimeRay.Spatial.LinearScanSpatialQuery.IntersectionPolicyVersion,
 				["spatial_kernel_geometry_snapshot_sha256"] = CathedralSpatialKernelGeometrySnapshotSha256,
@@ -5086,7 +5087,8 @@ private sealed class OverlayRollingWindow
 	public bool CathedralContactReplayComplete => _cathedralContactReplayComplete &&
 		_lastProbeSnapshotLifecycleResult.State == ProbeSnapshotLifecycleState.Complete;
 	public int CathedralContactReplayInvocationCount => _cathedralContactReplayInvocationCount;
-	public string CathedralContactAuthorityToken => _sealedProbeViewAvailable ? CathedralContactAuthorityTokenValue : string.Empty;
+	private string CathedralFormalAuthorityToken => _cathedralFormalSpatialQuery?.AuthorityToken ?? string.Empty;
+	public string CathedralContactAuthorityToken => _sealedProbeViewAvailable ? CathedralFormalAuthorityToken : string.Empty;
 	public int CathedralProbeQueryCount => _rbr?.GetFormalProbeQueriesCanonical().Length ?? 0;
 	public string CathedralProbeQueryDatasetSha256 => _rbr?.GetFormalProbeQueryDatasetSha256() ?? string.Empty;
 	public bool CathedralSpatialKernelDualValidationAvailable => _lastSpatialKernelDualValidation != null;
@@ -5096,6 +5098,7 @@ private sealed class OverlayRollingWindow
 	public int CathedralSpatialKernelMismatchPixelCount => _lastSpatialKernelDualValidation?.MismatchPixelCount ?? -1;
 	public int CathedralSpatialKernelMismatchQueryCount => _lastSpatialKernelDualValidation?.MismatchQueryCount ?? -1;
 	public string CathedralSpatialKernelContextSha256 => _lastSpatialKernelDualValidation?.SpatialAuthorityContextSha256 ?? string.Empty;
+	public string CathedralSpatialKernelBvhContextSha256 => _lastSpatialKernelDualValidation?.BvhSpatialAuthorityContextSha256 ?? string.Empty;
 	public string CathedralSpatialKernelGodotHistogram => _lastSpatialKernelDualValidation?.GodotContactHistogram ?? string.Empty;
 	public string CathedralSpatialKernelLinearHistogram => _lastSpatialKernelDualValidation?.LinearContactHistogram ?? string.Empty;
 	public int CathedralSpatialKernelContactCountMismatchPixelCount => _lastSpatialKernelDualValidation?.ContactCountMismatchPixelCount ?? -1;
@@ -5127,12 +5130,21 @@ private sealed class OverlayRollingWindow
 		return XPrimeRay.Spatial.SpatialAuthorityPromotionGate.CanPromote(
 			_cathedralSpatialSnapshot,
 			_cathedralSpatialAuthorityContext,
+			_cathedralBvhSpatialAuthorityContext,
 			true,
 			_lastSpatialKernelDualValidation.SpatialAuthorityContextSha256,
+			_lastSpatialKernelDualValidation.BvhSpatialAuthorityContextSha256,
 			_lastSpatialKernelDualValidation.ContactCountMismatchPixelCount,
 			_lastSpatialKernelDualValidation.SurfaceSemanticMismatchPixelCount,
 			spatialContextStable && _spatialKernelDiagnosticFailure.Length == 0,
 			_spatialKernelDiagnosticFailure,
+			new XPrimeRay.Spatial.BvhParityStatus(
+				_lastSpatialKernelDualValidation.BvhTotalMismatchPixelCount,
+				_lastSpatialKernelDualValidation.BvhMismatchQueryCount,
+				_lastSpatialKernelDualValidation.BvhHitMismatchQueryCount,
+				_lastSpatialKernelDualValidation.BvhPrimitiveIdentityMismatchQueryCount,
+				_lastSpatialKernelDualValidation.BvhSurfaceSemanticMismatchQueryCount,
+				_lastSpatialKernelDualValidation.BvhSegmentTMismatchQueryCount),
 			out reason);
 	}
 
@@ -5159,6 +5171,19 @@ private sealed class OverlayRollingWindow
 			if (!string.Equals(currentContext.CanonicalSha256, _cathedralSpatialAuthorityContext.CanonicalSha256, StringComparison.Ordinal))
 			{
 				reason = "spatial_context_drifted";
+				return false;
+			}
+			if (_cathedralBvhSpatialAuthorityContext == null) { reason = "bvh_context_missing"; return false; }
+			XPrimeRay.Spatial.SpatialBvhQuery currentBvh = new(current);
+			XPrimeRay.Spatial.BvhSpatialAuthorityContext currentBvhContext = new(
+				current.GeometrySnapshotSha256,
+				XPrimeRay.Spatial.SpatialBvhQuery.AuthorityTokenValue,
+				XPrimeRay.Spatial.LinearScanSpatialQuery.IntersectionPolicyVersion,
+				XPrimeRay.Spatial.SpatialBvhQuery.BuildPolicyVersion,
+				currentBvh.BuildSha256);
+			if (!string.Equals(currentBvhContext.CanonicalSha256, _cathedralBvhSpatialAuthorityContext.CanonicalSha256, StringComparison.Ordinal))
+			{
+				reason = "bvh_context_drifted";
 				return false;
 			}
 			return true;
@@ -10761,10 +10786,16 @@ private sealed class OverlayRollingWindow
 				_transportHadAnyGeometryContact,
 				_transportHadAnyBackgroundContact);
 			GodotAdapter.SpatialKernelDualValidationResult result = _lastSpatialKernelDualValidation;
+			_cathedralBvhSpatialAuthorityContext = new XPrimeRay.Spatial.BvhSpatialAuthorityContext(
+				result.GeometrySnapshotSha256,
+				XPrimeRay.Spatial.SpatialBvhQuery.AuthorityTokenValue,
+				XPrimeRay.Spatial.LinearScanSpatialQuery.IntersectionPolicyVersion,
+				XPrimeRay.Spatial.SpatialBvhQuery.BuildPolicyVersion,
+				result.BvhBuildSha256);
 			string level = result.MismatchPixelCount == 0 ? "PASS" : "MISMATCH";
 			GD.Print(
 				$"[SpatialKernel][DualValidation] status={level} authority={GodotAdapter.SpatialKernelDualValidator.DiagnosticAuthorityToken} " +
-				$"candidateAuthority={CathedralContactAuthorityTokenValue} geometrySha={result.GeometrySnapshotSha256} " +
+				$"candidateAuthority={CathedralFormalAuthorityToken} geometrySha={result.GeometrySnapshotSha256} " +
 				$"spatialContextSha={result.SpatialAuthorityContextSha256} " +
 				$"primitives={result.PrimitiveCount} queries={result.QueryCount} godotSha={result.GodotContactCountSha256} " +
 				$"linearSha={result.LinearContactCountSha256} countMismatchPixels={result.ContactCountMismatchPixelCount} " +
@@ -10776,6 +10807,7 @@ private sealed class OverlayRollingWindow
 				$"bvhQueryMismatch={result.BvhMismatchQueryCount} bvhHitMismatch={result.BvhHitMismatchQueryCount} " +
 				$"bvhPrimitiveMismatch={result.BvhPrimitiveIdentityMismatchQueryCount} bvhSurfaceMismatch={result.BvhSurfaceSemanticMismatchQueryCount} " +
 				$"bvhTMismatch={result.BvhSegmentTMismatchQueryCount} bvhPixelMismatch={result.BvhTotalMismatchPixelCount} " +
+				$"bvhContextSha={result.BvhSpatialAuthorityContextSha256} " +
 				$"bvhNodeTests={result.BvhNodeTestCount} bvhPrimitiveTests={result.BvhPrimitiveTestCount} " +
 				$"bvhBuildMs={result.BvhBuildElapsedMilliseconds:0.###} bvhElapsedMs={result.BvhElapsedMilliseconds:0.###} " +
 				$"bvhNodes={result.BvhNodeCount} bvhLeaves={result.BvhLeafCount} bvhDepth={result.BvhMaxDepth} bvhBuildSha={result.BvhBuildSha256}");
@@ -10864,6 +10896,8 @@ private sealed class OverlayRollingWindow
 		_cathedralGodotReplayQueryHits = null;
 		_cathedralSpatialSnapshot = null;
 		_cathedralSpatialAuthorityContext = null;
+		_cathedralBvhSpatialAuthorityContext = null;
+		_cathedralFormalSpatialQuery = null;
 		_spatialKernelDiagnosticFailure = string.Empty;
 		try
 		{
@@ -10875,6 +10909,7 @@ private sealed class OverlayRollingWindow
 				_cathedralSpatialSnapshot.GeometrySnapshotSha256,
 				XPrimeRay.Spatial.LinearScanSpatialQuery.AuthorityTokenValue,
 				XPrimeRay.Spatial.LinearScanSpatialQuery.IntersectionPolicyVersion);
+			_cathedralFormalSpatialQuery = new XPrimeRay.Spatial.LinearScanSpatialQuery(_cathedralSpatialSnapshot);
 		}
 		catch (Exception exception)
 		{

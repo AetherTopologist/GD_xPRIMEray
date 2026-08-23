@@ -11,6 +11,7 @@ internal static class PortableProbeCaptureBundleTests
 		ContextSerializationIsStable();
 		BundleEncodingAndHashesAreStable();
 		QualificationRejectsInvalidEffortAndIncompleteSources();
+		AuthorityTokenMismatchIsRejected();
 	}
 
 	private static void ContextSerializationIsStable()
@@ -71,9 +72,17 @@ internal static class PortableProbeCaptureBundleTests
 		TestAssert.Equal("lifecycle_not_complete", incompleteReason, "incomplete rejection reason");
 	}
 
+	private static void AuthorityTokenMismatchIsRejected()
+	{
+		PortableProbeCaptureInput input = CreateInput(Path.Combine(Path.GetTempPath(), "not-written"));
+		input = CopyWith(input, authority: "XPrimeRaySpatialKernel/LinearScan-v0", provenanceAuthority: "XPrimeRaySpatialKernel/BVH-v0");
+		TestAssert.False(PortableProbeCaptureBundle.TryWrite(input, out _, out string reason), "authority mismatch rejected");
+		TestAssert.Equal("contact_authority_token_mismatch", reason, "authority mismatch reason");
+	}
+
 	private static PortableProbeCaptureInput CreateInput(string output)
 	{
-		return new PortableProbeCaptureInput
+		PortableProbeCaptureInput result = new PortableProbeCaptureInput
 		{
 			RunId = "test",
 			OutputDirectory = output,
@@ -96,13 +105,16 @@ internal static class PortableProbeCaptureBundleTests
 			ContactCounts = new[] { 0, 1, 2, 3 },
 			FinalStepCounts = new[] { 0, 40, 81, 80 },
 			PolicyMaxSteps = new[] { 81, 81, 81, 81 },
-			EffortValid = new byte[] { 1, 1, 1, 0 }
+			EffortValid = new byte[] { 1, 1, 1, 0 },
+			ContactAuthorityToken = "XPrimeRaySpatialKernel/LinearScan-v0",
+			RuntimeProvenance = new Dictionary<string, string> { ["capture_authority"] = "XPrimeRaySpatialKernel/LinearScan-v0" }
 		};
+		return result;
 	}
 
-	private static PortableProbeCaptureInput CopyWith(PortableProbeCaptureInput input, bool? complete = null, int[]? contacts = null, int[]? finalSteps = null, byte[]? effortValid = null)
+	private static PortableProbeCaptureInput CopyWith(PortableProbeCaptureInput input, bool? complete = null, int[]? contacts = null, int[]? finalSteps = null, byte[]? effortValid = null, string? authority = null, string? provenanceAuthority = null)
 	{
-		return new PortableProbeCaptureInput
+		PortableProbeCaptureInput result = new PortableProbeCaptureInput
 		{
 			RunId = input.RunId, OutputDirectory = input.OutputDirectory, SemanticSceneId = input.SemanticSceneId, GodotScenePath = input.GodotScenePath,
 			EngineCommit = input.EngineCommit, AcquisitionLineage = input.AcquisitionLineage, LifecycleComplete = complete ?? input.LifecycleComplete,
@@ -110,8 +122,12 @@ internal static class PortableProbeCaptureBundleTests
 			CameraTransform = input.CameraTransform, Width = input.Width, Height = input.Height, UnprocessedCount = input.UnprocessedCount,
 			StepsPerRay = input.StepsPerRay, StepLength = input.StepLength, FieldStrength = input.FieldStrength,
 			Outcomes = input.Outcomes, ContactCounts = contacts ?? input.ContactCounts, FinalStepCounts = finalSteps ?? input.FinalStepCounts,
-			PolicyMaxSteps = input.PolicyMaxSteps, EffortValid = effortValid ?? input.EffortValid
+			PolicyMaxSteps = input.PolicyMaxSteps, EffortValid = effortValid ?? input.EffortValid,
+			ContactAuthorityToken = authority ?? input.ContactAuthorityToken,
+			RuntimeProvenance = new Dictionary<string, string>(input.RuntimeProvenance)
 		};
+		if (provenanceAuthority != null) result.RuntimeProvenance["capture_authority"] = provenanceAuthority;
+		return result;
 	}
 
 	private static int ReadPngWidth(string path) => BinaryPrimitives.ReadInt32BigEndian(File.ReadAllBytes(path).AsSpan(16, 4));

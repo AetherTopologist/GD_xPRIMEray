@@ -14,6 +14,7 @@ public static class SpatialKernelTests
         DuplicateCanonicalIdRejected();
         ProcessStableCanonicalBytes();
         SpatialAuthorityContextIsDeterministic();
+        BvhAuthorityContextIsDeterministic();
         GeometryMutationChangesSpatialIdentity();
         SemanticMismatchIsNotHiddenByEqualCounts();
         StaleSpatialSnapshotRejected();
@@ -79,6 +80,21 @@ public static class SpatialKernelTests
         Assert(a.CanonicalSha256 != changed.CanonicalSha256, "spatial authority context distinguishes kernel");
     }
 
+    private static void BvhAuthorityContextIsDeterministic()
+    {
+        FrozenGeometrySnapshot snapshot = Snapshot(Box("/World/A", new Vector3(-2, 0, 0)), Box("/World/B", new Vector3(2, 0, 0)));
+        SpatialBvhQuery bvh = new(snapshot);
+        BvhSpatialAuthorityContext a = BvhContext(snapshot, bvh.BuildSha256);
+        BvhSpatialAuthorityContext b = BvhContext(snapshot, bvh.BuildSha256);
+        Assert(a.CanonicalSha256 == b.CanonicalSha256, "BVH context is deterministic");
+        FrozenGeometrySnapshot reordered = Snapshot(Box("/World/B", new Vector3(2, 0, 0)), Box("/World/A", new Vector3(-2, 0, 0)));
+        Assert(a.CanonicalSha256 == BvhContext(reordered).CanonicalSha256, "BVH context survives input reorder");
+        Assert(a.CanonicalSha256 != BvhContext(snapshot, "altered-build").CanonicalSha256, "BVH topology changes context");
+        Assert(a.CanonicalSha256 != new BvhSpatialAuthorityContext(snapshot.GeometrySnapshotSha256, a.AuthorityToken, a.IntersectionPolicyVersion, "altered-policy", a.BvhBuildSha256).CanonicalSha256, "BVH build policy changes context");
+        FrozenGeometrySnapshot changedGeometry = Snapshot(Box("/World/Wall", Vector3.Zero, halfExtents: new Vector3(2, 1, 1)));
+        Assert(a.CanonicalSha256 != BvhContext(changedGeometry, bvh.BuildSha256).CanonicalSha256, "BVH geometry changes context");
+    }
+
     private static void GeometryMutationChangesSpatialIdentity()
     {
         FrozenGeometrySnapshot original = Snapshot(Box("/World/Wall", Vector3.Zero, halfExtents: Vector3.One));
@@ -101,20 +117,25 @@ public static class SpatialKernelTests
         FrozenGeometrySnapshot original = Snapshot(Box("/World/Wall", Vector3.Zero));
         FrozenGeometrySnapshot resized = Snapshot(Box("/World/Wall", Vector3.Zero, halfExtents: new Vector3(2, 1, 1)));
         SpatialAuthorityContext context = new(original.GeometrySnapshotSha256, LinearScanSpatialQuery.AuthorityTokenValue, LinearScanSpatialQuery.IntersectionPolicyVersion);
-        Assert(!SpatialAuthorityPromotionGate.CanPromote(resized, context, true, context.CanonicalSha256, 0, 0, true, "", out string reason) && reason == "frozen_geometry_drifted", "stale frozen snapshot rejected");
+        BvhSpatialAuthorityContext bvhContext = BvhContext(original);
+        Assert(!Promote(resized, context, bvhContext, context.CanonicalSha256, bvhContext.CanonicalSha256, new(), out string reason) && reason == "frozen_geometry_drifted", "stale frozen snapshot rejected");
     }
 
     private static void PromotionGateRequiresQualifiedValidation()
     {
         FrozenGeometrySnapshot snapshot = Snapshot(Box("/World/Wall", Vector3.Zero));
         SpatialAuthorityContext context = new(snapshot.GeometrySnapshotSha256, LinearScanSpatialQuery.AuthorityTokenValue, LinearScanSpatialQuery.IntersectionPolicyVersion);
-        Assert(SpatialAuthorityPromotionGate.CanPromote(snapshot, context, true, context.CanonicalSha256, 0, 0, true, "", out _), "qualified promotion accepted");
-        Assert(!SpatialAuthorityPromotionGate.CanPromote(snapshot, context, true, context.CanonicalSha256, 1, 0, true, "", out _), "count mismatch blocks promotion");
-        Assert(!SpatialAuthorityPromotionGate.CanPromote(snapshot, context, true, context.CanonicalSha256, 0, 1, true, "", out _), "semantic mismatch blocks promotion");
-        Assert(!SpatialAuthorityPromotionGate.CanPromote(snapshot, context, false, context.CanonicalSha256, 0, 0, true, "", out _), "missing validation blocks promotion");
-        Assert(!SpatialAuthorityPromotionGate.CanPromote(snapshot, context, true, context.CanonicalSha256, 0, 0, false, "", out string unsupportedReason) && unsupportedReason == "unsupported_geometry", "unsupported geometry blocks promotion");
-        Assert(!SpatialAuthorityPromotionGate.CanPromote(snapshot, context, true, context.CanonicalSha256, 0, 0, true, "diagnostic_failed", out string diagnosticReason) && diagnosticReason == "spatial_diagnostic_failure", "diagnostic failure blocks promotion");
-        Assert(!SpatialAuthorityPromotionGate.CanPromote(snapshot, context, true, "stale-context", 0, 0, true, "", out string staleContextReason) && staleContextReason == "spatial_context_drifted", "stale context blocks promotion");
+        BvhSpatialAuthorityContext bvhContext = BvhContext(snapshot);
+        Assert(Promote(snapshot, context, bvhContext, context.CanonicalSha256, bvhContext.CanonicalSha256, new(), out _), "qualified promotion accepted");
+        Assert(!Promote(snapshot, context, bvhContext, context.CanonicalSha256, bvhContext.CanonicalSha256, new(1, 0, 0, 0, 0, 0), out string pixelReason) && pixelReason == "bvh_parity_failure", "BVH pixel mismatch blocks promotion");
+        Assert(!Promote(snapshot, context, bvhContext, context.CanonicalSha256, bvhContext.CanonicalSha256, new(0, 1, 0, 0, 0, 0), out string queryReason) && queryReason == "bvh_parity_failure", "BVH query mismatch blocks promotion");
+        Assert(!Promote(snapshot, context, bvhContext, context.CanonicalSha256, bvhContext.CanonicalSha256, new(0, 0, 0, 0, 1, 0), out string semanticReason) && semanticReason == "bvh_parity_failure", "BVH semantic mismatch blocks promotion");
+        Assert(!Promote(snapshot, context, bvhContext, context.CanonicalSha256, bvhContext.CanonicalSha256, new(0, 0, 0, 0, 0, 1), out string tReason) && tReason == "bvh_parity_failure", "BVH SegmentT mismatch blocks promotion");
+        Assert(!Promote(snapshot, context, bvhContext, context.CanonicalSha256, "altered-bvh-context", new(), out string bvhContextReason) && bvhContextReason == "bvh_context_drifted", "BVH context drift blocks promotion");
+        Assert(!Promote(snapshot, context, bvhContext, context.CanonicalSha256, bvhContext.CanonicalSha256, new(), out _, dualValidationPresent: false), "missing validation blocks promotion");
+        Assert(!Promote(snapshot, context, bvhContext, context.CanonicalSha256, bvhContext.CanonicalSha256, new(), out string unsupportedReason, supportedGeometry: false) && unsupportedReason == "unsupported_geometry", "unsupported geometry blocks promotion");
+        Assert(!Promote(snapshot, context, bvhContext, context.CanonicalSha256, bvhContext.CanonicalSha256, new(), out string diagnosticReason, diagnosticFailure: "diagnostic_failed") && diagnosticReason == "spatial_diagnostic_failure", "diagnostic failure blocks promotion");
+        Assert(!Promote(snapshot, context, bvhContext, "stale-context", bvhContext.CanonicalSha256, new(), out string staleContextReason) && staleContextReason == "spatial_context_drifted", "stale context blocks promotion");
     }
 
     private static void InsideSegment()
@@ -305,6 +326,41 @@ public static class SpatialKernelTests
     }
 
     private static FrozenGeometrySnapshot Snapshot(params FrozenOrientedBox[] boxes) => new(boxes);
+
+    private static BvhSpatialAuthorityContext BvhContext(FrozenGeometrySnapshot snapshot, string? buildSha = null)
+    {
+        SpatialBvhQuery bvh = new(snapshot);
+        return new BvhSpatialAuthorityContext(
+            snapshot.GeometrySnapshotSha256,
+            SpatialBvhQuery.AuthorityTokenValue,
+            LinearScanSpatialQuery.IntersectionPolicyVersion,
+            SpatialBvhQuery.BuildPolicyVersion,
+            buildSha ?? bvh.BuildSha256);
+    }
+
+    private static bool Promote(
+        FrozenGeometrySnapshot snapshot,
+        SpatialAuthorityContext context,
+        BvhSpatialAuthorityContext bvhContext,
+        string validationContext,
+        string validationBvhContext,
+        BvhParityStatus parity,
+        out string reason,
+        bool dualValidationPresent = true,
+        bool supportedGeometry = true,
+        string diagnosticFailure = "") => SpatialAuthorityPromotionGate.CanPromote(
+            snapshot,
+            context,
+            bvhContext,
+            dualValidationPresent,
+            validationContext,
+            validationBvhContext,
+            0,
+            0,
+            supportedGeometry,
+            diagnosticFailure,
+            parity,
+            out reason);
 
     private static FrozenOrientedBox Box(string id, Vector3 center, Matrix4x4? transform = null, Vector3? halfExtents = null)
     {
