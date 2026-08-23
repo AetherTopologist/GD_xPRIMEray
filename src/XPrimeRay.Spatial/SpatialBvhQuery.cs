@@ -33,6 +33,14 @@ public sealed class SpatialBvhQuery : IPass1SpatialQuery
     public SpatialBvhQuery(FrozenGeometrySnapshot snapshot)
     {
         _snapshot = snapshot ?? throw new ArgumentNullException(nameof(snapshot));
+        for (int i = 0; i < snapshot.Primitives.Count; i++)
+        {
+            Aabb3 bounds = snapshot.Primitives[i].WorldBounds;
+            if (!IsFinite(bounds.Min) || !IsFinite(bounds.Max))
+                throw new ArgumentException($"BVH WorldBounds must be finite for primitive index {i}.", nameof(snapshot));
+            if (bounds.Min.X > bounds.Max.X || bounds.Min.Y > bounds.Max.Y || bounds.Min.Z > bounds.Max.Z)
+                throw new ArgumentException($"BVH WorldBounds must be ordered for primitive index {i}.", nameof(snapshot));
+        }
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         List<int> indices = Enumerable.Range(0, snapshot.Primitives.Count)
             .Where(index => !snapshot.Primitives[index].IsExcluded)
@@ -159,6 +167,13 @@ public sealed class SpatialBvhQuery : IPass1SpatialQuery
 
     private static float Axis(Vector3 value, int axis) => axis switch { 1 => value.Y, 2 => value.Z, _ => value.X };
 
+    /// <summary>
+    /// Conservative broad-phase test for a finite inclusive segment [from,to].
+    /// This only decides whether a BVH node may contain a candidate; the OBB
+    /// truth source remains <see cref="OrientedBoxIntersection.TryIntersectSegment"/>.
+    /// It follows the finite-segment policy without adding an epsilon or changing
+    /// endpoint, parallel-slab, or start-inside semantics.
+    /// </summary>
     private static bool SegmentIntersectsAabb(Aabb3 bounds, Vector3 from, Vector3 to)
     {
         Vector3 direction = to - from;
@@ -184,6 +199,9 @@ public sealed class SpatialBvhQuery : IPass1SpatialQuery
         }
         return exit >= 0.0 && enter <= 1.0;
     }
+
+    private static bool IsFinite(Vector3 value) =>
+        float.IsFinite(value.X) && float.IsFinite(value.Y) && float.IsFinite(value.Z);
 
     private static int Pop(Span<int> stack, ref int[]? overflow, ref int count)
     {

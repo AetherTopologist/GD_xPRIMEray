@@ -30,6 +30,7 @@ public static class SpatialKernelTests
         NearestPrimitive();
         EqualDistanceTieBreak();
         ExcludedPrimitive();
+        BvhRejectsInvalidBounds();
         RepeatedQueriesStable();
         BvhBuildAndQueryParity();
         BvhScalingBenchmark();
@@ -192,12 +193,11 @@ public static class SpatialKernelTests
         SpatialBvhQuery bvhPermuted = new(permuted);
         Assert(bvh.BuildSha256 == bvhPermuted.BuildSha256, "BVH fingerprint is input-order independent");
         LinearScanSpatialQuery linear = new(snapshot);
-        for (int i = 0; i < 40; i++)
+        BenchmarkRay[] corpus = BuildBenchmarkCorpus(17);
+        foreach (BenchmarkRay ray in corpus)
         {
-            Vector3 from = new(-5f + i * 0.2f, -3f + i * 0.11f, -2f);
-            Vector3 to = new(16f - i * 0.1f, 8f - i * 0.07f, 2f);
-            bool linearHit = linear.IntersectsSegment(from, to, 1, out SurfaceHit linearResult);
-            bool bvhHit = bvh.IntersectsSegment(from, to, 1, out SurfaceHit bvhResult);
+            bool linearHit = linear.IntersectsSegment(ray.From, ray.To, 1, out SurfaceHit linearResult);
+            bool bvhHit = bvh.IntersectsSegment(ray.From, ray.To, 1, out SurfaceHit bvhResult);
             Assert(linearHit == bvhHit, "BVH hit parity");
             if (linearHit)
             {
@@ -206,7 +206,16 @@ public static class SpatialKernelTests
                 Assert(linearResult.SegmentT == bvhResult.SegmentT, "BVH SegmentT parity");
             }
         }
-        Assert(bvh.PrimitiveTestCount < linear.PrimitiveTestCount, "BVH reduces primitive tests");
+        Assert(bvh.PrimitiveTestCount <= linear.PrimitiveTestCount, "BVH does not increase global primitive tests");
+
+        LinearScanSpatialQuery intersectingLinear = new(snapshot);
+        SpatialBvhQuery intersectingBvh = new(snapshot);
+        foreach (BenchmarkRay ray in corpus.Where(ray => ray.ExpectedIntersecting))
+        {
+            intersectingLinear.IntersectsSegment(ray.From, ray.To, 1, out _);
+            intersectingBvh.IntersectsSegment(ray.From, ray.To, 1, out _);
+        }
+        Assert(intersectingBvh.PrimitiveTestCount < intersectingLinear.PrimitiveTestCount, "BVH reduces known intersecting subset");
     }
 
     private static void BvhScalingBenchmark()
@@ -216,20 +225,76 @@ public static class SpatialKernelTests
             FrozenGeometrySnapshot snapshot = Snapshot(Enumerable.Range(0, size)
                 .Select(i => Box($"/Bench/Box{i:D5}", new Vector3((i % 100) * 3f, (i / 100) * 3f, 0f)))
                 .ToArray());
+            BenchmarkRay[] corpus = BuildBenchmarkCorpus(size);
+            // Warm both implementations before measuring. Timed instances keep
+            // correctness counters limited to the measured corpus only.
+            SpatialBvhQuery warmBvh = new(snapshot);
+            LinearScanSpatialQuery warmLinear = new(snapshot);
+            for (int warmup = 0; warmup < 3; warmup++)
+                foreach (BenchmarkRay ray in corpus)
+                {
+                    warmLinear.IntersectsSegment(ray.From, ray.To, 1, out _);
+                    warmBvh.IntersectsSegment(ray.From, ray.To, 1, out _);
+                }
+
             SpatialBvhQuery bvh = new(snapshot);
+            Assert(warmBvh.BuildSha256 == bvh.BuildSha256, "BVH build fingerprint stable after warmup");
             LinearScanSpatialQuery linear = new(snapshot);
-            Vector3 from = new(-4f, -4f, 0f);
-            Vector3 to = new(304f, MathF.Max(4f, ((size - 1) / 100) * 3f + 4f), 0f);
-            const int queryCount = 128;
+            const int repetitions = 128;
             var linearTimer = System.Diagnostics.Stopwatch.StartNew();
-            for (int i = 0; i < queryCount; i++) linear.IntersectsSegment(from, to, 1, out _);
+            for (int i = 0; i < repetitions; i++)
+                foreach (BenchmarkRay ray in corpus) linear.IntersectsSegment(ray.From, ray.To, 1, out _);
             linearTimer.Stop();
             var bvhTimer = System.Diagnostics.Stopwatch.StartNew();
-            for (int i = 0; i < queryCount; i++) bvh.IntersectsSegment(from, to, 1, out _);
+            for (int i = 0; i < repetitions; i++)
+                foreach (BenchmarkRay ray in corpus) bvh.IntersectsSegment(ray.From, ray.To, 1, out _);
             bvhTimer.Stop();
-            Console.WriteLine($"BVH_BENCH size={size} buildMs={bvh.BuildElapsedMilliseconds:0.###} linearMs={linearTimer.Elapsed.TotalMilliseconds:0.###} bvhMs={bvhTimer.Elapsed.TotalMilliseconds:0.###} linearPrim={linear.PrimitiveTestCount} bvhNodes={bvh.NodeTestCount} bvhPrim={bvh.PrimitiveTestCount} depth={bvh.MaxDepth}");
+            double linearMs = linearTimer.Elapsed.TotalMilliseconds;
+            double bvhMs = bvhTimer.Elapsed.TotalMilliseconds;
+            double queryTotal = repetitions * corpus.Length;
+            Console.WriteLine($"BVH_BENCH size={size} queries={queryTotal} buildMs={bvh.BuildElapsedMilliseconds:0.###} linearMs={linearMs:0.###} bvhMs={bvhMs:0.###} linearQps={queryTotal / System.Math.Max(0.001, linearMs) * 1000.0:0.###} bvhQps={queryTotal / System.Math.Max(0.001, bvhMs) * 1000.0:0.###} speedup={linearMs / System.Math.Max(0.001, bvhMs):0.###} linearPrim={linear.PrimitiveTestCount} bvhNodes={bvh.NodeTestCount} bvhPrim={bvh.PrimitiveTestCount} depth={bvh.MaxDepth} buildSha={bvh.BuildSha256}");
             Assert(bvh.PrimitiveTestCount <= linear.PrimitiveTestCount, "BVH benchmark primitive tests do not increase");
         }
+    }
+
+    private static void BvhRejectsInvalidBounds()
+    {
+        FrozenOrientedBox template = Box("/World/Invalid", Vector3.Zero);
+        AssertBvhRejects(new Aabb3(new Vector3(float.NaN, 0, 0), new Vector3(1, 1, 1)), "NaN bounds");
+        AssertBvhRejects(new Aabb3(new Vector3(0, 0, 0), new Vector3(float.PositiveInfinity, 1, 1)), "infinite bounds");
+        AssertBvhRejects(new Aabb3(new Vector3(2, 0, 0), new Vector3(1, 1, 1)), "reversed degenerate bounds");
+
+        void AssertBvhRejects(Aabb3 bounds, string label)
+        {
+            FrozenOrientedBox invalid = new(template.CanonicalPrimitiveId, template.SurfaceClass,
+                template.WorldFromLocal, template.LocalFromWorld, template.HalfExtents, bounds,
+                template.CollisionLayer, template.Flags);
+            bool rejected = false;
+            try { _ = new SpatialBvhQuery(Snapshot(invalid)); }
+            catch (ArgumentException) { rejected = true; }
+            Assert(rejected, label + " rejected");
+        }
+    }
+
+    private readonly record struct BenchmarkRay(Vector3 From, Vector3 To, string Label, bool ExpectedIntersecting);
+
+    private static BenchmarkRay[] BuildBenchmarkCorpus(int size)
+    {
+        float maxX = ((size - 1) % 100) * 3f;
+        float maxY = ((size - 1) / 100) * 3f;
+        float farX = maxX + 4f;
+        float farY = MathF.Max(4f, maxY + 4f);
+        return new[]
+        {
+            new BenchmarkRay(new Vector3(-4, -4, -2), new Vector3(farX, farY, 2), "full-scene-diagonal", true),
+            new BenchmarkRay(new Vector3(-4, -4, 1.05f), new Vector3(farX, farY, 1.05f), "near-miss", false),
+            new BenchmarkRay(new Vector3(-4, 0, 0), new Vector3(farX, 0, 0), "axis-aligned", true),
+            new BenchmarkRay(new Vector3(-4, farY, -0.5f), new Vector3(farX, -2, 0.5f), "oblique", true),
+            new BenchmarkRay(Vector3.Zero, new Vector3(farX, farY, 0), "start-inside", true),
+            new BenchmarkRay(new Vector3(0, 0, -4), new Vector3(0, 0, 4), "axis-z", true),
+            new BenchmarkRay(new Vector3(-4, maxY * 0.25f, 0), new Vector3(farX, maxY * 0.25f, 0), "sparse-sweep-a", true),
+            new BenchmarkRay(new Vector3(-4, maxY * 0.75f + 0.37f, 0), new Vector3(farX, maxY * 0.75f + 0.37f, 0), "sparse-sweep-b", false)
+        };
     }
 
     private static void AssertHit(Vector3 from, Vector3 to, float expectedT, string name)
