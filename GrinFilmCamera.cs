@@ -5030,6 +5030,13 @@ private sealed class OverlayRollingWindow
 				["physics_backend"] = ProjectSettings.GetSetting("physics/3d/physics_engine").ToString(),
 				["renderer_backend"] = ProjectSettings.GetSetting("renderer/rendering_method").ToString(),
 				["capture_authority"] = CathedralFormalAuthorityToken,
+				["bvh_authority_token"] = XPrimeRay.Spatial.SpatialBvhQuery.AuthorityTokenValue,
+				["bvh_build_sha256"] = _lastSpatialKernelDualValidation?.BvhBuildSha256 ?? string.Empty,
+				["bvh_authority_context_sha256"] = CathedralSpatialKernelBvhContextSha256,
+				["linear_witness_sha256"] = _lastSpatialKernelDualValidation?.LinearContactCountSha256 ?? string.Empty,
+				["godot_witness_sha256"] = _lastSpatialKernelDualValidation?.GodotContactCountSha256 ?? string.Empty,
+				["bvh_mismatch_queries"] = (_lastSpatialKernelDualValidation?.BvhMismatchQueryCount ?? -1).ToString(),
+				["bvh_mismatch_pixels"] = (_lastSpatialKernelDualValidation?.BvhTotalMismatchPixelCount ?? -1).ToString(),
 				["spatial_kernel_authority"] = CathedralSpatialKernelAuthorityToken,
 				["spatial_kernel_intersection_policy"] = XPrimeRay.Spatial.LinearScanSpatialQuery.IntersectionPolicyVersion,
 				["spatial_kernel_geometry_snapshot_sha256"] = CathedralSpatialKernelGeometrySnapshotSha256,
@@ -5125,6 +5132,12 @@ private sealed class OverlayRollingWindow
 			_lastSpatialKernelDualValidation.LinearContactCounts.Length < _filmWidth * _filmHeight)
 		{
 			reason = "linear_contact_channel_missing";
+			return false;
+		}
+		if (_lastSpatialKernelDualValidation.BvhContactCounts == null ||
+			_lastSpatialKernelDualValidation.BvhContactCounts.Length < _filmWidth * _filmHeight)
+		{
+			reason = "bvh_contact_channel_missing";
 			return false;
 		}
 		return XPrimeRay.Spatial.SpatialAuthorityPromotionGate.CanPromote(
@@ -10794,8 +10807,8 @@ private sealed class OverlayRollingWindow
 				result.BvhBuildSha256);
 			string level = result.MismatchPixelCount == 0 ? "PASS" : "MISMATCH";
 			GD.Print(
-				$"[SpatialKernel][DualValidation] status={level} authority={GodotAdapter.SpatialKernelDualValidator.DiagnosticAuthorityToken} " +
-				$"candidateAuthority={CathedralFormalAuthorityToken} geometrySha={result.GeometrySnapshotSha256} " +
+				$"[SpatialKernel][DualValidation] status={level} witnessAuthority={GodotAdapter.SpatialKernelDualValidator.DiagnosticAuthorityToken} " +
+				$"formalAuthorityCandidate={XPrimeRay.Spatial.SpatialBvhQuery.AuthorityTokenValue} geometrySha={result.GeometrySnapshotSha256} " +
 				$"spatialContextSha={result.SpatialAuthorityContextSha256} " +
 				$"primitives={result.PrimitiveCount} queries={result.QueryCount} godotSha={result.GodotContactCountSha256} " +
 				$"linearSha={result.LinearContactCountSha256} countMismatchPixels={result.ContactCountMismatchPixelCount} " +
@@ -10909,7 +10922,7 @@ private sealed class OverlayRollingWindow
 				_cathedralSpatialSnapshot.GeometrySnapshotSha256,
 				XPrimeRay.Spatial.LinearScanSpatialQuery.AuthorityTokenValue,
 				XPrimeRay.Spatial.LinearScanSpatialQuery.IntersectionPolicyVersion);
-			_cathedralFormalSpatialQuery = new XPrimeRay.Spatial.LinearScanSpatialQuery(_cathedralSpatialSnapshot);
+			_cathedralFormalSpatialQuery = null;
 		}
 		catch (Exception exception)
 		{
@@ -11910,6 +11923,9 @@ private sealed class OverlayRollingWindow
 				GD.PushError($"[CathedralProbe][SpatialAuthority] promotion failed reason={promotionFailureReason}");
 				return;
 			}
+			// Formal authority transfer occurs only after the complete readiness gate.
+			// LinearScan remains the mandatory golden witness in the dual result.
+			_cathedralFormalSpatialQuery = new XPrimeRay.Spatial.SpatialBvhQuery(_cathedralSpatialSnapshot);
 			_probeFrameContextKey = summaryContext;
 			_probeFrameGeneration++;
 			if (_probeSnapshotLifecycleActive &&
@@ -11988,10 +12004,12 @@ private sealed class OverlayRollingWindow
 		_sealedProbeViewPolicyMaxSteps = new int[totalPixels];
 		_sealedProbeViewEffortValid = new byte[totalPixels];
 		Array.Copy(_probeOutcomes, _sealedProbeViewOutcomes, totalPixels);
-		if (_lastSpatialKernelDualValidation?.LinearContactCounts == null ||
-			_lastSpatialKernelDualValidation.LinearContactCounts.Length < totalPixels)
-			throw new InvalidOperationException("formal LinearScan contact channel is unavailable");
-		Array.Copy(_lastSpatialKernelDualValidation.LinearContactCounts, _sealedProbeViewContactCounts, totalPixels);
+		if (!string.Equals(CathedralFormalAuthorityToken, XPrimeRay.Spatial.SpatialBvhQuery.AuthorityTokenValue, StringComparison.Ordinal))
+			throw new InvalidOperationException("formal BVH authority is unavailable");
+		if (_lastSpatialKernelDualValidation?.BvhContactCounts == null ||
+			_lastSpatialKernelDualValidation.BvhContactCounts.Length < totalPixels)
+			throw new InvalidOperationException("formal BVH contact channel is unavailable");
+		Array.Copy(_lastSpatialKernelDualValidation.BvhContactCounts, _sealedProbeViewContactCounts, totalPixels);
 		Array.Copy(_transportFinalStepCount, _sealedProbeViewFinalStepCounts, totalPixels);
 		Array.Copy(_transportPolicyMaxSteps, _sealedProbeViewPolicyMaxSteps, totalPixels);
 		Array.Copy(_transportEffortValid, _sealedProbeViewEffortValid, totalPixels);

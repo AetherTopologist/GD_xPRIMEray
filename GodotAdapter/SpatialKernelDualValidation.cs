@@ -27,6 +27,7 @@ public sealed class SpatialKernelDualValidationResult
     public required long PrimitiveTestCount { get; init; }
     public required double ElapsedMilliseconds { get; init; }
     public required int[] LinearContactCounts { get; init; }
+    public required int[] BvhContactCounts { get; init; }
     public required string BvhContactCountSha256 { get; init; }
     public required int BvhHitMismatchQueryCount { get; init; }
     public required int BvhPrimitiveIdentityMismatchQueryCount { get; init; }
@@ -195,6 +196,7 @@ public static class SpatialKernelDualValidator
             PrimitiveTestCount = query.PrimitiveTestCount,
             ElapsedMilliseconds = TicksToMilliseconds(linearTicks),
             LinearContactCounts = linearCounts,
+            BvhContactCounts = bvhCounts,
             BvhContactCountSha256 = HashInt32(bvhCounts, totalPixels),
             BvhHitMismatchQueryCount = bvhHitMismatches,
             BvhPrimitiveIdentityMismatchQueryCount = bvhPrimitiveMismatches,
