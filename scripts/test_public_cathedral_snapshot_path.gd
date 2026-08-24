@@ -5,6 +5,7 @@ var chamber: Node
 var film: Node
 var film_controller: Node
 var field_dial: Node
+var hermetic_display: Node
 
 func _initialize() -> void:
 	scene_root = load("res://ObservatoryWorkbench.tscn").instantiate()
@@ -16,28 +17,38 @@ func _initialize() -> void:
 	film = chamber.get_node("GrinFilmCamera")
 	film_controller = chamber.get_node("FilmController")
 	field_dial = chamber.get_node("FieldDialController")
+	hermetic_display = chamber.get_node("HermeticRoomDisplay")
 	await _settle(30)
 
 	_send_key(KEY_F)
 	await _settle(4)
 	_assert(field_dial.call("GetExperimentName") == "Gallery", "F preserves Gallery experiment")
 	_assert(_all_field_sources_visible(), "F enables all field structures")
+	_assert(not bool(hermetic_display.visible), "Gallery exposes Hermetic apparatus")
 
 	_send_key(KEY_H)
 	await _settle(8)
 	_assert(field_dial.call("GetExperimentName") == "Gallery", "H does not change experiment")
-	_assert(field_dial.call("GetPresentationName") == "Hermetic", "H selects Hermetic presentation")
+	_assert(field_dial.call("GetPresentationName") == "Gallery", "H changes Gallery presentation identity")
+	_assert(field_dial.call("GetPresentationStatus") == "Hermetic presentation unavailable · press E", "H reports Gallery presentation unavailable")
+	_assert(not bool(hermetic_display.visible), "H reveals Hermetic apparatus in Gallery")
 	_assert(not bool(film.get("ProbeViewAvailable")), "Hermetic starts without sealed authority")
+	_send_key(KEY_H)
+	await _settle(4)
+	_assert(field_dial.call("GetPresentationStatus") == "Hermetic presentation unavailable · press E", "repeated H reports Gallery presentation unavailable")
+	_assert(not bool(hermetic_display.visible), "repeated H reveals Hermetic apparatus in Gallery")
 
 	_send_key(KEY_E)
 	await _settle(8)
 	_assert(field_dial.call("GetExperimentName") == "Hermetic", "E selects Hermetic experiment")
 	_assert(field_dial.call("GetPresentationName") == "Gallery", "E resets presentation baseline")
+	_assert(bool(hermetic_display.visible), "E does not establish Hermetic apparatus")
 	_assert(not bool(film.get("ProbeViewAvailable")), "E leaves no stale sealed authority")
 	_send_key(KEY_H)
 	await _settle(4)
 	_assert(field_dial.call("GetExperimentName") == "Hermetic", "H preserves Hermetic experiment")
 	_assert(field_dial.call("GetPresentationName") == "Hermetic", "H selects Hermetic presentation")
+	_assert(bool(hermetic_display.visible), "H hides active Hermetic apparatus")
 
 	_send_key(KEY_G)
 	await _settle(2)
@@ -46,11 +57,15 @@ func _initialize() -> void:
 	_assert(bool(film.get("ProbeViewAvailable")), "formal Snapshot seals authority")
 	_assert(int(film.get("SealedProbeViewGeneration")) == 1, "first public Snapshot generation")
 	var generation := int(film.get("SealedProbeViewGeneration"))
+	var measurement_identity := _measurement_identity()
+	var observer_transform := _observer_transform()
 
 	_send_key(KEY_F)
 	await _settle(4)
 	_assert(bool(film.get("ProbeViewAvailable")), "F does not invalidate seal")
 	_assert(int(film.get("SealedProbeViewGeneration")) == generation, "F preserves generation")
+	_assert(_measurement_identity() == measurement_identity, "F changes measurement identity")
+	_assert(_observer_transform() == observer_transform, "F changes observer transform")
 	_send_key(KEY_F)
 	await _settle(4)
 
@@ -71,10 +86,28 @@ func _initialize() -> void:
 	await _settle(2)
 	_assert(int(film.get("CurrentProbeView")) == 1, "Shift+Q maps Effort back to Contact Events")
 	_assert(int(film.get("SealedProbeViewGeneration")) == generation, "Q preserves generation")
+	_assert(_measurement_identity() == measurement_identity, "Q changes measurement identity")
+
+	_send_key(KEY_H)
+	await _settle(4)
+	_assert(field_dial.call("GetExperimentName") == "Hermetic", "H changes Hermetic experiment")
+	_assert(field_dial.call("GetPresentationName") == "Gallery", "first H returns Hermetic presentation to Gallery")
+	_assert(bool(hermetic_display.visible), "H removes active Hermetic apparatus")
+	_assert(int(film.get("SealedProbeViewGeneration")) == generation, "H changes sealed generation")
+	_assert(_measurement_identity() == measurement_identity, "H changes measurement identity")
+	_assert(_observer_transform() == observer_transform, "H changes observer transform")
+	_send_key(KEY_H)
+	await _settle(4)
+	_assert(field_dial.call("GetPresentationName") == "Hermetic", "second H enables active Hermetic presentation")
+	_assert(bool(hermetic_display.visible), "second H removes active Hermetic apparatus")
+	_assert(int(film.get("SealedProbeViewGeneration")) == generation, "second H changes sealed generation")
+	_assert(_measurement_identity() == measurement_identity, "second H changes measurement identity")
+	_assert(_observer_transform() == observer_transform, "second H changes observer transform")
 
 	_send_key(KEY_E)
 	await _settle(6)
 	_assert(not bool(film.get("ProbeViewAvailable")), "E invalidates sealed authority")
+	_assert(not bool(hermetic_display.visible), "Gallery retains Hermetic apparatus")
 	_assert(str(film.get("CathedralSnapshotLifecycleStateName")) == "invalidated", "E invalidation state")
 	_assert(not bool(chamber.get_node("TransportChamberPlayer").call("IsPoseHeld")), "E releases held pose")
 
@@ -104,9 +137,22 @@ func _wait_for_complete() -> void:
 
 func _all_field_sources_visible() -> bool:
 	for source in scene_root.get_tree().get_nodes_in_group("field_sources"):
-		if bool(source.get("DebugVizEnabled")) and not bool(source.get("DebugVizInGame")):
+		if bool(source.get("Enabled")) and bool(source.get("DebugVizEnabled")) and not bool(source.get("DebugVizInGame")):
 			return false
 	return true
+
+func _measurement_identity() -> String:
+	return "%s|%s|%s|%s|%s|%s" % [
+		str(film.get("CathedralSpatialKernelGeometrySnapshotSha256")),
+		str(film.get("CathedralSpatialAuthorityContextSha256")),
+		str(film.get("CathedralSpatialKernelContextSha256")),
+		str(film.get("CathedralSpatialKernelBvhContextSha256")),
+		str(film.get("CathedralContactAuthorityToken")),
+		str(film.get("SealedProbeViewGeneration"))
+	]
+
+func _observer_transform() -> String:
+	return str(chamber.get_node("TransportChamberPlayer").global_transform)
 
 func _send_key(code: Key) -> void:
 	var event := InputEventKey.new()

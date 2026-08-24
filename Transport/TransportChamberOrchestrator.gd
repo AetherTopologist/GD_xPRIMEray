@@ -188,6 +188,7 @@ func _update_telemetry_label() -> void:
 	var field_state := "FULL"
 	var experiment := "Gallery"
 	var presentation := "Gallery"
+	var presentation_status := ""
 	var reference_amp := 0.0
 	var bend_scale := 0.0
 	if _film_controller != null:
@@ -208,6 +209,8 @@ func _update_telemetry_label() -> void:
 			experiment = str(_field_dial.call("GetExperimentName"))
 		if _field_dial.has_method("GetPresentationName"):
 			presentation = str(_field_dial.call("GetPresentationName"))
+		if _field_dial.has_method("GetPresentationStatus"):
+			presentation_status = str(_field_dial.call("GetPresentationStatus"))
 		if _field_dial.has_method("GetReferenceAmp"):
 			reference_amp = float(_field_dial.call("GetReferenceAmp"))
 		if _field_dial.has_method("GetBendScale"):
@@ -217,10 +220,11 @@ func _update_telemetry_label() -> void:
 	if _film_camera != null:
 		rows = str(_film_camera.get("MaxRowsPerFrameCap"))
 		scale = "%0.2f" % float(_film_camera.get("FilmResolutionScale"))
-	_telemetry_label.text = "Telemetry\nZone: %s | Experiment: %s | Presentation: %s\nGallery delta: %+0.3f\nEarth delta: %+0.3f\nField: %0.2f / %s\nReference Amp: %0.2f | BendScale: %0.2f\nFilm: %s / %s / %s\nRows cap: %s | scale: %s | compute: %s\nMapped-vector graphic: deferred" % [
+	_telemetry_label.text = "Telemetry\nZone: %s | Experiment: %s | Presentation: %s\n%s\nGallery delta: %+0.3f\nEarth delta: %+0.3f\nField: %0.2f / %s\nReference Amp: %0.2f | BendScale: %0.2f\nFilm: %s / %s / %s\nRows cap: %s | scale: %s | compute: %s\nMapped-vector graphic: deferred" % [
 		zone,
 		experiment,
 		presentation,
+		presentation_status,
 		gallery_delta,
 		earth_delta,
 		field_value,

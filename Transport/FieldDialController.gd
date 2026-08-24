@@ -28,6 +28,7 @@ var _held_direction := 0
 var _repeat_timer := 0.0
 var _experiment := EXPERIMENT_GALLERY
 var _hermetic_presentation := false
+var _presentation_status := ""
 var _gallery_camera_transform := Transform3D(Basis.IDENTITY, Vector3(0.0, 1.8, 10.0))
 var _hermetic_camera_transform := Transform3D(Basis.IDENTITY, Vector3(2.0, 1.6, -1.0))
 
@@ -105,6 +106,11 @@ func ToggleExperiment() -> void:
 
 
 func ToggleHermeticPresentation() -> void:
+	if _experiment != EXPERIMENT_HERMETIC:
+		_presentation_status = "Hermetic presentation unavailable · press E"
+		print("[Observatory] %s" % _presentation_status)
+		_update_display()
+		return
 	_set_presentation(not _hermetic_presentation)
 
 
@@ -138,6 +144,10 @@ func GetExperimentName() -> String:
 
 func GetPresentationName() -> String:
 	return "Hermetic" if _hermetic_presentation else "Gallery"
+
+
+func GetPresentationStatus() -> String:
+	return _presentation_status
 
 
 func GetReferenceAmp() -> float:
@@ -184,15 +194,22 @@ func _apply_field_strength(notify: bool) -> void:
 
 func _set_experiment(experiment: String, invalidate_film: bool) -> void:
 	_experiment = experiment
+	_presentation_status = ""
 	var hermetic_active := _experiment == EXPERIMENT_HERMETIC
 	if _gallery_collision != null:
 		_gallery_collision.visible = not hermetic_active
 		_set_collision_enabled(_gallery_collision, not hermetic_active)
+	if _overspace_root != null:
+		# The Gallery apparatus is likewise experiment-owned, not presentation-owned.
+		_overspace_root.visible = not hermetic_active
 	for path in gallery_field_paths:
 		var field := get_node_or_null(path)
 		if field != null:
 			field.set("Enabled", not hermetic_active)
 	if _hermetic_display != null:
+		# HermeticRoomDisplay is experiment-owned apparatus. H never controls
+		# this eligibility; it follows E exactly.
+		_hermetic_display.visible = hermetic_active
 		_set_collision_enabled(_hermetic_display, hermetic_active)
 	if _hermetic_field != null:
 		_hermetic_field.set("Enabled", hermetic_active)
@@ -210,10 +227,7 @@ func _set_experiment(experiment: String, invalidate_film: bool) -> void:
 
 func _set_presentation(hermetic: bool) -> void:
 	_hermetic_presentation = hermetic
-	if _overspace_root != null:
-		_overspace_root.visible = not hermetic
-	if _hermetic_display != null:
-		_hermetic_display.visible = hermetic
+	_presentation_status = "Hermetic presentation: %s" % ("ON" if hermetic else "OFF")
 	_update_display()
 
 
