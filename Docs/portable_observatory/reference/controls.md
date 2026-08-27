@@ -17,7 +17,7 @@ Public control legend for the Godot Transport Lens host. Internal names only whe
 
 ```text
 G plate · N display · , . 0 1 field · Tab inspector · Esc evidence
-P probe · J/K region · H shell · V walk/fly
+P probe · J/K region · V walk/fly
 ```
 
 ---
@@ -34,7 +34,6 @@ P probe · J/K region · H shell · V walk/fly
 | **P** | Probe deeper | Region Refinement on selection | More Transport Effort—not automatic truth |
 | **J** / **K** | Prev / next region | Cycle Unresolved Regions | When wired |
 | **R** | Reset probe effort | Clear refinement memory for context | When wired |
-| **H** | Scene shell | Gallery ↔ Hermetic display preset | Invalidates observation context |
 | **V** | Walk / Fly | Locomotion | Free-roam camera ≠ Transport Lens |
 | **[** / **]** | Plate opacity | Presentation blend | Not measurement |
 | **Esc** | Evidence Console | Workbench / release mouse | Recipe-bound evidence |

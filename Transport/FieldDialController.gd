@@ -27,8 +27,6 @@ var _input_enabled := true
 var _held_direction := 0
 var _repeat_timer := 0.0
 var _experiment := EXPERIMENT_GALLERY
-var _hermetic_presentation := false
-var _presentation_status := ""
 var _gallery_camera_transform := Transform3D(Basis.IDENTITY, Vector3(0.0, 1.8, 10.0))
 var _hermetic_camera_transform := Transform3D(Basis.IDENTITY, Vector3(2.0, 1.6, -1.0))
 
@@ -46,7 +44,6 @@ var _hermetic_camera_transform := Transform3D(Basis.IDENTITY, Vector3(2.0, 1.6, 
 func _ready() -> void:
 	_apply_field_strength(false)
 	_set_experiment(EXPERIMENT_GALLERY, false)
-	_set_presentation(false)
 	_update_display()
 
 
@@ -70,9 +67,6 @@ func _unhandled_input(event: InputEvent) -> void:
 					get_viewport().set_input_as_handled()
 				KEY_E:
 					ToggleExperiment()
-					get_viewport().set_input_as_handled()
-				KEY_H:
-					ToggleHermeticPresentation()
 					get_viewport().set_input_as_handled()
 		elif (event.keycode == KEY_COMMA and _held_direction < 0) or (event.keycode == KEY_PERIOD and _held_direction > 0):
 			_held_direction = 0
@@ -105,15 +99,6 @@ func ToggleExperiment() -> void:
 	_set_experiment(next_experiment, true)
 
 
-func ToggleHermeticPresentation() -> void:
-	if _experiment != EXPERIMENT_HERMETIC:
-		_presentation_status = "Hermetic presentation unavailable · press E"
-		print("[Observatory] %s" % _presentation_status)
-		_update_display()
-		return
-	_set_presentation(not _hermetic_presentation)
-
-
 func SetDisplayPresetForTesting(preset: String) -> void:
 	_set_experiment(EXPERIMENT_HERMETIC if preset.to_lower() == "hermetic" else EXPERIMENT_GALLERY, true)
 
@@ -140,14 +125,6 @@ func GetDisplayPresetName() -> String:
 
 func GetExperimentName() -> String:
 	return _experiment
-
-
-func GetPresentationName() -> String:
-	return "Hermetic" if _hermetic_presentation else "Gallery"
-
-
-func GetPresentationStatus() -> String:
-	return _presentation_status
 
 
 func GetReferenceAmp() -> float:
@@ -194,7 +171,6 @@ func _apply_field_strength(notify: bool) -> void:
 
 func _set_experiment(experiment: String, invalidate_film: bool) -> void:
 	_experiment = experiment
-	_presentation_status = ""
 	var hermetic_active := _experiment == EXPERIMENT_HERMETIC
 	if _gallery_collision != null:
 		_gallery_collision.visible = not hermetic_active
@@ -217,17 +193,6 @@ func _set_experiment(experiment: String, invalidate_film: bool) -> void:
 		_player.call("ApplyCameraTransform", _hermetic_camera_transform if hermetic_active else _gallery_camera_transform)
 	if invalidate_film and _film_controller != null and _film_controller.has_method("NotifyCameraTransformJump"):
 		_film_controller.call("NotifyCameraTransformJump")
-	# Experiment selection is an authoritative context transition.  Always
-	# return presentation to the Gallery baseline so E/H/E cannot leave the
-	# Gallery experiment wearing Hermetic presentation state.  H remains the
-	# explicit, presentation-only opt-in.
-	_set_presentation(false)
-	_update_display()
-
-
-func _set_presentation(hermetic: bool) -> void:
-	_hermetic_presentation = hermetic
-	_presentation_status = "Hermetic presentation: %s" % ("ON" if hermetic else "OFF")
 	_update_display()
 
 

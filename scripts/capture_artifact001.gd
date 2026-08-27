@@ -53,12 +53,8 @@ func _initialize() -> void:
 	await _settle(10)
 	_assert(field_dial.call("GetExperimentName") == "Hermetic", "E did not select Hermetic experiment")
 	var experiment_pose: Transform3D = player.global_transform
-	_send_key(KEY_H)
-	await _settle(10)
-	_assert(field_dial.call("GetExperimentName") == "Hermetic", "H changed the experiment")
-	_assert(field_dial.call("GetPresentationName") == "Hermetic", "H did not select Hermetic presentation")
-	_assert(player.global_transform.is_equal_approx(experiment_pose), "H changed observer pose")
-	_assert(_all_field_sources_runtime_visible(), "Field Structure did not remain enabled after H")
+	_assert(player.global_transform.is_equal_approx(experiment_pose), "E changed observer pose unexpectedly")
+	_assert(_all_field_sources_runtime_visible(), "Field Structure did not remain enabled after E")
 	await _capture_stage("hermetic_field_structure.png", "Hermetic", false)
 
 	_send_key(KEY_G)
@@ -80,13 +76,6 @@ func _initialize() -> void:
 	sealed_pose = player.global_transform
 	_assert(bool(player.call("IsPoseHeld")), "formal SNAPSHOT did not hold observer pose")
 	await _capture_stage("snapshot_complete.png", "Hermetic", true)
-	_send_key(KEY_H)
-	await _settle(4)
-	_assert(field_dial.call("GetExperimentName") == "Hermetic", "H changed experiment after seal")
-	_assert(int(film.get("SealedProbeViewGeneration")) == start_generation, "H invalidated sealed generation")
-	_assert(player.global_transform.is_equal_approx(sealed_pose), "H moved sealed observer")
-	_send_key(KEY_H)
-	await _settle(4)
 	_send_key(KEY_F)
 	await _settle(4)
 	_assert(int(film.get("SealedProbeViewGeneration")) == start_generation, "F invalidated sealed generation")
@@ -175,7 +164,7 @@ func _write_artifact_manifest() -> void:
 	proof["contact_query_count"] = query_count
 	proof["contact_authority"] = str(film.get("CathedralContactAuthorityToken"))
 	manifest["artifact_001"] = {
-		"recipe": "Gallery launch → F ON → E Hermetic experiment → H Hermetic presentation → G formal SNAPSHOT → Q triad",
+		"recipe": "Gallery launch → F optional → E select Hermetic Experiment → G formal SNAPSHOT → Q triad",
 		"field_structure": "ON",
 		"preset": "Hermetic",
 		"snapshot_state": str(film.get("CathedralSnapshotLifecycleStateName")),
