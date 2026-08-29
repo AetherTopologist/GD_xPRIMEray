@@ -1,18 +1,94 @@
 ---
 title: xPRIMEray
-description: Curved-ray optical transport observatory — GRIN field integration, wormhole rendering, curvature domain diagnostics, and observer-relative overlays in Godot 4 C#
+description: Portable Observatory for optical transport — sealed frames, Probe Views, and living engine state
 ---
 
 <div class="xp-hero" align="center">
   <img src="/GD_xPRIMEray/assets/xPRIMEray_Logo_Hero_960.png?v=phase0-2" alt="xPRIMEray" width="460">
-  <div class="xp-tagline">Where physics performs.</div>
+  <div class="xp-tagline">A Portable Observatory for optical transport.</div>
 </div>
 
 <div class="xp-lobby-intro">
-  A curved-ray renderer that solves, not simulates. Every ray is integrated through a refractive field. Every pixel is classified. The validator tells you whether the render is real.
+  Same frame. Same transport. Different questions.
 </div>
 
-<div class="xp-motto">Observation precedes explanation. Plausible ≠ Correct.</div>
+<div class="xp-motto">Render the path. Inspect the journey.</div>
+
+<figure class="xp-obs-visual" markdown>
+  ![Contact Events Probe View of a sealed Complete plate](assets/observatory/artifact_001/stills/contact_events_display.png){ .xp-plate }
+  <figcaption>One sealed plate. Contact Events mapping. Q rereads the same acquisition — it does not take another picture. Color is presentation mapping, not measurement authority.</figcaption>
+</figure>
+
+<div class="xp-engine-state" id="engine-state">
+  <div class="xp-engine-state__kicker">Engine State</div>
+  <dl>
+    <div class="xp-engine-state__row">
+      <dt>Formal authority</dt>
+      <dd>BVH-v0
+        <span class="xp-quiet">Contact: XPrimeRaySpatialKernel/BVH-v0 · witness LinearScan-v0 · secondary GodotPhysics/DeterministicReplay-v1</span>
+      </dd>
+    </div>
+    <div class="xp-engine-state__row">
+      <dt>Just landed</dt>
+      <dd>Compute Envelope v0
+        <span class="xp-quiet">de028857 · resource policy without measurement drift · SAFE · BALANCED · MAX · CUSTOM</span>
+      </dd>
+    </div>
+    <div class="xp-engine-state__row">
+      <dt>Now</dt>
+      <dd>Third Observer v0
+        <span class="xp-quiet">next implementation target · not in flight</span>
+      </dd>
+    </div>
+    <div class="xp-engine-state__row">
+      <dt>Next</dt>
+      <dd>Cathedral Probe observer-object relationship graph</dd>
+    </div>
+  </dl>
+  <p class="xp-engine-state__later">Later: adaptive scheduling · field-aware acceleration · optical-closure acquisition policy under G</p>
+</div>
+
+<p class="xp-thesis">Outcome → Contact Events → Transport Effort</p>
+
+<div class="xp-probe-triad" id="probe-views" markdown>
+
+<figure markdown>
+  ![Outcome Probe View — uniform MaxStepsExhausted plate](assets/observatory/artifact_001/stills/outcome_display.png){ .xp-plate }
+  <figcaption><strong>Q  Outcome</strong> Terminal semantic class. This plate may be legitimately flat.</figcaption>
+</figure>
+
+<figure markdown>
+  ![Contact Events Probe View — concentric contact bands](assets/observatory/artifact_001/stills/contact_events_display.png){ .xp-plate }
+  <figcaption><strong>Q  Contact Events</strong> Accepted per-step contacts. Not HitGeometry. Not a unique-surface census.</figcaption>
+</figure>
+
+<figure markdown>
+  ![Transport Effort Probe View — uniform effort plate](assets/observatory/artifact_001/stills/transport_effort_display.png){ .xp-plate }
+  <figcaption><strong>Q  Transport Effort</strong> Numerical step budget used. Not time, energy, or field strength.</figcaption>
+</figure>
+
+</div>
+
+<p class="xp-controls">E Experiment · F Field Structure · G SNAPSHOT · Q Probe Views · V Walk/Fly · Tab telemetry · Esc Workbench</p>
+
+## Explore / Demos
+
+<div class="xp-demo-grid">
+  <a href="#probe-views">Three Probe Views</a>
+  <a href="Observatory/chapters/chapter_02/">Observer Disagreement</a>
+  <a href="Observatory/chapters/chapter_03/">Hermetic Closure</a>
+  <a href="Observatory_Gallery/">Observatory Gallery</a>
+  <a href="Observatory/artifacts/">Artifact Gallery</a>
+  <a href="portable_observatory/">Portable Observatory</a>
+  <span>Mirror ray tracing<span class="xp-demo-soon">on deck</span></span>
+  <span>Lens imaging<span class="xp-demo-soon">on deck</span></span>
+  <span>Refraction<span class="xp-demo-soon">on deck</span></span>
+  <span>GRIN slab<span class="xp-demo-soon">on deck</span></span>
+  <span>Field bending<span class="xp-demo-soon">on deck</span></span>
+  <span>Multi-observer<span class="xp-demo-soon">on deck</span></span>
+</div>
+
+## Findings
 
 <div class="xp-exhibit-grid" markdown>
 

@@ -389,6 +389,188 @@
   text-align: center;
 }
 
+/* ── Living engine state (lobby instrument panel) ─────────── */
+.xp-plate {
+  width: 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  border: 1px solid rgba(120, 100, 220, 0.22) !important;
+  padding: 0 !important;
+  background: #07070b !important;
+  border-radius: 4px !important;
+}
+
+.xp-obs-visual {
+  margin: 0.4rem 0 1.2rem;
+}
+
+.xp-obs-visual figcaption {
+  text-align: left;
+  font-style: normal;
+  opacity: 0.62;
+  font-size: 0.78rem;
+  margin-top: 0.45rem;
+}
+
+.xp-engine-state {
+  margin: 0.2rem 0 1.5rem;
+  padding: 0.85rem 1rem 0.7rem;
+  border: 1px solid rgba(120, 100, 220, 0.22);
+  border-radius: 6px;
+  background: #07070b;
+}
+
+.xp-engine-state__kicker {
+  font-family: ui-monospace, "IBM Plex Mono", "Roboto Mono", monospace;
+  font-size: 0.64rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  opacity: 0.5;
+  margin-bottom: 0.35rem;
+}
+
+.xp-engine-state__row {
+  display: grid;
+  grid-template-columns: 9.2rem 1fr;
+  gap: 0.15rem 1rem;
+  padding: 0.42rem 0;
+  border-top: 1px solid rgba(128, 128, 128, 0.12);
+  align-items: baseline;
+}
+
+.xp-engine-state__row dt {
+  font-family: ui-monospace, "IBM Plex Mono", "Roboto Mono", monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.5;
+  margin: 0;
+}
+
+.xp-engine-state__row dd {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+.xp-engine-state__row .xp-quiet {
+  display: block;
+  margin-top: 0.15rem;
+  font-family: ui-monospace, "IBM Plex Mono", "Roboto Mono", monospace;
+  font-size: 0.68rem;
+  opacity: 0.52;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.xp-chip {
+  font-family: ui-monospace, "IBM Plex Mono", "Roboto Mono", monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-left: 0.45rem;
+  opacity: 0.7;
+}
+
+.xp-chip--now {
+  color: #e89a30;
+  opacity: 0.95;
+}
+
+.xp-engine-state__later {
+  margin: 0.45rem 0 0;
+  font-family: ui-monospace, "IBM Plex Mono", "Roboto Mono", monospace;
+  font-size: 0.66rem;
+  opacity: 0.42;
+}
+
+.xp-thesis {
+  text-align: center;
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  margin: 0.15rem 0 1.1rem;
+  opacity: 0.82;
+}
+
+.xp-probe-triad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.7rem;
+  margin: 0.6rem 0 1.2rem;
+}
+
+.xp-probe-triad figure {
+  margin: 0;
+}
+
+.xp-probe-triad figcaption {
+  text-align: left;
+  font-style: normal;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  opacity: 0.7;
+  margin-top: 0.4rem;
+}
+
+.xp-probe-triad strong {
+  display: block;
+  font-family: ui-monospace, "IBM Plex Mono", "Roboto Mono", monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+  opacity: 0.9;
+  margin-bottom: 0.15rem;
+}
+
+.xp-controls {
+  font-family: ui-monospace, "IBM Plex Mono", "Roboto Mono", monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  opacity: 0.62;
+  margin: 0 0 1.4rem;
+}
+
+.xp-demo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.45rem;
+  margin: 0.5rem 0 1.5rem;
+}
+
+.xp-demo-grid > a,
+.xp-demo-grid > span {
+  display: block;
+  border: 1px solid rgba(120, 100, 220, 0.18);
+  border-radius: 4px;
+  padding: 0.55rem 0.65rem;
+  font-size: 0.78rem;
+  text-decoration: none !important;
+}
+
+.xp-demo-grid span {
+  opacity: 0.42;
+}
+
+.xp-demo-grid .xp-demo-soon {
+  font-family: ui-monospace, "IBM Plex Mono", "Roboto Mono", monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  display: block;
+  margin-top: 0.2rem;
+}
+
+@media (max-width: 760px) {
+  .xp-engine-state__row {
+    grid-template-columns: 1fr;
+  }
+
+  .xp-probe-triad {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ── OC-001 Optical Closure Audit ─────────────────────────── */
 .oc-tier-strip {
   display: grid;
