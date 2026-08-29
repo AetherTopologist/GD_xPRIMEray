@@ -7,7 +7,8 @@ internal static class Program
         (string Name, Action Run)[] suites =
         {
             (nameof(RuntimeDiagnosticPolicyTests), RuntimeDiagnosticPolicyTests.Run),
-            (nameof(RuntimeHealthWatchdogTests), RuntimeHealthWatchdogTests.Run)
+            (nameof(RuntimeHealthWatchdogTests), RuntimeHealthWatchdogTests.Run),
+            (nameof(ComputeResourcePolicyTests), ComputeResourcePolicyTests.Run)
         };
 
         int failures = 0;

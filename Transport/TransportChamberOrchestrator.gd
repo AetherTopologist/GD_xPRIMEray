@@ -189,6 +189,10 @@ func _update_telemetry_label() -> void:
 	var experiment := "Gallery"
 	var reference_amp := 0.0
 	var bend_scale := 0.0
+	var compute_profile := "unknown"
+	var compute_workers := "unknown"
+	var compute_watchdog := "unknown"
+	var compute_pressure := "unknown"
 	if _film_controller != null:
 		if _film_controller.has_method("GetModeName"):
 			film_mode = str(_film_controller.call("GetModeName"))
@@ -214,7 +218,15 @@ func _update_telemetry_label() -> void:
 	if _film_camera != null:
 		rows = str(_film_camera.get("MaxRowsPerFrameCap"))
 		scale = "%0.2f" % float(_film_camera.get("FilmResolutionScale"))
-	_telemetry_label.text = "Telemetry\nZone: %s | Experiment: %s\nGallery delta: %+0.3f\nEarth delta: %+0.3f\nField: %0.2f / %s\nReference Amp: %0.2f | BendScale: %0.2f\nFilm: %s / %s / %s\nRows cap: %s | scale: %s | compute: %s\nMapped-vector graphic: deferred" % [
+		if _film_camera.get("ComputeResourceProfile") != null:
+			compute_profile = str(_film_camera.get("ComputeResourceProfile"))
+		if _film_camera.get("ComputeEffectiveWorkers") != null:
+			compute_workers = str(_film_camera.get("ComputeEffectiveWorkers"))
+		if _film_camera.get("ComputeWatchdogStatus") != null:
+			compute_watchdog = str(_film_camera.get("ComputeWatchdogStatus"))
+		if _film_camera.get("ComputeResourcePressure") != null:
+			compute_pressure = str(_film_camera.get("ComputeResourcePressure"))
+	_telemetry_label.text = "Telemetry\nZone: %s | Experiment: %s\nGallery delta: %+0.3f\nEarth delta: %+0.3f\nField: %0.2f / %s\nReference Amp: %0.2f | BendScale: %0.2f\nFilm: %s / %s / %s\nRows cap: %s | scale: %s | compute: %s\nCompute: %s · workers %s · watchdog %s · pressure %s\nMapped-vector graphic: deferred" % [
 		zone,
 		experiment,
 		gallery_delta,
@@ -229,6 +241,10 @@ func _update_telemetry_label() -> void:
 		rows,
 		scale,
 		compute,
+		compute_profile,
+		compute_workers,
+		compute_watchdog,
+		compute_pressure,
 	]
 
 

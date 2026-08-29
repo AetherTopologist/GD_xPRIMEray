@@ -1391,11 +1391,25 @@ public partial class GrinFilmCamera : Node
 	[Export(PropertyHint.Range, "0,65536,1")] public int RuntimeHealthWorkingSetAbortMiB = 0;
 	[Export(PropertyHint.Range, "0,65536,1")] public int RuntimeHealthPrivateMemoryAbortMiB = 0;
 
+	[ExportGroup("Compute Envelope")]
+	/// <summary>Execution-only resource profile. It never participates in observation identity.</summary>
+	[Export] public string ComputeResourceProfileName = "BALANCED";
+	[Export(PropertyHint.Range, "0,64,1")] public int ComputeCustomWorkerCount = 1;
+	[Export(PropertyHint.Range, "0,65536,1")] public int ComputeCustomWorkingSetWarningMiB = 0;
+	[Export(PropertyHint.Range, "0,65536,1")] public int ComputeCustomWorkingSetAbortMiB = 0;
+	[Export(PropertyHint.Range, "0,65536,1")] public int ComputeCustomPrivateMemoryAbortMiB = 0;
+
 	private RuntimeDiagnosticPolicy _diagnostics = RuntimeDiagnosticPolicy.LiveDefault;
 	private readonly LiveDiagnosticAggregator _liveDiagnostics = new(TimeSpan.FromSeconds(1));
 	private RuntimeHealthWatchdog _runtimeHealth;
+	private ResolvedComputeResourcePolicy _computeResourcePolicy;
+	private string _computeResourcePolicyError = string.Empty;
 	private string _runtimeHealthLastCompletedWorkUnit = "startup";
 	public string RuntimeHealthRunId => _runtimeHealth?.RunId ?? string.Empty;
+	public string ComputeResourceProfile => _computeResourcePolicy?.RequestedProfile.ToString().ToUpperInvariant() ?? "INVALID";
+	public string ComputeEffectiveWorkers => _computeResourcePolicy == null ? "unknown" : $"{_computeResourcePolicy.EffectiveBandWorkerCount}/{_computeResourcePolicy.HostLogicalProcessors}";
+	public string ComputeWatchdogStatus => _runtimeHealth != null && _computeResourcePolicy != null && _computeResourcePolicy.WatchdogEnforced ? "ACTIVE" : "UNAVAILABLE";
+	public string ComputeResourcePressure => _computeResourcePolicy?.EffectiveProfile == XPrimeRay.Diagnostics.ComputeResourceProfile.Max ? "HIGH" : "NORMAL";
 	private OneShotDiagnosticGate _probeSnapshotLifecycleEvidenceGate;
 	private OneShotDiagnosticGate _cathedralSealedObservationFrameDiagnosticGate;
 
@@ -3807,21 +3821,25 @@ private sealed class OverlayRollingWindow
 
 	private void InitializeRuntimeHealthWatchdog()
 	{
-		if (!RuntimeHealthWatchdogEnabled)
+		ResolveComputeResourcePolicy();
+		// A valid compute profile always owns resource protection. The legacy
+		// toggle remains relevant only when the profile itself cannot resolve.
+		if (!RuntimeHealthWatchdogEnabled && _computeResourcePolicy == null)
 			return;
 		try
 		{
 			string outputDirectory = RuntimeHealthOutputDirectory.Trim();
 			if (outputDirectory.Length == 0)
 				outputDirectory = ProjectSettings.GlobalizePath("user://runtime_health");
+			ResolvedComputeResourcePolicy policy = _computeResourcePolicy;
 			_runtimeHealth = new RuntimeHealthWatchdog(new RuntimeHealthWatchdogOptions(
 				outputDirectory,
 				TimeSpan.FromSeconds(Math.Max(0.1f, RuntimeHealthHeartbeatSeconds)),
-				RuntimeHealthDevelopmentSafe,
-				RuntimeHealthMaxWorkerCount,
-				MiB(RuntimeHealthWorkingSetWarningMiB),
-				MiB(RuntimeHealthWorkingSetAbortMiB),
-				MiB(RuntimeHealthPrivateMemoryAbortMiB)));
+				policy != null ? policy.WatchdogEnforced : RuntimeHealthDevelopmentSafe,
+				policy?.EffectiveBandWorkerCount ?? RuntimeHealthMaxWorkerCount,
+				policy?.WorkingSetWarningBytes ?? MiB(RuntimeHealthWorkingSetWarningMiB),
+				policy?.WorkingSetAbortBytes ?? MiB(RuntimeHealthWorkingSetAbortMiB),
+				policy?.PrivateMemoryAbortBytes ?? MiB(RuntimeHealthPrivateMemoryAbortMiB)));
 			if (_runtimeHealth.ConfiguredLimitsIgnored)
 				GD.PushWarning("[RuntimeHealth] configured limits are inactive because DevelopmentSafe=false");
 			if (_runtimeHealth.AbnormalPreviousRun)
@@ -3834,6 +3852,48 @@ private sealed class OverlayRollingWindow
 	}
 
 	private static long MiB(int value) => value <= 0 ? 0 : (long)value * 1024L * 1024L;
+
+	private int ComputeEffectivePass1WorkerCount()
+	{
+		int configured = Math.Clamp(ThreadedBandWorkerCount, 1, 16);
+		return _computeResourcePolicy == null
+			? configured
+			: Math.Min(configured, _computeResourcePolicy.EffectiveBandWorkerCount);
+	}
+
+	private void ResolveComputeResourcePolicy()
+	{
+		try
+		{
+			if (!Enum.TryParse(ComputeResourceProfileName?.Trim(), true, out ComputeResourceProfile profile))
+				throw new ArgumentException($"unknown compute resource profile '{ComputeResourceProfileName}'");
+			HostCapabilitySnapshot host = HostCapabilitySnapshot.Detect(
+				() => System.Environment.ProcessorCount,
+				() => GC.GetGCMemoryInfo().TotalAvailableMemoryBytes,
+				null);
+			_computeResourcePolicy = ComputeResourcePolicyResolver.Resolve(
+				profile,
+				host,
+				ComputeCustomWorkerCount,
+				MiB(ComputeCustomWorkingSetWarningMiB),
+				MiB(ComputeCustomWorkingSetAbortMiB),
+				MiB(ComputeCustomPrivateMemoryAbortMiB));
+			if (host.LogicalProcessorCount == null)
+				GD.PushWarning($"[ComputeEnvelope] host cores unknown; using one worker ({host.DetectionNote})");
+			GD.Print($"[ComputeEnvelope] profile={_computeResourcePolicy.RequestedProfile.ToString().ToUpperInvariant()} " +
+				$"workers={_computeResourcePolicy.EffectiveBandWorkerCount}/{_computeResourcePolicy.HostLogicalProcessors} " +
+				$"workingSetWarningMiB={_computeResourcePolicy.WorkingSetWarningBytes / (1024L * 1024L)} " +
+				$"workingSetAbortMiB={_computeResourcePolicy.WorkingSetAbortBytes / (1024L * 1024L)} " +
+				$"privateMemoryAbortMiB={_computeResourcePolicy.PrivateMemoryAbortBytes / (1024L * 1024L)} " +
+				$"watchdog=ACTIVE pass2Experimental=0 pressure={(_computeResourcePolicy.EffectiveProfile == XPrimeRay.Diagnostics.ComputeResourceProfile.Max ? "HIGH" : "NORMAL")}");
+		}
+		catch (Exception exception)
+		{
+			_computeResourcePolicy = null;
+			_computeResourcePolicyError = exception.Message;
+			GD.PushError($"[ComputeEnvelope] invalid resource policy: {exception.Message}");
+		}
+	}
 
 	public override void _ExitTree()
 	{
@@ -4631,7 +4691,7 @@ private sealed class OverlayRollingWindow
 		if (_runtimeHealth == null)
 			return;
 		int workers = 1;
-		if (UseThreadedBands) workers = Math.Max(workers, ThreadedBandWorkerCount);
+		if (UseThreadedBands) workers = Math.Max(workers, _computeResourcePolicy == null ? ThreadedBandWorkerCount : Math.Min(ThreadedBandWorkerCount, _computeResourcePolicy.EffectiveBandWorkerCount));
 		if (UseThreadedPass2CandidateEval) workers = Math.Max(workers, ThreadedPass2CandidateWorkers);
 		if (UseThreadedPass2QueryResolve) workers = Math.Max(workers, ThreadedPass2QueryWorkers);
 		if (UseThreadedPass2LocalAccumulation) workers = Math.Max(workers, ThreadedPass2WorkerCount);
@@ -4648,11 +4708,22 @@ private sealed class OverlayRollingWindow
 
 	private bool RuntimeHealthLimitExceeded()
 	{
-		if (_runtimeHealth == null || !_probeSnapshotLifecycleActive)
+		if (!_probeSnapshotLifecycleActive)
+			return false;
+		if (_computeResourcePolicy == null)
+		{
+			CompleteCathedralProbeSnapshotLifecycle(
+				ProbeSnapshotLifecycleState.Failed,
+				ProbeSnapshotLifecycleReason.ResourceLimitExceeded,
+				contextMatched: true,
+				dimensionsMatched: true);
+			return true;
+		}
+		if (_runtimeHealth == null)
 			return false;
 		int workers = 1;
 		if (UseThreadedBands)
-			workers = Math.Max(workers, ThreadedBandWorkerCount);
+			workers = Math.Max(workers, Math.Min(ThreadedBandWorkerCount, _computeResourcePolicy.EffectiveBandWorkerCount));
 		if (UseThreadedPass2CandidateEval)
 			workers = Math.Max(workers, ThreadedPass2CandidateWorkers);
 		if (UseThreadedPass2QueryResolve)
@@ -5029,6 +5100,11 @@ private sealed class OverlayRollingWindow
 				["runtime"] = "godot4-mono",
 				["physics_backend"] = ProjectSettings.GetSetting("physics/3d/physics_engine").ToString(),
 				["renderer_backend"] = ProjectSettings.GetSetting("renderer/rendering_method").ToString(),
+				["compute_envelope_schema"] = _computeResourcePolicy?.SchemaVersion ?? "invalid",
+				["compute_profile"] = ComputeResourceProfile,
+				["compute_effective_workers"] = _computeResourcePolicy?.EffectiveBandWorkerCount.ToString(CultureInfo.InvariantCulture) ?? "unknown",
+				["host_logical_cores"] = _computeResourcePolicy?.HostLogicalProcessors ?? "unknown",
+				["compute_resource_pressure"] = ComputeResourcePressure,
 				["capture_authority"] = CathedralFormalAuthorityToken,
 				["bvh_authority_token"] = XPrimeRay.Spatial.SpatialBvhQuery.AuthorityTokenValue,
 				["bvh_build_sha256"] = _lastSpatialKernelDualValidation?.BvhBuildSha256 ?? string.Empty,
@@ -26723,7 +26799,7 @@ private sealed class OverlayRollingWindow
 				FramePerfVerbose = FramePerfVerbose,
 				FramePerfLogEveryNFrames = FramePerfLogEveryNFrames,
 				UseThreadedBands = UseThreadedBands,
-				ThreadedBandWorkerCount = Math.Clamp(ThreadedBandWorkerCount, 1, 16),
+				ThreadedBandWorkerCount = Math.Clamp(ComputeEffectivePass1WorkerCount(), 1, 16),
 				ThreadedBandRowsPerChunk = Math.Max(1, ThreadedBandRowsPerChunk),
 				UseThreadedPass2CandidateEval = UseThreadedPass2CandidateEval,
 				ThreadedPass2CandidateWorkers = Math.Clamp(ThreadedPass2CandidateWorkers, 1, 16),
