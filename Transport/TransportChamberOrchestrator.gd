@@ -226,7 +226,7 @@ func _update_telemetry_label() -> void:
 			compute_watchdog = str(_film_camera.get("ComputeWatchdogStatus"))
 		if _film_camera.get("ComputeResourcePressure") != null:
 			compute_pressure = str(_film_camera.get("ComputeResourcePressure"))
-	_telemetry_label.text = "Telemetry\nZone: %s | Experiment: %s\nGallery delta: %+0.3f\nEarth delta: %+0.3f\nField: %0.2f / %s\nReference Amp: %0.2f | BendScale: %0.2f\nFilm: %s / %s / %s\nRows cap: %s | scale: %s | compute: %s\nCompute: %s · workers %s · watchdog %s · pressure %s\nMapped-vector graphic: deferred" % [
+	_telemetry_label.text = "Telemetry\nZone: %s | Experiment: %s\nGallery delta: %+0.3f\nEarth delta: %+0.3f\nField: %0.2f / %s\nReference Amp: %0.2f | BendScale: %0.2f\nFilm: %s / %s / %s\nRows cap: %s | scale: %s | compute: %s\nCompute: %s · workers actual/ceiling/host %s · watchdog %s · pressure %s\nMapped-vector graphic: deferred" % [
 		zone,
 		experiment,
 		gallery_delta,

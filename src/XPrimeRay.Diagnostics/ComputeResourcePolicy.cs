@@ -130,6 +130,17 @@ public static class ComputeResourcePolicyResolver
                 throw new ArgumentOutOfRangeException(nameof(profile));
         }
 
+        if (profile != ComputeResourceProfile.Custom)
+        {
+            int safeWorkers = Math.Max(1, hostWorkers / 4);
+            int balancedWorkers = Math.Max(1, hostWorkers / 2);
+            int maxWorkers = hostWorkers;
+            if (safeWorkers == balancedWorkers || balancedWorkers == maxWorkers)
+                note = string.IsNullOrEmpty(note)
+                    ? $"small-host profile collapse: SAFE={safeWorkers}, BALANCED={balancedWorkers}, MAX={maxWorkers}"
+                    : $"{note}; small-host profile collapse: SAFE={safeWorkers}, BALANCED={balancedWorkers}, MAX={maxWorkers}";
+        }
+
         return new ResolvedComputeResourcePolicy(
             SchemaVersion,
             profile,

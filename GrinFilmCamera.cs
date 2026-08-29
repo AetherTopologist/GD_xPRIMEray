@@ -1407,8 +1407,19 @@ public partial class GrinFilmCamera : Node
 	private string _runtimeHealthLastCompletedWorkUnit = "startup";
 	public string RuntimeHealthRunId => _runtimeHealth?.RunId ?? string.Empty;
 	public string ComputeResourceProfile => _computeResourcePolicy?.RequestedProfile.ToString().ToUpperInvariant() ?? "INVALID";
-	public string ComputeEffectiveWorkers => _computeResourcePolicy == null ? "unknown" : $"{_computeResourcePolicy.EffectiveBandWorkerCount}/{_computeResourcePolicy.HostLogicalProcessors}";
-	public string ComputeWatchdogStatus => _runtimeHealth != null && _computeResourcePolicy != null && _computeResourcePolicy.WatchdogEnforced ? "ACTIVE" : "UNAVAILABLE";
+	public string ComputeEffectiveWorkers => _computeResourcePolicy == null ? "unknown" : $"{ComputeActualPass1WorkerCount()}/{_computeResourcePolicy.EffectiveBandWorkerCount}/{_computeResourcePolicy.HostLogicalProcessors}";
+	public string ComputePolicyWorkerCeiling => _computeResourcePolicy?.EffectiveBandWorkerCount.ToString(CultureInfo.InvariantCulture) ?? "unknown";
+	public string ComputeWatchdogStatus
+	{
+		get
+		{
+			if (_runtimeHealth == null || _computeResourcePolicy == null || !_computeResourcePolicy.WatchdogEnforced)
+				return "UNAVAILABLE";
+			return _computeResourcePolicy.WorkingSetAbortBytes == 0 && _computeResourcePolicy.PrivateMemoryAbortBytes == 0
+				? "ACTIVE (worker-only)"
+				: "ACTIVE";
+		}
+	}
 	public string ComputeResourcePressure => _computeResourcePolicy?.EffectiveProfile == XPrimeRay.Diagnostics.ComputeResourceProfile.Max ? "HIGH" : "NORMAL";
 	private OneShotDiagnosticGate _probeSnapshotLifecycleEvidenceGate;
 	private OneShotDiagnosticGate _cathedralSealedObservationFrameDiagnosticGate;
@@ -3861,6 +3872,13 @@ private sealed class OverlayRollingWindow
 			: Math.Min(configured, _computeResourcePolicy.EffectiveBandWorkerCount);
 	}
 
+	private int ComputeActualPass1WorkerCount()
+	{
+		if (!UseThreadedBands)
+			return 1;
+		return ComputeEffectivePass1WorkerCount();
+	}
+
 	private void ResolveComputeResourcePolicy()
 	{
 		try
@@ -3881,7 +3899,7 @@ private sealed class OverlayRollingWindow
 			if (host.LogicalProcessorCount == null)
 				GD.PushWarning($"[ComputeEnvelope] host cores unknown; using one worker ({host.DetectionNote})");
 			GD.Print($"[ComputeEnvelope] profile={_computeResourcePolicy.RequestedProfile.ToString().ToUpperInvariant()} " +
-				$"workers={_computeResourcePolicy.EffectiveBandWorkerCount}/{_computeResourcePolicy.HostLogicalProcessors} " +
+				$"workers={ComputeActualPass1WorkerCount()}/{_computeResourcePolicy.EffectiveBandWorkerCount}/{_computeResourcePolicy.HostLogicalProcessors} " +
 				$"workingSetWarningMiB={_computeResourcePolicy.WorkingSetWarningBytes / (1024L * 1024L)} " +
 				$"workingSetAbortMiB={_computeResourcePolicy.WorkingSetAbortBytes / (1024L * 1024L)} " +
 				$"privateMemoryAbortMiB={_computeResourcePolicy.PrivateMemoryAbortBytes / (1024L * 1024L)} " +
@@ -4714,7 +4732,7 @@ private sealed class OverlayRollingWindow
 		{
 			CompleteCathedralProbeSnapshotLifecycle(
 				ProbeSnapshotLifecycleState.Failed,
-				ProbeSnapshotLifecycleReason.ResourceLimitExceeded,
+				ProbeSnapshotLifecycleReason.ComputePolicyInvalid,
 				contextMatched: true,
 				dimensionsMatched: true);
 			return true;
@@ -5102,7 +5120,8 @@ private sealed class OverlayRollingWindow
 				["renderer_backend"] = ProjectSettings.GetSetting("renderer/rendering_method").ToString(),
 				["compute_envelope_schema"] = _computeResourcePolicy?.SchemaVersion ?? "invalid",
 				["compute_profile"] = ComputeResourceProfile,
-				["compute_effective_workers"] = _computeResourcePolicy?.EffectiveBandWorkerCount.ToString(CultureInfo.InvariantCulture) ?? "unknown",
+				["compute_effective_workers"] = ComputeActualPass1WorkerCount().ToString(CultureInfo.InvariantCulture),
+				["compute_policy_worker_ceiling"] = _computeResourcePolicy?.EffectiveBandWorkerCount.ToString(CultureInfo.InvariantCulture) ?? "unknown",
 				["host_logical_cores"] = _computeResourcePolicy?.HostLogicalProcessors ?? "unknown",
 				["compute_resource_pressure"] = ComputeResourcePressure,
 				["capture_authority"] = CathedralFormalAuthorityToken,
@@ -11270,6 +11289,7 @@ private sealed class OverlayRollingWindow
 			ProbeSnapshotLifecycleReason.PolicyChanged => "policy_changed",
 			ProbeSnapshotLifecycleReason.SpatialAuthorityPromotionFailed => "spatial_authority_promotion_failed",
 			ProbeSnapshotLifecycleReason.ResourceLimitExceeded => "resource_limit_exceeded",
+			ProbeSnapshotLifecycleReason.ComputePolicyInvalid => "compute_policy_invalid",
 			_ => "unknown",
 		};
 	}

@@ -7,6 +7,7 @@ internal static class ComputeResourcePolicyTests
     public static void Run()
     {
         ProfilesResolveInOrderAndKeepProtection();
+        SmallHostsReportHonestProfileCollapse();
         CustomValidationHappensBeforeUse();
         FailedHostDetectionFallsBackConservatively();
         ProfileDoesNotEnterScientificIdentity();
@@ -35,6 +36,21 @@ internal static class ComputeResourcePolicyTests
         Throws<ArgumentOutOfRangeException>(() => ComputeResourcePolicyResolver.Resolve(ComputeResourceProfile.Custom, host, customWorkerCount: 9), "host ceiling rejected");
         var disabled = ComputeResourcePolicyResolver.Resolve(ComputeResourceProfile.Custom, host, customWorkerCount: 1);
         Assert.Equal(0L, disabled.WorkingSetAbortBytes, "zero explicitly disables abort limit");
+    }
+
+    private static void SmallHostsReportHonestProfileCollapse()
+    {
+        var oneCore = new HostCapabilitySnapshot(1, null, null, "X64", "test", false, "");
+        var oneMax = ComputeResourcePolicyResolver.Resolve(ComputeResourceProfile.Max, oneCore);
+        Assert.Equal(1, oneMax.EffectiveBandWorkerCount, "one-core max workers");
+        Assert.True(oneMax.ResolutionNote.Contains("SAFE=1, BALANCED=1, MAX=1", StringComparison.Ordinal), "one-core collapse note");
+
+        var twoCore = new HostCapabilitySnapshot(2, null, null, "X64", "test", false, "");
+        var twoBalanced = ComputeResourcePolicyResolver.Resolve(ComputeResourceProfile.Balanced, twoCore);
+        var twoMax = ComputeResourcePolicyResolver.Resolve(ComputeResourceProfile.Max, twoCore);
+        Assert.Equal(1, twoBalanced.EffectiveBandWorkerCount, "two-core balanced workers");
+        Assert.Equal(2, twoMax.EffectiveBandWorkerCount, "two-core max workers");
+        Assert.True(twoBalanced.ResolutionNote.Contains("SAFE=1, BALANCED=1, MAX=2", StringComparison.Ordinal), "two-core collapse note");
     }
 
     private static void Throws<T>(Action action, string message) where T : Exception
