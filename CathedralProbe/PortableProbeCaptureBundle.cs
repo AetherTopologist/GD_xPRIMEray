@@ -57,7 +57,7 @@ public sealed class PortableProbeCaptureResult
 /// </summary>
 public static class PortableProbeCaptureBundle
 {
-	public const string SchemaVersion = "1.0.0";
+	public const string SchemaVersion = "1.1.0";
 	public const string ArtifactClass = "qualified_visualization";
 	private const int DisplayScale = 24;
 
@@ -204,6 +204,7 @@ public static class PortableProbeCaptureBundle
 	{
 		Dictionary<string, object> context = new()
 		{
+			["observer_id"] = input.ContextKey.ObserverId.Label,
 			["camera_origin_hash"] = input.ContextKey.CameraOriginHash,
 			["camera_basis_hash"] = input.ContextKey.CameraBasisHash,
 			["fov_deg"] = input.ContextKey.FovDeg,
@@ -217,7 +218,11 @@ public static class PortableProbeCaptureBundle
 			["boundary_layer_epoch"] = input.ContextKey.BoundaryLayerEpoch,
 			["refinement_policy_version"] = input.ContextKey.RefinementPolicyVersion,
 			["canonical_sha256"] = contextSha,
-			["canonical_serialization"] = "v1 little-endian: camera_origin_hash, camera_basis_hash, fov_bits, film_width, film_height, base_steps_per_ray, bend_scale_bits, field_strength_bits, field_source_epoch, geometry_epoch, boundary_layer_epoch, refinement_policy_version"
+			["canonical_serialization"] = "v2 little-endian: schema_version (uint32), observer_id (uint32 length + UTF-8 bytes), camera_origin_hash, camera_basis_hash, fov_bits, film_width, film_height, base_steps_per_ray, bend_scale_bits, field_strength_bits, field_source_epoch, geometry_epoch, boundary_layer_epoch, refinement_policy_version"
+		};
+		Dictionary<string, string> normalizedRuntimeProvenance = new(input.RuntimeProvenance)
+		{
+			["observer_id"] = input.ContextKey.ObserverId.Label
 		};
 		Dictionary<string, object> camera = new()
 		{
@@ -237,7 +242,7 @@ public static class PortableProbeCaptureBundle
 				["contact_events"] = input.ContactAuthorityToken,
 				["spatial_authority"] = "not_xprimeray_spatial_kernel"
 			},
-			["runtime_provenance"] = input.RuntimeProvenance,
+			["runtime_provenance"] = normalizedRuntimeProvenance,
 			["acquisition"] = new Dictionary<string, object>
 			{
 				["state"] = "Complete", ["generation"] = input.Generation, ["width"] = input.Width, ["height"] = input.Height,
@@ -270,6 +275,7 @@ public static class PortableProbeCaptureBundle
 		sb.AppendLine("# Portable Observatory Cathedral Probe Bundle v1");
 		sb.AppendLine();
 		sb.AppendLine("## 1. Acquisition Identity");
+		sb.AppendLine($"- Observer: `{input.ContextKey.ObserverId.Label}`");
 		sb.AppendLine($"- Semantic SceneId: `{input.SemanticSceneId}`");
 		sb.AppendLine($"- Godot scene path: `{input.GodotScenePath}`");
 		sb.AppendLine($"- Generation: `{input.Generation}`");

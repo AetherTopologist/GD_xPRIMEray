@@ -5118,6 +5118,7 @@ private sealed class OverlayRollingWindow
 				["runtime"] = "godot4-mono",
 				["physics_backend"] = ProjectSettings.GetSetting("physics/3d/physics_engine").ToString(),
 				["renderer_backend"] = ProjectSettings.GetSetting("renderer/rendering_method").ToString(),
+				["observer_id"] = _sealedProbeViewContextKey.ObserverId.Label ?? "unknown",
 				["compute_envelope_schema"] = _computeResourcePolicy?.SchemaVersion ?? "invalid",
 				["compute_profile"] = ComputeResourceProfile,
 				["compute_effective_workers"] = ComputeActualPass1WorkerCount().ToString(CultureInfo.InvariantCulture),

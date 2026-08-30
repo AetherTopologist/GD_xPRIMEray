@@ -11,6 +11,7 @@ internal static class PortableProbeCaptureBundleTests
 	{
 		ContextSerializationIsStable();
 		ObserverIdentityIsStructuralAndContextScoped();
+		ManifestSealsObserverAttribution();
 		BundleEncodingAndHashesAreStable();
 		QualificationRejectsInvalidEffortAndIncompleteSources();
 		AuthorityTokenMismatchIsRejected();
@@ -42,6 +43,35 @@ internal static class PortableProbeCaptureBundleTests
 		ObservationPolicyFingerprint policyA = new(80, 0.07f, 0.01f, 0.07f, 1f, 0.5f, 3, 4, 5, 1, "runtime_current");
 		ObservationPolicyFingerprint policyB = new(80, 0.07f, 0.01f, 0.07f, 1f, 0.5f, 3, 4, 5, 1, "runtime_current");
 		TestAssert.True(policyA.Equals(policyB), "observer identity absent from policy fingerprint");
+	}
+
+	private static void ManifestSealsObserverAttribution()
+	{
+		string root = Path.Combine(Path.GetTempPath(), "observer-attribution-tests-" + Guid.NewGuid().ToString("N"));
+		Directory.CreateDirectory(root);
+		try
+		{
+			PortableProbeCaptureInput input = CreateInput(Path.Combine(root, "b"));
+			ProbeContextKey observerB = new(ObserverId.B, 1, 2, 70f, 2, 2, 80, 0.12f, 0f, 3, 4, 5, 1);
+			input = CopyWith(input, context: observerB, observerProvenance: "A");
+			TestAssert.True(PortableProbeCaptureBundle.TryWrite(input, out PortableProbeCaptureResult? result, out string reason), reason);
+			using JsonDocument manifest = JsonDocument.Parse(File.ReadAllText(result!.ManifestPath));
+			TestAssert.Equal("1.1.0", manifest.RootElement.GetProperty("schema_version").GetString(), "bundle schema version");
+			TestAssert.Equal("B", manifest.RootElement.GetProperty("acquisition").GetProperty("context").GetProperty("observer_id").GetString(), "context observer attribution");
+			TestAssert.Equal("B", manifest.RootElement.GetProperty("runtime_provenance").GetProperty("observer_id").GetString(), "normalized provenance attribution");
+			TestAssert.Equal("compute-policy-test", manifest.RootElement.GetProperty("runtime_provenance").GetProperty("compute_marker").GetString(), "compute provenance preserved");
+			TestAssert.True(File.ReadAllText(result.SummaryPath).Contains("- Observer: `B`", StringComparison.Ordinal), "summary observer line");
+			string description = manifest.RootElement.GetProperty("acquisition").GetProperty("context").GetProperty("canonical_serialization").GetString() ?? string.Empty;
+			TestAssert.True(description.StartsWith("v2 little-endian: schema_version (uint32), observer_id (uint32 length + UTF-8 bytes)", StringComparison.Ordinal), "v2 serialization description");
+
+			PortableProbeCaptureInput inputA = CreateInput(Path.Combine(root, "a"));
+			TestAssert.True(PortableProbeCaptureBundle.TryWrite(inputA, out _, out string reasonA), reasonA);
+			TestAssert.True(File.ReadAllBytes(Path.Combine(root, "a", "contact_counts.bin")).SequenceEqual(File.ReadAllBytes(Path.Combine(root, "b", "contact_counts.bin"))), "observer does not change contact bytes");
+		}
+		finally
+		{
+			if (Directory.Exists(root)) Directory.Delete(root, true);
+		}
 	}
 
 	private static void BundleEncodingAndHashesAreStable()
@@ -125,18 +155,18 @@ internal static class PortableProbeCaptureBundleTests
 			PolicyMaxSteps = new[] { 81, 81, 81, 81 },
 			EffortValid = new byte[] { 1, 1, 1, 0 },
 			ContactAuthorityToken = "XPrimeRaySpatialKernel/LinearScan-v0",
-			RuntimeProvenance = new Dictionary<string, string> { ["capture_authority"] = "XPrimeRaySpatialKernel/LinearScan-v0" }
+			RuntimeProvenance = new Dictionary<string, string> { ["capture_authority"] = "XPrimeRaySpatialKernel/LinearScan-v0", ["compute_marker"] = "compute-policy-test" }
 		};
 		return result;
 	}
 
-	private static PortableProbeCaptureInput CopyWith(PortableProbeCaptureInput input, bool? complete = null, int[]? contacts = null, int[]? finalSteps = null, byte[]? effortValid = null, string? authority = null, string? provenanceAuthority = null)
+	private static PortableProbeCaptureInput CopyWith(PortableProbeCaptureInput input, bool? complete = null, int[]? contacts = null, int[]? finalSteps = null, byte[]? effortValid = null, string? authority = null, string? provenanceAuthority = null, ProbeContextKey? context = null, string? observerProvenance = null)
 	{
 		PortableProbeCaptureInput result = new PortableProbeCaptureInput
 		{
 			RunId = input.RunId, OutputDirectory = input.OutputDirectory, SemanticSceneId = input.SemanticSceneId, GodotScenePath = input.GodotScenePath,
 			EngineCommit = input.EngineCommit, AcquisitionLineage = input.AcquisitionLineage, LifecycleComplete = complete ?? input.LifecycleComplete,
-			SealedAuthorityAvailable = input.SealedAuthorityAvailable, Generation = input.Generation, ContextKey = input.ContextKey,
+			SealedAuthorityAvailable = input.SealedAuthorityAvailable, Generation = input.Generation, ContextKey = context ?? input.ContextKey,
 			CameraTransform = input.CameraTransform, Width = input.Width, Height = input.Height, UnprocessedCount = input.UnprocessedCount,
 			StepsPerRay = input.StepsPerRay, StepLength = input.StepLength, FieldStrength = input.FieldStrength,
 			Outcomes = input.Outcomes, ContactCounts = contacts ?? input.ContactCounts, FinalStepCounts = finalSteps ?? input.FinalStepCounts,
@@ -145,6 +175,7 @@ internal static class PortableProbeCaptureBundleTests
 			RuntimeProvenance = new Dictionary<string, string>(input.RuntimeProvenance)
 		};
 		if (provenanceAuthority != null) result.RuntimeProvenance["capture_authority"] = provenanceAuthority;
+		if (observerProvenance != null) result.RuntimeProvenance["observer_id"] = observerProvenance;
 		return result;
 	}
 
