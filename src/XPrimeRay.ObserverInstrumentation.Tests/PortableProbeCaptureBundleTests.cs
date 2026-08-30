@@ -1,6 +1,7 @@
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Text.Json;
+using XPrimeRay.ObservationLayer;
 
 namespace XPrimeRay.ObserverInstrumentation.Tests;
 
@@ -9,6 +10,7 @@ internal static class PortableProbeCaptureBundleTests
 	public static void Run()
 	{
 		ContextSerializationIsStable();
+		ObserverIdentityIsStructuralAndContextScoped();
 		BundleEncodingAndHashesAreStable();
 		QualificationRejectsInvalidEffortAndIncompleteSources();
 		AuthorityTokenMismatchIsRejected();
@@ -16,14 +18,30 @@ internal static class PortableProbeCaptureBundleTests
 
 	private static void ContextSerializationIsStable()
 	{
-		ProbeContextKey key = new(1, 2, 70.0f, 80, 45, 80, 0.12f, 0.0f, 3, 4, 5, 1);
+		ProbeContextKey key = new(ObserverId.A, 1, 2, 70.0f, 80, 45, 80, 0.12f, 0.0f, 3, 4, 5, 1);
 		byte[] first = ProbeContextCanonicalSerializer.Serialize(key);
 		byte[] second = ProbeContextCanonicalSerializer.Serialize(key);
 		TestAssert.True(first.SequenceEqual(second), "context canonical bytes deterministic");
-		TestAssert.Equal(39, first.Length, "context canonical byte length");
-		ProbeContextKey changed = new(1, 2, 70.0f, 80, 45, 80, 0.12f, 0.5f, 3, 4, 5, 1);
+		TestAssert.Equal(48, first.Length, "context canonical byte length");
+		ProbeContextKey changed = new(ObserverId.A, 1, 2, 70.0f, 80, 45, 80, 0.12f, 0.5f, 3, 4, 5, 1);
 		TestAssert.False(SHA256.HashData(first).SequenceEqual(SHA256.HashData(ProbeContextCanonicalSerializer.Serialize(changed))), "changed field changes context hash");
-		TestAssert.Equal((byte)0x01, first[0], "context little-endian origin low byte");
+		TestAssert.Equal((byte)0x02, first[0], "context schema little-endian low byte");
+		TestAssert.Equal((byte)0x01, first[9], "context origin low byte after observer identity");
+	}
+
+	private static void ObserverIdentityIsStructuralAndContextScoped()
+	{
+		TestAssert.Equal(ObserverId.A, new ObserverId("A"), "observer A structural equality");
+		TestAssert.Equal(ObserverId.A.GetHashCode(), new ObserverId("A").GetHashCode(), "observer A stable hash");
+		TestAssert.False(ObserverId.A == ObserverId.B, "observer A differs from B");
+		TestAssert.True(ObserverId.A.SerializeCanonical().SequenceEqual(new ObserverId("A").SerializeCanonical()), "observer canonical bytes stable");
+		ProbeContextKey a = new(ObserverId.A, 1, 2, 70f, 80, 45, 80, 0.12f, 0f, 3, 4, 5, 1);
+		ProbeContextKey b = new(ObserverId.B, 1, 2, 70f, 80, 45, 80, 0.12f, 0f, 3, 4, 5, 1);
+		TestAssert.False(a == b, "observer identity changes context equality");
+		TestAssert.False(SHA256.HashData(ProbeContextCanonicalSerializer.Serialize(a)).SequenceEqual(SHA256.HashData(ProbeContextCanonicalSerializer.Serialize(b))), "observer identity changes context hash");
+		ObservationPolicyFingerprint policyA = new(80, 0.07f, 0.01f, 0.07f, 1f, 0.5f, 3, 4, 5, 1, "runtime_current");
+		ObservationPolicyFingerprint policyB = new(80, 0.07f, 0.01f, 0.07f, 1f, 0.5f, 3, 4, 5, 1, "runtime_current");
+		TestAssert.True(policyA.Equals(policyB), "observer identity absent from policy fingerprint");
 	}
 
 	private static void BundleEncodingAndHashesAreStable()
@@ -93,7 +111,7 @@ internal static class PortableProbeCaptureBundleTests
 			LifecycleComplete = true,
 			SealedAuthorityAvailable = true,
 			Generation = 1,
-			ContextKey = new ProbeContextKey(1, 2, 70f, 2, 2, 80, 0.12f, 0f, 3, 4, 5, 1),
+			ContextKey = new ProbeContextKey(ObserverId.A, 1, 2, 70f, 2, 2, 80, 0.12f, 0f, 3, 4, 5, 1),
 			CameraTransform = Enumerable.Repeat(0f, 12).ToArray(),
 			Width = 2,
 			Height = 2,

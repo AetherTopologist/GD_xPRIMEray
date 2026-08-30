@@ -428,7 +428,7 @@ internal static class ProbeRegionRefinementEngineTests
 
 	private static ProbeContextKey Context(int width, int height)
 	{
-		return new ProbeContextKey(1, 2, 60f, (ushort)width, (ushort)height, 80, 1f, 1f, 3, 4, 5, 1);
+		return new ProbeContextKey(ObserverId.A, 1, 2, 60f, (ushort)width, (ushort)height, 80, 1f, 1f, 3, 4, 5, 1);
 	}
 
 	private static ProbeOutcomeCode[] Plane(int width, int height, params ProbeOutcomeCode[] outcomes)

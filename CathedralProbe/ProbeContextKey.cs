@@ -5,6 +5,7 @@
 /// </summary>
 public readonly struct ProbeContextKey : System.IEquatable<ProbeContextKey>
 {
+	public readonly ObserverId ObserverId;
 	public readonly uint CameraOriginHash;
 	public readonly uint CameraBasisHash;
 	public readonly float FovDeg;
@@ -19,6 +20,7 @@ public readonly struct ProbeContextKey : System.IEquatable<ProbeContextKey>
 	public readonly byte RefinementPolicyVersion;
 
 	public ProbeContextKey(
+		ObserverId observerId,
 		uint cameraOriginHash,
 		uint cameraBasisHash,
 		float fovDeg,
@@ -32,6 +34,7 @@ public readonly struct ProbeContextKey : System.IEquatable<ProbeContextKey>
 		uint boundaryLayerEpoch,
 		byte refinementPolicyVersion)
 	{
+		ObserverId = observerId;
 		CameraOriginHash = cameraOriginHash;
 		CameraBasisHash = cameraBasisHash;
 		FovDeg = fovDeg;
@@ -49,6 +52,7 @@ public readonly struct ProbeContextKey : System.IEquatable<ProbeContextKey>
 	public bool Equals(ProbeContextKey other)
 	{
 		return CameraOriginHash == other.CameraOriginHash
+			&& ObserverId == other.ObserverId
 			&& CameraBasisHash == other.CameraBasisHash
 			&& FovDeg.Equals(other.FovDeg)
 			&& FilmWidth == other.FilmWidth
@@ -70,6 +74,7 @@ public readonly struct ProbeContextKey : System.IEquatable<ProbeContextKey>
 	public override int GetHashCode()
 	{
 		var hash = new System.HashCode();
+		hash.Add(ObserverId);
 		hash.Add(CameraOriginHash);
 		hash.Add(CameraBasisHash);
 		hash.Add(FovDeg);

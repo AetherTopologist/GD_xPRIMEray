@@ -10270,6 +10270,7 @@ private sealed class OverlayRollingWindow
 		}
 
 		contextKey = new ProbeContextKey(
+			ObserverId.A,
 			HashVector3Quantized(_cam.GlobalTransform.Origin),
 			HashBasisQuantized(_cam.GlobalTransform.Basis),
 			QuantizeFloat(_cam.Fov, 1000f),
@@ -11155,6 +11156,7 @@ private sealed class OverlayRollingWindow
 			policyVersion: CathedralProbeRefinementPolicyVersion,
 			transportMode: "runtime_current");
 		string contextIdentity =
+			$"observerId={_probeFrameContextKey.ObserverId.Label};" +
 			$"cameraOrigin={_probeFrameContextKey.CameraOriginHash:x8};" +
 			$"cameraBasis={_probeFrameContextKey.CameraBasisHash:x8};" +
 			$"fov={_probeFrameContextKey.FovDeg:0.######};" +

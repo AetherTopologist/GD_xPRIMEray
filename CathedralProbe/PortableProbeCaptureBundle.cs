@@ -464,12 +464,17 @@ public static class PortableProbeCaptureBundle
 
 public static class ProbeContextCanonicalSerializer
 {
-	/// v1 field order: uint origin, uint basis, float fov bits, ushort width, ushort height,
+	public const uint SchemaVersion = 2;
+
+	/// v2 field order: uint schema version, ObserverId canonical bytes, then uint origin,
+	/// uint basis, float fov bits, ushort width, ushort height,
 	/// ushort base steps, float bend bits, float field bits, uint field epoch, uint geometry epoch,
 	/// uint boundary epoch, byte refinement policy. All integral values are little-endian.
 	public static byte[] Serialize(in ProbeContextKey key)
 	{
 		using MemoryStream stream = new();
+		WriteUInt32(stream, SchemaVersion);
+		stream.Write(key.ObserverId.SerializeCanonical());
 		WriteUInt32(stream, key.CameraOriginHash); WriteUInt32(stream, key.CameraBasisHash); WriteSingle(stream, key.FovDeg);
 		WriteUInt16(stream, key.FilmWidth); WriteUInt16(stream, key.FilmHeight); WriteUInt16(stream, key.BaseStepsPerRay);
 		WriteSingle(stream, key.BendScale); WriteSingle(stream, key.FieldStrength);
