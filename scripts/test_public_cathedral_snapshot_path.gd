@@ -27,8 +27,8 @@ func _initialize() -> void:
 	_assert(not bool(hermetic_display.visible), "Gallery exposes Hermetic apparatus")
 	_send_key(KEY_H)
 	await _settle(4)
-	_assert(field_dial.call("GetExperimentName") == "Gallery", "retired H changes the experiment")
-	_assert(not bool(hermetic_display.visible), "retired H reveals Hermetic apparatus")
+	_assert(field_dial.call("GetExperimentName") == "Gallery", "H is inert")
+	_assert(not bool(hermetic_display.visible), "H does not reveal Hermetic apparatus")
 
 	_assert(not bool(film.get("ProbeViewAvailable")), "Hermetic starts without sealed authority")
 
