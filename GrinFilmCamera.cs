@@ -3814,6 +3814,7 @@ private sealed class OverlayRollingWindow
 	{
 		public PhysicsRayQueryParameters3D QuickRayParams;
 		public long PhysQueries;
+		public long PhysicsUsec;
 		public long EarlyStopPixels;
 		public long StepsIntegrated;
 		public long FieldEvals;
@@ -9770,6 +9771,7 @@ private sealed class OverlayRollingWindow
 				out _,
 				out _,
 				out _,
+				out _,
 				curvatureGridForPass1,
 				fieldGridForPass1);
 
@@ -11829,6 +11831,7 @@ private sealed class OverlayRollingWindow
 					out bool maxStepsReached,
 					out _,
 					out int stepsIntegrated,
+					out _,
 					out _,
 					out _,
 					out _,
@@ -14666,6 +14669,7 @@ private sealed class OverlayRollingWindow
 			out _,
 			out _,
 			out _,
+			out _,
 			FrameSnapshotBus.CurrentSnapshot?.CurvatureGrid,
 			null);
 
@@ -15707,6 +15711,7 @@ private sealed class OverlayRollingWindow
 			out float d2kMax,
 			out _,
 			out float turnMax,
+			out _,
 			FrameSnapshotBus.CurrentSnapshot?.CurvatureGrid,
 			null);
 
@@ -16302,6 +16307,10 @@ private sealed class OverlayRollingWindow
 			// the frozen acquisition can resume on the next physics pump.
 			cfg.UpdateEveryFrame = true;
 			cfg.UpdateEveryFrameBudgetMs = 0f;
+			// Keep the formal deterministic anchor on its pre-P3 single-worker row
+			// schedule; the pixel fan-out is a LIVE preview execution policy only.
+			cfg.ThreadedBandWorkerCount = 1;
+			cfg.ThreadedBandRowsPerChunk = 16;
 			cfg.RayMarch.FieldStrength = _cathedralSnapshotContext.FieldStrength;
 			cfg.RayMarch.StepsPerRay = _cathedralSnapshotContext.StepsPerRay;
 			cfg.RayMarch.StepLength = _cathedralSnapshotContext.StepLength;
@@ -16599,6 +16608,13 @@ private sealed class OverlayRollingWindow
 			// CONTROL FACTOR: PixelStride reduces sampling density.
 			int stride = filmCfg.PixelStride;
 			long tracedPixels = (long)filmW * filmH / Math.Max(1, stride * stride);
+			long pass1PhysQueries = 0;
+			long pass1PhysicsUsec = 0;
+			long pass1PixelsAttempted = 0;
+			long pass1PixelsSkipped = 0;
+			int pass1DispatchItems = 1;
+			int pass1EffectiveMaxConcurrency = 1;
+			string pass1DispatchPath = "legacy-pixel";
 
 			float pass2SoftGateMinSegmentLengthEffective = softGateCfg.MinSegmentLength;
 			pass2SoftGateMaxAttemptsPerFrameEffective = softGateCfg.MaxAttemptsPerFrame;
@@ -16844,8 +16860,13 @@ private sealed class OverlayRollingWindow
 					ultraInfo = $" stab={stab:0.00} turboM~{turboM:0.00}";
 				}
 				GD.Print(
-					$"[BandSummary] frame={_frameIndex} y=[{yStart},{yEnd}) " +
-					$"hits={bandHits} tracedPx={bandTracedPixels} noCandPx={bandNoCandidatePixels} avgSteps={avgStepsPerTracedPixel:0.00} reasonDone={reasonDone}{ultraInfo}");
+					$"[BandSummary] frame={_frameIndex} y=[{yStart},{yEnd}) bandH={bandH} " +
+					$"dispatchItems={pass1DispatchItems} effectiveMaxConcurrency={pass1EffectiveMaxConcurrency} " +
+					$"dispatchPath={pass1DispatchPath} hits={bandHits} tracedPx={bandTracedPixels} " +
+					$"pass1PhysQ={pass1PhysQueries} pass1PxAttempted={pass1PixelsAttempted} " +
+					$"pass1PhysicsMs=cumulative-worker:{pass1PhysicsUsec / 1000.0:0.###} " +
+					$"pass1PxSkipped={pass1PixelsSkipped} noCandPx={bandNoCandidatePixels} " +
+					$"avgSteps={avgStepsPerTracedPixel:0.00} reasonDone={reasonDone}{ultraInfo}");
 			}
 
 			void ResetNoHitStall()
@@ -17661,7 +17682,6 @@ private sealed class OverlayRollingWindow
 			ulong a1 = a0;
 			// CROSS-CLASS CONTRACT: pass1StopOnHit inherits ray stopping rules from RayBeamRenderer.
 			bool pass1StopOnHit = rayCfg.StopOnHit || rayCfg.TerminateTrailOnHit || rayCfg.RequireHitToRender;
-			long pass1PhysQueries = 0;
 			long pass1EarlyStopPixels = 0;
 			pass1StepsIntegrated = 0;
 			long pass1FieldEvals = 0;
@@ -17734,6 +17754,7 @@ private sealed class OverlayRollingWindow
 					// DECISION: skip pixels not aligned to stride (block fill later).
 					if ((x % stride) != 0 || (y % stride) != 0)
 					{
+						Interlocked.Increment(ref pass1PixelsSkipped);
 						_segCountPerPixel[pi] = 0;
 						_pass1StepsIntegrated[pi] = 0;
 						_pass1HitFound[pi] = false;
@@ -17746,6 +17767,7 @@ private sealed class OverlayRollingWindow
 						_pass1HitColliderId[pi] = 0;
 						return local;
 					}
+					Interlocked.Increment(ref pass1PixelsAttempted);
 
 					float v = ((y + 0.5f) / filmH) * 2f - 1f;
 					v = -v;
@@ -17818,13 +17840,17 @@ private sealed class OverlayRollingWindow
 							out float telemetryCurvatureMean,
 							out float telemetryDkMax,
 							out float telemetryD2kMax,
-							out float telemetryTurnSum,
-							out float telemetryTurnMax,
+						out float telemetryTurnSum,
+						out float telemetryTurnMax,
+						out long pass1PhysicsUsec,
 							curvatureGridForPass1,
 							fieldGridForPass1,
 							ClassifyProbeColliderForPass1,
 							y * filmW + x
 						);
+					// Count the exact IntersectRay duration even when the guarded call
+					// reports an exception; failed calls are still physics work.
+					local.PhysicsUsec += pass1PhysicsUsec;
 
 					// DECISION: accumulate perf counters only when enabled.
 					if (collectPass1Perf)
@@ -17903,6 +17929,7 @@ private sealed class OverlayRollingWindow
 					if (collectPass1Perf)
 					{
 						pass1PhysQueries += local.PhysQueries;
+						pass1PhysicsUsec += local.PhysicsUsec;
 						pass1EarlyStopPixels += local.EarlyStopPixels;
 					}
 					if (collectPass1Steps) pass1StepsIntegrated += local.StepsIntegrated;
@@ -18054,56 +18081,47 @@ private sealed class OverlayRollingWindow
 				{
 					ProcessPass1PixelsInTraversalOrder(renderTestTraversalMode);
 				}
+				else if (snapshotAcquisition)
+				{
+					// Formal SNAPSHOT remains the single-worker deterministic anchor.
+					pass1DispatchItems = pixelCount;
+					pass1EffectiveMaxConcurrency = 1;
+					pass1DispatchPath = "formal-pixel-serial";
+					Pass1ThreadLocal local = CreatePass1ThreadLocal();
+					for (int pi = 0; pi < pixelCount; pi++)
+						local = ProcessPass1Pixel(pi, local);
+					MergePass1ThreadLocal(in local);
+					DisposePass1ThreadLocal(local);
+				}
 				else if (useThreadedPass1Bands)
 				{
-					int chunkCount = Math.Max(1, (bandH + threadedBandRowsPerChunk - 1) / threadedBandRowsPerChunk);
-					Pass1ThreadLocal[] chunkResults = new Pass1ThreadLocal[chunkCount];
-					if (threadedBandWorkerCount <= 1 || chunkCount <= 1)
+					// Compute Envelope owns only the worker ceiling; .NET owns the
+					// dynamic pixel partitioning and work stealing.
+					pass1DispatchItems = pixelCount;
+					pass1EffectiveMaxConcurrency = threadedBandWorkerCount;
+					pass1DispatchPath = "ce-pixel";
+					var pass1Options = new System.Threading.Tasks.ParallelOptions
 					{
-						for (int chunkIndex = 0; chunkIndex < chunkCount; chunkIndex++)
+						MaxDegreeOfParallelism = threadedBandWorkerCount
+					};
+					System.Threading.Tasks.Parallel.For(
+						0,
+						pixelCount,
+						pass1Options,
+						() => CreatePass1ThreadLocal(),
+						(pi, _, local) => ProcessPass1Pixel(pi, local),
+						local =>
 						{
-							int rowStartLocal = chunkIndex * threadedBandRowsPerChunk;
-							int rowEndLocal = Math.Min(bandH, rowStartLocal + threadedBandRowsPerChunk);
-							int piStart = rowStartLocal * filmW;
-							int piEnd = rowEndLocal * filmW;
-							Pass1ThreadLocal local = CreatePass1ThreadLocal();
-							for (int pi = piStart; pi < piEnd; pi++)
-								local = ProcessPass1Pixel(pi, local);
-							chunkResults[chunkIndex] = local;
-						}
-					}
-					else
-					{
-						var pass1ChunkOptions = new System.Threading.Tasks.ParallelOptions
-						{
-							MaxDegreeOfParallelism = threadedBandWorkerCount
-						};
-						System.Threading.Tasks.Parallel.For(
-							0,
-							chunkCount,
-							pass1ChunkOptions,
-							chunkIndex =>
-							{
-								int rowStartLocal = chunkIndex * threadedBandRowsPerChunk;
-								int rowEndLocal = Math.Min(bandH, rowStartLocal + threadedBandRowsPerChunk);
-								int piStart = rowStartLocal * filmW;
-								int piEnd = rowEndLocal * filmW;
-								Pass1ThreadLocal local = CreatePass1ThreadLocal();
-								for (int pi = piStart; pi < piEnd; pi++)
-									local = ProcessPass1Pixel(pi, local);
-								chunkResults[chunkIndex] = local;
-							});
-					}
-
-					for (int chunkIndex = 0; chunkIndex < chunkCount; chunkIndex++)
-					{
-						MergePass1ThreadLocal(in chunkResults[chunkIndex]);
-						DisposePass1ThreadLocal(chunkResults[chunkIndex]);
-					}
+							MergePass1ThreadLocal(in local);
+							DisposePass1ThreadLocal(local);
+						});
 				}
 				else
 				{
 					// DECISION: preserve the legacy default path unless threaded bands are explicitly enabled.
+					pass1DispatchItems = pixelCount;
+					pass1EffectiveMaxConcurrency = jobs;
+					pass1DispatchPath = "legacy-pixel";
 					System.Threading.Tasks.Parallel.For(
 						0,
 						pixelCount,

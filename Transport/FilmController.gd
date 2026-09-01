@@ -278,9 +278,6 @@ func _apply_quality(scale: float, rows_cap: int, rows_per_step: int, budget_ms: 
 	_film_camera.set("MaxRowsPerFrameCap", rows_cap)
 	_film_camera.set("UpdateEveryFrameMaxRowsPerStep", rows_per_step)
 	_film_camera.set("UpdateEveryFrameBudgetMs", budget_ms)
-	_film_camera.set("UseThreadedBands", false)
-	_film_camera.set("ThreadedBandWorkerCount", 1)
-	_film_camera.set("ThreadedBandRowsPerChunk", rows_per_step)
 
 
 func _restart_film_pass() -> void:

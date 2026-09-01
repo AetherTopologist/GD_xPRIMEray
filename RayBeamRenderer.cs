@@ -2385,9 +2385,11 @@ public partial class RayBeamRenderer : Node3D
 		string fixtureName,
 		string modeToken,
 		ref int warnedState,
-		out Godot.Collections.Dictionary hit)
+		out Godot.Collections.Dictionary hit,
+		out long intersectUsec)
 	{
 		hit = new Godot.Collections.Dictionary();
+		intersectUsec = 0;
 		bool spaceUsable = IsUsablePhysicsSpaceState(space);
 		bool queryValid = query != null;
 		string sceneToken = FormatRayDiagToken(sceneName);
@@ -2409,6 +2411,7 @@ public partial class RayBeamRenderer : Node3D
 			return false;
 		}
 
+		long intersectStartTicks = System.Diagnostics.Stopwatch.GetTimestamp();
 		try
 		{
 			hit = space.IntersectRay(query);
@@ -2439,6 +2442,11 @@ public partial class RayBeamRenderer : Node3D
 					$"reason=skip_query_without_crash");
 			}
 			return false;
+		}
+		finally
+		{
+			long elapsedTicks = System.Diagnostics.Stopwatch.GetTimestamp() - intersectStartTicks;
+			intersectUsec = (long)(elapsedTicks * 1000000.0 / System.Diagnostics.Stopwatch.Frequency);
 		}
 	}
 
@@ -2581,7 +2589,8 @@ public partial class RayBeamRenderer : Node3D
 				fixtureName: diagnosticFixtureName,
 				modeToken: diagnosticModeToken,
 				ref _subdividedRayQueryFailureWarned,
-				out var hit))
+				out var hit,
+				out _))
 			{
 				return false;
 			}
@@ -2659,7 +2668,8 @@ public partial class RayBeamRenderer : Node3D
 				fixtureName: diagnosticFixtureName,
 				modeToken: diagnosticModeToken,
 				ref _subdividedRayQueryFailureWarned,
-				out var hit))
+				out var hit,
+				out _))
 			{
 				return false;
 			}
@@ -3602,6 +3612,7 @@ public partial class RayBeamRenderer : Node3D
 		out float d2kMax,
 		out float turnSum,
 		out float turnMax,
+		out long physicsUsec,
 		CurvatureBoundGrid curvatureGrid,
 		FieldGrid3D fieldGrid = null,
 		Pass1ContactClassifier contactClassifier = null,
@@ -3637,6 +3648,7 @@ public partial class RayBeamRenderer : Node3D
 		fieldEvals = 0;
 		pass1Raycasts = 0;
 		pass1ProbeHits = 0;
+		physicsUsec = 0;
 		fieldGridHits = 0;
 		fieldGridMisses = 0;
 		fieldGridFallbacks = 0;
@@ -4047,10 +4059,13 @@ public partial class RayBeamRenderer : Node3D
 						diagnosticFixtureName,
 						diagnosticModeToken,
 						ref _pass1ProbeQueryFailureWarned,
-						out var hit0))
+						out var hit0,
+						out long queryUsec))
 					{
+						physicsUsec += queryUsec;
 						continue;
 					}
+					physicsUsec += queryUsec;
 					// DECISION: process hit results only when raycast hits something.
 						if (hit0.Count > 0)
 						{
