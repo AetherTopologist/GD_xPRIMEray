@@ -140,6 +140,7 @@ MaxRowsPerFrameCap = 16
 UseThreadedBands = true
 ThreadedBandWorkerCount = 16
 ThreadedBandRowsPerChunk = 1
+Pass1ProbeMinTravelDelta = 0.5
 EnableFramePerf = false
 RenderStepPhaseLog = false
 RenderStepBandLog = false

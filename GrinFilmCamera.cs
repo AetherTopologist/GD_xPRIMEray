@@ -16311,6 +16311,9 @@ private sealed class OverlayRollingWindow
 			// schedule; the pixel fan-out is a LIVE preview execution policy only.
 			cfg.ThreadedBandWorkerCount = 1;
 			cfg.ThreadedBandRowsPerChunk = 16;
+			// Formal acquisition retains the pre-P3 cadence; the live preview
+			// parameter is intentionally not part of the formal measurement change.
+			cfg.Pass1ProbeMinTravelDelta = 0.25f;
 			cfg.RayMarch.FieldStrength = _cathedralSnapshotContext.FieldStrength;
 			cfg.RayMarch.StepsPerRay = _cathedralSnapshotContext.StepsPerRay;
 			cfg.RayMarch.StepLength = _cathedralSnapshotContext.StepLength;
