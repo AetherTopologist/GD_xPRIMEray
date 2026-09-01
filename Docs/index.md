@@ -30,24 +30,24 @@ description: Portable Observatory for optical transport — sealed frames, Probe
     </div>
     <div class="xp-engine-state__row">
       <dt>Just landed</dt>
-      <dd>Third Observer identity + sealed attribution
-        <span class="xp-quiet">d0d08d8a ObserverId in ProbeContextKey v2 · 762e77f4 sealed capture attribution · 96ae234d H inert</span>
+      <dd>Interactive preview budget restored
+        <span class="xp-quiet">3e606f94 budget · b782f58d TLAS harness · 141f3889 diagnostic · production live TLAS healthy · serial median ~82 ms → ~19 ms · formal G authority unchanged</span>
       </dd>
     </div>
     <div class="xp-engine-state__row">
       <dt>Now</dt>
-      <dd>Live Preview performance foundation <span class="xp-chip xp-chip--now">in flight</span>
-        <span class="xp-quiet">TLAS / dispatch architecture under active qualification · 30 FPS is a target, not a landed capability</span>
+      <dd>Live Preview interaction qualification
+        <span class="xp-quiet">The accelerator was not missing. Live preview was honoring an 80 ms scheduling budget. Target 16 ms · median ≈ 19 ms · p90 ≈ 21 ms. 16 ms is not a guaranteed maximum. Hardware flight is not yet qualified.</span>
       </dd>
     </div>
     <div class="xp-engine-state__row">
       <dt>Next</dt>
-      <dd>Per-observer sealed state
-        <span class="xp-quiet">after live preview acceleration · then G5 observer switching</span>
+      <dd>Real hardware mouse/WASD flight qualification
+        <span class="xp-quiet">then single-row outlier scheduling · then Compute Envelope live dispatch</span>
       </dd>
     </div>
   </dl>
-  <p class="xp-engine-state__later">Later: Cathedral Probe observer-object graph · observer disagreement instrumentation · progressive sparse preview · adaptive scheduling · field-aware acceleration · optical-closure policy under G</p>
+  <p class="xp-engine-state__later">Later: per-observer sealed state · A/B/C observer switching · Cathedral Probe observer-object graph · observer disagreement instrumentation · progressive sparse/reprojected preview · optical-closure acquisition policies</p>
 </div>
 
 <p class="xp-thesis">Outcome → Contact Events → Transport Effort</p>
