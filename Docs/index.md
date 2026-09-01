@@ -30,22 +30,24 @@ description: Portable Observatory for optical transport — sealed frames, Probe
     </div>
     <div class="xp-engine-state__row">
       <dt>Just landed</dt>
-      <dd>Compute Envelope v0
-        <span class="xp-quiet">de028857 · resource policy without measurement drift · SAFE · BALANCED · MAX · CUSTOM</span>
+      <dd>Third Observer identity + sealed attribution
+        <span class="xp-quiet">d0d08d8a ObserverId in ProbeContextKey v2 · 762e77f4 sealed capture attribution · 96ae234d H inert</span>
       </dd>
     </div>
     <div class="xp-engine-state__row">
       <dt>Now</dt>
-      <dd>Third Observer v0
-        <span class="xp-quiet">next implementation target · not in flight</span>
+      <dd>Live Preview performance foundation <span class="xp-chip xp-chip--now">in flight</span>
+        <span class="xp-quiet">TLAS / dispatch architecture under active qualification · 30 FPS is a target, not a landed capability</span>
       </dd>
     </div>
     <div class="xp-engine-state__row">
       <dt>Next</dt>
-      <dd>Cathedral Probe observer-object relationship graph</dd>
+      <dd>Per-observer sealed state
+        <span class="xp-quiet">after live preview acceleration · then G5 observer switching</span>
+      </dd>
     </div>
   </dl>
-  <p class="xp-engine-state__later">Later: adaptive scheduling · field-aware acceleration · optical-closure acquisition policy under G</p>
+  <p class="xp-engine-state__later">Later: Cathedral Probe observer-object graph · observer disagreement instrumentation · progressive sparse preview · adaptive scheduling · field-aware acceleration · optical-closure policy under G</p>
 </div>
 
 <p class="xp-thesis">Outcome → Contact Events → Transport Effort</p>
@@ -69,7 +71,7 @@ description: Portable Observatory for optical transport — sealed frames, Probe
 
 </div>
 
-<p class="xp-controls">E Experiment · F Field Structure · G SNAPSHOT · Q Probe Views · V Walk/Fly · Tab telemetry · Esc Workbench</p>
+<p class="xp-controls">E chooses the experiment · F reveals the field · G measures · Q interrogates<br>V Walk/Fly · Tab telemetry · Esc Workbench<br>Q rereads one sealed acquisition. Third Observer identity names a different observer context. Those are different claims.</p>
 
 ## Explore / Demos
 
