@@ -15,6 +15,7 @@ namespace GodotAdapter;
 public static class SnapshotBuilder
 {
     private static double _nextSnapshotLogTimeSec = 0;
+    private static bool _snapshotPopulationDiagnosticReported;
     private const float GeometryInflate = 0.02f; // expands by this in all axes
     private const float FallbackRadius = 0.05f;
 
@@ -109,6 +110,14 @@ public static class SnapshotBuilder
         var geometryNodes = new List<Node3D>(collisionNodes.Count + visualNodes.Count);
         var seenInstanceIds = new HashSet<ulong>();
         var nodesWithCollisionDescendant = BuildNodesWithCollisionDescendants(collisionNodes);
+        var collisionLayerZero = 0;
+        foreach (var collision in collisionNodes)
+        {
+            if (collision.CollisionLayer == 0u)
+            {
+                collisionLayerZero++;
+            }
+        }
         var collisionIncluded = 0;
         var collisionSkippedNonRaycast = 0;
         var visualSkippedByCollisionPreference = 0;
@@ -158,11 +167,17 @@ public static class SnapshotBuilder
         var visualIncluded = geometryCount - collisionIncluded;
         MaybeLogSnapshot(
             geometryCount,
+            collisionNodes.Count,
+            collisionLayerZero,
             collisionIncluded,
             visualIncluded,
             visualSkippedByCollisionPreference,
             collisionSkippedNonRaycast,
-            geometry);
+            geometry,
+            geometryTlas,
+            CountNodesInGroup(sceneRoot, "raytrace_geometry"),
+            CountNodesInGroup(sceneRoot, "fixture_geometry"),
+            CountNodesInGroup(sceneRoot, "field_sources"));
 
         return new SceneSnapshot
         {
@@ -427,13 +442,20 @@ public static class SnapshotBuilder
 
     private static void MaybeLogSnapshot(
         int geometryCount,
+        int collisionInspected,
+        int collisionLayerZero,
         int collisionIncluded,
         int visualIncluded,
         int visualSkippedByCollisionPreference,
         int collisionSkippedNonRaycast,
-        GeometryEntitySOA geometry)
+        GeometryEntitySOA geometry,
+        GeometryTLAS geometryTlas,
+        int raytraceGroupCount,
+        int fixtureGroupCount,
+        int fieldSourceGroupCount)
     {
-        if (!DebugLogConfig.EnableSnapshotLog)
+        bool tlasUsable = geometryTlas != null && geometryTlas.Nodes != null && geometryTlas.Nodes.Length > 0 && geometryTlas.RootIndex >= 0;
+        if (!DebugLogConfig.EnableSnapshotLog && tlasUsable && _snapshotPopulationDiagnosticReported)
         {
             return;
         }
@@ -445,9 +467,13 @@ public static class SnapshotBuilder
         }
 
         _nextSnapshotLogTimeSec = now + Math.Max(0.05, DebugLogConfig.SnapshotLogIntervalSec);
+        _snapshotPopulationDiagnosticReported = true;
         GD.Print(
-            $"[SNAPSHOT] geomCount={geometryCount} collisionIncluded={collisionIncluded} visualIncluded={visualIncluded} " +
-            $"visualSkippedPref={visualSkippedByCollisionPreference} collisionSkippedNonRaycast={collisionSkippedNonRaycast}");
+            $"[SNAPSHOT] geomCount={geometryCount} collisionInspected={collisionInspected} collisionLayerZero={collisionLayerZero} " +
+            $"collisionLayerNonZero={collisionInspected - collisionLayerZero} collisionIncluded={collisionIncluded} visualIncluded={visualIncluded} " +
+            $"visualSkippedPref={visualSkippedByCollisionPreference} collisionSkippedNonRaycast={collisionSkippedNonRaycast} " +
+            $"tlasNodes={geometryTlas?.Nodes?.Length ?? 0} tlasRoot={geometryTlas?.RootIndex ?? -1} " +
+            $"entityCount={geometry?.Count ?? 0} raytraceGroup={raytraceGroupCount} fixtureGroup={fixtureGroupCount} fieldSources={fieldSourceGroupCount}");
         MaybeLogGeometryBoundsSamples(geometry);
     }
 
@@ -473,6 +499,22 @@ public static class SnapshotBuilder
         }
 
         GD.Print(sb.ToString());
+    }
+
+    private static int CountNodesInGroup(Node root, string groupName)
+    {
+        int count = root != null && root.IsInGroup(groupName) ? 1 : 0;
+        if (root == null)
+        {
+            return count;
+        }
+
+        foreach (Node child in root.GetChildren())
+        {
+            count += CountNodesInGroup(child, groupName);
+        }
+
+        return count;
     }
 
     private static NumVector3 ToNumerics(GdVector3 v)

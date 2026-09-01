@@ -2458,6 +2458,8 @@ private bool _fixtureDebugHasExplicitBackgroundGroup = false;
 	private double _snapshotLogTimerSec = 0.0;
 	private bool _warnedNotProcessing = false;
 	private bool _warnedNoCameraForGrid = false;
+	private bool _liveGeometryTlasDiagnosticReported = false;
+	private bool _liveSnapshotBuildDiagnosticReported = false;
 	private int _fieldSourceLastRefreshFrame = -100000;
 	private Node[] _fieldSourceNodes = Array.Empty<Node>();
 	private Transform3D[] _fieldSourceXforms = Array.Empty<Transform3D>();
@@ -4868,6 +4870,15 @@ private sealed class OverlayRollingWindow
 	private void RenderFrameBackend(double delta)
 	{
 		var snapshot = GodotAdapter.SnapshotBuilder.BuildFromGodotScene(GetTree().CurrentScene);
+		if (!_liveSnapshotBuildDiagnosticReported)
+		{
+			_liveSnapshotBuildDiagnosticReported = true;
+			GD.Print(
+				$"[LiveTLAS][SnapshotBuild] geometryEntities={snapshot?.Geometry?.Count ?? 0} " +
+				$"tlasNodes={snapshot?.GeometryTLAS?.Nodes?.Length ?? 0} " +
+				$"tlasRoot={snapshot?.GeometryTLAS?.RootIndex ?? -1} " +
+				$"sceneCurrent={(GetTree().CurrentScene != null ? 1 : 0)}");
+		}
 		var cam = _cam;
 		if (cam == null || !IsInstanceValid(cam))
 		{
@@ -17202,6 +17213,14 @@ private sealed class OverlayRollingWindow
 			geomPruneRequestedForStep = cfg.UseGeometryTLASPruning;
 			bool effectivePruneActive = geomPruneRequestedForStep
 				&& IsGeometryTLASUsable(geomTlasForStep, geomEntitiesForStep);
+			if (!snapshotAcquisition)
+				MaybeLogLiveGeometryTlasDiagnostic(
+					geomPruneRequestedForStep,
+					effectivePruneActive,
+					geomTlasForStep,
+					geomEntitiesForStep,
+					renderSceneName,
+					renderModeToken);
 			useGeomTlasPruningForStep = effectivePruneActive;
 			bool geomPruneSwitchingThisStep = _hasRenderHealthGeomPruneMode
 				&& _lastRenderHealthGeomPruneMode != useGeomTlasPruningForStep;
@@ -25040,6 +25059,39 @@ private sealed class OverlayRollingWindow
 		if (geomTlas.LeafGeometryIds == null || geomTlas.LeafGeometryIds.Length == 0)
 			return false;
 		return true;
+	}
+
+	private void MaybeLogLiveGeometryTlasDiagnostic(
+		bool pruneRequested,
+		bool pruneEffective,
+		RendererCore.Geometry.GeometryTLAS geometryTlas,
+		GeometryEntitySOA geometryEntities,
+		string sceneName,
+		string macroMode)
+	{
+		if (!pruneRequested || pruneEffective)
+		{
+			_liveGeometryTlasDiagnosticReported = false;
+			return;
+		}
+		if (_liveGeometryTlasDiagnosticReported)
+			return;
+		_liveGeometryTlasDiagnosticReported = true;
+		GD.Print(
+			$"[LiveTLAS][Unavailable] tlasNodes={geometryTlas?.Nodes?.Length ?? 0} " +
+			$"rootIndex={geometryTlas?.RootIndex ?? -1} entityCount={geometryEntities?.Count ?? 0} " +
+			$"film={_filmWidth}x{_filmHeight} experiment={ResolveActiveExperimentName()} " +
+			$"scene={sceneName} macroMode={macroMode} pruneRequested=1 pruneEffective=0 " +
+			$"geometrySource=FrameSnapshotBus.CurrentSnapshot " +
+			$"snapshotPublished={(FrameSnapshotBus.HasSnapshot ? 1 : 0)} frameId={FrameSnapshotBus.FrameId}");
+	}
+
+	private string ResolveActiveExperimentName()
+	{
+		Node fieldDial = GetTree().CurrentScene?.FindChild("FieldDialController", true, false);
+		if (fieldDial != null && fieldDial.HasMethod("GetExperimentName"))
+			return fieldDial.Call("GetExperimentName").ToString();
+		return "unknown";
 	}
 
 	private static bool TransformEqualApprox(Transform3D a, Transform3D b)
