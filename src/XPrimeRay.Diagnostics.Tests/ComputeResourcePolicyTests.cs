@@ -22,8 +22,13 @@ internal static class ComputeResourcePolicyTests
         Assert.Equal(6, safe.EffectiveBandWorkerCount, "safe workers");
         Assert.Equal(12, balanced.EffectiveBandWorkerCount, "balanced workers");
         Assert.Equal(24, max.EffectiveBandWorkerCount, "max workers");
+        Assert.Equal(6, safe.LivePass1WorkerCeiling, "safe live pass1 ceiling");
+        Assert.Equal(12, balanced.LivePass1WorkerCeiling, "balanced live pass1 inherited ceiling");
+        Assert.Equal(24, max.LivePass1WorkerCeiling, "max live pass1 inherited ceiling");
         Assert.True(safe.WatchdogEnforced && balanced.WatchdogEnforced && max.WatchdogEnforced, "all profiles enforce watchdog");
         Assert.False(max.ExperimentalPass2ThreadingEnabled, "max enables experimental pass2 threading");
+        Assert.Equal(12, balanced.Pass2WorkerCeiling, "pass2 defaults to global ceiling");
+        Assert.Equal(12, balanced.DiagnosticWorkerCeiling, "diagnostic defaults to global ceiling");
         Assert.True(max.WorkingSetAbortBytes > balanced.WorkingSetAbortBytes && balanced.WorkingSetAbortBytes > safe.WorkingSetAbortBytes, "memory ordering");
     }
 
@@ -36,6 +41,9 @@ internal static class ComputeResourcePolicyTests
         Throws<ArgumentOutOfRangeException>(() => ComputeResourcePolicyResolver.Resolve(ComputeResourceProfile.Custom, host, customWorkerCount: 9), "host ceiling rejected");
         var disabled = ComputeResourcePolicyResolver.Resolve(ComputeResourceProfile.Custom, host, customWorkerCount: 1);
         Assert.Equal(0L, disabled.WorkingSetAbortBytes, "zero explicitly disables abort limit");
+        var capped = ComputeResourcePolicyResolver.Resolve(ComputeResourceProfile.Custom, host, customWorkerCount: 8, livePass1WorkerCeiling: 6);
+        Assert.Equal(8, capped.EffectiveBandWorkerCount, "custom global workers");
+        Assert.Equal(6, capped.LivePass1WorkerCeiling, "explicit live pass1 cap");
     }
 
     private static void SmallHostsReportHonestProfileCollapse()

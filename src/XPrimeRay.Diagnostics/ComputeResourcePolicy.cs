@@ -75,6 +75,9 @@ public sealed record ResolvedComputeResourcePolicy(
     ComputeResourceProfile EffectiveProfile,
     int? HostLogicalProcessorCount,
     int EffectiveBandWorkerCount,
+    int LivePass1WorkerCeiling,
+    int Pass2WorkerCeiling,
+    int DiagnosticWorkerCeiling,
     long WorkingSetWarningBytes,
     long WorkingSetAbortBytes,
     long PrivateMemoryAbortBytes,
@@ -95,7 +98,10 @@ public static class ComputeResourcePolicyResolver
         int customWorkerCount = 0,
         long customWorkingSetWarningBytes = 0,
         long customWorkingSetAbortBytes = 0,
-        long customPrivateMemoryAbortBytes = 0)
+        long customPrivateMemoryAbortBytes = 0,
+        int livePass1WorkerCeiling = 0,
+        int pass2WorkerCeiling = 0,
+        int diagnosticWorkerCeiling = 0)
     {
         if (host == null) throw new ArgumentNullException(nameof(host));
         int hostWorkers = host.LogicalProcessorCount is > 0 ? host.LogicalProcessorCount.Value : 1;
@@ -141,18 +147,32 @@ public static class ComputeResourcePolicyResolver
                     : $"{note}; small-host profile collapse: SAFE={safeWorkers}, BALANCED={balancedWorkers}, MAX={maxWorkers}";
         }
 
+        int liveCeiling = ResolveStageCeiling(livePass1WorkerCeiling, workers, nameof(livePass1WorkerCeiling));
+        int pass2Ceiling = ResolveStageCeiling(pass2WorkerCeiling, workers, nameof(pass2WorkerCeiling));
+        int diagnosticCeiling = ResolveStageCeiling(diagnosticWorkerCeiling, workers, nameof(diagnosticWorkerCeiling));
+
         return new ResolvedComputeResourcePolicy(
             SchemaVersion,
             profile,
             profile,
             host.LogicalProcessorCount,
             workers,
+            liveCeiling,
+            pass2Ceiling,
+            diagnosticCeiling,
             warning,
             abort,
             privateAbort,
             WatchdogEnforced: true,
             ExperimentalPass2ThreadingEnabled: false,
             note);
+    }
+
+    private static int ResolveStageCeiling(int requested, int globalCeiling, string parameterName)
+    {
+        if (requested < 0)
+            throw new ArgumentOutOfRangeException(parameterName, "stage worker ceiling cannot be negative; zero inherits the global ceiling.");
+        return requested == 0 ? globalCeiling : Math.Min(requested, globalCeiling);
     }
 
     private static (long Warning, long Abort, long PrivateAbort) MemoryLimits(HostCapabilitySnapshot host, double warningFraction, double abortFraction)

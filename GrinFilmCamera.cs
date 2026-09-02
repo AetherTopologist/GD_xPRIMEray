@@ -127,6 +127,7 @@ public partial class GrinFilmCamera : Node
 		public bool UseThreadedBands;
 		public int ThreadedBandWorkerCount;
 		public int ThreadedBandRowsPerChunk;
+		public int LivePass1WorkerCeiling;
 		public bool UseThreadedPass2CandidateEval;
 		public int ThreadedPass2CandidateWorkers;
 		public int ThreadedPass2CandidateRowsPerChunk;
@@ -1303,6 +1304,8 @@ public partial class GrinFilmCamera : Node
 	[Export] public bool UseThreadedBands = false;
 	/// <summary>Worker count for the threaded pass1 row-chunk mode. Set to 1 for deterministic single-worker comparison.</summary>
 	[Export(PropertyHint.Range, "1,16,1")] public int ThreadedBandWorkerCount = 2;
+	/// <summary>Qualified live pass1 stage ceiling; zero inherits the global Compute Envelope ceiling.</summary>
+	[Export(PropertyHint.Range, "0,16,1")] public int LivePass1WorkerCeiling = 6;
 	/// <summary>Rows per pass1 work chunk when threaded bands are enabled.</summary>
 	[Export(PropertyHint.Range, "1,256,1")] public int ThreadedBandRowsPerChunk = 4;
 	/// <summary>Experimental pass2 candidate-eval prepass: threaded TLAS candidate evaluation, serialized Godot queries and final commit.</summary>
@@ -1409,6 +1412,9 @@ public partial class GrinFilmCamera : Node
 	public string ComputeResourceProfile => _computeResourcePolicy?.RequestedProfile.ToString().ToUpperInvariant() ?? "INVALID";
 	public string ComputeEffectiveWorkers => _computeResourcePolicy == null ? "unknown" : $"{ComputeActualPass1WorkerCount()}/{_computeResourcePolicy.EffectiveBandWorkerCount}/{_computeResourcePolicy.HostLogicalProcessors}";
 	public string ComputePolicyWorkerCeiling => _computeResourcePolicy?.EffectiveBandWorkerCount.ToString(CultureInfo.InvariantCulture) ?? "unknown";
+	public string ComputeGlobalWorkerCeiling => ComputePolicyWorkerCeiling;
+	public string LivePass1WorkerCeilingResolved => _computeResourcePolicy?.LivePass1WorkerCeiling.ToString(CultureInfo.InvariantCulture) ?? "unknown";
+	public string LivePass1WorkersEffective => ComputeActualPass1WorkerCount().ToString(CultureInfo.InvariantCulture);
 	public string ComputeWatchdogStatus
 	{
 		get
@@ -3872,7 +3878,7 @@ private sealed class OverlayRollingWindow
 		int configured = Math.Clamp(ThreadedBandWorkerCount, 1, 16);
 		return _computeResourcePolicy == null
 			? configured
-			: Math.Min(configured, _computeResourcePolicy.EffectiveBandWorkerCount);
+			: Math.Min(configured, _computeResourcePolicy.LivePass1WorkerCeiling);
 	}
 
 	private int ComputeActualPass1WorkerCount()
@@ -3898,11 +3904,12 @@ private sealed class OverlayRollingWindow
 				ComputeCustomWorkerCount,
 				MiB(ComputeCustomWorkingSetWarningMiB),
 				MiB(ComputeCustomWorkingSetAbortMiB),
-				MiB(ComputeCustomPrivateMemoryAbortMiB));
+				MiB(ComputeCustomPrivateMemoryAbortMiB),
+				LivePass1WorkerCeiling);
 			if (host.LogicalProcessorCount == null)
 				GD.PushWarning($"[ComputeEnvelope] host cores unknown; using one worker ({host.DetectionNote})");
-			GD.Print($"[ComputeEnvelope] profile={_computeResourcePolicy.RequestedProfile.ToString().ToUpperInvariant()} " +
-				$"workers={ComputeActualPass1WorkerCount()}/{_computeResourcePolicy.EffectiveBandWorkerCount}/{_computeResourcePolicy.HostLogicalProcessors} " +
+				GD.Print($"[ComputeEnvelope] profile={_computeResourcePolicy.RequestedProfile.ToString().ToUpperInvariant()} " +
+					$"workers=live:{ComputeActualPass1WorkerCount()}/stage:{_computeResourcePolicy.LivePass1WorkerCeiling}/global:{_computeResourcePolicy.EffectiveBandWorkerCount}/host:{_computeResourcePolicy.HostLogicalProcessors} " +
 				$"workingSetWarningMiB={_computeResourcePolicy.WorkingSetWarningBytes / (1024L * 1024L)} " +
 				$"workingSetAbortMiB={_computeResourcePolicy.WorkingSetAbortBytes / (1024L * 1024L)} " +
 				$"privateMemoryAbortMiB={_computeResourcePolicy.PrivateMemoryAbortBytes / (1024L * 1024L)} " +
@@ -5134,6 +5141,9 @@ private sealed class OverlayRollingWindow
 				["compute_envelope_schema"] = _computeResourcePolicy?.SchemaVersion ?? "invalid",
 				["compute_profile"] = ComputeResourceProfile,
 				["compute_effective_workers"] = ComputeActualPass1WorkerCount().ToString(CultureInfo.InvariantCulture),
+				["compute_global_worker_ceiling"] = _computeResourcePolicy?.EffectiveBandWorkerCount.ToString(CultureInfo.InvariantCulture) ?? "unknown",
+				["live_pass1_worker_ceiling"] = _computeResourcePolicy?.LivePass1WorkerCeiling.ToString(CultureInfo.InvariantCulture) ?? "unknown",
+				["live_pass1_workers_effective"] = ComputeActualPass1WorkerCount().ToString(CultureInfo.InvariantCulture),
 				["compute_policy_worker_ceiling"] = _computeResourcePolicy?.EffectiveBandWorkerCount.ToString(CultureInfo.InvariantCulture) ?? "unknown",
 				["host_logical_cores"] = _computeResourcePolicy?.HostLogicalProcessors ?? "unknown",
 				["compute_resource_pressure"] = ComputeResourcePressure,
@@ -6014,6 +6024,7 @@ private sealed class OverlayRollingWindow
 				UseThreadedBands = UseThreadedBands,
 				ThreadedBandWorkerCount = ThreadedBandWorkerCount,
 				ThreadedBandRowsPerChunk = ThreadedBandRowsPerChunk,
+				LivePass1WorkerCeiling = LivePass1WorkerCeiling,
 				UseThreadedPass2CandidateEval = UseThreadedPass2CandidateEval,
 				ThreadedPass2CandidateWorkers = ThreadedPass2CandidateWorkers,
 				ThreadedPass2CandidateRowsPerChunk = ThreadedPass2CandidateRowsPerChunk,
@@ -6293,6 +6304,7 @@ private sealed class OverlayRollingWindow
 			UseThreadedBands = defaults.UseThreadedBands;
 			ThreadedBandWorkerCount = defaults.ThreadedBandWorkerCount;
 			ThreadedBandRowsPerChunk = defaults.ThreadedBandRowsPerChunk;
+			LivePass1WorkerCeiling = defaults.LivePass1WorkerCeiling;
 			UseThreadedPass2CandidateEval = defaults.UseThreadedPass2CandidateEval;
 			ThreadedPass2CandidateWorkers = defaults.ThreadedPass2CandidateWorkers;
 			ThreadedPass2CandidateRowsPerChunk = defaults.ThreadedPass2CandidateRowsPerChunk;
