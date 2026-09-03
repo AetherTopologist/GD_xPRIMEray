@@ -25,29 +25,29 @@ description: Portable Observatory for optical transport — sealed frames, Probe
     <div class="xp-engine-state__row">
       <dt>Formal authority</dt>
       <dd>BVH-v0
-        <span class="xp-quiet">Contact: XPrimeRaySpatialKernel/BVH-v0 · witness LinearScan-v0 · secondary GodotPhysics/DeterministicReplay-v1</span>
+        <span class="xp-quiet">Contact: XPrimeRaySpatialKernel/BVH-v0 · witness LinearScan-v0 · secondary GodotPhysics/DeterministicReplay-v1 · Formal G remains a deterministic single-worker sealed acquisition</span>
       </dd>
     </div>
     <div class="xp-engine-state__row">
       <dt>Just landed</dt>
-      <dd>Interactive preview budget restored
-        <span class="xp-quiet">3e606f94 budget · b782f58d TLAS harness · 141f3889 diagnostic · production live TLAS healthy · serial median ~82 ms → ~19 ms · formal G authority unchanged</span>
+      <dd>Stage-aware Compute Envelope
+        <span class="xp-quiet">P2 make time small · P3-C eff87add pixel steal · P3-D 5e503096 fewer physics queries · P3-E 1fee7ce3 stage ceilings · Live Pass1 cap 6 on current host/workload · workers=live:6/stage:6/global:12/host:24</span>
       </dd>
     </div>
     <div class="xp-engine-state__row">
       <dt>Now</dt>
-      <dd>Live Preview interaction qualification
-        <span class="xp-quiet">The accelerator was not missing. Live preview was honoring an 80 ms scheduling budget. Target 16 ms · median ≈ 19 ms · p90 ≈ 21 ms. 16 ms is not a guaranteed maximum. Hardware flight is not yet qualified.</span>
+      <dd>Compute Envelope is permission, not obligation
+        <span class="xp-quiet">Live Pass1 qualified at N=6 on current host/workload · 68.10 rows/sec · 183% CPU · wider N did not help · Formal G isolated</span>
       </dd>
     </div>
     <div class="xp-engine-state__row">
       <dt>Next</dt>
-      <dd>Real hardware mouse/WASD flight qualification
-        <span class="xp-quiet">then single-row outlier scheduling · then Compute Envelope live dispatch</span>
+      <dd>Third Observer G4/G5
+        <span class="xp-quiet">then Cathedral Probe · progressive sparse/reprojected preview · optical-closure acquisition policy</span>
       </dd>
     </div>
   </dl>
-  <p class="xp-engine-state__later">Later: per-observer sealed state · A/B/C observer switching · Cathedral Probe observer-object graph · observer disagreement instrumentation · progressive sparse/reprojected preview · optical-closure acquisition policies</p>
+  <p class="xp-engine-state__later">P2 — Make time small. P3-C — Make work wide. P3-D — Ask fewer redundant physics questions. P3-E — Let each stage use only the width that helps. Deferred: Pass2 threading · BVH live prefilter.</p>
 </div>
 
 <p class="xp-thesis">Outcome → Contact Events → Transport Effort</p>
@@ -71,7 +71,7 @@ description: Portable Observatory for optical transport — sealed frames, Probe
 
 </div>
 
-<p class="xp-controls">E chooses the experiment · F reveals the field · G measures · Q interrogates<br>V Walk/Fly · Tab telemetry · Esc Workbench<br>Q rereads one sealed acquisition. Third Observer identity names a different observer context. Those are different claims.</p>
+<p class="xp-controls">E chooses the experiment · F reveals the field · G measures · Q interrogates<br>V Walk/Fly · Tab telemetry · Esc Workbench<br>Q rereads one sealed acquisition. Third Observer identity names a different observer context. Those are different claims.<br>Experiment chooses the world. Measurement chooses the question. Compute chooses how aggressively the machine may answer. Compute Envelope is permission, not obligation.<br>Three clocks: interaction · live film · Formal G. P2/P3 affect live film only.</p>
 
 ## Explore / Demos
 
