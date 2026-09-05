@@ -97,6 +97,11 @@ func _physics_process(delta: float) -> void:
 
 
 func _run_render_step_if_requested() -> void:
+	# LIVE is driven by GrinFilmCamera's physics-safe update loop.  This
+	# controller pump is retained only for the legacy one-shot SNAPSHOT path;
+	# running both paths would render the same live frame twice.
+	if _mode != FilmMode.SNAPSHOT:
+		return
 	if not _render_requested or _film_camera == null:
 		return
 	if _film_camera.has_method("RenderStep"):
@@ -288,7 +293,7 @@ func _restart_film_pass() -> void:
 func _set_film_compute(enabled: bool) -> void:
 	_render_requested = enabled
 	if _film_camera != null:
-		_film_camera.set("UpdateEveryFrame", false)
+		_film_camera.set("UpdateEveryFrame", enabled)
 
 
 func _apply_shading_mode(shading_mode: int, reset_pass: bool) -> void:
