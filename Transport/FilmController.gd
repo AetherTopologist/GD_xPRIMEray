@@ -268,7 +268,12 @@ func _release_snapshot_pose_after_invalidation() -> void:
 
 func _apply_quality_preview() -> void:
 	_quality_name = "Preview 80x45"
-	_apply_quality(0.5, 16, 16, 80.0)
+	# The scene owns the LIVE row quantum.  Preview quality changes resolution
+	# and budget, but must not overwrite the authored interaction cap.
+	if _film_camera == null:
+		return
+	_film_camera.set("FilmResolutionScale", 0.5)
+	_film_camera.set("UpdateEveryFrameBudgetMs", 80.0)
 
 
 func _apply_quality_interactive() -> void:
